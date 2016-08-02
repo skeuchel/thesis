@@ -1,0 +1,338 @@
+\usepackage{ifdraft}
+
+% If you ever would like to set up two different versions from the same code, you should look at the packages listed here:
+% https://www.ctan.org/topic/cond-comp
+%
+% If you want to make a list of abbreviations, this blog explains how to do this:
+% http://texblog.org/2014/01/15/glossary-and-list-of-acronyms-with-latex/
+
+\ifdraft{
+\usepackage{draftwatermark}
+\SetWatermarkScale{2.0}
+\SetWatermarkLightness{0.9}
+}{}
+
+% Warn about old packages
+\RequirePackage[l2tabu, orthodox]{nag}
+
+% English and Dutch, main language last.
+\usepackage[dutch,english]{babel}
+
+% Figures (titlepage among others)
+\usepackage{graphicx}
+\usepackage{float}
+
+% page dimensions
+% taken from Michael's book, the name of this page format is StudienPartitur
+% Karel also has 17cm x 24cm and says this is a B5. The print shop he used was University Press.
+% Show the page margins during the writing process using the showframe option.
+%
+% I set the marginpar myself so that the todos appear nicely. This does NOT affect the textwidth, which is extremely important for me.
+%
+% For the crop marks on the draft version: see http://tex.stackexchange.com/questions/211248/problem-with-cropmarks-on-geometry-package
+% However, you need to centre smaller page on the larger page for not cutting away text on the back of the page.
+% This can be done using layouthoffset and layoutvoffset.
+% Also see: http://tex.stackexchange.com/questions/211248/problem-with-cropmarks-on-geometry-package
+% You have printed both portrait and landscape pages satisfactorily and have compared margins with other booklets.
+\ifdraft{
+  \usepackage[paper=a4paper,layoutwidth=170mm,layoutheight=240mm, marginparwidth=1in,
+  showframe,showcrop,layouthoffset=20mm,layoutvoffset=28.5mm]{geometry}
+}{
+\usepackage[paperwidth=170mm,paperheight=240mm, marginparwidth=1in]{geometry}
+}
+
+% I want more space between the lines of the title.
+% This package provides \setstretch/2.
+\usepackage{setspace}
+
+% Nice todo notes
+% After geometry I guess, so that it is aware of the paper size
+\ifdraft{
+\usepackage{todonotes}
+}{}
+
+% Nice chapter headers, seven IKEA styles to choose from.
+\usepackage[Lenny]{fncychap}
+
+% Command \layout to insert a page containing layout with all the dimensions
+\ifdraft{
+\usepackage{layout}
+}{}
+
+% Automatically adds the bibliography and/or the index and/or the contents, etc., to the Table of Contents listing.
+%
+% I don't want the ToC in the ToC.
+\usepackage[nottoc]{tocbibind}
+
+% Usepackage caption
+%
+% captionof command
+\usepackage[bf,small,hang]{caption}
+
+% URL's
+% Provided by the hyperref package.
+%\usepackage{url}
+
+% Popular mathematical packages
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{calculation}
+\usepackage{mathtools}
+
+\usepackage{relsize}
+
+% At the end of each chapter, there is a reference to the article it is based on.
+% Tom wants those in full.
+% I tried the bibentry package, but it did not work.
+% The biblatex package seems to be a completely different system from bibtex so I don't want to go there.
+
+% Allows to turn certain pages into landscape
+% The previous page may not be filled completely, so I provide my own environments for this
+\usepackage{pdflscape}
+\usepackage{afterpage}
+
+% Floating landscape table on a page by its own where the previous page is filled completely.
+% I tried defining an environment for this but just got nowhere...
+%
+% See http://tex.stackexchange.com/questions/19017/how-to-place-a-table-on-a-new-page-with-landscape-orientation-without-clearing-t
+%
+% Example usage:
+%
+%
+
+% Geometry and landscape do not go well together: the margins are not adapted.
+% Fix from http://tex.stackexchange.com/questions/115908/geometry-showframe-landscape
+\makeatletter
+\newcommand*{\gmshow@textheight}{\textheight}
+\newdimen\gmshow@@textheight
+\g@addto@macro\landscape{%
+  \gmshow@@textheight=\hsize
+  \renewcommand*{\gmshow@textheight}{\gmshow@@textheight}%
+}
+\def\Gm@vrule{%
+  \vrule width 0.2pt height\gmshow@textheight depth\z@
+}%
+\makeatother
+
+% I will only use minipages [t]{0.5\linewidth} and \begin{TwoFigVerbatim} for my figures if I need two figures next to each other.
+% For a single floating or nonfloating figure, I'll use OneFigVerbatim.
+% In the past, I didn't have much success with more complicated packages.
+%
+% In rare cases, I'll allow myself to use
+% \begin{TwoFigVerbatim}[commandchars=?\{\}]
+\usepackage{fancyvrb}
+\DefineVerbatimEnvironment{OneFigVerbatim}{Verbatim}{xleftmargin=1cm, fontsize=\small}
+\DefineVerbatimEnvironment{TwoFigVerbatim}{Verbatim}{xleftmargin=1cm, fontsize=\small}
+
+% Indexing, I haven't looked at Xindy yet
+\usepackage{makeidx}
+\makeindex
+
+% I noticed that some figures are really far away, so let's refer to them
+% intelligently using \cref (synonym: \vref). \Cref at the start of a
+% sentence. See cleverref below.
+\usepackage{varioref}
+
+% Normally hyperref should be loaded as the last package, but there are exceptions
+%
+% To color the hyperlinks use the colorlinks option, but this may be distracting
+\usepackage{hyperref}
+
+% Varioref and hyperref do not go together (figure 4.7 f:ex), but loading this
+% as the last package seems to fix it.
+% Tom eist het gebruik van de capitalise optie.
+\usepackage[capitalise]{cleveref}
+
+
+% START visual index
+%
+% Source: http://tex.stackexchange.com/questions/119880/show-current-chapter-number-on-each-page-margin
+% \usepackage[contents={},opacity=1,scale=1,color=black]{background}
+% \usepackage{tikzpagenodes}
+% \usepackage{totcount}
+% \usetikzlibrary{calc}
+%
+% \newif\ifMaterial
+%
+% \newlength\LabelSize
+% \setlength\LabelSize{2.5cm}
+%
+% \AtBeginDocument{%
+% \regtotcounter{chapter}
+% \setlength\LabelSize{\dimexpr\textheight/\totvalue{chapter}\relax}
+% \ifdim\LabelSize>2.5cm\relax
+%   \global\setlength\LabelSize{2.5cm}
+% \fi
+% }
+%
+% \newcommand\AddLabels{%
+% \Materialtrue%
+% \AddEverypageHook{%
+% \ifMaterial%
+% \ifodd\value{page} %
+%  \backgroundsetup{
+%   angle=90,
+%   position={current page.east|-current page text area.north  east},
+%   vshift=15pt,
+%   hshift=-\thechapter*\LabelSize,
+%   contents={%
+%   \tikz\node[fill=gray!30,anchor=west,text width=\LabelSize,
+%     align=center,text height=15pt,text depth=10pt,font=\large\sffamily] {\thechapter};
+%   }%
+%  }
+%  \else
+%  \backgroundsetup{
+%   angle=90,
+%   position={current page.west|-current page text area.north west},
+%   vshift=-15pt,
+%   hshift=-\thechapter*\LabelSize,
+%   contents={%
+%   \tikz\node[fill=gray!30,anchor=west,text width=\LabelSize,
+%     align=center,text height=15pt,text depth=10pt,font=\large\sffamily] {\thechapter};
+%   }%
+%  }
+%  \fi
+%  \BgMaterial%
+% \else\relax\fi}%
+% }
+%
+% \newcommand\RemoveLabels{\Materialfalse}
+%
+% \AddLabels
+
+% END visual index
+
+% Make hyper-references back from bibliography to citation.
+% Benoit: do I want this in the production version?
+%--------------------------------------------------
+% ... but for writing the document, this is probably useful.
+%
+
+% For an explanation of the options:
+% http://ftp.snt.utwente.nl/pub/software/tex/macros/latex/contrib/hyperref/backref.pdf
+% With option hyperpageref, the page numbers are hyperlinked.
+\usepackage[hyperpageref]{backref}
+
+% I don't like the style of the hyperlinked page numbers, so I redefine the
+% \backref macro in terms of its old definition, see
+% http://tex.stackexchange.com/questions/101693/how-to-do-a-recursive-renewcommand
+%
+% A nice style even for a production version, found on
+% http://tex.stackexchange.com/questions/173046/modifying-backreference-page-numbers-in-references
+\renewcommand\backrefxxx[3]{%
+  \hyperlink{page.#1}{$\uparrow$#1}%
+}
+
+% Intended to check references in a document, looking for numbered but
+% unlabelled equations, for labels which are not used in the text, for unused
+% bibliography references.
+%
+% Note that refcheck should be loaded after the ams packages and the hyperref
+% package.
+% http://tex.stackexchange.com/questions/25742/how-can-i-get-latex-to-warn-about-unreferenced-figures-and-unused-labels-in-gene
+\ifdraft{
+\usepackage{refcheck}
+}{}
+
+% Command for the reference to the sources-of-a-chapter section or paragraph at
+% the end of each chapter. I want this in the ToC, but I want an unnumbered
+% section.
+\newcommand{\chapterSource}{\section*{References} \addcontentsline{toc}{section}{References}}
+
+% Define a custom indexing command so that it prints words added to the index in
+% blue.  It used to be underlining, but this influences to linebreaks.  This is
+% useful during the writing process, but you may want to change the definition
+% for the final version.  Argument 1 can be a plural, argument 2 will be added
+% to the index.  If argument 1 == argument 2, use \pindex{argument1}.
+\ifdraft{
+\newcommand{\myIndex}[2]{\textcolor{blue}{#1}\index{#2}}
+}{
+\newcommand{\myIndex}[2]{#1\index{#2}}
+}
+
+% Index a word without printing it in the final version. For the development
+% version, print it as a marginnote that is not in the list of todos.
+\ifdraft{
+\newcommand{\npindex}[1]{\index{#1}\todo[color=yellow,nolist]{\tiny{Idx: #1}}}
+}{
+\newcommand{\npindex}[1]{\index{#1}}
+}
+
+% Print a word and index it too.
+\newcommand{\pindex}[1]{\myIndex{#1}{#1}}
+
+% Commands for making todo notes. \todo/1 is also available.
+\ifdraft{
+\newcommand{\benoit}[1]{\todo[color=green]{Benoit: #1}}
+\newcommand{\marko}[1]{\todo[color=blue]{Marko: #1}}
+\newcommand{\tom}[1]{\todo[color=red]{Tom: #1}}
+}{
+\newcommand{\benoit}[1]{}
+\newcommand{\marko}[1]{}
+\newcommand{\tom}[1]{}
+}
+
+% A command for making a structural note, which is different from a todo note.
+% These notes won't appear in the list of todos.
+\newcommand{\structureNote}[1]{}
+%\newcommand{\structureNote}[1]{\todo[color=purple,nolist]{\tiny{#1}}}
+
+% Newtheorem used in the definition of the example environment
+% http://tex.stackexchange.com/questions/155710/understanding-the-arguments-in-newtheorem-e-g-newtheoremtheoremtheoremsec/155714#155714
+% Met deze definitie zal de nummering altijd doorlopen over de verschillende
+% hoofdstukken heen.  Dat is OK voor mij, maar een alternatief is bvb. de
+% nummering te herstarten per hoofdstuk.
+\newtheorem{exampleTheoremEnv}{Example}
+
+% Environment for examples - It is useful to have your examples in this
+% environment Because we may want to change the definition, we do not use a
+% newtheorem directly
+\newenvironment{example}
+  {
+     % Begin definitions
+     \begin{exampleTheoremEnv}
+  }
+  {
+     %End definitions
+     \end{exampleTheoremEnv}
+  }
+
+
+% One can be sure to be in math mode.
+\newcommand{\pred}[1]{\ensuremath{#1}}
+
+\newcommand{\code}[1]{\texttt{#1}}
+
+% Big oh notation, one can be sure to be in math mode.
+\newcommand{\bigoh}[1]{\ensuremath{\mathcal{O}(#1)}}
+
+% cardinality of a set. For its argument, one can be sure to be in math mode.
+\newcommand{\card}[1]{\ensuremath{\left\|#1\right\|}}
+
+% numbervars is a function. For its argument, one can be sure to be in math mode.
+\DeclareMathOperator{\numbervarsOperator}{numbervars}
+\newcommand{\numbervars}[1]{\ensuremath{\numbervarsOperator(#1)}}
+
+% Notation for the unique variables produced by the numbervars operation
+% Argument is the number of the variable. F.e. \numberedVariable{1} produces a nice V_1 in a calligraphic font.
+\newcommand{\numberedVariable}[1]{\ensuremath{\mathcal{V}_{#1}}}
+
+% Powerset
+%\DeclareMathOperator{\powerset}{\mathcal{P}}
+% A subset of the powerset used in my answer subsumption chapter.
+\DeclareMathOperator{\Card}{Card}
+
+% Larget square subset equals for use over a set
+% This doesn't seem to exists, or at least I couldn't find it quickly
+\newcommand{\bigsqsubseteq}{\mathlarger{\sqsubseteq}}
+
+\DeclareMathOperator{\ubs}{\textrm{ubs}}
+\DeclareMathOperator{\Maybe}{Maybe}
+
+\ifdraft{
+\newcommand{\revisionBoundary}{\textcolor{red}{\hrulefill\quad {\Large revision boundary}\quad \hrulefill}}
+}{
+\newcommand{\revisionBoundary}{}
+}

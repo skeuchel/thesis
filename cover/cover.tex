@@ -1,0 +1,440 @@
+\documentclass[12pt]{article}
+
+% KNOWN PROBLEMS -- TODO
+%
+% - text positions are not safe against dimension changes; easy to fix.
+% - the wave will have a slightly different angle on the right if the bleed width changes; hard to fix. Not worth the effort.
+
+\usepackage{graphicx}
+
+% My guess for the bad colors I had on a first test print: use of the RGB color space.
+% Let's try CMYK
+% http://tex.stackexchange.com/questions/125028/xelatex-and-tikz-how-do-i-ensure-my-pdfs-are-using-the-cmyk-color-model
+
+% A sans serif font that I want to try.
+% Switch to this font with the \fcofamily command.
+\usepackage{comfortaa}
+
+% Filename of the UGent logo
+% Choose eps version for high quality.
+\newcommand{\LogoFile}{translogoneg}
+
+\newcommand{\MyBindingTitle}{Towards Flexible Goal-Oriented Logic Programming}
+% \MyFrontCoverTitle may contain linebreaks (\\). The others may not.
+\newcommand{\MyFrontCoverTitle}{Towards\\Flexible Goal-Oriented Logic Programming}
+
+\newcommand{\MyBindingName}{B.~Desouter}
+\newcommand{\MyFrontCoverName}{Benoit Desouter}
+
+% Important length settings
+% =========================
+%
+% The relevant lengths are defined in the following TUG Boat article: http://tug.org/pracjourn/2007-1/robbers/robbers.pdf
+%
+%       (a')                  (e')  (f') (g')  (h')                   (b')
+% +-----+------------------------+--+-------+--+-------------------------+-----+
+% |<. pdf paper width .................................................^......>|
+% |                                                                    B       |
+% |     (a)                      (e)(f)     (g)(h)                     v (b)   |
+% |     +------------------------+--+-------+--+-------------------------+     |
+% |     |                        |  |       |  |                         |     |
+% |<.A.>|                        | b|<. C .>| b|                         |<.A.>|
+% |     |                        | i|       | i|                         |     |
+% |     |<. book paper width ...>| n|       | n|<. book paper width ....>|     |
+% |     |                        | d|       | d|                         |     |
+% |     |                        | i|       | i|                         |     |
+% |     |                        | n|       | n|                         |     |
+% |     |                        | g|       | g|                         |     |
+% |     |                        |  |       |  |                         |     |
+% |     |                        | c|       | c|                         |     |
+% |     |                        | o|       | o|                         |     |
+% |     |                        | r|       | r|                         |     |
+% |     |                        | r|       | r|                         |     |
+% |     |                        | e|       | e|                         |     |
+% |     |                        | c|       | c|                         |     |
+% |     |                        | t|       | t|                         |     |
+% |     |                        | i|       | i|                         |     |
+% |     |                        | o|       | o|                         |     |
+% |     |                        | n|       | n|                         |     |
+% |     |                        |  |       |  |                         |     |
+% |     |                        |  |       |  |                         |     |
+% |     |                        |  |       |  |                         |     |
+% |     |                        |  |       |  |                         |     |
+% |     |                        |  |       |  |                         |     |
+% |     |                        |  |       |  |                         |     |
+% |     |                        |  |       |  |                         |     |
+% |     |                        |  |       |  |                         |     |
+% |     |                        |  |       |  |                         |     |
+% |     +------------------------+--+-------+--+-------------------------+     |
+% |     (c)                      (i)(j)     (k)(l)                     ^ (d)   |
+% |                                                                    B       |
+% |                                                                    v       |
+% +-----+------------------------+--+-------+--+-------------------------+-----+
+%       (c')                  (i')  (j') (k')  (l')                   (d')
+%
+% where A := bleed width
+% where B := bleed height
+% where C := binding width
+% where binding correction has a width := binding correction width
+%
+% where (a) := (BackCoverTopLeft)
+% where (b) := (FrontCoverTopRight)
+% where (c) := (BackCoverBottomLeft)
+% where (d) := (FrontCoverBottomRight)
+% where (e) := (BackCoverTopRight)
+% where (f) := (BindingTopLeft)
+% where (g) := (BindingTopRight)
+% where (h) := (FrontCoverTopLeft)
+% where (i) := (BackCoverBottomRight)
+% where (j) := (BindingBottomLeft)
+% where (k) := (BindingBottomRight)
+% where (l) := (FrontCoverBottomLeft)
+%
+% But perhaps the points (a') := (aPrime) to (l') := (lPrime) are even more important.
+%
+% The pdf paper width is not equal to  2 x (book paper width + binding correction width) + binding width because printers cannot print near the border. Therefore one uses bleed that is cut away (approximately).
+% Print the cover on a physical sheet of at least pdf paper width x pdf paper height.
+
+% Declaring the relevant lengths
+\newlength{\MyPdfPaperWidth}
+\newlength{\MyPdfPaperHeight}
+\newlength{\MyBleedWidth}
+\newlength{\MyBleedHeight}
+\newlength{\MyBookPaperWidth}
+\newlength{\MyBookPaperHeight}
+\newlength{\MyBindingCorrectionWidth}
+\newlength{\MyBindingWidth}
+
+% Set the lengths
+% You can adapt these at the last minute, I have defined everything in terms of those so that the overall appearance won't change (hopefully).
+\setlength{\MyBleedWidth}{3mm}
+\setlength{\MyBleedHeight}{3mm}
+\setlength{\MyBookPaperWidth}{170mm}
+\setlength{\MyBookPaperHeight}{240mm}
+\setlength{\MyBindingCorrectionWidth}{3mm}
+\setlength{\MyBindingWidth}{14mm} % The binding width of Karel's PhD thesis was 18mm, for 270 pages University Press says 14mm (see their website and emails).
+
+% Allow calculations with lengths
+\usepackage{calc}
+
+% Set the derived lengths
+% DO NOT CHANGE
+% Remember that for multiplication with a scalar, the scalar must be the second factor.
+\setlength{\MyPdfPaperWidth}{(\MyBleedWidth + \MyBookPaperWidth + \MyBindingCorrectionWidth)*2 + \MyBindingWidth}
+\setlength{\MyPdfPaperHeight}{\MyBleedHeight * 2 + \MyBookPaperHeight}
+
+% Set the pdf page dimensions
+\usepackage[paperwidth=\MyPdfPaperWidth,paperheight=\MyPdfPaperHeight]{geometry}
+
+\usepackage{tikz}
+\usetikzlibrary{backgrounds, calc, intersections}
+
+\pgfdeclarelayer{background}
+\pgfdeclarelayer{circles}
+\pgfdeclarelayer{foreground}
+\pgfdeclarelayer{auxiliaryLines}
+\pgfsetlayers{background,circles,main,foreground,auxiliaryLines}
+
+% Do not use RGB colors, I suppose.
+% Use http://www.rapidtables.com/convert/color/rgb-to-cmyk.htm
+% % The same blue color scheme as the example on which I based this code.
+% % Unexpectedly, it is rather nice.
+% % But many people have a blue thesis cover.
+% % I also want to try shades of dark green.
+% \definecolor{ColorScheme1Blue}{RGB}{81,91,199} % Meant for front and back cover background.
+% \definecolor{ColorScheme1DarkBlue}{RGB}{66,76,103} % Meant for binding background.
+% \definecolor{ColorScheme1Gray}{RGB}{112,121,139} % Meant for wave that is mostly covered and for the circles.
+
+% University Press Website:
+% - Use CMYK (can be verified using Scribus > Edit > Colors
+% - Sum of components should not exceed 300%
+% A beautiful green color scheme
+
+% Meant for top wave (the upper part of the front cover).
+% Component sum < 3? OK
+\definecolor{ColorScheme2DarkGreen}{cmyk}{0.453,0,0.734,0.749}
+% Meant for front and back cover background.
+% Component sum < 3? OK 
+\definecolor{ColorScheme2DarkerGreen}{cmyk}{0.519,0,0.846,0.796}
+% Meant for binding background.
+% Component sum < 3? OK
+% Calculated from ColorScheme2DarkerGreen by lowering the lightness value in the HSL model.
+\definecolor{ColorScheme2EvenDarkerGreen}{cmyk}{0.513,0,0.846,0.847}
+% Meant for wave that is mostly covered and for the circles.
+% Component sum < 3? OK
+% Calculated from ColorScheme2DarkerGreen by lowering the lightness value in the HSL model.
+\definecolor{ColorScheme2Gray}{cmyk}{0.194,0.129,0,0.455}
+
+% Define a color scheme above and then fill in here.
+\definecolor{MyBindingBackgroundColor}{named}{ColorScheme2EvenDarkerGreen}
+\definecolor{MyFrontCoverBackgroundColor}{named}{ColorScheme2DarkerGreen}
+\definecolor{MyBackCoverBackgroundColor}{named}{ColorScheme2DarkerGreen}
+\definecolor{FrontCoverWave1Color}{named}{ColorScheme2Gray}
+\definecolor{FrontCoverWave2Color}{named}{ColorScheme2DarkGreen}
+
+\definecolor{MyBindingTextColor}{named}{white}
+\definecolor{MyFrontCoverTextColor}{named}{white}
+
+
+% Best not to make the circles too distracting.
+% Better pick a color that is used elsewhere too.
+\definecolor{MyCirclesColor}{named}{FrontCoverWave1Color}
+% And use some transparancy.
+\newcommand{\MyCirclesOpacity}{0.5}
+
+% Commands for fonts
+% The \selectfont stuff
+\newcommand{\MyFrontCoverFont}{\fcofamily}
+\newcommand{\MyBindingFont}{\fcofamily}
+
+\pagestyle{empty}
+
+\begin{document}
+
+\begin{tikzpicture}[remember picture,overlay,shift={(current page.south west)}]
+% Set the bottom left of the pdf paper to be the origin (0,0) using shift.
+% Define the coordinates marked in the picture
+\coordinate (cPrime)                at (\MyBleedWidth,0);
+\coordinate (dPrime)                at (\MyPdfPaperWidth - \MyBleedWidth,0);
+
+\coordinate (iPrime)                at ([xshift=\MyBookPaperWidth]cPrime);
+\coordinate (lPrime)                at ([xshift=-\MyBookPaperWidth]dPrime);
+
+\coordinate (jPrime)                at ([xshift=\MyBindingCorrectionWidth]iPrime);
+\coordinate (kPrime)                at ([xshift=-\MyBindingCorrectionWidth]lPrime);
+
+\coordinate (aPrime)                at ([yshift=\MyPdfPaperHeight]cPrime);
+\coordinate (bPrime)                at ([yshift=\MyPdfPaperHeight]dPrime);
+
+\coordinate (ePrime)                at ([yshift=\MyPdfPaperHeight]iPrime);
+\coordinate (hPrime)                at ([yshift=\MyPdfPaperHeight]lPrime);
+
+\coordinate (fPrime)                at ([yshift=\MyPdfPaperHeight]jPrime);
+\coordinate (gPrime)                at ([yshift=\MyPdfPaperHeight]kPrime);
+
+\coordinate (BackCoverBottomLeft)   at ([yshift=\MyBleedHeight]cPrime); % (c)
+\coordinate (FrontCoverBottomRight) at ([yshift=\MyBleedHeight]dPrime); % (d)
+
+\coordinate (BackCoverBottomRight)  at ([yshift=\MyBleedHeight]iPrime); % (i)
+\coordinate (FrontCoverBottomLeft)  at ([yshift=\MyBleedHeight]lPrime); % (l)
+
+\coordinate (BindingBottomLeft)     at ([yshift=\MyBleedHeight]jPrime); % (j)
+\coordinate (BindingBottomRight)    at ([yshift=\MyBleedHeight]kPrime); % (k)
+
+\coordinate (BackCoverTopLeft)      at ([yshift=\MyBookPaperHeight]BackCoverBottomLeft); % (a)
+\coordinate (FrontCoverTopRight)    at ([yshift=\MyBookPaperHeight]FrontCoverBottomRight); % (b)
+
+\coordinate (BackCoverTopRight)     at ([yshift=\MyBookPaperHeight]BackCoverBottomRight); % (e)
+\coordinate (FrontCoverTopLeft)     at ([yshift=\MyBookPaperHeight]FrontCoverBottomLeft); % (h)
+
+\coordinate (BindingTopLeft)        at ([yshift=\MyBookPaperHeight]BindingBottomLeft); % (f)
+\coordinate (BindingTopRight)       at ([yshift=\MyBookPaperHeight]BindingBottomRight); % (g)
+
+% Coordinates not marked in the picture, but still necessary.
+\coordinate (pdfBottomLeft)  at (0,0);
+\coordinate (pdfTopLeft)     at ([yshift=\MyPdfPaperHeight]pdfBottomLeft);
+\coordinate (pdfBottomRight) at ([xshift=\MyPdfPaperWidth]pdfBottomLeft);
+\coordinate (pdfTopRight)    at ([yshift=\MyPdfPaperHeight]pdfBottomRight);
+
+% Define binding diagonals. This does not draw anything.
+% We use the newcommand so that we can construct the same path again without duplication.
+% There are some tricks on Stackoverflow to save the path, but I don't understand them so I don't want to use them. I tried some though to no good effect.
+\newcommand{\BindingMajorDiagonalDef}{(BindingBottomRight) -- (BindingTopLeft)}
+\newcommand{\BindingMinorDiagonalDef}{(BindingBottomLeft) -- (BindingTopRight)}
+\path[name path=BindingMajorDiagonal]\BindingMajorDiagonalDef;
+\path[name path=BindingMinorDiagonal]\BindingMinorDiagonalDef;
+
+% Define front cover diagonals. This does not draw anything.
+\newcommand{\FrontCoverMajorDiagonalDef}{(FrontCoverBottomRight) -- (FrontCoverTopLeft)}
+\newcommand{\FrontCoverMinorDiagonalDef}{(FrontCoverBottomLeft) -- (FrontCoverTopRight)}
+\path[name path=FrontCoverMajorDiagonal]\FrontCoverMajorDiagonalDef;
+\path[name path=FrontCoverMinorDiagonal]\FrontCoverMinorDiagonalDef;
+
+% Center of the binding: intersection of the two diagonals
+% In general two paths can have more than one intersection, so there probably is no shorter way.
+% See TikZ manual page 57.
+\path[name intersections={of=BindingMajorDiagonal and BindingMinorDiagonal}];
+\coordinate (BindingCenter) at (intersection-1);
+% \coordinate (BindingCenter) at (intersection of BindingBottomRight--BindingTopLeft and BindingBottomLeft--BindingTopRight);
+
+% Center of the front cover: intersection of the two diagonals
+\path[name intersections={of=FrontCoverMajorDiagonal and FrontCoverMinorDiagonal}];
+\coordinate (FrontCoverCenter) at (intersection-1);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Draw auxiliary lines and points: COMMENT OUT IN FINAL VERSION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\begin{pgfonlayer}{auxiliaryLines}
+%% Draw a large circle on the origin.
+%%\draw (0,0) circle[radius=3pt];
+%% Draw the coordinates to make sure they are in the correct place.
+%\draw (cPrime) circle[radius=1pt];
+%\draw (dPrime) circle[radius=1pt];
+%\draw (iPrime) circle[radius=1pt];
+%\draw (lPrime) circle[radius=1pt];
+%\draw (jPrime) circle[radius=1pt];
+%\draw (kPrime) circle[radius=1pt];
+%
+%\draw (aPrime) circle[radius=1pt];
+%\draw (bPrime) circle[radius=1pt];
+%\draw (ePrime) circle[radius=1pt];
+%\draw (hPrime) circle[radius=1pt];
+%\draw (fPrime) circle[radius=1pt];
+%\draw (gPrime) circle[radius=1pt];
+%
+%\draw (BackCoverBottomLeft) circle[radius=1pt];
+%\draw (FrontCoverBottomRight) circle[radius=1pt];
+%\draw (BackCoverTopLeft) circle[radius=1pt];
+%\draw (FrontCoverTopRight) circle[radius=1pt];
+%\draw (BackCoverBottomRight) circle[radius=1pt];
+%\draw (FrontCoverBottomLeft) circle[radius=1pt];
+%\draw (BackCoverTopRight) circle[radius=1pt];
+%\draw (FrontCoverTopLeft) circle[radius=1pt];
+%\draw (BindingBottomLeft) circle[radius=1pt];
+%\draw (BindingBottomRight) circle[radius=1pt];
+%\draw (BindingTopLeft) circle[radius=1pt];
+%\draw (BindingTopRight) circle[radius=1pt];
+%
+%% Binding diagonals and center point
+%\draw \BindingMajorDiagonalDef;
+%\draw \BindingMinorDiagonalDef;
+%\draw (BindingCenter) circle[radius=4pt];
+%
+%% Front cover diagonals and center point
+%\draw \FrontCoverMajorDiagonalDef;
+%\draw \FrontCoverMinorDiagonalDef;
+%\draw (FrontCoverCenter) circle[radius=4pt];
+%
+%% Box around the cover page to see the position of the text.
+%\draw (FrontCoverTopLeft) -- (FrontCoverTopRight) --
+%      (FrontCoverBottomRight) -- (FrontCoverBottomLeft) -- cycle;
+%
+%% Box around the binding to see the position of the text.
+%\draw (BindingTopLeft) -- (BindingTopRight) --
+%      (BindingBottomRight) -- (BindingBottomLeft) -- cycle;
+%
+%\end{pgfonlayer}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% END auxiliary lines
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{pgfonlayer}{background}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Binding background
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\fill[MyBindingBackgroundColor]
+     (ePrime) -- (hPrime) -- (lPrime) -- (iPrime) -- cycle;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% END Binding background
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Front cover background
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Background color of the front page, visible at the bottom.
+\fill[MyFrontCoverBackgroundColor]
+     (hPrime) -- (pdfTopRight) -- (pdfBottomRight) -- (lPrime) -- cycle;
+% Coordinates for the waves at the top of the front page. Random for now.
+\coordinate (FrontCoverWave1Left) at ([yshift=-10cm]FrontCoverTopLeft);
+\coordinate (FrontCoverWave1Right) at ([yshift=-8cm]pdfTopRight);
+\coordinate (FrontCoverWave2Left) at (FrontCoverWave1Left);
+\coordinate (FrontCoverWave2Right) at ([yshift=-7cm]pdfTopRight);
+% Waves at the top of the front page.
+% Based on http://tex.stackexchange.com/questions/175916/cover-page-with-latex
+% The most interesting here are the angles.
+\fill[FrontCoverWave1Color]
+     (hPrime) -- (pdfTopRight) --
+     (FrontCoverWave1Right) to[out=195,in=-15] (FrontCoverWave1Left);
+\fill[FrontCoverWave2Color]
+     (hPrime) -- (pdfTopRight) --
+     (FrontCoverWave2Right) to[out=195,in=-15] (FrontCoverWave2Left);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% END Front cover background
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Back cover background
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\fill[MyBackCoverBackgroundColor]
+     (pdfTopLeft) -- (ePrime) -- (iPrime) -- (pdfBottomLeft) -- cycle;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% END Back cover background
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{pgfonlayer}
+\begin{pgfonlayer}{circles}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Front cover circles
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The origin of the polar coordinate system that I will use for the circle animation.
+\coordinate (FrontCoverCirclesOrigin) at (FrontCoverBottomRight);
+\newcommand{\drawCircles}[1]{
+  % Scope in which I'll install a temporary polar coordinate system with the origin at (FrontCoverCirclesOrigin) in the original coordinate system.
+  \begin{scope}[shift=(#1)]
+  % Small circles -- draw the full circle so that we are robust against slightly wider bleed. You'll never see the entire circle with realistic bleed widths.
+  \foreach \i in {0,30,...,360} {
+    \fill[fill=MyCirclesColor,opacity=\MyCirclesOpacity] (\i:1cm) circle[radius=5pt];
+  }
+  % Medium circles, note that they won't be on a line with the small ones due to 5 degree shift.
+  % Medium circles on purpose do not have size 7.5.
+  \foreach \i in {-5,10,...,355} {
+    \fill[fill=MyCirclesColor,opacity=\MyCirclesOpacity] (\i:2.5cm) circle[radius=7pt];
+  }
+  % Large circles, note that these too won't be on a line with the medium ones.
+  \foreach \i in {-10,5,...,350} {
+    \fill[fill=MyCirclesColor,opacity=\MyCirclesOpacity] (\i:5cm) circle[radius=10pt];
+  }
+  \end{scope}
+} % END newcommand
+\drawCircles{FrontCoverCirclesOrigin}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% END Front cover circles
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Back cover circles
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\coordinate (BackCoverCirclesOrigin) at (BackCoverTopLeft);
+% Flip the circles drawn on the front page over both axes by inverting the axes.
+\begin{scope}[xscale=-1,yscale=-1]
+\drawCircles{BackCoverCirclesOrigin}
+\end{scope}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% END Back cover circles
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{pgfonlayer}
+\begin{pgfonlayer}{foreground}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Binding foreground
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Text positions -- random for now
+\coordinate (BindingTitlePosition) at ([yshift=2cm]BindingCenter);
+\coordinate (BindingAuthorPosition) at ([yshift=-10cm]BindingCenter);
+
+\node[color=MyBindingTextColor,rotate=270,font=\LARGE\MyBindingFont] at (BindingTitlePosition) {\MyBindingTitle};
+\node[color=MyBindingTextColor,rotate=270,font=\MyBindingFont] at (BindingAuthorPosition) {\MyBindingName};
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% END Binding foreground
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Front cover foreground
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Text positions -- random for now
+\coordinate (FrontCoverTitlePosition) at (FrontCoverCenter);
+\coordinate (FrontCoverAuthorPosition) at ([yshift=-5cm]FrontCoverCenter);
+% Logo position -- random for now
+\coordinate (FrontCoverLogoPosition) at ([yshift=5cm]FrontCoverCenter);
+% The align key is the key to allowing linebreaks (\\) in the title.
+\node at (FrontCoverLogoPosition) {\includegraphics{\LogoFile}};
+\node[color=MyFrontCoverTextColor,align=center,font=\LARGE\MyFrontCoverFont] at (FrontCoverTitlePosition) {\MyFrontCoverTitle};
+\node[color=MyFrontCoverTextColor,font=\LARGE\MyFrontCoverFont] at (FrontCoverAuthorPosition) {\MyFrontCoverName};
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% END Front cover foreground
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \node[
+%   align=left,
+%   font=\color{white}\fontsize{58}{64}\bfseries,
+%   anchor=north
+%   ]
+%   at ([yshift=-2.3cm]current page.north)
+%   (name)
+%   {\TeX \\[0.3ex] \LaTeX};
+\end{pgfonlayer}
+\end{tikzpicture}
+
+\end{document}

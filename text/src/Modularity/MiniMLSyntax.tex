@@ -1,0 +1,46 @@
+\begin{figure}[h]
+  \begin{center}
+    \begin{minipage}{\columnwidth}
+      \begin{center}
+        \fbox{
+        \hspace{-.3cm}
+          \begin{tabular}{r@{~}c@{~}lr}
+            {\tt e} & ::= & {\tt $\mathbb{N}$ $|$ e + e} & \textit{Arith}\\
+            & $|$ &  {\tt $\mathbb{B}$ $|$ {\bf if} e {\bf then} e {\bf else} e} & \textit{Bool} \\
+            & $|$ & {\tt {\bf case} e {\bf of \{ z} $\Rightarrow$ e $\mathbf{;}$ {\bf S} n $\Rightarrow$ e\}} & \textit{NatCase}\\
+            & $|$ & {\tt {\bf lam} x : T.e $|$ e e $|$ x} & \textit{Lambda}\\
+            & $|$ & {\tt {\bf fix} x : T.e} & \textit{Recursion}\\
+          \end{tabular}
+        }
+      \end{center}
+    \end{minipage}
+    \begin{minipage}{\columnwidth}
+      \hspace{-.3cm}
+    \begin{tabular}{cc}
+      \begin{minipage}{.48\columnwidth}
+        \fbox{
+        \hspace{-.3cm}
+          \begin{tabular}{r@{~}c@{~}lr}
+            {\tt V} & ::= & {\tt $\mathbb{N}$} & \textit{Arith}\\
+            & $|$ &  {\tt $\mathbb{B}$} & \textit{Bool} \\
+            & $|$ & {\tt {\bf closure} e $\mathtt{\overline{V}}$} & \textit{Lambda}\\
+          \end{tabular}
+        }
+      \end{minipage} &
+      \begin{minipage}{.38\columnwidth}
+        \hspace{-.3cm}
+        \fbox{
+        \hspace{-.3cm}
+          \begin{tabular}{r@{~}c@{~}lr}
+            {\tt T} & ::= & {\tt \bf nat} & \textit{Arith}\\
+            & $|$ &  {\tt bool} & \textit{Bool} \\
+            & $|$ & {\tt T $\rightarrow$ T} & \textit{Lambda}\\
+          \end{tabular}
+        }
+      \end{minipage} 
+    \end{tabular}
+    \end{minipage}
+  \end{center}
+  \caption{mini-ML expressions, values, and types}
+  \label{fig:MiniMLSyntax}
+\end{figure}

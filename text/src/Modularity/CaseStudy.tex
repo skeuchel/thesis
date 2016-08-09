@@ -1,0 +1,540 @@
+%% ODER: format ==         = "\mathrel{==}"
+%% ODER: format /=         = "\neq "
+%
+%
+\makeatletter
+\@ifundefined{lhs2tex.lhs2tex.sty.read}%
+  {\@namedef{lhs2tex.lhs2tex.sty.read}{}%
+   \newcommand\SkipToFmtEnd{}%
+   \newcommand\EndFmtInput{}%
+   \long\def\SkipToFmtEnd#1\EndFmtInput{}%
+  }\SkipToFmtEnd
+
+\newcommand\ReadOnlyOnce[1]{\@ifundefined{#1}{\@namedef{#1}{}}\SkipToFmtEnd}
+\usepackage{amstext}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\DeclareFontFamily{OT1}{cmtex}{}
+\DeclareFontShape{OT1}{cmtex}{m}{n}
+  {<5><6><7><8>cmtex8
+   <9>cmtex9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmtex10}{}
+\DeclareFontShape{OT1}{cmtex}{m}{it}
+  {<-> ssub * cmtt/m/it}{}
+\newcommand{\texfamily}{\fontfamily{cmtex}\selectfont}
+\DeclareFontShape{OT1}{cmtt}{bx}{n}
+  {<5><6><7><8>cmtt8
+   <9>cmbtt9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmbtt10}{}
+\DeclareFontShape{OT1}{cmtex}{bx}{n}
+  {<-> ssub * cmtt/bx/n}{}
+\newcommand{\tex}[1]{\text{\texfamily#1}}	% NEU
+
+\newcommand{\Sp}{\hskip.33334em\relax}
+
+
+\newcommand{\Conid}[1]{\mathit{#1}}
+\newcommand{\Varid}[1]{\mathit{#1}}
+\newcommand{\anonymous}{\kern0.06em \vbox{\hrule\@width.5em}}
+\newcommand{\plus}{\mathbin{+\!\!\!+}}
+\newcommand{\bind}{\mathbin{>\!\!\!>\mkern-6.7mu=}}
+\newcommand{\rbind}{\mathbin{=\mkern-6.7mu<\!\!\!<}}% suggested by Neil Mitchell
+\newcommand{\sequ}{\mathbin{>\!\!\!>}}
+\renewcommand{\leq}{\leqslant}
+\renewcommand{\geq}{\geqslant}
+\usepackage{polytable}
+
+%mathindent has to be defined
+\@ifundefined{mathindent}%
+  {\newdimen\mathindent\mathindent\leftmargini}%
+  {}%
+
+\def\resethooks{%
+  \global\let\SaveRestoreHook\empty
+  \global\let\ColumnHook\empty}
+\newcommand*{\savecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\savecolumns[#1]}}
+\newcommand*{\restorecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\restorecolumns[#1]}}
+\newcommand*{\aligncolumn}[2]%
+  {\g@addto@macro\ColumnHook{\column{#1}{#2}}}
+
+\resethooks
+
+\newcommand{\onelinecommentchars}{\quad-{}- }
+\newcommand{\commentbeginchars}{\enskip\{-}
+\newcommand{\commentendchars}{-\}\enskip}
+
+\newcommand{\visiblecomments}{%
+  \let\onelinecomment=\onelinecommentchars
+  \let\commentbegin=\commentbeginchars
+  \let\commentend=\commentendchars}
+
+\newcommand{\invisiblecomments}{%
+  \let\onelinecomment=\empty
+  \let\commentbegin=\empty
+  \let\commentend=\empty}
+
+\visiblecomments
+
+\newlength{\blanklineskip}
+\setlength{\blanklineskip}{0.66084ex}
+
+\newcommand{\hsindent}[1]{\quad}% default is fixed indentation
+\let\hspre\empty
+\let\hspost\empty
+\newcommand{\NB}{\textbf{NB}}
+\newcommand{\Todo}[1]{$\langle$\textbf{To do:}~#1$\rangle$}
+
+\EndFmtInput
+\makeatother
+%
+%
+%
+% First, let's redefine the forall, and the dot.
+%
+%
+% This is made in such a way that after a forall, the next
+% dot will be printed as a period, otherwise the formatting
+% of `comp_` is used. By redefining `comp_`, as suitable
+% composition operator can be chosen. Similarly, period_
+% is used for the period.
+%
+\ReadOnlyOnce{forall.fmt}%
+\makeatletter
+
+% The HaskellResetHook is a list to which things can
+% be added that reset the Haskell state to the beginning.
+% This is to recover from states where the hacked intelligence
+% is not sufficient.
+
+\let\HaskellResetHook\empty
+\newcommand*{\AtHaskellReset}[1]{%
+  \g@addto@macro\HaskellResetHook{#1}}
+\newcommand*{\HaskellReset}{\HaskellResetHook}
+
+\global\let\hsforallread\empty
+
+\newcommand\hsforall{\global\let\hsdot=\hsperiodonce}
+\newcommand*\hsperiodonce[2]{#2\global\let\hsdot=\hscompose}
+\newcommand*\hscompose[2]{#1}
+
+\AtHaskellReset{\global\let\hsdot=\hscompose}
+
+% In the beginning, we should reset Haskell once.
+\HaskellReset
+
+\makeatother
+\EndFmtInput
+%
+%
+%
+%
+%
+% This package provides two environments suitable to take the place
+% of hscode, called "plainhscode" and "arrayhscode". 
+%
+% The plain environment surrounds each code block by vertical space,
+% and it uses \abovedisplayskip and \belowdisplayskip to get spacing
+% similar to formulas. Note that if these dimensions are changed,
+% the spacing around displayed math formulas changes as well.
+% All code is indented using \leftskip.
+%
+% Changed 19.08.2004 to reflect changes in colorcode. Should work with
+% CodeGroup.sty.
+%
+\ReadOnlyOnce{polycode.fmt}%
+\makeatletter
+
+\newcommand{\hsnewpar}[1]%
+  {{\parskip=0pt\parindent=0pt\par\vskip #1\noindent}}
+
+% can be used, for instance, to redefine the code size, by setting the
+% command to \small or something alike
+\newcommand{\hscodestyle}{}
+
+% The command \sethscode can be used to switch the code formatting
+% behaviour by mapping the hscode environment in the subst directive
+% to a new LaTeX environment.
+
+\newcommand{\sethscode}[1]%
+  {\expandafter\let\expandafter\hscode\csname #1\endcsname
+   \expandafter\let\expandafter\endhscode\csname end#1\endcsname}
+
+% "compatibility" mode restores the non-polycode.fmt layout.
+
+\newenvironment{compathscode}%
+  {\par\noindent
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed\)%
+   \par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\compaths}{\sethscode{compathscode}}
+
+% "plain" mode is the proposed default.
+% It should now work with \centering.
+% This required some changes. The old version
+% is still available for reference as oldplainhscode.
+
+\newenvironment{plainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newenvironment{oldplainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+% Here, we make plainhscode the default environment.
+
+\newcommand{\plainhs}{\sethscode{plainhscode}}
+\newcommand{\oldplainhs}{\sethscode{oldplainhscode}}
+\plainhs
+
+% The arrayhscode is like plain, but makes use of polytable's
+% parray environment which disallows page breaks in code blocks.
+
+\newenvironment{arrayhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\parray}%
+  {\endparray\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newcommand{\arrayhs}{\sethscode{arrayhscode}}
+
+% The mathhscode environment also makes use of polytable's parray 
+% environment. It is supposed to be used only inside math mode 
+% (I used it to typeset the type rules in my thesis).
+
+\newenvironment{mathhscode}%
+  {\parray}{\endparray}
+
+\newcommand{\mathhs}{\sethscode{mathhscode}}
+
+% texths is similar to mathhs, but works in text mode.
+
+\newenvironment{texthscode}%
+  {\(\parray}{\endparray\)}
+
+\newcommand{\texths}{\sethscode{texthscode}}
+
+% The framed environment places code in a framed box.
+
+\def\codeframewidth{\arrayrulewidth}
+\RequirePackage{calc}
+
+\newenvironment{framedhscode}%
+  {\parskip=\abovedisplayskip\par\noindent
+   \hscodestyle
+   \arrayrulewidth=\codeframewidth
+   \tabular{@{}|p{\linewidth-2\arraycolsep-2\arrayrulewidth-2pt}|@{}}%
+   \hline\framedhslinecorrect\\{-1.5ex}%
+   \let\endoflinesave=\\
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \framedhslinecorrect\endoflinesave{.5ex}\hline
+   \endtabular
+   \parskip=\belowdisplayskip\par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\framedhslinecorrect}[2]%
+  {#1[#2]}
+
+\newcommand{\framedhs}{\sethscode{framedhscode}}
+
+% The inlinehscode environment is an experimental environment
+% that can be used to typeset displayed code inline.
+
+\newenvironment{inlinehscode}%
+  {\(\def\column##1##2{}%
+   \let\>\undefined\let\<\undefined\let\\\undefined
+   \newcommand\>[1][]{}\newcommand\<[1][]{}\newcommand\\[1][]{}%
+   \def\fromto##1##2##3{##3}%
+   \def\nextline{}}{\) }%
+
+\newcommand{\inlinehs}{\sethscode{inlinehscode}}
+
+% The joincode environment is a separate environment that
+% can be used to surround and thereby connect multiple code
+% blocks.
+
+\newenvironment{joincode}%
+  {\let\orighscode=\hscode
+   \let\origendhscode=\endhscode
+   \def\endhscode{\def\hscode{\endgroup\def\@currenvir{hscode}\\}\begingroup}
+   %\let\SaveRestoreHook=\empty
+   %\let\ColumnHook=\empty
+   %\let\resethooks=\empty
+   \orighscode\def\hscode{\endgroup\def\@currenvir{hscode}}}%
+  {\origendhscode
+   \global\let\hscode=\orighscode
+   \global\let\endhscode=\origendhscode}%
+
+\makeatother
+\EndFmtInput
+%
+
+% format runC         = "run\mathbb{C}_{\scalebox{0.6}{T}}"
+% format C            = "\mathbb{C}_{\scalebox{0.6}{T}}"
+%%format R            = "\mathbb{R}_{\scalebox{0.6}{T}}"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%format ._ = "."
+
+
+
+
+
+
+
+%
+%
+\ReadOnlyOnce{exists.fmt}%
+\makeatletter
+
+\newcommand\hsexists{\global\let\hsdot=\hsperiodonce}
+
+\AtHaskellReset{\global\let\hsdot=\hscompose}
+
+% In the beginning, we should reset Haskell once.
+\HaskellReset
+
+\makeatother
+\EndFmtInput
+
+\section{Case study}
+\label{sec:casestudy}
+
+As a demonstration of the advantages of our approach over MTC's
+Church-encoding based approach, we have ported the case study from
+\cite{mtc}.
+
+The study consists of five reusable language features with soundness
+and continuity\footnote{of step-bounded evaluation functions} proofs
+in addition to typing and evaluation functions.
+Figure~\ref{fig:MiniMLSyntax} presents the syntax of the expressions,
+values, and types provided by the features; each line is annotated
+with the feature that provides that set of definitions.
+
+\input{src/Modularity/MiniMLSyntax}
+
+In this section we discuss the benefits and trade-offs we have
+experienced while porting the case study to our approach.
+
+\paragraph{Code size}
+
+By the move to a datatype-generic approach the underlying modular
+framework grew from about 2500 LoC to about 3500 LoC. This includes
+both the universe of containers and polynomial functors and the
+generic implementations of fold, induction and equality.
+
+The size of the implementation of the modular feature components is
+roughly 1100 LoC per feature in the original MTC case study. By
+switching from Church-encodings to a datatype-generic approach we
+stripped away on average 70 LoC of additional proof obligations needed
+for reasoning with Church-encodings per feature. However, instantiating
+the MTC interface amounts to roughly 40 LoC per feature while our approach
+requires about 100 LoC per feature for the instances.
+
+By using the generic equality and generic proofs about its properties
+we can remove the specific implementations from the case study. This
+is about 40 LoC per feature. In total we could reduce the average size
+of a feature implementation to 1050 LoC.
+
+\paragraph{Impredicative sets}\label{ssec:impredicativeset}
+
+The higher-rank type in the definition of \ensuremath{\Varid{Fix_{M}}}
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Varid{Fix_{M}}\;(\Varid{f}\mathbin{::}\Conid{Set}\to \Conid{Set})\mathrel{=}\forall (\Varid{a}\mathbin{::}\Conid{Set})\hsforall \hsdot{\circ }{.}\Conid{Algebra}\;\Varid{f}\;\Varid{a}\to \Varid{a}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+causes \ensuremath{\Varid{Fix_{M}}\;\Varid{f}} to be in a higher universe level than the domain of
+\ensuremath{\Varid{f}}. Hence to use \ensuremath{\Varid{Fix_{M}}\;\Varid{f}} as a fixpoint of \ensuremath{\Varid{f}} we need an
+impredicative sort. MTC uses Coq's impredicative-set option for this
+which is known to lead to logical inconsistencies.
+
+When constructing the fixpoint of a container we do not need to raise
+the universe level and can thus avoid using impredicative sets.
+
+\paragraph{Induction principles}
+
+
+Church encodings have problems supporting proper induction principles,
+like the induction principle for arithmetic expressions \ensuremath{\Varid{ind}_{\Conid{A}}} in
+Section \ref{ssec:modularinductivereasoning}. MTC uses a
+\emph{poor-man's induction principle} \ensuremath{\Varid{ind}_{\Conid{A}}^2} instead.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{18}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Varid{ind}_{\Conid{A}}^2\mathbin{::}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\forall (\Varid{p}{}\<[18]%
+\>[18]{}\mathbin{::}(\Conid{Arith}\to \Conid{Prop})).{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\forall (\Varid{hl}{}\<[18]%
+\>[18]{}\mathbin{::}(\forall \Varid{n}\hsforall .\Varid{p}\;(\Conid{InMTC}\;(\Conid{Lit}\;\Varid{n})))).{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\forall (\Varid{ha}{}\<[18]%
+\>[18]{}\mathbin{::}(\forall \Varid{x}\hsforall \;\Varid{y}.\Varid{p}\;\Varid{x}\to \Varid{p}\;\Varid{y}\to \Varid{p}\;(\Conid{InMTC}\;(\Conid{Add}\;\Varid{x}\;\Varid{y})))).{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Conid{Algebra}\;\Varid{Arith}_F\;(\exists \Varid{a}\hsexists .\Varid{p}\;\Varid{a})\hsforall \hsforall \hsforall {}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+The induction principle uses a dependent sum type to turn a proof
+algebras into a regular algebra. The algebra builds a copy of the
+original term and a proof that the property holds for the copy. The
+proof for the copy can be obtained by folding with this algebra. In
+order to draw conclusions about the original term two additional
+\emph{well-formedness} conditions have to be proven.
+\begin{enumerate}
+
+\item The proof-algebra has to be well-formed in the sense that it
+really builds a copy of the original term instead of producing an
+arbitrary term. This proof needs to be done only once for every
+induction principle of every functor and is about 20 LoC per
+feature. The use of this well-formedness proof is completely automated
+using type-classes and hence hidden from the user.
+
+\item The fold operator used to build the proof using the algebra
+needs to be a proper fold operator, i.e. it needs to satisfy the
+universal property of folds.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{5E}{@{}l@{}}%
+\column{8}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{10}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{12}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Varid{foldMTC}\mathbin{::}\Conid{Algebra}\;\Varid{f}\;\Varid{a}\to \Varid{Fix_{M}}\;\Varid{f}\to \Varid{a}{}\<[E]%
+\\
+\>[3]{}\Varid{foldMTC}\;\Varid{alg}\;\Varid{fa}\mathrel{=}\Varid{fa}\;\Varid{alg}{}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\mathbf{type}\;\Conid{UniversalProperty}\;(\Varid{f}\mathbin{::}\mathbin{*}\to \mathbin{*})\;(\Varid{e}\mathbin{::}\Varid{Fix_{M}}\;\Varid{f}){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\mathrel{=}{}\<[5E]%
+\>[8]{}\forall \Varid{a}\hsforall \;(\Varid{alg}\mathbin{::}\Conid{Algebra}\;\Varid{f}\;\Varid{a})\;(\Varid{h}\mathbin{::}\Varid{Fix_{M}}\;\Varid{f}\to \Varid{a})\hsdot{\circ }{.}{}\<[E]%
+\\
+\>[8]{}\hsindent{2}{}\<[10]%
+\>[10]{}(\forall \Varid{e}\hsforall \hsdot{\circ }{.}\Varid{h}\;(\Varid{inMTC}\;\Varid{e})\mathrel{=}\Varid{alg}\;\Varid{h}\;\Varid{e})\to {}\<[E]%
+\\
+\>[10]{}\hsindent{2}{}\<[12]%
+\>[12]{}\Varid{h}\;\Varid{e}\mathrel{=}\Varid{foldMTC}\;\Varid{alg}\;\Varid{e}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+In an initial algebra representation of an inductive datatype, we have
+a single implementation of a fold operator that can be proven
+correct. In MTC's approach based on Church-encodings however, each
+term consists of a separate fold implementation that must satisfy the
+universal property.
+
+\end{enumerate}
+
+Hence, in order to enable reasoning MTC must provide a proof of the
+universal property of folds for every value of a modular datatype that
+is used in a proof. This is mostly done by packaging a term and the
+proof of the universal property of its fold in a dependent sum type.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\mathbf{type}\;\Conid{FixUP}\;\Varid{f}\mathrel{=}\exists (\Varid{x}\mathbin{::}\Varid{Fix_{M}}\;\Varid{f})\hsexists \hsdot{\circ }{.}\Conid{UniversalProperty}\;\Varid{f}\;\Varid{x}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\paragraph{Equality of terms}
+
+Packaging universal properties with terms obfuscates equality of terms
+when using Church-encodings. The proof component may differ for the
+same underlying term.
+
+This shows up for example in type-soundness proofs in MTC. An
+extensible logical relation \ensuremath{\Conid{WTValue}\;(\Varid{v},\Varid{t})} is used to represent
+well-typing of values. The judgement ranges over values and types. The
+universal properties are needed for inversion lemmas and thus the
+judgement needs to range over the variants that are packaged with the
+universal properties.
+
+However, knowing that \ensuremath{\Conid{WTValue}\;(\Varid{v},\Varid{t})} and \ensuremath{\Varid{proj1}\;\Varid{t}\mathrel{=}\Varid{proj1}\;\Varid{t'}} does
+not directly imply \ensuremath{\Conid{WTValue}\;(\Varid{v},\Varid{t'})} because of the possibly distinct
+proof component. To solve this situation auxiliary lemmas are needed
+that establish the implication. Other logical relations need similar
+lemmas. Every feature that introduces new rules to the judgements must
+also provide proof algebras for these lemmas.
+
+In the case study two logical relations need this kind of auxiliary
+lemmas: the relation for well-typing and a sub-value relation for
+continuity. Both of these relations are indexed by two modular types
+and hence need two lemmas each. The proofs of these four lemmas, the
+declaration of abstract proof algebras and the use of the lemmas
+amounts to roughly 30 LoC per feature.
+
+In our approach we never package proofs together with terms and hence
+this problem never appears. We thereby gain better readability of
+proofs and a small reduction in code size.
+
+\paragraph{Adequacy}
+
+Adequacy of definitions is an important problem in mechanizations. One
+concern is the adequate encoding of fixpoints. MTC relies on a
+side-condition to show that for a given functor \ensuremath{\Varid{f}} the folding \ensuremath{\Varid{inMTC}\mathbin{::}\Varid{f}\;(\Varid{Fix_{M}}\;\Varid{f})\to \Varid{Fix_{M}}\;\Varid{f}} and unfolding \ensuremath{\Varid{outMTC}\mathbin{::}\Varid{Fix_{M}}\;\Varid{f}\to \Varid{f}\;(\Varid{Fix_{M}}\;\Varid{f})} are inverse operations, namely, that all appearing \ensuremath{\Varid{Fix_{M}}\;\Varid{f}} values need to have the universal property of folds. This
+side-condition raises the question if \ensuremath{\Varid{Fix_{M}}\;\Varid{f}} is an adequate
+fixpoint of \ensuremath{\Varid{f}}. The pairing of terms together with their proofs of
+the universal property do not form a proper fixpoint either, because
+of the possibility of different proof components for the same
+underlying terms.
+
+Our approach solve this adequacy issue. The \ensuremath{\Conid{SPF}} type class from
+Figure \ref{fig:strictlypositivefunctor} requires that \ensuremath{\mathbf{in}} and \ensuremath{\Varid{out}}
+are inverse operations without any side conditions on the values and
+containers give rise to proper \ensuremath{\Conid{SPF}} instances.
+
+
+

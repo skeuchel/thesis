@@ -19,7 +19,12 @@
 \usepackage[dutch,english]{babel}
 
 % Figures (titlepage among others)
+\usepackage{color}
 \usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{xcolor}
 \usepackage{float}
 
 % page dimensions
@@ -265,12 +270,10 @@
 
 % Commands for making todo notes. \todo/1 is also available.
 \ifdraft{
-\newcommand{\benoit}[1]{\todo[color=green]{Benoit: #1}}
-\newcommand{\marko}[1]{\todo[color=blue]{Marko: #1}}
+\newcommand{\steven}[1]{\todo[color=green]{Benoit: #1}}
 \newcommand{\tom}[1]{\todo[color=red]{Tom: #1}}
 }{
-\newcommand{\benoit}[1]{}
-\newcommand{\marko}[1]{}
+\newcommand{\steven}[1]{}
 \newcommand{\tom}[1]{}
 }
 

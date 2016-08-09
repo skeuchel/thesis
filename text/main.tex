@@ -1,10 +1,13 @@
 % See http://tex.stackexchange.com/questions/95334/how-can-i-set-the-final-option-for-the-graphicx-package-in-xetex
-%\PassOptionsToPackage{final}{graphicx}
-%\PassOptionsToPackage{final}{hyperref}
-\documentclass[draft,twoside]{book}
-%\documentclass[final,twoside]{book}
+\PassOptionsToPackage{final}{graphicx}
+\PassOptionsToPackage{final}{hyperref}
+%\documentclass[draft,twoside]{book}
+\documentclass[final,twoside]{book}
 
-\input{preamble}
+\input{src/Preamble}
+\input{src/PreambleLhs}
+\input{src/Macros}
+\input{src/Modularity/Macros}
 
 \begin{document}
 
@@ -14,15 +17,52 @@
 % This is an extremely useful command that you searched for quite some time, therefore do not delete this comment.
 %\layout
 
-\input{Titlepage}
-\input{Acknowledgements}
+\input{src/Titlepage}
+\input{src/Acknowledgements}
 
 \tableofcontents
 
 \mainmatter
 
-\input{Introduction}
-\input{Conclusion}
+\input{src/Introduction}
+
+
+%% The 7 depths defined in latex
+%% \part{''part''}                   -1  not in letters
+%% \chapter{''chapter''}             0   only books and reports
+%% \section{''section''}             1   not in letters
+%% \subsection{''subsection''}       2   not in letters
+%% \subsubsection{''subsubsection''} 3   not in letters
+%% \paragraph{''paragraph''}         4   not in letters
+%% \subparagraph{''subparagraph''}   5   not in letters
+
+
+%% Meta-theory, natural deduction, operational semantics, type systems,
+%% type-safety, mechanization, datatype generic programming
+\part{Modularity}
+
+\chapter{Background}
+\input{src/Modularity/Abstract}
+\section{Modular definitions}
+\input{src/Modularity/Introduction}
+\section{Expression problem}
+\section{Datatypes \`a la Carte}
+\section{Church encodings}
+\section{Metatheory \`a la Carte}
+
+\chapter{Modular predicative universes}
+\input{src/Modularity/Functors}
+\input{src/Modularity/Containers}
+\input{src/Modularity/Polynomial}
+\input{src/Modularity/CaseStudy}
+\input{src/Modularity/RelatedWork}
+\input{src/Modularity/Conclusion}
+
+\chapter{Modular monadic effects}
+
+
+
+\input{src/Conclusion}
 
 \backmatter
 

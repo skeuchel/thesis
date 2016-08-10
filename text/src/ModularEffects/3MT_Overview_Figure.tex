@@ -1,0 +1,634 @@
+%% ODER: format ==         = "\mathrel{==}"
+%% ODER: format /=         = "\neq "
+%
+%
+\makeatletter
+\@ifundefined{lhs2tex.lhs2tex.sty.read}%
+  {\@namedef{lhs2tex.lhs2tex.sty.read}{}%
+   \newcommand\SkipToFmtEnd{}%
+   \newcommand\EndFmtInput{}%
+   \long\def\SkipToFmtEnd#1\EndFmtInput{}%
+  }\SkipToFmtEnd
+
+\newcommand\ReadOnlyOnce[1]{\@ifundefined{#1}{\@namedef{#1}{}}\SkipToFmtEnd}
+\usepackage{amstext}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\DeclareFontFamily{OT1}{cmtex}{}
+\DeclareFontShape{OT1}{cmtex}{m}{n}
+  {<5><6><7><8>cmtex8
+   <9>cmtex9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmtex10}{}
+\DeclareFontShape{OT1}{cmtex}{m}{it}
+  {<-> ssub * cmtt/m/it}{}
+\newcommand{\texfamily}{\fontfamily{cmtex}\selectfont}
+\DeclareFontShape{OT1}{cmtt}{bx}{n}
+  {<5><6><7><8>cmtt8
+   <9>cmbtt9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmbtt10}{}
+\DeclareFontShape{OT1}{cmtex}{bx}{n}
+  {<-> ssub * cmtt/bx/n}{}
+\newcommand{\tex}[1]{\text{\texfamily#1}}	% NEU
+
+\newcommand{\Sp}{\hskip.33334em\relax}
+
+
+\newcommand{\Conid}[1]{\mathit{#1}}
+\newcommand{\Varid}[1]{\mathit{#1}}
+\newcommand{\anonymous}{\kern0.06em \vbox{\hrule\@width.5em}}
+\newcommand{\plus}{\mathbin{+\!\!\!+}}
+\newcommand{\bind}{\mathbin{>\!\!\!>\mkern-6.7mu=}}
+\newcommand{\rbind}{\mathbin{=\mkern-6.7mu<\!\!\!<}}% suggested by Neil Mitchell
+\newcommand{\sequ}{\mathbin{>\!\!\!>}}
+\renewcommand{\leq}{\leqslant}
+\renewcommand{\geq}{\geqslant}
+\usepackage{polytable}
+
+%mathindent has to be defined
+\@ifundefined{mathindent}%
+  {\newdimen\mathindent\mathindent\leftmargini}%
+  {}%
+
+\def\resethooks{%
+  \global\let\SaveRestoreHook\empty
+  \global\let\ColumnHook\empty}
+\newcommand*{\savecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\savecolumns[#1]}}
+\newcommand*{\restorecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\restorecolumns[#1]}}
+\newcommand*{\aligncolumn}[2]%
+  {\g@addto@macro\ColumnHook{\column{#1}{#2}}}
+
+\resethooks
+
+\newcommand{\onelinecommentchars}{\quad-{}- }
+\newcommand{\commentbeginchars}{\enskip\{-}
+\newcommand{\commentendchars}{-\}\enskip}
+
+\newcommand{\visiblecomments}{%
+  \let\onelinecomment=\onelinecommentchars
+  \let\commentbegin=\commentbeginchars
+  \let\commentend=\commentendchars}
+
+\newcommand{\invisiblecomments}{%
+  \let\onelinecomment=\empty
+  \let\commentbegin=\empty
+  \let\commentend=\empty}
+
+\visiblecomments
+
+\newlength{\blanklineskip}
+\setlength{\blanklineskip}{0.66084ex}
+
+\newcommand{\hsindent}[1]{\quad}% default is fixed indentation
+\let\hspre\empty
+\let\hspost\empty
+\newcommand{\NB}{\textbf{NB}}
+\newcommand{\Todo}[1]{$\langle$\textbf{To do:}~#1$\rangle$}
+
+\EndFmtInput
+\makeatother
+%
+%
+%
+%
+%
+%
+% This package provides two environments suitable to take the place
+% of hscode, called "plainhscode" and "arrayhscode". 
+%
+% The plain environment surrounds each code block by vertical space,
+% and it uses \abovedisplayskip and \belowdisplayskip to get spacing
+% similar to formulas. Note that if these dimensions are changed,
+% the spacing around displayed math formulas changes as well.
+% All code is indented using \leftskip.
+%
+% Changed 19.08.2004 to reflect changes in colorcode. Should work with
+% CodeGroup.sty.
+%
+\ReadOnlyOnce{polycode.fmt}%
+\makeatletter
+
+\newcommand{\hsnewpar}[1]%
+  {{\parskip=0pt\parindent=0pt\par\vskip #1\noindent}}
+
+% can be used, for instance, to redefine the code size, by setting the
+% command to \small or something alike
+\newcommand{\hscodestyle}{}
+
+% The command \sethscode can be used to switch the code formatting
+% behaviour by mapping the hscode environment in the subst directive
+% to a new LaTeX environment.
+
+\newcommand{\sethscode}[1]%
+  {\expandafter\let\expandafter\hscode\csname #1\endcsname
+   \expandafter\let\expandafter\endhscode\csname end#1\endcsname}
+
+% "compatibility" mode restores the non-polycode.fmt layout.
+
+\newenvironment{compathscode}%
+  {\par\noindent
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed\)%
+   \par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\compaths}{\sethscode{compathscode}}
+
+% "plain" mode is the proposed default.
+% It should now work with \centering.
+% This required some changes. The old version
+% is still available for reference as oldplainhscode.
+
+\newenvironment{plainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newenvironment{oldplainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+% Here, we make plainhscode the default environment.
+
+\newcommand{\plainhs}{\sethscode{plainhscode}}
+\newcommand{\oldplainhs}{\sethscode{oldplainhscode}}
+\plainhs
+
+% The arrayhscode is like plain, but makes use of polytable's
+% parray environment which disallows page breaks in code blocks.
+
+\newenvironment{arrayhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\parray}%
+  {\endparray\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newcommand{\arrayhs}{\sethscode{arrayhscode}}
+
+% The mathhscode environment also makes use of polytable's parray 
+% environment. It is supposed to be used only inside math mode 
+% (I used it to typeset the type rules in my thesis).
+
+\newenvironment{mathhscode}%
+  {\parray}{\endparray}
+
+\newcommand{\mathhs}{\sethscode{mathhscode}}
+
+% texths is similar to mathhs, but works in text mode.
+
+\newenvironment{texthscode}%
+  {\(\parray}{\endparray\)}
+
+\newcommand{\texths}{\sethscode{texthscode}}
+
+% The framed environment places code in a framed box.
+
+\def\codeframewidth{\arrayrulewidth}
+\RequirePackage{calc}
+
+\newenvironment{framedhscode}%
+  {\parskip=\abovedisplayskip\par\noindent
+   \hscodestyle
+   \arrayrulewidth=\codeframewidth
+   \tabular{@{}|p{\linewidth-2\arraycolsep-2\arrayrulewidth-2pt}|@{}}%
+   \hline\framedhslinecorrect\\{-1.5ex}%
+   \let\endoflinesave=\\
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \framedhslinecorrect\endoflinesave{.5ex}\hline
+   \endtabular
+   \parskip=\belowdisplayskip\par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\framedhslinecorrect}[2]%
+  {#1[#2]}
+
+\newcommand{\framedhs}{\sethscode{framedhscode}}
+
+% The inlinehscode environment is an experimental environment
+% that can be used to typeset displayed code inline.
+
+\newenvironment{inlinehscode}%
+  {\(\def\column##1##2{}%
+   \let\>\undefined\let\<\undefined\let\\\undefined
+   \newcommand\>[1][]{}\newcommand\<[1][]{}\newcommand\\[1][]{}%
+   \def\fromto##1##2##3{##3}%
+   \def\nextline{}}{\) }%
+
+\newcommand{\inlinehs}{\sethscode{inlinehscode}}
+
+% The joincode environment is a separate environment that
+% can be used to surround and thereby connect multiple code
+% blocks.
+
+\newenvironment{joincode}%
+  {\let\orighscode=\hscode
+   \let\origendhscode=\endhscode
+   \def\endhscode{\def\hscode{\endgroup\def\@currenvir{hscode}\\}\begingroup}
+   %\let\SaveRestoreHook=\empty
+   %\let\ColumnHook=\empty
+   %\let\resethooks=\empty
+   \orighscode\def\hscode{\endgroup\def\@currenvir{hscode}}}%
+  {\origendhscode
+   \global\let\hscode=\orighscode
+   \global\let\endhscode=\origendhscode}%
+
+\makeatother
+\EndFmtInput
+%
+%
+%
+% First, let's redefine the forall, and the dot.
+%
+%
+% This is made in such a way that after a forall, the next
+% dot will be printed as a period, otherwise the formatting
+% of `comp_` is used. By redefining `comp_`, as suitable
+% composition operator can be chosen. Similarly, period_
+% is used for the period.
+%
+\ReadOnlyOnce{forall.fmt}%
+\makeatletter
+
+% The HaskellResetHook is a list to which things can
+% be added that reset the Haskell state to the beginning.
+% This is to recover from states where the hacked intelligence
+% is not sufficient.
+
+\let\HaskellResetHook\empty
+\newcommand*{\AtHaskellReset}[1]{%
+  \g@addto@macro\HaskellResetHook{#1}}
+\newcommand*{\HaskellReset}{\HaskellResetHook}
+
+\global\let\hsforallread\empty
+
+\newcommand\hsforall{\global\let\hsdot=\hsperiodonce}
+\newcommand*\hsperiodonce[2]{#2\global\let\hsdot=\hscompose}
+\newcommand*\hscompose[2]{#1}
+
+\AtHaskellReset{\global\let\hsdot=\hscompose}
+
+% In the beginning, we should reset Haskell once.
+\HaskellReset
+
+\makeatother
+\EndFmtInput
+
+% format runC         = "run\mathbb{C}_{\scalebox{0.6}{T}}"
+% format C            = "\mathbb{C}_{\scalebox{0.6}{T}}"
+%%format R            = "\mathbb{R}_{\scalebox{0.6}{T}}"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%format ._ = "."
+
+
+
+
+
+
+
+
+\begin{figure*}[!ht]
+\scriptsize
+\begin{center}
+\begin{tabular}{|ccc|}
+\hline
+\hspace{-.5cm}
+\begin{minipage}[t]{0.3\linewidth}
+\vspace{.04cm}
+
+
+
+\hspace{.65cm}\ruleline{Monad class}\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{7}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{20}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{24}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\mathbf{class}\;\Conid{Functor}\;\Varid{m}\Rightarrow \Conid{Monad}\;\Varid{m}\;\mathbf{where}{}\<[E]%
+\\
+\>[3]{}\hsindent{4}{}\<[7]%
+\>[7]{}\Varid{return}{}\<[20]%
+\>[20]{}\mathbin{::}\Varid{a}\to \Varid{m}\;\Varid{a}{}\<[E]%
+\\
+\>[3]{}\hsindent{4}{}\<[7]%
+\>[7]{}(\bind ){}\<[20]%
+\>[20]{}\mathbin{::}\Varid{m}\;\Varid{a}\to (\Varid{a}\to \Varid{m}\;\Varid{b})\to \Varid{m}\;\Varid{b}{}\<[E]%
+\\
+\>[3]{}\hsindent{4}{}\<[7]%
+\>[7]{}\Varid{return\char95 bind}{}\<[20]%
+\>[20]{}\mathbin{::}\Varid{return}\;\Varid{x}\bind \Varid{f}\equiv \Varid{f}\;\Varid{x}{}\<[E]%
+\\
+\>[3]{}\hsindent{4}{}\<[7]%
+\>[7]{}\Varid{bind\char95 return}{}\<[20]%
+\>[20]{}\mathbin{::}\Varid{p}\bind \Varid{return}\equiv \Varid{p}{}\<[E]%
+\\
+\>[3]{}\hsindent{4}{}\<[7]%
+\>[7]{}\Varid{bind\char95 bind}{}\<[20]%
+\>[20]{}\mathbin{::}{}\<[24]%
+\>[24]{}(\Varid{p}\bind \Varid{f})\bind \Varid{g}\equiv {}\<[E]%
+\\
+\>[24]{}\Varid{p}\bind \lambda \Varid{x}\to (\Varid{f}\;\Varid{x}\bind \Varid{g}){}\<[E]%
+\\
+\>[3]{}\hsindent{4}{}\<[7]%
+\>[7]{}\Varid{fmap\char95 bind}{}\<[20]%
+\>[20]{}\mathbin{::}\Varid{fmap}\;\Varid{f}\;\Varid{t}\equiv \Varid{t}\bind (\Varid{return}\hsdot{\circ }{.}\Varid{f}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\hspace{.65cm}\ruleline{Failure class}\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{18}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\mathbf{class}\;\Conid{Monad}\;\Varid{m}\Rightarrow \mathbb{F}_{\scalebox{0.6}{M}}\;\Varid{m}\;\mathbf{where}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{fail}{}\<[18]%
+\>[18]{}\mathbin{::}\Varid{m}\;\Varid{a}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{bind\char95 fail}{}\<[18]%
+\>[18]{}\mathbin{::}\Varid{fail}\bind \Varid{f}\equiv \Varid{fail}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\hspace{.65cm}\ruleline{State class}\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{16}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{18}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{19}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\mathbf{class}\;\Conid{Monad}\;\Varid{m}{}\<[18]%
+\>[18]{}\Rightarrow \mathbb{S}_{\scalebox{0.6}{M}}\;\Varid{s}\;\Varid{m}\;\mathbf{where}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{get}{}\<[16]%
+\>[16]{}\mathbin{::}\Varid{m}\;\Varid{s}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{put}{}\<[16]%
+\>[16]{}\mathbin{::}\Varid{s}\to \Varid{m}\;(){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{get\char95 query}{}\<[16]%
+\>[16]{}\mathbin{::}\Varid{get}\sequ \Varid{t}\equiv \Varid{t}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{put\char95 get}{}\<[16]%
+\>[16]{}\mathbin{::}\Varid{put}\;\Varid{s}\sequ \Varid{get}\equiv \Varid{put}\;\Varid{s}\sequ \Varid{return}\;\Varid{s}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{get\char95 put}{}\<[16]%
+\>[16]{}\mathbin{::}\Varid{get}\bind \Varid{put}\equiv \Varid{return}\;(){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{get\char95 get}{}\<[16]%
+\>[16]{}\mathbin{::}\Varid{get}\bind \lambda \Varid{s}\bind \Varid{get}\bind \Varid{f}\;\Varid{s}\equiv {}\<[E]%
+\\
+\>[16]{}\hsindent{3}{}\<[19]%
+\>[19]{}\Varid{get}\bind \lambda \Varid{s}\to \Varid{f}\;\Varid{s}\;\Varid{s}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{put\char95 put}{}\<[16]%
+\>[16]{}\mathbin{::}\Varid{put}\;\Varid{s}_1\sequ \Varid{put}\;\Varid{s}_2\equiv \Varid{put}\;\Varid{s}_2{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\end{minipage} 
+
+&
+
+\begin{minipage}[t]{0.34\linewidth}
+
+
+
+\vspace{.04cm}
+\hspace{.65cm}\ruleline{Reader class}\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{18}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{19}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{23}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{25}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\mathbf{class}\;\Conid{Monad}\;\Varid{m}{}\<[18]%
+\>[18]{}\Rightarrow \mathbb{R}_{\scalebox{0.6}{M}}\;\Varid{e}\;\Varid{m}\;\mathbf{where}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{ask}{}\<[19]%
+\>[19]{}\mathbin{::}\Varid{m}\;\Varid{e}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{local}{}\<[19]%
+\>[19]{}\mathbin{::}(\Varid{e}\to \Varid{e})\to \Varid{m}\;\Varid{a}\to \Varid{m}\;\Varid{a}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{ask\char95 query}{}\<[19]%
+\>[19]{}\mathbin{::}\Varid{ask}\sequ \Varid{t}\equiv \Varid{t}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{local\char95 return}{}\<[19]%
+\>[19]{}\mathbin{::}\Varid{local}\;\Varid{f}\hsdot{\circ }{.}\Varid{return}\mathrel{=}\Varid{return}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{ask\char95 ask}{}\<[19]%
+\>[19]{}\mathbin{::}{}\<[23]%
+\>[23]{}\Varid{ask}\bind \lambda \Varid{s}\bind \Varid{ask}\bind \Varid{f}\;\Varid{s}\equiv {}\<[E]%
+\\
+\>[23]{}\hsindent{2}{}\<[25]%
+\>[25]{}\Varid{ask}\bind \lambda \Varid{s}\to \Varid{f}\;\Varid{s}\;\Varid{s}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{ask\char95 bind}{}\<[19]%
+\>[19]{}\mathbin{::}{}\<[23]%
+\>[23]{}\Varid{t}\bind \lambda \Varid{x}\to \Varid{ask}\bind \lambda \Varid{e}\to \Varid{f}\;\Varid{x}\;\Varid{e}\equiv {}\<[E]%
+\\
+\>[23]{}\hsindent{2}{}\<[25]%
+\>[25]{}\Varid{ask}\bind \lambda \Varid{e}\to \Varid{t}\bind \lambda \Varid{x}\to \Varid{f}\;\Varid{x}\;\Varid{e}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{local\char95 bind}{}\<[19]%
+\>[19]{}\mathbin{::}{}\<[23]%
+\>[23]{}\Varid{local}\;\Varid{f}\;(\Varid{t}\bind \Varid{g})\equiv {}\<[E]%
+\\
+\>[23]{}\hsindent{2}{}\<[25]%
+\>[25]{}\Varid{local}\;\Varid{f}\;\Varid{t}\bind \Varid{local}\;\Varid{f}\hsdot{\circ }{.}\Varid{g}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{local\char95 ask}{}\<[19]%
+\>[19]{}\mathbin{::}\Varid{local}\;\Varid{f}\;\Varid{ask}\equiv \Varid{ask}\bind \Varid{return}\hsdot{\circ }{.}\Varid{f}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{local\char95 local}{}\<[19]%
+\>[19]{}\mathbin{::}\Varid{local}\;\Varid{f}\hsdot{\circ }{.}\Varid{local}\;\Varid{g}\equiv \Varid{local}\;(\Varid{g}\hsdot{\circ }{.}\Varid{f}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+% <   fmap_throw    :: fmap f (throw e) = throw e -- remove?
+
+
+
+\hspace{.65cm}\ruleline{Exception class}\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{18}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{19}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{23}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\mathbf{class}\;\Conid{Monad}\;\Varid{m}{}\<[18]%
+\>[18]{}\Rightarrow \mathbb{E}_{\scalebox{0.6}{M}}\;\Varid{x}\;\Varid{m}\;\mathbf{where}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{throw}{}\<[19]%
+\>[19]{}\mathbin{::}\Varid{x}\to \Varid{m}\;\Varid{a}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{catch}{}\<[19]%
+\>[19]{}\mathbin{::}\Varid{m}\;\Varid{a}\to (\Varid{x}\to \Varid{m}\;\Varid{a})\to \Varid{m}\;\Varid{a}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{bind\char95 throw}{}\<[19]%
+\>[19]{}\mathbin{::}\Varid{throw}\;\Varid{e}\bind \Varid{f}\equiv \Varid{throw}\;\Varid{e}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{catch\char95 throw}_{1}{}\<[19]%
+\>[19]{}\mathbin{::}\Varid{catch}\;(\Varid{throw}\;\Varid{e})\;\Varid{h}\equiv \Varid{h}\;\Varid{e}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{catch\char95 throw}_{2}{}\<[19]%
+\>[19]{}\mathbin{::}\Varid{catch}\;\Varid{t}\;\Varid{throw}\equiv \Varid{t}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{catch\char95 return}{}\<[19]%
+\>[19]{}\mathbin{::}\Varid{catch}\;(\Varid{return}\;\Varid{x})\;\Varid{h}\equiv \Varid{return}\;\Varid{x}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{fmap\char95 catch}{}\<[19]%
+\>[19]{}\mathbin{::}{}\<[23]%
+\>[23]{}\Varid{fmap}\;\Varid{f}\;(\Varid{catch}\;\Varid{t}\;\Varid{h})\equiv {}\<[E]%
+\\
+\>[23]{}\Varid{catch}\;(\Varid{fmap}\;\Varid{f}\;\Varid{t})\;(\Varid{fmap}\;\Varid{f}\hsdot{\circ }{.}\Varid{h}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\end{minipage} 
+
+&
+
+\begin{minipage}[t]{0.28\linewidth}
+\vspace{.04cm}
+\hspace{.5cm}\ruleline{Identity monad}\quad\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{16}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\mathbf{newtype}\;\mathbb{I}\;\Varid{a}{}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\mathbb{I}{}\<[16]%
+\>[16]{}\mathbin{::}\Varid{a}\to \mathbb{I}\;\Varid{a}{}\<[E]%
+\\
+\>[3]{}run\mathbb{I}{}\<[16]%
+\>[16]{}\mathbin{::}\mathbb{I}\;\Varid{a}\to \Varid{a}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\hspace{.5cm}\ruleline{Failure transformer}\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{16}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\mathbf{newtype}\;\mathbb{F}_{\scalebox{0.6}{T}}\;\Varid{m}\;\Varid{a}{}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\mathbb{F}_{\scalebox{0.6}{T}}{}\<[16]%
+\>[16]{}\mathbin{::}\Varid{m}\;(\Conid{Maybe}\;\Varid{a})\to \mathbb{F}_{\scalebox{0.6}{T}}\;\Varid{m}\;\Varid{a}{}\<[E]%
+\\
+\>[3]{}run\mathbb{F}_{\scalebox{0.6}{T}}{}\<[16]%
+\>[16]{}\mathbin{::}\mathbb{F}_{\scalebox{0.6}{T}}\;\Varid{m}\;\Varid{a}\to \Varid{m}\;(\Conid{Maybe}\;\Varid{a}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\hspace{.5cm}\ruleline{State transformer}\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{16}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\mathbf{newtype}\;\mathbb{S}_{\scalebox{0.6}{T}}\;\Varid{s}\;\Varid{m}\;\Varid{a}{}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\mathbb{S}_{\scalebox{0.6}{T}}{}\<[16]%
+\>[16]{}\mathbin{::}(\Varid{s}\to \Varid{m}\;(\Varid{a},\Varid{s}))\to \mathbb{S}_{\scalebox{0.6}{T}}\;\Varid{s}\;\Varid{m}\;\Varid{a}{}\<[E]%
+\\
+\>[3]{}run\mathbb{S}_{\scalebox{0.6}{T}}{}\<[16]%
+\>[16]{}\mathbin{::}\mathbb{S}_{\scalebox{0.6}{T}}\;\Varid{s}\;\Varid{m}\;\Varid{a}\to \Varid{s}\to \Varid{m}\;(\Varid{a},\Varid{s}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\hspace{.5cm}\ruleline{Exception transformer}\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{16}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\mathbf{newtype}\;\mathbb{E}_{\scalebox{0.6}{T}}\;\Varid{x}\;\Varid{m}\;\Varid{a}{}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\mathbb{E}_{\scalebox{0.6}{T}}{}\<[16]%
+\>[16]{}\mathbin{::}\Varid{m}\;(\Conid{Either}\;\Varid{x}\;\Varid{a})\to \mathbb{E}_{\scalebox{0.6}{T}}\;\Varid{x}\;\Varid{m}\;\Varid{a}{}\<[E]%
+\\
+\>[3]{}run\mathbb{E}_{\scalebox{0.6}{T}}{}\<[16]%
+\>[16]{}\mathbin{::}\mathbb{E}_{\scalebox{0.6}{T}}\;\Varid{x}\;\Varid{m}\;\Varid{a}\to \Varid{m}\;(\Conid{Either}\;\Varid{x}\;\Varid{a}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\hspace{.5cm}\ruleline{Reader transformer}\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\mathbf{newtype}\;\mathbb{R}_{\scalebox{0.6}{T}}\;\Varid{e}\;\Varid{m}\;\Varid{a}{}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\mathbb{R}_{\scalebox{0.6}{T}}\mathbin{::}(\Varid{e}\to \Varid{m}\;\Varid{a})\to \mathbb{R}_{\scalebox{0.6}{T}}\;\Varid{e}\;\Varid{m}\;\Varid{a}{}\<[E]%
+\\
+\>[3]{}run\mathbb{R}_{\scalebox{0.6}{T}}\mathbin{::}\mathbb{R}_{\scalebox{0.6}{T}}\;\Varid{e}\;\Varid{m}\;\Varid{a}\to \Varid{e}\to \Varid{m}\;\Varid{a}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\end{minipage}
+ \\
+\hline
+\end{tabular}
+\caption{Key classes, definitions and laws from \Name's monadic library. The names of algebraic laws are in bold.}
+\label{fig:reference}
+\vspace{-.75cm}
+\end{center}
+\end{figure*}

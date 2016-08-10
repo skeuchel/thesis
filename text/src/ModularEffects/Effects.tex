@@ -1,0 +1,914 @@
+%% ODER: format ==         = "\mathrel{==}"
+%% ODER: format /=         = "\neq "
+%
+%
+\makeatletter
+\@ifundefined{lhs2tex.lhs2tex.sty.read}%
+  {\@namedef{lhs2tex.lhs2tex.sty.read}{}%
+   \newcommand\SkipToFmtEnd{}%
+   \newcommand\EndFmtInput{}%
+   \long\def\SkipToFmtEnd#1\EndFmtInput{}%
+  }\SkipToFmtEnd
+
+\newcommand\ReadOnlyOnce[1]{\@ifundefined{#1}{\@namedef{#1}{}}\SkipToFmtEnd}
+\usepackage{amstext}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\DeclareFontFamily{OT1}{cmtex}{}
+\DeclareFontShape{OT1}{cmtex}{m}{n}
+  {<5><6><7><8>cmtex8
+   <9>cmtex9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmtex10}{}
+\DeclareFontShape{OT1}{cmtex}{m}{it}
+  {<-> ssub * cmtt/m/it}{}
+\newcommand{\texfamily}{\fontfamily{cmtex}\selectfont}
+\DeclareFontShape{OT1}{cmtt}{bx}{n}
+  {<5><6><7><8>cmtt8
+   <9>cmbtt9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmbtt10}{}
+\DeclareFontShape{OT1}{cmtex}{bx}{n}
+  {<-> ssub * cmtt/bx/n}{}
+\newcommand{\tex}[1]{\text{\texfamily#1}}	% NEU
+
+\newcommand{\Sp}{\hskip.33334em\relax}
+
+
+\newcommand{\Conid}[1]{\mathit{#1}}
+\newcommand{\Varid}[1]{\mathit{#1}}
+\newcommand{\anonymous}{\kern0.06em \vbox{\hrule\@width.5em}}
+\newcommand{\plus}{\mathbin{+\!\!\!+}}
+\newcommand{\bind}{\mathbin{>\!\!\!>\mkern-6.7mu=}}
+\newcommand{\rbind}{\mathbin{=\mkern-6.7mu<\!\!\!<}}% suggested by Neil Mitchell
+\newcommand{\sequ}{\mathbin{>\!\!\!>}}
+\renewcommand{\leq}{\leqslant}
+\renewcommand{\geq}{\geqslant}
+\usepackage{polytable}
+
+%mathindent has to be defined
+\@ifundefined{mathindent}%
+  {\newdimen\mathindent\mathindent\leftmargini}%
+  {}%
+
+\def\resethooks{%
+  \global\let\SaveRestoreHook\empty
+  \global\let\ColumnHook\empty}
+\newcommand*{\savecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\savecolumns[#1]}}
+\newcommand*{\restorecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\restorecolumns[#1]}}
+\newcommand*{\aligncolumn}[2]%
+  {\g@addto@macro\ColumnHook{\column{#1}{#2}}}
+
+\resethooks
+
+\newcommand{\onelinecommentchars}{\quad-{}- }
+\newcommand{\commentbeginchars}{\enskip\{-}
+\newcommand{\commentendchars}{-\}\enskip}
+
+\newcommand{\visiblecomments}{%
+  \let\onelinecomment=\onelinecommentchars
+  \let\commentbegin=\commentbeginchars
+  \let\commentend=\commentendchars}
+
+\newcommand{\invisiblecomments}{%
+  \let\onelinecomment=\empty
+  \let\commentbegin=\empty
+  \let\commentend=\empty}
+
+\visiblecomments
+
+\newlength{\blanklineskip}
+\setlength{\blanklineskip}{0.66084ex}
+
+\newcommand{\hsindent}[1]{\quad}% default is fixed indentation
+\let\hspre\empty
+\let\hspost\empty
+\newcommand{\NB}{\textbf{NB}}
+\newcommand{\Todo}[1]{$\langle$\textbf{To do:}~#1$\rangle$}
+
+\EndFmtInput
+\makeatother
+%
+%
+%
+%
+%
+%
+% This package provides two environments suitable to take the place
+% of hscode, called "plainhscode" and "arrayhscode". 
+%
+% The plain environment surrounds each code block by vertical space,
+% and it uses \abovedisplayskip and \belowdisplayskip to get spacing
+% similar to formulas. Note that if these dimensions are changed,
+% the spacing around displayed math formulas changes as well.
+% All code is indented using \leftskip.
+%
+% Changed 19.08.2004 to reflect changes in colorcode. Should work with
+% CodeGroup.sty.
+%
+\ReadOnlyOnce{polycode.fmt}%
+\makeatletter
+
+\newcommand{\hsnewpar}[1]%
+  {{\parskip=0pt\parindent=0pt\par\vskip #1\noindent}}
+
+% can be used, for instance, to redefine the code size, by setting the
+% command to \small or something alike
+\newcommand{\hscodestyle}{}
+
+% The command \sethscode can be used to switch the code formatting
+% behaviour by mapping the hscode environment in the subst directive
+% to a new LaTeX environment.
+
+\newcommand{\sethscode}[1]%
+  {\expandafter\let\expandafter\hscode\csname #1\endcsname
+   \expandafter\let\expandafter\endhscode\csname end#1\endcsname}
+
+% "compatibility" mode restores the non-polycode.fmt layout.
+
+\newenvironment{compathscode}%
+  {\par\noindent
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed\)%
+   \par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\compaths}{\sethscode{compathscode}}
+
+% "plain" mode is the proposed default.
+% It should now work with \centering.
+% This required some changes. The old version
+% is still available for reference as oldplainhscode.
+
+\newenvironment{plainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newenvironment{oldplainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+% Here, we make plainhscode the default environment.
+
+\newcommand{\plainhs}{\sethscode{plainhscode}}
+\newcommand{\oldplainhs}{\sethscode{oldplainhscode}}
+\plainhs
+
+% The arrayhscode is like plain, but makes use of polytable's
+% parray environment which disallows page breaks in code blocks.
+
+\newenvironment{arrayhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\parray}%
+  {\endparray\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newcommand{\arrayhs}{\sethscode{arrayhscode}}
+
+% The mathhscode environment also makes use of polytable's parray 
+% environment. It is supposed to be used only inside math mode 
+% (I used it to typeset the type rules in my thesis).
+
+\newenvironment{mathhscode}%
+  {\parray}{\endparray}
+
+\newcommand{\mathhs}{\sethscode{mathhscode}}
+
+% texths is similar to mathhs, but works in text mode.
+
+\newenvironment{texthscode}%
+  {\(\parray}{\endparray\)}
+
+\newcommand{\texths}{\sethscode{texthscode}}
+
+% The framed environment places code in a framed box.
+
+\def\codeframewidth{\arrayrulewidth}
+\RequirePackage{calc}
+
+\newenvironment{framedhscode}%
+  {\parskip=\abovedisplayskip\par\noindent
+   \hscodestyle
+   \arrayrulewidth=\codeframewidth
+   \tabular{@{}|p{\linewidth-2\arraycolsep-2\arrayrulewidth-2pt}|@{}}%
+   \hline\framedhslinecorrect\\{-1.5ex}%
+   \let\endoflinesave=\\
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \framedhslinecorrect\endoflinesave{.5ex}\hline
+   \endtabular
+   \parskip=\belowdisplayskip\par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\framedhslinecorrect}[2]%
+  {#1[#2]}
+
+\newcommand{\framedhs}{\sethscode{framedhscode}}
+
+% The inlinehscode environment is an experimental environment
+% that can be used to typeset displayed code inline.
+
+\newenvironment{inlinehscode}%
+  {\(\def\column##1##2{}%
+   \let\>\undefined\let\<\undefined\let\\\undefined
+   \newcommand\>[1][]{}\newcommand\<[1][]{}\newcommand\\[1][]{}%
+   \def\fromto##1##2##3{##3}%
+   \def\nextline{}}{\) }%
+
+\newcommand{\inlinehs}{\sethscode{inlinehscode}}
+
+% The joincode environment is a separate environment that
+% can be used to surround and thereby connect multiple code
+% blocks.
+
+\newenvironment{joincode}%
+  {\let\orighscode=\hscode
+   \let\origendhscode=\endhscode
+   \def\endhscode{\def\hscode{\endgroup\def\@currenvir{hscode}\\}\begingroup}
+   %\let\SaveRestoreHook=\empty
+   %\let\ColumnHook=\empty
+   %\let\resethooks=\empty
+   \orighscode\def\hscode{\endgroup\def\@currenvir{hscode}}}%
+  {\origendhscode
+   \global\let\hscode=\orighscode
+   \global\let\endhscode=\origendhscode}%
+
+\makeatother
+\EndFmtInput
+%
+%
+%
+% First, let's redefine the forall, and the dot.
+%
+%
+% This is made in such a way that after a forall, the next
+% dot will be printed as a period, otherwise the formatting
+% of `comp_` is used. By redefining `comp_`, as suitable
+% composition operator can be chosen. Similarly, period_
+% is used for the period.
+%
+\ReadOnlyOnce{forall.fmt}%
+\makeatletter
+
+% The HaskellResetHook is a list to which things can
+% be added that reset the Haskell state to the beginning.
+% This is to recover from states where the hacked intelligence
+% is not sufficient.
+
+\let\HaskellResetHook\empty
+\newcommand*{\AtHaskellReset}[1]{%
+  \g@addto@macro\HaskellResetHook{#1}}
+\newcommand*{\HaskellReset}{\HaskellResetHook}
+
+\global\let\hsforallread\empty
+
+\newcommand\hsforall{\global\let\hsdot=\hsperiodonce}
+\newcommand*\hsperiodonce[2]{#2\global\let\hsdot=\hscompose}
+\newcommand*\hscompose[2]{#1}
+
+\AtHaskellReset{\global\let\hsdot=\hscompose}
+
+% In the beginning, we should reset Haskell once.
+\HaskellReset
+
+\makeatother
+\EndFmtInput
+
+% format runC         = "run\mathbb{C}_{\scalebox{0.6}{T}}"
+% format C            = "\mathbb{C}_{\scalebox{0.6}{T}}"
+%%format R            = "\mathbb{R}_{\scalebox{0.6}{T}}"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%format ._ = "."
+
+
+
+
+
+
+
+
+
+%===============================================================================
+
+\input{src/ModularEffects/3MT_Overview_Figure}
+
+
+\section{The \name Monad Library}
+
+\name includes a monad library to support effectful semantic
+functions using \emph{monads} and \emph{monad transformers}, and
+provides \emph{algebraic laws} for reasoning.
+Monads provide a uniform representation for encapsulating
+computational effects such as mutable state, exception handling, and
+non-determinism. Monad transformers allow monads supporting the desired set of
+effects to be built. Algebraic laws are the key to \emph{modular} reasoning about
+monadic definitions.
+
+\name implements the necessary definitions of \emph{monads} and
+\emph{monad transformers} as a Coq library inspired by the Haskell
+\emph{monad transformer library} (MTL)~\cite{liang95monad}. Our
+library refines the MTL in two key ways in order to support modular
+reasoning using algebraic laws. While algebraic laws can only be
+documented informally in Haskell, our library fully integrates them
+into type class definitions using Coq's expressive type
+system. Additionally, \name systematically includes laws for all
+monad subclasses, several of which have not been covered in the
+functional programming literature before.
+
+% TOM: This is not very important:
+%
+% Although the port of the MTL definitions was mostly straightforward
+% a notable difference is that the port does not use functional dependencies~\cite{jones00type}.
+% The reason is simply that Coq's implementation of type classes does
+% not support functional dependencies. However the use of functional
+% dependencies is mostly for convenience: in Haskell it allows the compiler to
+% improve type-inference. Since in Coq there is a lot less type-inference and
+% type annotations are most often required anyway, the lack of functional dependencies
+% is not a significant drawback.
+
+
+\paragraph{Library overview}
+Figure~\ref{fig:reference} summarizes the library's key classes, definitions
+and laws. The type class \ensuremath{\Conid{Monad}} describes the basic interface of monads.  The
+type \ensuremath{\Varid{m}\;\Varid{a}} denotes computations of type \ensuremath{\Varid{m}} which produce values of type \ensuremath{\Varid{a}}
+when executed.  The function \ensuremath{\Varid{return}} lifts a value of type \ensuremath{\Varid{a}} into a (pure)
+computation that simply produces the value. The \emph{bind} function \ensuremath{\bind }
+composes a computation \ensuremath{\Varid{m}\;\Varid{a}} producing values of type \ensuremath{\Varid{a}}, with a
+function that accepts a value of type \ensuremath{\Varid{a}} and returns a computation of type
+\ensuremath{\Varid{m}\;\Varid{b}}. The function \ensuremath{\sequ } defines a special case of bind that discards
+the intermediate value:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}(\sequ )\mathbin{::}\Conid{Monad}\;\Varid{m}\Rightarrow \Varid{m}\;\Varid{a}\to \Varid{m}\;\Varid{b}\to \Varid{m}\;\Varid{b}{}\<[E]%
+\\
+\>[3]{}\Varid{ma}\sequ \Varid{mb}\mathrel{=}\Varid{ma}\bind \mathbin{\char92 \char95 }\to \Varid{mb}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+The \ensuremath{\mathbf{do}} notation is syntactic sugar for the \textit{bind}
+operator: \ensuremath{\mathbf{do}\;\{\mskip1.5mu \Varid{x}\leftarrow \Varid{f};\Varid{g}\mskip1.5mu\}} means \ensuremath{\Varid{f}\bind \lambda \Varid{x}\to \Varid{g}}.
+
+Particular monads can be built from basic monad types such as the
+identity monad (\ensuremath{\mathbb{I}}) and monad transformers including the
+failure (\ensuremath{\mathbb{F}_{\scalebox{0.6}{T}}}), mutable state (\ensuremath{\mathbb{S}_{\scalebox{0.6}{T}}}), and exception (\ensuremath{\mathbb{E}_{\scalebox{0.6}{T}}})
+transformers. These transformers are combined into different monad
+stacks with \ensuremath{\mathbb{I}} at the bottom. Constructor and extractor
+functions such as \ensuremath{\mathbb{S}_{\scalebox{0.6}{T}}} and \ensuremath{run\mathbb{S}_{\scalebox{0.6}{T}}} provide the signatures of
+the functions for building and running particular
+monads/transformers.
+
+In order to support extensible effects, a feature needs to abstract
+over the monad implementation used. Any implementation which includes
+the required operations is valid. These operations are captured in
+type classes such as \ensuremath{\mathbb{S}_{\scalebox{0.6}{M}}} and \ensuremath{\mathbb{E}_{\scalebox{0.6}{M}}}, also called
+\emph{monad subclasses}.  The type classes (denoted by subscript M)
+are used to require a monad stack to support a
+particular effect without assuming a particular stack
+configuration.\footnote{Supporting two instances of the same effect
+requires extra machinery~\cite{zipper}.} Each class offers a set of
+primitive operations, such as \ensuremath{\Varid{get}} to access the state for
+\ensuremath{\mathbb{S}_{\scalebox{0.6}{M}}}.
+
+\paragraph{Algebraic laws} Each monad (sub)class includes a set of
+algebraic laws that govern its operations.  These laws are an integral
+part of the definition of the monad type classes and constrain the
+possible implementations to sensible ones. Thus, even without knowing
+the particular implementation of a type class, we can still modularly
+reason about its behavior via these laws. This is crucial for
+supporting modular reasoning~\cite{effectiveadvice}.
+
+The first three laws for the \ensuremath{\Conid{Monad}} class are standard, while the
+last law (\ensuremath{\Varid{fmap\char95 bind}}) relates \ensuremath{\Varid{fmap}} and \ensuremath{\Varid{bind}} in the usual way.
+Each monad subclass also includes its own set of laws. The laws for
+various subclasses can be found scattered throughout the functional
+programming literature, such as for failure~\cite{gibbons11just} and
+state~\cite{effectiveadvice,gibbons11just}. Yet, as far as we know,
+\name is the first to systematically bring them together. Furthermore, although most
+laws have been presented in the semantics literature in one form or another, we have not
+seen some of the laws in the functional programming literature.
+One such example are the laws for the exception class:
+
+\begin{itemize}
+\item The \ensuremath{\Varid{bind\char95 throw}} law generalizes the \ensuremath{\Varid{bind\char95 fail}} law: a sequential
+      computation is aborted by throwing an exception.
+\item The \ensuremath{\Varid{catch\char95 throw}_{1}} law states that the exception handler is invoked
+      when an exception is thrown in a \ensuremath{\Varid{catch}}.
+\item The \ensuremath{\Varid{catch\char95 throw}_{2}} law indicates that an exception handler is redundant
+      if it just re-throws the exception.
+\item The \ensuremath{\Varid{catch\char95 return}} law states that a \ensuremath{\Varid{catch}} around a pure computation is redundant.
+\item The \ensuremath{\Varid{fmap\char95 catch}} law states that pure functions (\ensuremath{\Varid{fmap}\;\Varid{f}}) distribute on the right
+      with \ensuremath{\Varid{catch}}. %This is obviously not true for impure computations.
+\end{itemize}
+
+% \paragraph{Exception Laws}
+%  There
+% are two laws for this interaction. The |catch_throw| law specifies that when
+% the handler function (the second argument of |catch|) is |throw| then the
+% computation |m|, which is been handled, should be returned. Intuitively, the
+% exceptional value for the |throw| operation is simply the value yielded by |m|,
+% so the resulting computation of throwing that value should just be equivalent
+% to |m|.  The |catch_throw'| specifies that handling a thrown exception, should
+% result in applying the handle function |h| to the exceptional value. The
+% interaction between |catch| and |return| is also important and captured by the
+% |catch_return| law: if a computation is pure then it does not throw exceptions,
+% and there trying to catch an exception should have no effect on the original
+% computation. Finally, there is also an interaction between |fmap| and |catch|
+% (the law |fmap_catch|), which essentially expresses that |fmap| and |catch|
+% distribute over each other.
+
+\paragraph{Other definitions} Our monad library contains a number of
+other classes, definitions and laws apart from the definitions
+discussed here. This includes infrastructure for other types of
+effects (e.g. writer effects), as well as other infrastructure from
+the MTL.  There are roughly 30 algebraic laws in total.
+%The complete code for \name can be found in the online repository.
+
+\input{src/ModularEffects/References_Figure}
+
+%===============================================================================
+\section{Modular Monadic Semantics}
+
+% This section presents \Name's solution for modular effects and modular
+% effectful reasoning. That solution employs
+% \emph{monads}~\cite{moggi89computational,moggi91notions,wadler92essence},
+% \emph{monad transformers}~\cite{m} and \emph{algebraic laws}~\cite{m}.  We
+% provide the first formalization of a monad transformer library with algebraic
+% laws. Some of the algebraic laws, such as the laws for exceptions, were
+% previously undocumented in the literature.
+
+% The monad library allows \name to deal with the problem of
+% expressing side-effects in semantics in a modular way. It also gives us
+% the basic mechanisms which will allow modular reasoning about such
+% definitions.\BO{add forward references here?}
+
+Features can utilize the monad library included with \name to
+construct algebras for semantic functions which are compatible with a
+range of effects. These modular monadic algebras have the form:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{12}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Varid{eval_{Ref}}{}\<[12]%
+\>[12]{}\mathbin{::}\mathbb{S}_{\scalebox{0.6}{M}}\;\Conid{Store}\;\Varid{m}\Rightarrow \Varid{Algebra}_M\;\Varid{Ref}_F\;(\Varid{m}\;\Varid{a}){}\<[E]%
+\\
+\>[3]{}\Varid{evalErr}{}\<[12]%
+\>[12]{}\mathbin{::}\mathbb{E}_{\scalebox{0.6}{M}}\;()\;\Varid{m}\Rightarrow \Varid{Algebra}_M\;\Conid{ErrF}\;(\Varid{m}\;\Varid{a}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\noindent These algebras use monad subclasses such as \ensuremath{\mathbb{S}_{\scalebox{0.6}{M}}} and
+\ensuremath{\mathbb{E}_{\scalebox{0.6}{M}}} to \emph{constrain} the monad required by the feature,
+% Unlike the approach in Section~\ref{m},
+allowing the monad to have more effects than those used in the feature.
+These two algebras can be combined to create a new evaluation algebra
+with type:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}(\mathbb{S}_{\scalebox{0.6}{M}}\;\Varid{m}\;\Varid{s},\mathbb{E}_{\scalebox{0.6}{M}}\;\Varid{m}\;\Varid{x})\Rightarrow \Varid{Algebra}_M\;(\Varid{Ref}_F\oplus\Conid{ErrF})\;(\Varid{m}\;\Varid{a}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+The combination imposes both type class constraints while
+the monad type remains extensible with new effects. The complete set of
+effects used by the evaluation functions for the five language
+features used in our case study of Section~\ref{sec:CaseStudy} are given in Figure~\ref{fig:FeatureEffects}.
+
+\input{src/ModularEffects/FeatureEffects}
+
+
+%-------------------------------------------------------------------------------
+\subsection{Example: References}
+Figure~\ref{fig:references} illustrates this approach with definitions for the
+functor for expressions and the evaluation and typing algebras for the
+reference feature. Other features have similar definitions.
+
+For the sake of presentation the definitions are slightly simplified
+from the actual ones in Coq. For instance, we have omitted issues
+related to the extensibility of the syntax for values (\ensuremath{\Conid{Value}}) and
+types (\ensuremath{\Conid{Type}}).  We refer the interested reader to MTC~\cite{mtc} and
+the \name Coq code for these details.  \ensuremath{\Conid{Value}} and \ensuremath{\Conid{Type}} are treated
+as abstract datatypes with a number of constructor functions: \ensuremath{\Varid{loc}},
+\ensuremath{\Varid{stuck}}, \ensuremath{\Varid{unit}}, \ensuremath{\Varid{tRef}} and \ensuremath{\Varid{tUnit}} denote respectively reference
+locations, stuck values, unit values, reference types and unit
+types. There are also matching functions \ensuremath{\Varid{isLoc}} and \ensuremath{\Varid{isTRef}} for
+checking whether a term is a location value or a reference type,
+respectively.
+
+The type \ensuremath{\Varid{Ref}_F} is the functor for references. It has
+constructors for creating references (\ensuremath{\Conid{Ref}}), dereferencing (\ensuremath{\Conid{DeRef}}) and
+assigning (\ensuremath{\Conid{Assign}}) references. The evaluation algebra \ensuremath{\Varid{eval_{Ref}}} uses
+the state monad for its reference environment, which is captured
+in the type class constraint \ensuremath{\mathbb{S}_{\scalebox{0.6}{M}}\;\Conid{Store}\;\Varid{m}}.  The typing algebra
+(\ensuremath{\Varid{typeof_{Ref}}}) is also monadic, using the failure monad to denote
+ill-typing.
+
+% The definition of the algebra is quite straightforward.
+% itself is standard and looks almost like the monolithic version
+% defined over a non-extensible expression type.  One small difference
+% is the use of |rec| instead of a recursive call. A more significant
+% difference is the use of the observation function |isLoc| to
+% simulate a case analysis on values computed in the recursive call.
+% As
+% discussed in Section~\ref{m} it is the use of these observation
+% functions that makes the approach trully modular.\BO{reference?}  In a
+% monolithic version a conventional case analysis would have been used
+% instead.
+
+% Similarly to the
+% evaluation algebra, an observation function |isTRef| is used.
+
+%-------------------------------------------------------------------------------
+\subsection{Effect-Dependent Theorems}
+
+Monadic semantic function algebras are compatible with new effects and
+algebraic laws facilitate writing extensible proofs over these monadic
+algebras. Effects introduce further challenges to proof reuse,
+however: each combination of effects induces its own type soundness
+statement. Consider the theorem for a language with references which
+features a store $\sigma$ and a store typing $\Sigma$ that are related
+through the store typing judgement $\Sigma \vdash \sigma$:
+
+
+\vspace{2mm}
+\noindent\fbox{
+\begin{minipage}{.93\columnwidth}
+\begin{gather*}
+\forall e, t, \Sigma, \sigma.
+    \left\{\begin{array}{c}
+    \ensuremath{\Varid{typeof}\;\Varid{e}\equiv \Varid{return}\;\Varid{t}} \\
+    \Sigma \vdash \sigma
+    \end{array}\right\} \rightarrow \\
+  \exists v, \Sigma', \sigma'.
+   \left\{\begin{array}{c}
+   \ensuremath{\Varid{put}\;\Varid{\sigma}\sequ \llbracket \Varid{e}\rrbracket\equiv \Varid{put}\;\sigma'\sequ \Varid{return}\;\Varid{v}} \\
+   \Sigma' \supseteq \Sigma \\
+   \Sigma' \vdash v : t \\
+   \Sigma' \vdash \sigma'
+   \end{array}\right\}
+\tag{\textsc{LSound}$_S$}
+\label{thm:SoundS}
+\end{gather*}
+\end{minipage}
+}
+\vspace{2mm}
+
+\noindent Contrast this with the theorem for a language with errors,
+which must account for the computation possibly ending in an exception
+being thrown:
+
+\vspace{2mm}
+\noindent\fbox{
+\begin{minipage}{.93\columnwidth}
+\begin{gather*}\forall e, t. \ensuremath{\Varid{typeof}\;\Varid{e}\equiv \Varid{return}\;\Varid{t}}
+    \rightarrow \\ (\exists v. \ensuremath{\llbracket \Varid{e}\rrbracket\equiv \Varid{return}\;\Varid{v}} \wedge \vdash v : t) \vee (\exists x. \ensuremath{\llbracket \Varid{e}\rrbracket\equiv \Varid{throw}\;\Varid{x}})
+\tag{\textsc{LSound}$_E$}
+\label{thm:SoundE}
+\end{gather*}
+\end{minipage}
+}
+
+\vspace{2mm}
+
+
+Clearly, the available effects are essential for the formulation of
+the theorem. A larger language which involves both exceptions and
+state requires yet another theorem where the impact of both effects
+cross-cut one another\footnote{A similar
+proliferation of soundness theorems can be found in
+TAPL~\cite{pierce}.}:
+
+\vspace{2mm}
+\noindent\fbox{
+\begin{minipage}{.93\columnwidth}
+\begin{gather*}
+\forall e, t, \Sigma, \sigma.
+    \left\{\begin{array}{c}
+    \ensuremath{\Varid{typeof}\;\Varid{e}\equiv \Varid{return}\;\Varid{t}} \\
+    \Sigma \vdash \sigma
+    \end{array}\right\}
+ \rightarrow \\
+  \exists v, \Sigma', \sigma'.
+   \left\{\begin{array}{c}
+   \ensuremath{\Varid{put}\;\Varid{\sigma}\sequ \llbracket \Varid{e}\rrbracket\equiv \Varid{put}\;\sigma'\sequ \Varid{return}\;\Varid{v}} \\
+   \Sigma' \supseteq \Sigma \\
+   \Sigma' \vdash v : t \\
+   \Sigma' \vdash \sigma'
+   \end{array}\right\} \\
+\vee \\
+  \exists x.
+   \ensuremath{\Varid{put}\;\Varid{\sigma}\sequ \llbracket \Varid{e}\rrbracket\equiv \Varid{throw}\;\Varid{x}}
+\tag{\textsc{LSound}$_\mathit{ES}$}
+\label{thm:SoundES}
+\end{gather*}
+\end{minipage}
+}
+\vspace{2mm}
+% \BO{Wondering whether some additional notes on $\Sigma$ related portions is
+% useful.}
+
+Modular formulations of \ref{thm:SoundE} and \ref{thm:SoundS} are
+useless for proving a modular variant of \ref{thm:SoundES} because
+their induction hypotheses have the wrong form. The hypothesis for
+\ref{thm:SoundE} requires the result to be of the form \ensuremath{\Varid{return}\;\Varid{v}},
+disallowing \ensuremath{\Varid{put}\;\sigma'\sequ \Varid{return}\;\Varid{v}} (the form required by \ref{thm:SoundS}).
+Similarly, the hypothesis for \ref{thm:SoundS} does not
+account for exceptions occurring in subterms. In general, without
+anticipating additional effects, type soundness theorems with fixed
+sets of effects cannot be reused modularly.
+
+\begin{comment}
+These type classes and operations enable us to write evaluation
+algebras against constrained polymorphic monads:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{14}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{44}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Varid{evalState}{}\<[14]%
+\>[14]{}\mathbin{::}\mathbb{S}_{\scalebox{0.6}{M}}\;\Varid{m}\;\Varid{s}\Rightarrow \Conid{F}\;(\Varid{m}\;\Varid{a}){}\<[44]%
+\>[44]{}\to \Varid{m}\;\Varid{a}{}\<[E]%
+\\
+\>[3]{}\Varid{evalExcep}{}\<[14]%
+\>[14]{}\mathbin{::}\mathbb{E}_{\scalebox{0.6}{M}}\;\Varid{m}\;\Varid{x}\Rightarrow \Conid{F}\;(\Varid{m}\;\Varid{a}){}\<[44]%
+\>[44]{}\to \Varid{m}\;\Varid{a}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+These two types are compatible. Combining them, yields the conjunction of the
+two type class constraints:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}(\mathbb{S}_{\scalebox{0.6}{M}}\;\Varid{m}\;\Varid{s},\mathbb{E}_{\scalebox{0.6}{M}}\;\Varid{m}\;\Varid{x})\Rightarrow (\Conid{F}\oplus\Conid{G})\;(\Varid{m}\;\Varid{a})\to \Varid{m}\;\Varid{a}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+This type is further extensible with new effects.
+
+\BO{Finish section here.}
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\paragraph{Basic Definition}
+In Haskell, monads are described by a type class:
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{13}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{class}\;\Conid{Monad}\;\Varid{m}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{return}{}\<[13]%
+\>[13]{}\mathbin{::}\Varid{a}\to \Varid{m}\;\Varid{a}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}(\bind ){}\<[13]%
+\>[13]{}\mathbin{::}\Varid{m}\;\Varid{a}\to (\Varid{a}\to \Varid{m}\;\Varid{b})\to \Varid{m}\;\Varid{b}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+The type \ensuremath{\Varid{m}\;\Varid{a}} describes computations of type \ensuremath{\Varid{m}}
+which produce values of type \ensuremath{\Varid{a}} when executed.
+The function \ensuremath{\Varid{return}} lifts a value of type \ensuremath{\Varid{a}} into a
+(pure) computation that simply produces the value. The \emph{bind} function
+\ensuremath{\bind } composes a computation \ensuremath{\Varid{m}\;\Varid{a}}, which produces values of type \ensuremath{\Varid{a}},
+with a function that accepts a value of type \ensuremath{\Varid{a}} and returns
+a computation of type \ensuremath{\Varid{b}}. The convenient function \ensuremath{\sequ } defines a special case of bind
+that discards the intermediate value:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}(\sequ )\mathbin{::}\Conid{Monad}\;\Varid{m}\Rightarrow \Varid{m}\;\Varid{a}\to \Varid{m}\;\Varid{b}\to \Varid{m}\;\Varid{b}{}\<[E]%
+\\
+\>[3]{}\Varid{ma}\sequ \Varid{mb}\mathrel{=}\Varid{ma}\bind \mathbin{\char92 \char95 }\to \Varid{mb}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+The Haskell \ensuremath{\mathbf{do}} notation is syntactic sugar for the \textit{bind}
+operator: \ensuremath{\mathbf{do}\;\{\mskip1.5mu \Varid{x}\leftarrow \Varid{f};\Varid{g}\mskip1.5mu\}} means \ensuremath{\Varid{f}\bind \lambda \Varid{x}\to \Varid{g}}.
+
+
+
+Two particular monads are the state monad \ensuremath{\Conid{State}\;\Varid{s}} and the exception monad
+\ensuremath{\Conid{Exc}\;\Varid{x}}.  The former which provides two operations \ensuremath{\Varid{get}\mathbin{::}\Conid{State}\;\Varid{s}\;\Varid{s}} and \ensuremath{\Varid{put}\mathbin{::}\Varid{s}\to \Conid{State}\;\Varid{s}\;()} for reading and writing a state. The latter provides \ensuremath{\Varid{throw}\mathbin{::}\Varid{x}\to \Conid{Exc}\;\Varid{x}\;\Varid{a}} for throwing an exception and \ensuremath{\Varid{catch}\mathbin{::}\Conid{Exc}\;\Varid{x}\;\Varid{a}\to (\Varid{x}\to \Conid{Exc}\;\Varid{x}\;\Varid{a})\to \Conid{Exc}\;\Varid{x}\;\Varid{a}}. These enable us to write evaluation algebras of type:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{14}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{32}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Varid{evalState}{}\<[14]%
+\>[14]{}\mathbin{::}\Conid{F}\;(\Conid{State}\;\Varid{s}\;\Varid{a}){}\<[32]%
+\>[32]{}\to \Conid{State}\;\Varid{s}\;\Varid{a}{}\<[E]%
+\\
+\>[3]{}\Varid{evalExcep}{}\<[14]%
+\>[14]{}\mathbin{::}\Conid{F}\;(\Conid{Exc}\;\Varid{x}\;\Varid{a}){}\<[32]%
+\>[32]{}\to \Conid{Exc}\;\Varid{x}\;\Varid{a}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+The two types are now much more similar in structure, but still not compatible
+because neither supports the effects of the other.
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\paragraph{Abstractions}
+
+In order to allow extensible effects we need abstract over the particular monad
+implementation used. Any implementation is valid as long as it supports the
+required operations. These requirements are captured in type classes such as
+\ensuremath{\mathbb{S}_{\scalebox{0.6}{M}}} and \ensuremath{\mathbb{E}_{\scalebox{0.6}{M}}}, also called \emph{monad subclasses}. Note that
+classes such as \ensuremath{\mathbb{S}_{\scalebox{0.6}{M}}\;\Varid{s}\;\Varid{m}} use \emph{functional
+dependencies}~\cite{jones00type}. The annotation \ensuremath{\Varid{m}\to \Varid{s}} states that there is
+a functional dependency between the type \ensuremath{\Varid{m}} and \ensuremath{\Varid{s}} (the type \ensuremath{\Varid{m}} determines
+the type \ensuremath{\Varid{s}}). This additional information is used by the compiler to improve
+type-inference.
+
+These type classes enable us to write evaluation algebras against constrained
+polymorphic monads:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{14}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{44}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Varid{evalState}{}\<[14]%
+\>[14]{}\mathbin{::}\mathbb{S}_{\scalebox{0.6}{M}}\;\Varid{m}\;\Varid{s}\Rightarrow \Conid{F}\;(\Varid{m}\;\Varid{a}){}\<[44]%
+\>[44]{}\to \Varid{m}\;\Varid{a}{}\<[E]%
+\\
+\>[3]{}\Varid{evalExcep}{}\<[14]%
+\>[14]{}\mathbin{::}\mathbb{E}_{\scalebox{0.6}{M}}\;\Varid{m}\;\Varid{x}\Rightarrow \Conid{F}\;(\Varid{m}\;\Varid{a}){}\<[44]%
+\>[44]{}\to \Varid{m}\;\Varid{a}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+These two types are compatible. Combining them, yields the conjunction of the
+two type class constraints:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}(\mathbb{S}_{\scalebox{0.6}{M}}\;\Varid{m}\;\Varid{s},\mathbb{E}_{\scalebox{0.6}{M}}\;\Varid{m}\;\Varid{x})\Rightarrow (\Conid{F}\oplus\Conid{G})\;(\Varid{m}\;\Varid{a})\to \Varid{m}\;\Varid{a}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+This type is further extensible with new effects.
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\paragraph{Modular Monad Definitions}
+
+In order to instantiate a closed language with multiple effects, we must supply
+a monad definition that implements all the required effects. We could write a
+new definition from scratch, but it is much more convenient to reuse existing
+implementations for individual effects. This is where \emph{monad transformers}
+come in.
+
+A monad transformer~\cite{liang95monad} is a higher-order monad that is
+parameterized by another monad. It layers two kinds of monads on top of each
+other to compose their functionality A monad transformer is defined by the
+following type class:
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{7}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\mathbf{class}\;\Conid{MonadTrans}\;\Varid{t}\;\mathbf{where}{}\<[E]%
+\\
+\>[3]{}\hsindent{4}{}\<[7]%
+\>[7]{}\Varid{lift}\mathbin{::}\Conid{Monad}\;\Varid{m}\Rightarrow \Varid{m}\;\Varid{a}\to \Varid{t}\;\Varid{m}\;\Varid{a}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\noindent The \ensuremath{\Varid{lift}} operation  takes a monadic computation \ensuremath{\Varid{m}\;\Varid{a}},
+and lifts it into the transformed monad \ensuremath{\Varid{t}\;\Varid{m}} For each particular type
+of effect (such as state or exceptions) there is an associated monad transformer
+type and type class.
+
+%-------------------------------------------------------------------------------
+\subsection{Monads and Modular Reasoning}
+
+While constrained polymorphic monads are quite convenient for modularizing side
+effects in function algebras, they are problematic for reasoning. The
+constrained polymorphism abstracts the behavior of the effectful operations
+into an interface. When looking at a feature in isolation, we do not know what
+implementation is used for its side effects. This is only known for fully
+composed languages, and the implementation used may be different for different
+languages. That leaves very little room for modular reasoning.
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\paragraph{Monad Laws}
+Fortunately, this problem is partly mitigated by the \emph{laws}. These laws
+are an integral part of the definition of the monadic type classes and
+constrain the possible implementations to sensible ones. Hence, without
+knowing the particular implementation of a type classes used, we can still rely
+on its laws for reasoning purposes.
+
+For example, \ensuremath{\Conid{Monad}} instances must satisfy the following laws:
+\begin{IEEEeqnarray*}{rCl"s}
+\ensuremath{\Varid{return}\;\Varid{x}\bind \Varid{f}}  & ~~\ensuremath{\equiv }~~ & \ensuremath{\Varid{f}\;\Varid{x}}                      & \textsc{(Return-Bind)} \\
+\ensuremath{\Varid{p}\bind \Varid{return}}   & \ensuremath{\equiv } & \ensuremath{\Varid{p}}                        & \textsc{(Bind-Return)} \\
+\ensuremath{(\Varid{p}\bind \Varid{f})\bind \Varid{g}}& \ensuremath{\equiv } & \ensuremath{\Varid{p}\bind \lambda \Varid{x}\to (\Varid{f}\;\Varid{x}\bind \Varid{g})}  & \textsc{(Bind-Bind)}
+\end{IEEEeqnarray*}
+and \ensuremath{\mathbb{S}_{\scalebox{0.6}{M}}} instances must satisfy 5 more laws:
+\begin{IEEEeqnarray*}{rCl"s}
+\ensuremath{\Varid{get}\sequ \Varid{m}}  & ~~\ensuremath{\equiv }~~ & \ensuremath{\Varid{m}}                      & \textsc{(Get-Query)} \\
+\ensuremath{\Varid{put}\;\Varid{s}\sequ \Varid{get}}  & ~~\ensuremath{\equiv }~~ & \ensuremath{\Varid{put}\;\Varid{s}\sequ \Varid{return}\;\Varid{s}}                      & \textsc{(Put-Get)} \\
+\ensuremath{\Varid{get}\bind \Varid{put}}  & ~~\ensuremath{\equiv }~~ & \ensuremath{\Varid{return}\;()}                      & \textsc{(Get-Put)} \\
+\ensuremath{\Varid{get}\bind \lambda \Varid{s}\to \Varid{get}\bind \Varid{f}\;\Varid{s}} & \ensuremath{\equiv } & \ensuremath{\Varid{get}\bind \lambda \Varid{s}\to \Varid{f}\;\Varid{s}\;\Varid{s}}      & \textsc{(Get-Get)} \\
+\ensuremath{\Varid{put}\;\Varid{s}_1\sequ \Varid{put}\;\Varid{s}_2} & \ensuremath{\equiv } & \ensuremath{\Varid{put}\;\Varid{s}_2} & \textsc{(Put-Put)}
+\end{IEEEeqnarray*}
+The Haskell language is not equipped to express, enforce and exploit type class
+laws, but Coq does. Hence, we have provided our monadic type classes in Coq with a full
+complement of laws, about 30 in total.
+
+These laws play a crucial role in all the proofs over constrained polymorphic
+monadic algebras.
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\subsection{Effect-Dependent Theorems}
+
+Even though we now have reusable function algebras thanks to monads, and we can
+write proofs about these algebras thanks to laws, the proofs themselves are not
+necessarily reusable. In fact, the proofs for a property like type soundness
+are inherently not reusable. The problem is that each combination of effects
+requires its own type soundness statement~\cite{pierce}. Consider the theorem for exceptions:
+
+\begin{gather*}\forall e, t. \ensuremath{\Varid{typeof}\;\Varid{e}} = \ensuremath{\Varid{return}\;\Varid{t}}
+    \rightarrow \\ (\exists v. \ensuremath{\llbracket \Varid{e}\rrbracket} = \ensuremath{\Varid{return}\;\Varid{v}} \wedge \vdash v : t) \vee (\exists x. \ensuremath{\llbracket \Varid{e}\rrbracket} = \ensuremath{\Varid{throw}\;\Varid{x}})
+\end{gather*}
+
+and that for state:
+
+\tom{Ben, have a look at the use of local here.}
+\begin{gather*}
+\forall e, t, \Sigma, \sigma.
+    \left\{\begin{array}{c}
+    \ensuremath{\Varid{local}\;(\Varid{const}\;\Varid{\Sigma})\;(\Varid{typeof}\;\Varid{e})\mathrel{=}\Varid{return}\;\Varid{t}} \\
+    \Sigma \vdash \sigma
+    \end{array}\right\} \\
+ \rightarrow \\
+  \exists v, \Sigma', \sigma'.
+   \left\{\begin{array}{c}
+   \ensuremath{\Varid{put}\;\Varid{\sigma}\sequ \llbracket \Varid{e}\rrbracket} = \ensuremath{\Varid{put}\;\Varid{\sigma}\sequ \Varid{return}\;\Varid{v}} \\
+   \Sigma' \supseteq \Sigma \\
+   \Sigma' \vdash v : t \\
+   \Sigma' \vdash \sigma'
+   \end{array}\right\}
+\end{gather*}
+
+Clearly, the available effects are essential for the formulation of the
+theorem. If we build a larger language that involves both effects, then
+we need to write a new theorem where the elements of both are cross-cutting one
+another.
+
+\tom{Show the combined theorem here.}
+
+Neither of the two above theorems is useful for proving the new theorem. The former
+does not mention the state and the latter does not allow for failure.
+
+\tom{some sentence(s) to explain this is a general issue and a big challenge}
+
+In general,
+without anticipating or restricting the possible effects, there is no strongest
+possible type soundness property.
+
+In summary, it seems that we monads give us modularly reusable functions but
+not proofs.
+\end{comment}

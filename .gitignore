@@ -6,7 +6,6 @@
 *.fls
 *.out
 *.toc
-*.fmt
 *.ptb
 
 ## Intermediate documents:
@@ -104,7 +103,6 @@ _minted*
 *.mw
 
 # mylatexformat
-*.fmt
 
 # nomencl
 *.nlo

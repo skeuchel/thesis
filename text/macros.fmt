@@ -1,0 +1,196 @@
+%format t_1 = "\Varid{t}_1"
+%format t_2 = "\Varid{t}_2"
+
+%format exists = \exists
+
+%format t_c = "\Varid{c}_t"
+%format t_t = "\Varid{t}_t"
+%format t_e = "\Varid{e}_t"
+%format v_c = "\Varid{c}_e"
+%format v_t = "\Varid{t}_e"
+%format v_e = "\Varid{e}_e"
+
+%format catch_throw1
+%format catch_throw2
+
+%format TExn = "\Varid{T}_{exn}"
+%format soundness_X
+%format b_1 = "\Varid{e}_1"
+%format b_2 = "\Varid{e}_2"
+%format e_1 = "\Varid{e}_1"
+%format e_2 = "\Varid{e}_2"
+%format alg_1 = "\Varid{alg}_1"
+%format alg_2 = "\Varid{alg}_2"
+%format f_1 = "\Varid{f}_1"
+%format f_2 = "\Varid{f}_2"
+%format f_3 = "\Varid{f}_3"
+%format f_4 = "\Varid{f}_4"
+
+%format f_v
+%format f_t
+%format typeofAlg = "\Varid{typeof}_{alg}"
+
+%format eq_type = "\Varid{eq}_{type}"
+%format (eval e) = "\llbracket " e "\rrbracket"
+%format eval_X
+%format MAlgebra = "\Varid{Algebra}_M"
+%format Mendler = MAlgebra
+%format mfold    = "\Varid{fold}_M"
+%format mfold'
+%format MFix = "\Varid{Fix}_M"
+%format in_t = "\Varid{in}_f"
+%format in_t'
+%format out_t = "\Varid{out}_f"
+%format :+: = "\oplus"
+%format :*: = "\mathop{{\mathsmaller\boxplus}}"
+%format ::*:: = "\mathop{{\mathsmaller\boxplus}_{M}}"
+%format :::+::: = "\oplus_i"
+%format :<: = "\prec:"
+%format e1 = "\Varid{e}_1"
+%format e2 = "\Varid{e}_2"
+%format e3 = "\Varid{e}_3"
+%format e4 = "\Varid{e}_4"
+%format e5 = "\Varid{e}_5"
+%format exp1 = "\Varid{exp}_1"
+%format n1
+%format n2
+%format p1
+%format p2
+%format t1
+%format t2
+%format alg1
+%format alg2
+%format <> = "\neq"
+%format <-> = "\leftrightarrow"
+%format \/ = "\lor"
+%format /\ = "\land"
+%format Not = "\neg"
+
+%format satisfiableF = "\Varid{satisfiable}_F"
+%format satisfiableExpF = "\Varid{satisfiableExp}_F"
+%format satisfiableExF = "\Varid{satisfiableEx}_F"y
+%format satisfiablealg = "\Varid{satisfiable}_\mathit{alg}"
+%format algSAT = "\Varid{alg}_\mathit{SAT}"
+%format sat_soundP = "\Varid{sat\_sound}_P"
+%format Sat_Name = "\Varid{SAT}_\mathit{Name}"
+%format sat_name = "\Varid{sat}_\mathit{name}"
+%format SatSound_Name = "\Varid{SSound}_\mathit{Name}"
+%format satsound_name = "\Varid{ssound}_\mathit{Name}"
+%format encodesExpF = "\Varid{encodes}_\mathit{ExpF}"
+%format encodesExF = "\Varid{encodes}_\mathit{ExF}"
+
+%format PExpF = "\Varid{PExp}_F"
+%format ExpF = "\Varid{Exp}_F"
+%format ExF = "\Varid{Ex}_F"
+%format PExF = "\Varid{PEx}_F"
+%format encodesExpF = "\Varid{Encodes}_\mathit{Exp_{F}}"
+%format encodesExF = "\Varid{Encodes}_\mathit{Ex_{F}}"
+%format Encodes_VarT   = "\Varid{Encodes}_\textit{VarT}"
+%format Encodes_VarF   = "\Varid{Encodes}_\textit{VarF}"
+%format Encodes_Exists = "\Varid{Encodes}_\textit{Exists}"
+%format Encodes_True = "\Varid{Encodes}_\textit{True}"
+%format Encodes_False = "\Varid{Encodes}_\textit{False}"
+%format Encodes_AndF = "\Varid{Encodes}_\textit{And}"
+%format Encodes_OrF = "\Varid{Encodes}_\textit{Or}"
+%format Encodes_NotF = "\Varid{Encodes}_\textit{Not}"
+%format BolF = "\Varid{Bol}"
+%format AndF = "\Varid{And}"
+%format OrF = "\Varid{Or}"
+%format NotF = "\Varid{Not}"
+%format VarF = "\Varid{Var}"
+%format ExistsF = "\Varid{Exists}"
+%format PVarF = "\Varid{PVar}"
+%format PExistsF = "\Varid{PExists}"
+%format Lambda = "\Varid{Lambda}_F"
+%format ClosureF = "\Varid{Closure}_F"
+%format Closure  = "\Varid{Clos}"
+%format ArithF = "\Varid{Arith}_F"
+%format LogicF = "\Varid{Logic}_F"
+%format RefF = "\Varid{Ref}_F"
+%format ExcF = "\Varid{Exc}_F"
+%format IfF    = "\Varid{Logic}_F"
+%format BoolF    = "\Varid{Logic}_F"
+%format NValF  = "\Varid{VNat}_F"
+%format BValF  = "\Varid{VBool}_F"
+%format StuckF = "\Varid{Stuck}_F"
+%format NTypF   = "\Varid{NTyp}_F"
+%format WTNatF = "\Varid{WTNat}_F"
+%format WTBoolF = "\Varid{WTBool}_F"
+%format TypeF   = "\Varid{Type}_F"
+%format ValueF   = "\Varid{Value}_F"
+%format TArrowF  = "\Varid{TArrow}_F"
+%format TNatF  = "\Varid{TNat}_F"
+%format TBoolF = "\Varid{TBool}_F"
+
+%format f_np
+
+%format arithAlg = "\Varid{eval}_{\Varid{Arith}}"
+%format ifEval = "\Varid{eval}_{\Varid{Logic}}"
+
+%format ._ = "."
+
+%format UP'_F = "\Varid{UP}_F"
+%format UP'_P = "\Varid{UP}_P"
+
+
+%format v1 = "\Varid{v}_1"
+%format v2 = "\Varid{v}_2"
+%format v3 = "\Varid{v}_3"
+
+
+%format S_ = "\Sigma"
+%format s_ = "\sigma"
+%format s_'
+%%format ._ = "."
+%format p_1 = "\pi_1"
+%format p_2 = "\pi_2"
+%format exists = "\exists"
+%format (exist x p) = "\langle " e "," p "\rangle"
+%format WTV_proj1_t = "WTV_{\pi_1,t}"
+%format WTV_proj1_v = "WTV_{\pi_1,v}"
+
+%format A_ind = "\Varid{A_{ind}}"
+%format A_ind'
+%format Hl = "\Varid{H_l}"
+%format Ha = "\Varid{H_a}"
+
+%format evalAlg = "\Varid{eval_{alg}}"
+%format evalLambda = "\Varid{eval_{Lambda}}"
+%format eval_alg = evalAlg
+%format eval2 = eval
+
+%format Theorem = "\textbf{Theorem}"
+%format Proof = "\textbf{Proof}"
+%format Qed = "\textbf{Qed}"
+
+%format ~= = "\equiv"
+%format |- = "\vdash"
+%format empty = "\bullet"
+%format gamma = "\Gamma"
+%format xxx = "\times"
+
+%format m_c = "\Varid{m}_\Varid{c}"
+%format m_i = "\Varid{m}_\Varid{i}"
+%format m_e = "\Varid{m}_\Varid{e}"
+%format m_t = "\Varid{m}_{\Varid{t}}"
+%format T_Me = "\Varid{T}_\Varid{Me}"
+%format T_Mh = "\Varid{T}_\Varid{Mh}"
+%format T_e = "\Varid{T}_\Varid{e}"
+%format T_h = "\Varid{T}_\Varid{h}"
+%format T_m = "\Varid{T}_\Varid{m}"
+%format U_m = "\Varid{U}_\Varid{m}"
+
+%format t_m = "\Varid{t}_\Varid{m}"
+%format t_t = "\Varid{t}_\Varid{t}"
+%format t_c = "\Varid{t}_\Varid{c}"
+%format t_e = "\Varid{t}_\Varid{e}"
+%format v_t = "\Varid{v}_\Varid{t}"
+%format v_c = "\Varid{v}_\Varid{c}"
+%format v_e = "\Varid{v}_\Varid{e}"
+%format v_m = "\Varid{v}_\Varid{m}"
+
+%format MonadEnvironment   = "\mathbb{R}_{\scalebox{0.6}{M}}"
+%format MonadErrorEnvironment   = "\mathbb{ER}_{\scalebox{0.6}{M}}"
+%format MonadFailState   = "\mathbb{FS}_{\scalebox{0.6}{M}}"
+%format MonadErrorState   = "\mathbb{ES}_{\scalebox{0.6}{M}}"
+%format MonadFailErrorState   = "\mathbb{EFS}_{\scalebox{0.6}{M}}"

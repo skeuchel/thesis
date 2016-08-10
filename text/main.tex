@@ -9,7 +9,19 @@
 \input{src/Macros}
 \input{src/Modularity/Macros}
 
+\definecolor{purple}{RGB}{136,38,143}
+\newcommand\BD[1]{\textcolor{purple}{[BD: #1]}}
+\newcommand\SK[1]{\textcolor{blue!70!black}{[SK: #1]}}
+\newcommand\TS[1]{\textcolor{blue!70!black}{[TS: #1]}}
+\newcommand\BO[1]{\textcolor{green!70!black}{[BO: #1]}}
+\newcommand*\ruleline[1]{\raisebox{.6ex}{\hspace{2ex}\makebox[.85\linewidth]{\hrulefill\hspace{1ex}\raisebox{-.6ex}{\normalsize#1}\hspace{1ex}\hrulefill\hspace{2ex}}}\vspace{-.15cm}}
+% \newenvironment{example}{\par\noindent\textit{Example}\quad}{}
+\newcommand\citep[1]{\cite{#1}}
+
 \begin{document}
+
+\newcommand{\name}{{\sc 3MT}~}
+\newcommand{\Name}{{\sc 3MT}}
 
 % Must be before titlepage so that the empty page after the titlepage gets a Roman page number.
 \frontmatter
@@ -59,6 +71,14 @@
 \input{src/Modularity/Conclusion}
 
 \chapter{Modular monadic effects}
+\input{src/ModularEffects/Abstract}
+\input{src/ModularEffects/MTC}
+\input{src/ModularEffects/Effects}
+\input{src/ModularEffects/Elaboration}
+\input{src/ModularEffects/CaseStudy}
+\input{src/ModularEffects/RelatedWork}
+\input{src/ModularEffects/Conclusion}
+
 
 
 

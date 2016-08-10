@@ -13,8 +13,8 @@ MAIN        := main
 MAINTECH    := main_techmemo
 SRCDIR      := src
 
-LHSFILES    := $(wildcard $(SRCDIR)/Modularity/*.lhs)
-TEXFILES    := $(wildcard $(SRCDIR)/Modularity/*.tex)
+LHSFILES    := $(wildcard $(SRCDIR)/Modularity/*.lhs) $(wildcard $(SRCDIR)/ModularEffects/*.lhs)
+TEXFILES    := $(wildcard $(SRCDIR)/Modularity/*.tex) $(wildcard $(SRCDIR)/ModularEffects/*.tex)
 LHS2TEX_FLAGS  := --poly -s dvipdfm
 
 # Latexmk is so smart that it does not recompile if a file that is included is

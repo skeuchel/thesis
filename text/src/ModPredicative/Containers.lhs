@@ -1,4 +1,3 @@
-
 %include lhs2TeX.fmt
 %include forall.fmt
 %include polycode.fmt
@@ -7,14 +6,23 @@
 
 %if False
 
-> {-# LANGUAGE DataKinds, KindSignatures, GADTs, ExistentialQuantification, PolyKinds, TypeFamilies, TypeOperators #-}
+> {-# LANGUAGE DataKinds #-}
+> {-# LANGUAGE KindSignatures #-}
+> {-# LANGUAGE GADTs #-}
+> {-# LANGUAGE ExistentialQuantification #-}
+> {-# LANGUAGE PolyKinds #-}
+> {-# LANGUAGE TypeFamilies #-}
+> {-# LANGUAGE TypeInType #-}
+> {-# LANGUAGE TypeOperators #-}
+
+> import Data.Kind
 
 -- > import Introduction
 
 %endif
 
 
-\section{Containers}\label{sec:containers}
+\section{Containers}\label{sec:mod:containers}
 
 %% \steven{Containers and generic programming help in getting valid
 %% definitions of |fold|, |ind| and :+: instances. Use this as a
@@ -71,10 +79,10 @@ any container.
 
 > data Ext (p :: sk -> *) (a :: *) =
 >   forall st. Ext (p st -> a)
->
+
 > instance Functor (Ext p) where
 >   fmap f (Ext pf) = Ext (f . pf)
->
+
 > data (:>) (s :: *) (p :: s -> *)
 
 %endif
@@ -343,18 +351,6 @@ of two indexed containers.
 \fbox{
 \hspace{-5pt}\begin{minipage}{1\columnwidth}
 
-%if False
-
-> data Ext (p :: sk -> *) (a :: *) =
->   forall st. Ext (p st -> a)
->
-> instance Functor (Ext p) where
->   fmap f (Ext pf) = Ext (f . pf)
->
-> data (:>) (s :: *) (p :: s -> *)
-
-%endif
-
 < data ICont i where
 <   (_ |> _ |> _) ::  (s :: i -> *) ->
 <                     (p :: forall j. s j -> *) ->
@@ -385,3 +381,9 @@ Fixed points and fold operators can be defined generically on that
 universe similarly to Section \ref{ssec:contfixandfold}. Indexed
 containers are also closed under coproducts and indexed algebras can
 be modularly composed using type classes.
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../mod"
+%%% End:

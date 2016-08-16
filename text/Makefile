@@ -1,35 +1,29 @@
-current_dir=$(shell pwd)
-
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # Programs
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 LATEXMK     := latexmk
 LHS2TEX     := lhs2TeX
 PDFLATEX    := pdflatex
 LATEX       := pdflatex
 BIBTEX      := bibtex
 
-MAIN        := main
-MAINTECH    := main_techmemo
-SRCDIR      := src
-
-LHSFILES    := $(wildcard $(SRCDIR)/Modularity/*.lhs) $(wildcard $(SRCDIR)/ModularEffects/*.lhs)
-TEXFILES    := $(wildcard $(SRCDIR)/Modularity/*.tex) $(wildcard $(SRCDIR)/ModularEffects/*.tex)
+#-------------------------------------------------------------------------------
+# Flags
+#-------------------------------------------------------------------------------
 LHS2TEX_FLAGS  := --poly -s dvipdfm
 
-# Latexmk is so smart that it does not recompile if a file that is included is
-# only touched. You must really edit it.
-all: $(MAIN).pdf
-	latexmk -pdf main.tex
+#-------------------------------------------------------------------------------
+# Dirs
+#-------------------------------------------------------------------------------
+SRCDIR      := src
 
-%.pdf: %.tex lhs
-	latexmk -pdf  $<
-	./shShowVersion.sh
-
-lhs: $(LHSFILES:.lhs=.tex)
-
-once:
-	pdflatex main.tex
+#-------------------------------------------------------------------------------
+# PDF targets
+#-------------------------------------------------------------------------------
+all: main
+main: main.pdf
+mod: mod.pdf
+intro: intro.pdf
 
 open: all
 	open main.pdf
@@ -37,24 +31,26 @@ open: all
 clean:
 	latexmk -C
 
-force:
+#-------------------------------------------------------------------------------
+# LHS processing
+#-------------------------------------------------------------------------------
+# List of .lhs files needed to be processed by lhs2tex
+LHSFILES    := $(wildcard $(SRCDIR)/*/*.lhs)
 
+# List of all texfiles. This includes the generated ones (or maybe they have
+# to exist prior to invoking make).
+TEXFILES    := $(wildcard $(SRCDIR)/*/*.tex)
 
-%.tex : %.lhs force
-	[ $(<) ] && ($(LHS2TEX) $(LHS2TEX_FLAGS) $< > $@ || rm -f $@)
+# Targets and make rule
+lhs: $(LHSFILES:.lhs=.tex)
+%.tex : %.lhs
+	$(LHS2TEX) $(LHS2TEX_FLAGS) $< > $@ || (rm -f $@ && exit 1)
 
+#-------------------------------------------------------------------------------
+# PDF processing
+#-------------------------------------------------------------------------------
+# Latexmk does the dependency tracking for us.
+%.pdf: %.tex lhs
+	latexmk -pdf  $<
 
-
-
-# # Only the answer subsumption chapter (separate file).
-# subsum:
-#  	latexmk -pdf subsumptionOnly.tex
-#
-# # Only the conclusion chapter (separate file).
-# concl:
-#  	latexmk -pdf conclusionOnly.tex
-#
-# intro:
-#  	latexmk -pdf introductionOnly.tex
-
-.PHONY: all once open clean
+.PHONY: all open clean

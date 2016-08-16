@@ -19,7 +19,7 @@ Figure~\ref{fig:MiniMLSyntax} presents the syntax of the expressions,
 values, and types provided by the features; each line is annotated
 with the feature that provides that set of definitions.
 
-\input{src/Modularity/MiniMLSyntax}
+\input{src/ModPredicative/MiniMLSyntax}
 
 In this section we discuss the benefits and trade-offs we have
 experienced while porting the case study to our approach.

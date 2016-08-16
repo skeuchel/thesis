@@ -72,7 +72,7 @@ choice of the universe. Add a citation.}
 \hspace{-5pt}\begin{minipage}{1\columnwidth}
 
 > data Poly = U | I | C Poly Poly | P Poly Poly
->
+
 > data ExtP (c :: Poly) (a :: *) where
 >   EU  :: ExtP U a
 >   EI  :: a -> ExtP I a
@@ -253,3 +253,11 @@ be used to instantiate the |Eq| type class in Figure
 \ref{fig:equalityclass}.
 
 < instance Polynomial f => Eq (Fix f)
+
+
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../mod"
+%%% End:

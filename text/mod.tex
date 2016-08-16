@@ -1,8 +1,8 @@
 % See http://tex.stackexchange.com/questions/95334/how-can-i-set-the-final-option-for-the-graphicx-package-in-xetex
 \PassOptionsToPackage{final}{graphicx}
 \PassOptionsToPackage{final}{hyperref}
-%\documentclass[draft,twoside]{book}
-\documentclass[final,twoside]{book}
+\documentclass[draft,twoside]{book}
+%\documentclass[final,twoside]{book}
 
 \input{src/Preamble}
 \input{src/PreambleLhs}
@@ -23,20 +23,20 @@
 \newcommand{\name}{{\sc 3MT}~}
 \newcommand{\Name}{{\sc 3MT}}
 
-% Must be before titlepage so that the empty page after the titlepage gets a Roman page number.
-\frontmatter
-
-% This is an extremely useful command that you searched for quite some time, therefore do not delete this comment.
-%\layout
-
-\input{src/Titlepage}
-\input{src/Acknowledgements}
-
-\tableofcontents
-
-\mainmatter
-
-\input{src/Introduction}
+%% % Must be before titlepage so that the empty page after the titlepage gets a Roman page number.
+%% \frontmatter
+%%
+%% % This is an extremely useful command that you searched for quite some time, therefore do not delete this comment.
+%% %\layout
+%%
+%% \input{src/Titlepage}
+%% \input{src/Acknowledgements}
+%%
+%% \tableofcontents
+%%
+%% \mainmatter
+%%
+%% \input{src/Introduction}
 
 
 %% The 7 depths defined in latex
@@ -51,42 +51,42 @@
 
 %% Meta-theory, natural deduction, operational semantics, type systems,
 %% type-safety, mechanization, datatype generic programming
-\part{Modularity}
+%% \part{Modularity}
 \input{src/Modularity}
 
 
-%% \part{Genericity}
-%% \input{src/Genericity}
-
-
-\input{src/Conclusion}
-
-\backmatter
-
-% Summaries
-\chapter{Summary}
-\input{summaries/english.tex}
-
-\begin{otherlanguage}{dutch}
-\chapter{Nederlandstalige samenvatting}
-\input{summaries/dutch.tex}
-\end{otherlanguage}
-
-% Bibliography settings
-\bibliographystyle{plain}
-% Keeping stuff in separate bibliograhy files is not convenient, as we often have duplicate entries.
-\bibliography{Bibliography}
-
-% Order taken from Michaels book
-\listoffigures
-\listoftables
-
-% Fix hyperref displaying/jumping to wrong page number for index: that of the list of tables.
-% See http://tex.stackexchange.com/questions/138903/wrong-hyperref-for-index-in-tableofcontents-since-texlive-2010
-% It now does not jump exactly to the title, but at least to the first index entry.
-\clearpage
-\phantomsection
-% Index, this is the very last thing in Michaels thesis book.
-\printindex
+%% %% \part{Genericity}
+%% %% \input{src/Genericity}
+%%
+%%
+%% \input{src/Conclusion}
+%%
+%% \backmatter
+%%
+%% % Summaries
+%% \chapter{Summary}
+%% \input{summaries/english.tex}
+%%
+%% \begin{otherlanguage}{dutch}
+%% \chapter{Nederlandstalige samenvatting}
+%% \input{summaries/dutch.tex}
+%% \end{otherlanguage}
+%%
+%% % Bibliography settings
+%% \bibliographystyle{plain}
+%% % Keeping stuff in separate bibliograhy files is not convenient, as we often have duplicate entries.
+%% \bibliography{Bibliography}
+%%
+%% % Order taken from Michaels book
+%% \listoffigures
+%% \listoftables
+%%
+%% % Fix hyperref displaying/jumping to wrong page number for index: that of the list of tables.
+%% % See http://tex.stackexchange.com/questions/138903/wrong-hyperref-for-index-in-tableofcontents-since-texlive-2010
+%% % It now does not jump exactly to the title, but at least to the first index entry.
+%% \clearpage
+%% \phantomsection
+%% % Index, this is the very last thing in Michaels thesis book.
+%% \printindex
 
 \end{document}

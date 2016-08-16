@@ -272,9 +272,11 @@
 
 % Commands for making todo notes. \todo/1 is also available.
 \ifdraft{
-\newcommand{\steven}[1]{\todo[color=green]{Benoit: #1}}
+\newcommand{\sk}[1]{\todo[color=green]{SK: #1}}
+\newcommand{\steven}[1]{\todo[color=green]{SK: #1}}
 \newcommand{\tom}[1]{\todo[color=red]{Tom: #1}}
 }{
+\newcommand{\sk}[1]{}
 \newcommand{\steven}[1]{}
 \newcommand{\tom}[1]{}
 }

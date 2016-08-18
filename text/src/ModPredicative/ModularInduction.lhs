@@ -4,8 +4,8 @@
 %include Formatting.fmt
 %include macros.fmt
 
-\subsection{Modular inductive reasoning}
-\label{ssec:modularinductivereasoning}
+\subsection{Modular Inductive Reasoning}
+\label{sec:mod:modularinductivereasoning}
 
 The |SPF| typeclass also provides an interface for reasoning. It
 includes proof terms that witness that folding/unfolding of the
@@ -34,19 +34,24 @@ we have no recursive positions and in case of addition we have two.
 Proof algebras for other datatypes differ in the number of cases and
 the number of recursive positions.
 
-In the following we develop a uniform representation of proof algebras
-to allow their modularization. We use an \emph{all
-modality}~\cite{benke:universes} for functors to capture the proofs of
-recursive positions. Informally, the all modality of a functor |f| and
-a predicate |p :: a -> Prop| is a new type |All a p :: f a -> Prop|
-that says that the predicate |p| holds for each |x :: a| in an |f
-a|. The following type |ArithAll| is an example of an all modality for
-arithmetic expressions.
+\paragraph{All modalities}
+In the following we develop a uniform representation of proof algebras to allow
+their modularization. We use an \emph{all modality}~\cite{benke:universes} for
+functors to capture the proofs of recursive positions. Informally, the all
+modality of a functor |f| and a predicate (|p :: a -> Prop|) is a new type (|All
+a p :: f a -> Prop|) that denotes that the predicate |p| holds for each (|x ::
+a|) in an (|f a|).
+
+\paragraph{Example}
+The following type |ArithAll| is an example of an all modality for arithmetic
+expressions.
 
 < data ArithAll a p :: ArithF a -> Prop where
 <   ALit  ::                ArithAll a p (Lit n)
 <   AAdd  :: p x -> p y ->  ArithAll a p (Add x y)
 
+
+\paragraph{Modality type class}
 We introduce a new typeclass |PFunctor| that carries the associated
 all modality type and make |SPF| a subclass of it. Using the all
 modality definition we can write |indArith| equivalently as
@@ -75,40 +80,63 @@ proof algebra of a property |p| for the initial algebra and constructs
 a proof for every value of |Fix|.
 
 
-\subsection{Composing features}
+\subsection{Composing proofs}
 
-In Section \ref{sec:semanticfunctions} we have shown how to modularly
-compose signatures and semantic functions. These definitions carry
-over to Coq without any problems. We now turn to modularly composing
-proofs.
+The modular composition of signature and semantic functions in our approach is
+the same as in DTC and MTC. We now turn towoards the modular composition of
+proofs. Composing two instances of the |PFunctor| class is straightforward by
+inspecting the value of |xs| of the coproduct (|(f :+: g) a|) of the two
+functors.
 
-The |PFunctor| class also has the nice property of being closed under
-coproducts.
+\begin{figure}[t]
+\fbox{
+  \begin{minipage}{\columnwidth}
+    \begin{code}
+      instance  (PFunctor f, PFunctor g) => PFunctor (f :+: g) where
+        type All a p xs =  case xs of
+                             Inl xs  -> All a p xs
+                             Inr xs  -> All a p xs
 
-< instance  (PFunctor f, PFunctor g) =>
-<             PFunctor (f :+: g) where
-<   type All a p xs =  case xs of
-<                        Inl xs  -> All a p xs
-<                        Inr xs  -> All a p xs
+      class ProofAlgebra f a alg p where
+        palgebra :: PAlgebra f a alg p
 
-As for function algebras, we can use a type class to define and
-assemble proof algebras in a modular fashion.
+      instance  (ProofAlgebra f a falg p, ProofAlgebra g a galg p) =>
+            ProofAlgebra (f :+: a) a (algebraPlus falg galg) p where
+        palgebra (Inl xs)  axs = palgebra xs axs
+        palgebra (Inr xs)  axs = palgebra xs axs
+    \end{code}
+  \end{minipage}
+}
+\caption{Modular composition of proofs}
+\label{fig:mod:mendlerchurchencoding}
+\end{figure}
 
-< class ProofAlgebra f a alg p where
-<   palgebra :: PAlgebra f a alg p
-<
-< instance  (ProofAlgebra f a falg p,
-<            ProofAlgebra g a galg p) =>
-<     ProofAlgebra (f :+: a) a
-<       (algebraPlus falg galg) p where
-<    palgebra (Inl xs)  axs = palgebra xs axs
-<    palgebra (Inr xs)  axs = palgebra xs axs
 
-When instantiating modular functions to a specific set of signatures,
-we need an |SPF| instance for the coproduct of that set. As with
-algebras we would like to derive an instance for |f :+: g| given
-instances for |f| and |g| as we cannot expect the programmer to
-provide an instance for every possible set of
-signatures. Unfortunately, |SPF| does not include enough information
-about the functors to do this in a constructive way. What we need is a
-refinement of |SPF| that allows us to perform this construction.
+As for function algebras, we can use a type class |ProofAlgebra| to define and
+assemble proof algebras in a modular fashion. The parameter |f| represents the
+underlying functor, |a| the carrier type, |alg| the underlying |f|-algebra and
+|p| a property of the carrier.
+
+In the definition of the |ProofAlgebra| instance for functor composition we need
+to have access to the function |algebraPlus| that composes the two function
+algebras |falg| and |galg|. To avoid coherence concerns, we assume that algebras
+are always composed using the instance for function algebra composition and that
+|algebraPlus| is the function that builds the dictionary for the composition
+from the dictionary of the two subfunctors.
+
+\subsection{Non-modularity of strictly-positive types}
+
+
+When instantiating modular functions to a specific set of signatures, we need an
+|SPF| instance for the coproduct of that set. As with algebras we would like to
+derive an instance for |f :+: g| given instances for |f| and |g| as we cannot
+expect the programmer to provide an instance for every possible set of
+signatures. Unfortunately, |SPF| does not include enough information about the
+functors to do this in a constructive way. What we need is a refinement of |SPF|
+that allows us to perform this construction.
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../mod"
+%%% End:

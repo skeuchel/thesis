@@ -29,7 +29,7 @@ functions over modular datatypes.
 %% Coq setting.
 
 
-\subsection{Fixed points}
+\subsection{Fixpoints}
 
 
 \begin{figure}[t]
@@ -73,7 +73,7 @@ that is isomorphic to the monolithic datatype from Figure
 
 
 
-\subsection{Automated injections}
+\subsection{Automated Injections}
 
 \begin{figure}[t]
 \fbox{
@@ -174,7 +174,7 @@ definitions to the instances above.
 
 
 
-\subsection{Semantic functions}
+\subsection{Semantic Functions}
 
 In this section we define evaluation for arithmetic and boolean
 expressions modularly. We use another modular datatype to represent

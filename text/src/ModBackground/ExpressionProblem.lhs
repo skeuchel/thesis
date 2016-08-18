@@ -4,7 +4,7 @@
 %include Formatting.fmt
 %include macros.fmt
 
-\section{Expression problem}\label{sec:mod:expressionproblem}
+\section{Expression Problem}\label{sec:mod:expressionproblem}
 
 \begin{figure}[t]
 \fbox{\hspace{-5pt}

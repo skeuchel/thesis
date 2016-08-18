@@ -1,3 +1,8 @@
+%include lhs2TeX.fmt
+%include polycode.fmt
+%include forall.fmt
+%include macros.fmt
+
 In previous work~\cite{mtc} we have shown that it is possible to
 modularize meta-theory along two dimensions: 1) language constructs and
 2) operations and proofs. A significant limitation of that work is
@@ -21,6 +26,10 @@ proofs, that approach would not have been manageable for the large family of
 type-soundness proofs for mini-ML variants, as keeping track of large goals and
 hypotheses by hand would be too painful and error-prone.
 
-%%Ultimately we have shown new ways to develop meta-theory more 
-%%modularly using functional programming reasoning techniques 
+%%Ultimately we have shown new ways to develop meta-theory more
+%%modularly using functional programming reasoning techniques
 
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../mod"
+%%% End:

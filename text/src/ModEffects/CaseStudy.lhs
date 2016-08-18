@@ -6,7 +6,7 @@
 \begin{figure*}[t]
   \begin{center}
   \fbox{
-        \includegraphics[scale = .85]{src/ModularEffects/CaseStudyFigure.pdf}
+        \includegraphics[scale = .85]{src/ModEffects/Figures/CaseStudyFigure.pdf}
    }
   \end{center}
   \caption{Dependency and size information for the features and effects used in the case study.}
@@ -143,7 +143,7 @@ semantic functions and soundness proofs from those of its features and
 the effect theorem for its set of effects.
 
 
-\input{src/ModularEffects/MiniMLSyntax}
+\input{src/ModEffects/Figures/MiniMLSyntax}
 
 %% \begin{center}
 %%   \fbox{

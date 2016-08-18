@@ -4,19 +4,15 @@
 %include Formatting.fmt
 %include macros.fmt
 
-\begin{figure*}[!ht]
-\scriptsize
-\begin{center}
-\begin{tabular}{||ccc||}
-\hline
-\hspace{-.5cm}
-\begin{minipage}[t]{0.3\linewidth}
-\vspace{.04cm}
 %format white = "~"
-
-
 %format catchError = "\Varid{catch}"
 %format throwError = "\Varid{throw}"
+
+\begin{figure*}[ht]
+\scriptsize
+\begin{center}
+\hspace{-.5cm}
+\begin{minipage}[t]{0.9\linewidth}
 
 \hspace{.65cm}\ruleline{Monad class}
 < class Functor m => Monad m where
@@ -29,35 +25,17 @@
 <     fmap_bind    :: fmap f t == t >>= (return . f)
 <
 
-\hspace{.65cm}\ruleline{Failure class}
-< class Monad m => FailMonad m where
-<   fail         :: m a
-<   bind_fail    :: fail >>= f == fail
-<
-
 \hspace{.65cm}\ruleline{State class}
 < class Monad m  => MonadState s m where
 <   get        :: m s
 <   put        :: s -> m ()
 <   get_query  :: get >> t == t
 <   put_get    :: put s >> get == put s >> return s
-<   get_put    :: get >>= put == return () 
+<   get_put    :: get >>= put == return ()
 <   get_get    :: get >>= \s >>= get >>= f s ==
 <                 get >>= \s -> f s s
 <   put_put    :: put s1 >> put s2 == put s2
 
-\end{minipage} 
-
-&
-
-\begin{minipage}[t]{0.34\linewidth}
-%format white = "~"
-
-
-%format catchError = "\Varid{catch}"
-%format throwError = "\Varid{throw}"
-
-\vspace{.04cm}
 \hspace{.65cm}\ruleline{Reader class}
 < class Monad m  => MonadReader e m where
 <   ask           :: m e
@@ -66,19 +44,20 @@
 <   local_return  :: local f . return = return
 <   ask_ask       ::  ask >>= \s >>= ask >>= f s ==
 <                       ask >>= \s -> f s s
-<   ask_bind      ::  t >>= \x -> ask >>= \e -> f x e == 
+<   ask_bind      ::  t >>= \x -> ask >>= \e -> f x e ==
 <                       ask >>= \e -> t >>= \x -> f x e
-<   local_bind    ::  local f (t >>= g) == 
+<   local_bind    ::  local f (t >>= g) ==
 <                       local f t >>= local f . g
 <   local_ask     :: local f ask == ask >>= return . f
 <   local_local   :: local f . local g == local (g . f)
 
+\hspace{.65cm}\ruleline{Failure class}
+< class Monad m => FailMonad m where
+<   fail         :: m a
+<   bind_fail    :: fail >>= f == fail
+<
+
 % <   fmap_throw    :: fmap f (throw e) = throw e -- remove?
-
-%format white = "~"
-
-%format catchError = "\Varid{catch}"
-%format throwError = "\Varid{throw}"
 
 \hspace{.65cm}\ruleline{Exception class}
 < class Monad m  => MonadError x m where
@@ -91,12 +70,16 @@
 <   fmap_catch    ::  fmap f (catch t h) ==
 <                     catch (fmap f t) (fmap f . h)
 
-\end{minipage} 
+\end{minipage}
+\caption{Key classes, definitions and laws from \Name's monadic library. The names of algebraic laws are in bold.}
+\label{fig:mod:monadclasses}
+\end{center}
+\end{figure*}
 
-&
-
-\begin{minipage}[t]{0.28\linewidth}
-\vspace{.04cm}
+\begin{figure*}[!ht]
+\scriptsize
+\begin{center}
+\begin{minipage}[t]{0.9\linewidth}
 \hspace{.5cm}\ruleline{Identity monad}\quad
 < newtype Id a
 <
@@ -127,13 +110,8 @@
 < ReaderT :: (e -> m a) -> ReaderT e m a
 < runReaderT :: ReaderT e m a -> e -> m a
 
-
 \end{minipage}
- \\
-\hline
-\end{tabular}
-\caption{Key classes, definitions and laws from \Name's monadic library. The names of algebraic laws are in bold.}
-\label{fig:reference}
-\vspace{-.75cm}
+\caption{Monad transformers}
+\label{fig:mod:monadtransformers}
 \end{center}
 \end{figure*}

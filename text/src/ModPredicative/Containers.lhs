@@ -44,28 +44,27 @@ of two important parts:
 \end{enumerate}
 
 
-There is a large number of approaches to DGP that vary in the class of
-types they can represent and the generic functions they admit. For our
-application we choose the universe of containers~\cite{containers}.
+There is a large number of approaches to DGP that vary in the class of types
+they can represent and the generic functions they admit. For our application we
+choose the universe of containers~\cite{constructingstrictlypositivetypes}.
 
 In this section we review containers for generic programming and show
 how to resolve the problem of implementing folds and induction in a
 modular way by using generic implementations.
 
-An important property of this universe is that all strictly-positive
-functors can be represented as containers~\cite{containers}. In this
-respect we do not loose any expressivity.
+An important property of this universe is that all strictly-positive functors
+can be represented as containers~\cite{constructingstrictlypositivetypes}. In
+this respect we do not loose any expressivity.
 
 \subsection{Universe}
 
-The codes of the container universe are of the form |S ||> P| where
-|S| denotes a type of shapes and |P :: S -> *| denotes a family of
-position types indexed by |S|. The extension |Ext c| of a container
-|c| in Figure \ref{fig:containerextension} is a functor. A value of
-the extensions |Ext c a| consists of a shape |s :: shape c| and for
-each position |p :: pos c s| of the given shape we have a value of
-type |a|. We can define the functorial mapping |gfmap| generically for
-any container.
+The codes of the container universe are of the form |S ||> P| where |S| denotes
+a type of shapes and |P :: S -> *| denotes a family of position types indexed by
+|S|. The extension |Ext c| of a container |c| in Figure
+\ref{fig:containerextension} is a functor. A value of the extensions |Ext c a|
+consists of a shape |s :: shape c| and for each position |p :: pos c s| of the
+given shape we have a value of type |a|. We can define the functorial mapping
+|gfmap| generically for any container.
 
 < gfmap :: (a -> b) -> Ext c a -> Ext c b
 < gfmap f (Ext s pf) = Ext s (\p -> f (pf p))
@@ -104,7 +103,7 @@ any container.
 \end{figure}
 
 
-
+\paragraph{Example}
 The functor |ArithF| for arithmetic expressions can be represented as a
 container functor using the following shape and position type.
 
@@ -137,7 +136,47 @@ with a value. In Coq one needs to refute the position value |p ::
 ArithP (Lit i)| as its type is uninhabited. We use a case distinction
 without alternatives as an elimination.
 
-\subsection{Fixpoints and folds}\label{ssec:contfixandfold}
+\paragraph{Coproducts}
+
+%{
+%format Splus = "S_{+}"
+%format Pplus = "P_{+}"
+%format S_1   = "S_1"
+%format S_2   = "S_2"
+%format P_1   = "P_1"
+%format P_2   = "P_2"
+%format c1    = "c_1"
+%format c2    = "c_2"
+
+Given two containers |S_1 ||> P_1| and |S_2 ||> P_2| we can construct a
+coproduct. The shape of the coproduct is given by the coproducts of the shape
+and the family of position types delegates the shape to the families |P_1| and
+|P_2|. Figure \ref{fig:containercoproducts} contains the definitions of shape
+and positions of the coproduct and injection functions on the extensions.
+
+\begin{figure}[t]
+\fbox{
+\hspace{-5pt}\begin{minipage}{1\columnwidth}
+  \begin{code}
+    type Splus = Either S_1 S_2
+    type Pplus (Left s)   = P_1 s
+    type Pplus (Right s)  = P_2 s
+
+
+    inl :: Ext (S_1 |> P_1) -> Ext (Splus |> Pplus)
+    inl (Ext s pf) = Ext (Left s) pf
+    inr :: Ext (S_2 |> P_2) -> Ext (Splus |> Pplus)
+    inr (Ext s pf) = Ext (Right s) pf
+  \end{code}
+\end{minipage}
+}
+\caption{Container coproducts}
+\label{fig:containercoproducts}
+\end{figure}
+
+%}
+
+\subsection{Fixpoints and Folds}\label{ssec:contfixandfold}
 
 The universe of containers allows multiple generic
 constructions. First of all, the fixpoint of a container is given by
@@ -156,41 +195,51 @@ Furthermore, we define a fold operator generically.
 <   alg (Ext s (\p -> gfold alg (pf p)))
 
 Note that this definition is essentially the same as the definition of
-|foldDTC| from Section \ref{sec:semanticfunctions}. Because of the
+|foldDTC| from Section \ref{sec:mod:datatypesalacarte}. Because of the
 generic implementation of |gfmap| we can inline it to expose the
 structural recursion. Coq accepts this definition, since the recursive
 call |gfold alg (pf p)| is performed on the structurally smaller
 argument |pf p|.
 
-\subsection{Coproducts}\label{ssec:containercoproduct}
 
-%{
-%format Splus = "S_{+}"
-%format Pplus = "P_{+}"
-%format S_1   = "S_1"
-%format S_2   = "S_2"
-%format P_1   = "P_1"
-%format P_2   = "P_2"
-%format c1    = "c_1"
-%format c2    = "c_2"
+\subsection{Induction}
 
-Given two containers |S_1 ||> P_1| and |S_2 ||> P_2| we can construct a
-coproduct. The shape of the coproduct is given by the coproducts of
-the shape and the family of position types delegates the shape to the
-families |P_1| and |P_2|.
+To define an induction principle for container types we proceed in the
+same way as in Section \ref{sec:mod:modularinductivereasoning} by
+defining proof algebras using an \emph{all
+modality}~\cite{benke:universes}. The all modality on containers is
+given generically by a $\Pi$-type that asserts that |q| holds at all
+positions.
 
-< type Splus = Either S_1 S_2
-< type Pplus (Left s)   = P_1 s
-< type Pplus (Right s)  = P_2 s
+\begin{figure}[t]
+\fbox{
+\hspace{-5pt}\begin{minipage}{1\columnwidth}
+  \begin{code}
+    GAll :: (q :: a -> Prop) -> Ext c a -> Prop
+    GAll q (Ext s pf) = forall ((p :: pos c s)). q (pf p)
 
-The injection functions on the extensions are given by
+    gind ::  forall ((c     :: Cont)) ->
+             forall ((q     :: W c -> Prop)) ->
+             forall ((palg  :: forall xs. GAll q xs -> q (Sup xs))) ->
+             forall x. q x
+    gind c q palg (Sup (Ext s pf)) =
+      palg (\p -> gind c q palg (pf p))
+    \end{code}
+    \end{minipage}
+  }
+\caption{Container induction}
+\label{fig:container induction}
+\end{figure}
 
-< inl :: Ext (S_1 |> P_1) -> Ext (Splus |> Pplus)
-< inl (Ext s pf) = Ext (Left s) pf
-< inr :: Ext (S_2 |> P_2) -> Ext (Splus |> Pplus)
-< inr (Ext s pf) = Ext (Right s) pf
+As with the implementation of the generic fold operations, enough
+structure is exposed to write a valid induction function: |gind| calls
+itself recursively on the structurally smaller values |pf p| to
+establish the proofs of the recursive positions before applying the
+proof algebra |palg|.
 
-%}
+
+
+\subsection{Container Class}
 
 \begin{figure}[t]
 \fbox{
@@ -208,34 +257,6 @@ The injection functions on the extensions are given by
 \caption{Container functor class}
 \label{fig:containerfunctorclass}
 \end{figure}
-
-\subsection{Induction}
-
-To define an induction principle for container types we proceed in the
-same way as in Section \ref{ssec:modularinductivereasoning} by
-defining proof algebras using an \emph{all
-modality}~\cite{benke:universes}. The all modality on containers is
-given generically by a $\Pi$-type that asserts that |q| holds at all
-positions.
-
-< GAll :: (q :: a -> Prop) -> Ext c a -> Prop
-< GAll q (Ext s pf) = forall ((p :: pos c s)). q (pf p)
-
-As with the implementation of the generic fold operations, enough
-structure is exposed to write a valid induction function: |gind| calls
-itself recursively on the structurally smaller values |pf p| to
-establish the proofs of the recursive positions before applying the
-proof algebra |palg|.
-
-< gind ::  forall ((c     :: Cont)) ->
-<          forall ((q     :: W c -> Prop)) ->
-<          forall ((palg  :: forall xs. GAll q xs -> q (Sup xs))) ->
-<          forall x. q x
-< gind c q palg (Sup (Ext s pf)) =
-<   palg (\p -> gind c q palg (pf p))
-
-
-\subsection{Container functor class}
 
 Directly working with the container representation is cumbersome for
 the user. As a syntactic convenience we allow the user to use any
@@ -265,11 +286,10 @@ The important difference to the |SPF| class is that we can generically
 build the instance for the coproduct of two |Container| functors by
 using the coproduct of their containers.
 
-< instance (Container f, Container g) =>
-<    Container (f :+: g)
+< instance (Container f, Container g) => Container (f :+: g)
 
 
-\subsection{Extensible logical relations}
+\subsection{Extensible Inductive Relations}
 
 
 \begin{figure}[t]

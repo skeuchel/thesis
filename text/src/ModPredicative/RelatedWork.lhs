@@ -3,7 +3,7 @@
 %include forall.fmt
 %include Formatting.fmt
 
-\section{Related and Future Work}
+\section{Related and Future Work}\label{sec:modp:related}
 
 \paragraph{DGP in proof-assistants}
 

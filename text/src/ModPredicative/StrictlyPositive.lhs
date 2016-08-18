@@ -4,7 +4,16 @@
 %include Formatting.fmt
 %include macros.fmt
 
-\section{Strictly positive functors}
+%if False
+
+> class Functor f => SPF f where
+>   type Fix f
+>   inFix  :: f (Fix f) -> Fix f
+>   outFix :: Fix f -> f (Fix f)
+
+%endif
+
+\section{Strictly Positive Functors}\label{sec:mod:strictlypositivefunctors}
 
 To this end, we define the |SPF| type class in Figure
 \ref{fig:strictlypositivefunctor} which serves as a declarative specification of
@@ -20,18 +29,9 @@ of defining it to the specific functors. |SPF| also includes the
 functions |inFix| and |outFix| as members that fold/unfold one layer
 of the fixpoint.
 
-The fold operator from Section \ref{sec:semanticfunctions} also causes
-problems in Coq. |SPF| is a sub-class of |Functor| so we would like to
-define a generic fold operator similar to |foldDTC|.
-
-%if False
-
-> class Functor f => SPF f where
->   type Fix f
->   inFix  :: f (Fix f) -> Fix f
->   outFix :: Fix f -> f (Fix f)
-
-%endif
+|SPF| is a sub-class of |Functor| so we would like to define a generic fold
+operator similar to DTC's operator |foldDTC| from Section
+\ref{sec:mod:datatypesalacarte}.
 
 > foldF :: SPF f => Algebra f a -> Fix f -> a
 > foldF alg = alg . fmap (foldF alg) . outFix

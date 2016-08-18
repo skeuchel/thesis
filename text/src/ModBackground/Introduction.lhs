@@ -1,4 +1,4 @@
-\section{Modular definitions}
+\section{Modular Definitions}
 
 Modularity is one of the holy grails of software engineering. The dream is to be
 able build new software systems entirely from reusable components, that have
@@ -11,7 +11,7 @@ meaning beyond their textual form and independently of a particular composition;
 they must support \emph{modular reasoning}. \sk{Discuss statically-typed
   components as one form of modular reasoning to ensure absence of type errors.}
 
-\subsection{Modular programming languages}
+\subsection{Modular Programming Languages}
 \sk{This should first talk about modularity in the specification of programming
   language features and the move on to discuss modularity in the context of
   metatheory.}

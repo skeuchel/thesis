@@ -35,16 +35,18 @@ clean:
 # LHS processing
 #-------------------------------------------------------------------------------
 # List of .lhs files needed to be processed by lhs2tex
-LHSFILES    := $(wildcard $(SRCDIR)/*/*.lhs)
+LHSFILES    := $(wildcard $(SRCDIR)/*/*.lhs) $(wildcard $(SRCDIR)/*/*/*.lhs)
 
 # List of all texfiles. This includes the generated ones (or maybe they have
 # to exist prior to invoking make).
-TEXFILES    := $(wildcard $(SRCDIR)/*/*.tex)
+TEXFILES    := $(wildcard $(SRCDIR)/*/*.tex) $(wildcard $(SRCDIR)/*/*/*.tex)
 
 # Targets and make rule
 lhs: $(LHSFILES:.lhs=.tex)
-%.tex : %.lhs
+%.tex : %.lhs force
 	$(LHS2TEX) $(LHS2TEX_FLAGS) $< > $@ || (rm -f $@ && exit 1)
+
+force:
 
 #-------------------------------------------------------------------------------
 # PDF processing

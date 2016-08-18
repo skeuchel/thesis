@@ -1,4 +1,5 @@
 
+\section{Conclusion}\label{sec:modp:conclusion}
 Formally mechanizing proofs can be very tedious and the amount of work
 required for larger developments is excruciating. Meta-Theory \`a la Carte
 is a framework for modular reusable components for use in
@@ -18,3 +19,9 @@ only strictly-positive functors.
 
 Working with generic structure representation has the added benefit that
 we can implement generic functions like equality and generic proofs once and for all.
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../mod"
+%%% End:

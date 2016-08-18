@@ -11,7 +11,7 @@
 
 %endif
 
-\section{Polynomial functors}\label{sec:polynomial}
+\section{Polynomial Functors}\label{sec:mod:polynomial}
 
 In the previous section we have implemented generic functions for
 functorial mappings, fixed points, folds and generic proofs about
@@ -130,10 +130,10 @@ instance for |FunType| is the following, with proofs omitted:
 <   pfromToInverse     = ...
 
 
-\subsection{Universe embedding}
+\subsection{Universe Embedding}
 
 To write modular functions for polynomial functors we proceed in
-the same way as in Section \ref{sec:containers} by showing that
+the same way as in Section \ref{sec:mod:containers} by showing that
 |Polynomial| is closed under coproducts and building the functionality
 of the |SPF| type class generically.
 
@@ -153,7 +153,7 @@ can compute the shape by recursing over the code.
 
 The constant unit functor and the identity functor have only one shape
 which is represented by a unit type. As in section
-\ref{ssec:containercoproduct} the shape of a coproduct is the
+\ref{sec:mod:containers} the shape of a coproduct is the
 coproduct of the shapes of the summands and the shape of a product is
 the product of shapes of the factors. The definition of positions also
 proceeds by recursing over the code.
@@ -213,7 +213,7 @@ available for polynomial functors.
 <   toFrom  =  ...
 
 
-\subsection{Generic equality}
+\subsection{Generic Equality}
 
 Performing the conversions between polynomial functors and containers in the
 definition of recursive functions makes it difficult to convince the termination

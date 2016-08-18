@@ -5,8 +5,8 @@
 %include macros.fmt
 %include exists.fmt
 
-\section{Case study}
-\label{sec:casestudy}
+\section{Case Study}
+\label{sec:mod:casestudy}
 
 As a demonstration of the advantages of our approach over MTC's
 Church-encoding based approach, we have ported the case study from
@@ -19,12 +19,12 @@ Figure~\ref{fig:MiniMLSyntax} presents the syntax of the expressions,
 values, and types provided by the features; each line is annotated
 with the feature that provides that set of definitions.
 
-\input{src/ModPredicative/MiniMLSyntax}
+\input{src/ModPredicative/Figures/MiniMLSyntax}
 
 In this section we discuss the benefits and trade-offs we have
 experienced while porting the case study to our approach.
 
-\paragraph{Code size}
+\paragraph{Code Size}
 
 By the move to a datatype-generic approach the underlying modular
 framework grew from about 2500 LoC to about 3500 LoC. This includes
@@ -57,66 +57,6 @@ which is known to lead to logical inconsistencies.
 
 When constructing the fixpoint of a container we do not need to raise
 the universe level and can thus avoid using impredicative sets.
-
-\paragraph{Induction principles}
-
-%{
-%format .         = "."
-%format indArith2 = ind "_{" A "}^2"
-
-Church encodings have problems supporting proper induction principles,
-like the induction principle for arithmetic expressions |indArith| in
-Section \ref{ssec:modularinductivereasoning}. MTC uses a
-\emph{poor-man's induction principle} |indArith2| instead.
-
-< indArith2 ::
-<   forall ((p   :: (Arith -> Prop)).
-<   forall ((hl  :: (forall n. p (InMTC (Lit n)))).
-<   forall ((ha  :: (forall x y. p x -> p y -> p (InMTC (Add x y)))).
-<   Algebra ArithF (exists a. p a)
-
-The induction principle uses a dependent sum type to turn a proof
-algebras into a regular algebra. The algebra builds a copy of the
-original term and a proof that the property holds for the copy. The
-proof for the copy can be obtained by folding with this algebra. In
-order to draw conclusions about the original term two additional
-\emph{well-formedness} conditions have to be proven.
-%}
-\begin{enumerate}
-
-\item The proof-algebra has to be well-formed in the sense that it
-really builds a copy of the original term instead of producing an
-arbitrary term. This proof needs to be done only once for every
-induction principle of every functor and is about 20 LoC per
-feature. The use of this well-formedness proof is completely automated
-using type-classes and hence hidden from the user.
-
-\item The fold operator used to build the proof using the algebra
-needs to be a proper fold operator, i.e. it needs to satisfy the
-universal property of folds.
-
-< foldMTC :: Algebra f a -> FixMTC f -> a
-< foldMTC alg fa = fa alg
-<
-< type UniversalProperty (f :: * -> *) (e :: FixMTC f)
-<   =  forall a (alg :: Algebra f a) (h :: FixMTC f -> a).
-<        (forall e. h (inMTC e) = alg h e) ->
-<          h e = foldMTC alg e
-
-In an initial algebra representation of an inductive datatype, we have
-a single implementation of a fold operator that can be proven
-correct. In MTC's approach based on Church-encodings however, each
-term consists of a separate fold implementation that must satisfy the
-universal property.
-
-\end{enumerate}
-
-Hence, in order to enable reasoning MTC must provide a proof of the
-universal property of folds for every value of a modular datatype that
-is used in a proof. This is mostly done by packaging a term and the
-proof of the universal property of its fold in a dependent sum type.
-
-> type FixUP f = exists ((x :: FixMTC f)). UniversalProperty f x
 
 \paragraph{Equality of terms}
 
@@ -215,3 +155,9 @@ is hence an instance of feature interaction in MTC. Using a generic
 implementation of equality we can thus not only avoid boilerplate
 code, but also cut down on feature interactions.
 %endif
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../mod"
+%%% End:

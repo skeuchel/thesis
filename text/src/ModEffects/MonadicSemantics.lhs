@@ -17,10 +17,10 @@
 %endif
 
 
-\input{src/ModEffects/Figures/References_Figure}
 
 %===============================================================================
 \section{Modular Monadic Semantics}
+\input{src/ModEffects/Figures/FeatureEffects}
 
 % This section presents \Name's solution for modular effects and modular
 % effectful reasoning. That solution employs
@@ -56,7 +56,6 @@ the monad type remains extensible with new effects. The complete set of
 effects used by the evaluation functions for the five language
 features used in our case study of Section~\ref{sec:CaseStudy} are given in Figure~\ref{fig:FeatureEffects}.
 
-\input{src/ModEffects/Figures/FeatureEffects}
 
 %if False
 
@@ -83,146 +82,78 @@ features used in our case study of Section~\ref{sec:CaseStudy} are given in Figu
 
 %-------------------------------------------------------------------------------
 \subsection{Example: References}
+\input{src/ModEffects/Figures/References_Figure}
 Figure~\ref{fig:references} illustrates this approach with definitions for the
 functor for expressions and the evaluation and typing algebras for the
 reference feature. Other features have similar definitions.
 
-For the sake of presentation the definitions are slightly simplified
-from the actual ones in Coq. For instance, we have omitted issues
-related to the extensibility of the syntax for values (|Value|) and
-types (|Type|).  We refer the interested reader to MTC~\cite{mtc} and
-the \name Coq code for these details.  |Value| and |Type| are treated
-as abstract datatypes with a number of constructor functions: |loc|,
-|stuck|, |unit|, |tRef| and |tUnit| denote respectively reference
-locations, stuck values, unit values, reference types and unit
-types. There are also matching functions |isLoc| and |isTRef| for
-checking whether a term is a location value or a reference type,
-respectively.
+For the sake of presentation the definitions are slightly simplified from the
+actual ones in Coq. For instance, we have omitted issues related to the
+extensibility of the syntax for values (|Value|) and types (|Type|).  |Value|
+and |Type| are treated as abstract datatypes with a number of smart constructor
+functions (c.f. Section \ref{ssec:mod:smartconstructors}): |loc|, |stuck|,
+|unit|, |tRef| and |tUnit| denote respectively reference locations, stuck
+values, unit values, reference types and unit types. There are also matching
+functions |isLoc| and |isTRef| for checking whether a term is a location value
+or a reference type, respectively.
 
-The type |RefF| is the functor for references. It has
-constructors for creating references (|Ref|), dereferencing (|DeRef|) and
-assigning (|Assign|) references. The evaluation algebra |evalRef| uses
-the state monad for its reference environment, which is captured
-in the type class constraint |MonadState Store m|.  The typing algebra
-(|typeofRef|) is also monadic, using the failure monad to denote
-ill-typing.
+The type |RefF| is the functor for references. It has constructors for creating
+references (|Ref|), dereferencing (|DeRef|) and assigning (|Assign|)
+references. The evaluation algebra |evalRef| uses the state monad for its
+reference environment, which is captured in the type class constraint
+|MonadState Store m|.  The typing algebra (|typeofRef|) is also monadic, using
+the failure monad to denote ill-typing.
 
-% The definition of the algebra is quite straightforward.
-% itself is standard and looks almost like the monolithic version
-% defined over a non-extensible expression type.  One small difference
-% is the use of |rec| instead of a recursive call. A more significant
-% difference is the use of the observation function |isLoc| to
-% simulate a case analysis on values computed in the recursive call.
-% As
-% discussed in Section~\ref{m} it is the use of these observation
-% functions that makes the approach trully modular.\BO{reference?}  In a
-% monolithic version a conventional case analysis would have been used
-% instead.
+% The definition of the algebra is quite straightforward.  itself is standard
+% and looks almost like the monolithic version defined over a non-extensible
+% expression type.  One small difference is the use of |rec| instead of a
+% recursive call. A more significant difference is the use of the observation
+% function |isLoc| to simulate a case analysis on values computed in the
+% recursive call.
 
-% Similarly to the
-% evaluation algebra, an observation function |isTRef| is used.
+% As discussed in Section~\ref{m} it is the use of these observation functions
+% that makes the approach trully modular.\BO{reference?}  In a monolithic
+% version a conventional case analysis would have been used instead.
+
+% Similarly to the evaluation algebra, an observation function |isTRef| is used.
 
 %-------------------------------------------------------------------------------
 \subsection{Effect-Dependent Theorems}
+\input{src/ModEffects/Figures/EffectTheorems}
 
-Monadic semantic function algebras are compatible with new effects and
-algebraic laws facilitate writing extensible proofs over these monadic
-algebras. Effects introduce further challenges to proof reuse,
-however: each combination of effects induces its own type soundness
-statement. Consider the theorem for a language with references which
-features a store $\sigma$ and a store typing $\Sigma$ that are related
-through the store typing judgement $\Sigma \vdash \sigma$:
+Monadic semantic function algebras are compatible with new effects and algebraic
+laws facilitate writing extensible proofs over these monadic algebras. Effects
+introduce further challenges to proof reuse, however: each combination of
+effects induces its own type soundness statement. Consider the theorem
+\LSoundS~in Figure \ref{thm:LSoundS} for a language with references
+which features a store $\sigma$ and a store typing $\Sigma$ that are related
+through the store typing judgement $\Sigma \vdash \sigma$. The initial store
+$\sigma$ is well-formed w.r.t. the initial store typing $\Sigma$, the final
+store typing $\Sigma'$ is an extension of the initial one, and the final store
+$\sigma'$ is well-formed w.r.t. $\Sigma'$. The |put| operation is used to
+constrain the initial and final store of the monadic computation.
 
-%format Sigma = "\Varid{\Sigma}"
-%format mu = "\sigma''"
-%format sigma = "\Varid{\sigma}"
-
-\vspace{2mm}
-\noindent\fbox{
-\begin{minipage}{.93\columnwidth}
-\begin{gather*}
-\forall e, t, \Sigma, \sigma.
-    \left\{\begin{array}{c}
-    | typeof e == return t | \\
-    \Sigma \vdash \sigma
-    \end{array}\right\} \rightarrow \\
-  \exists v, \Sigma', \sigma'.
-   \left\{\begin{array}{c}
-   |put sigma >> eval e == put mu >> return v| \\
-   \Sigma' \supseteq \Sigma \\
-   \Sigma' \vdash v : t \\
-   \Sigma' \vdash \sigma'
-   \end{array}\right\}
-\tag{\textsc{LSound}$_S$}
-\label{thm:SoundS}
-\end{gather*}
-\end{minipage}
-}
-\vspace{2mm}
-
-\noindent Contrast this with the theorem for a language with errors,
-which must account for the computation possibly ending in an exception
-being thrown:
-
-\vspace{2mm}
-\noindent\fbox{
-\begin{minipage}{.93\columnwidth}
-\begin{gather*}\forall e, t. |typeof e == return t|
-    \rightarrow \\ (\exists v. |eval e == return v| \wedge \vdash v : t) \vee (\exists x. |eval e == throw x|)
-\tag{\textsc{LSound}$_E$}
-\label{thm:SoundE}
-\end{gather*}
-\end{minipage}
-}
-
-\vspace{2mm}
+Contrast this with the theorem \LSoundE~for a language with errors,
+which must account for the computation possibly ending in an exception being
+thrown which is modeled by a disjunction in the conclusion.
 
 
-Clearly, the available effects are essential for the formulation of
-the theorem. A larger language which involves both exceptions and
-state requires yet another theorem where the impact of both effects
-cross-cut one another\footnote{A similar
-proliferation of soundness theorems can be found in
-TAPL~\cite{pierce}.}:
+Clearly, the available effects are essential for the formulation of the
+theorem. A larger language which involves both exceptions and state requires yet
+another theorem \LSoundES~where the impact of both effects cross-cut one
+another\footnote{A similar proliferation of soundness theorems can be found in
+  TAPL~\cite{pierce}.}:
 
-\vspace{2mm}
-\noindent\fbox{
-\begin{minipage}{.93\columnwidth}
-\begin{gather*}
-\forall e, t, \Sigma, \sigma.
-    \left\{\begin{array}{c}
-    | typeof e == return t | \\
-    \Sigma \vdash \sigma
-    \end{array}\right\}
- \rightarrow \\
-  \exists v, \Sigma', \sigma'.
-   \left\{\begin{array}{c}
-   |put sigma >> eval e == put mu >> return v| \\
-   \Sigma' \supseteq \Sigma \\
-   \Sigma' \vdash v : t \\
-   \Sigma' \vdash \sigma'
-   \end{array}\right\} \\
-\vee \\
-  \exists x.
-   |put sigma >> eval e == throw x|
-\tag{\textsc{LSound}$_\mathit{ES}$}
-\label{thm:SoundES}
-\end{gather*}
-\end{minipage}
-}
-\vspace{2mm}
 % \BO{Wondering whether some additional notes on $\Sigma$ related portions is
 % useful.}
 
-Modular formulations of \ref{thm:SoundE} and \ref{thm:SoundS} are
-useless for proving a modular variant of \ref{thm:SoundES} because
-their induction hypotheses have the wrong form. The hypothesis for
-\ref{thm:SoundE} requires the result to be of the form |return v|,
-disallowing |put mu >> return v| (the form required by \ref{thm:SoundS}).
-Similarly, the hypothesis for \ref{thm:SoundS} does not
-account for exceptions occurring in subterms. In general, without
-anticipating additional effects, type soundness theorems with fixed
-sets of effects cannot be reused modularly.
+Modular formulations of \LSoundS~and \LSoundE~are useless for proving a modular
+variant of \LSoundES~because their induction hypotheses have the wrong form. The
+hypothesis for \LSoundE~requires the result to be of the form |return v|,
+disallowing |put mu >> return v| (the form required by \LSoundS).  Similarly,
+the hypothesis for \LSoundS~does not account for exceptions occurring in
+subterms. In general, without anticipating additional effects, type soundness
+theorems with fixed sets of effects cannot be reused modularly.
 
 \begin{comment}
 These type classes and operations enable us to write evaluation
@@ -458,3 +389,9 @@ possible type soundness property.
 In summary, it seems that we monads give us modularly reusable functions but
 not proofs.
 \end{comment}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../mod"
+%%% End:

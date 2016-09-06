@@ -49,8 +49,9 @@
 %format e2
 %format t1
 %format t2
-%format evalRef = "\Varid{eval_{Ref}}"
+%format evalErr = "\Varid{eval_{Err}}"
 %format evalExc = "\Varid{eval_{Exc}}"
+%format evalRef = "\Varid{eval_{Ref}}"
 %format typeofRef = "\Varid{typeof_{Ref}}"
 
 %format FixDTC       = "\Varid{Fix_{D}}"

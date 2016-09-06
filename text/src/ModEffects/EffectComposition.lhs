@@ -15,35 +15,34 @@
 %===============================================================================
 \section{Effect Compositions}
 
-As we have seen, laws are essential for proofs of
-\ref{thm:FSound}. The proofs so far have involved only one effect and
-the laws regulate the behavior of that effect's primitive operations.
+As we have seen, laws are essential for proofs of \ref{thm:FSound}. The proofs
+so far have involved only one effect and the laws regulate the behavior of that
+effect's primitive operations.
 
-Languages often involve more than one effect, however. Hence, the
-proofs of effect theorems must reason about the interaction between
-multiple effects.  There is a trade-off between fully instantiating
-the monad for the language as we have done previously, and continuing
-to reason about a constrained polymorphic monad. The former is easy
-for reasoning, while the latter allows the same language proof to be
-instantiated with different implementations of the monad. In the latter case,
-additional \emph{effect interaction} laws are required.
+Languages often involve more than one effect, however. Hence, the proofs of
+effect theorems must reason about the interaction between multiple effects.
+There is a trade-off between fully instantiating the monad for the language as
+we have done previously, and continuing to reason about a constrained
+polymorphic monad. The former is easy for reasoning, while the latter allows the
+same language proof to be instantiated with different implementations of the
+monad. In the latter case, additional \emph{effect interaction} laws are
+required.
 
-%\BD{This section needs a discussion of the two candidate rules for
-%how put and catch interact. This reflects the fact that sometimes
-%there aren't single laws governing the interactions of effects. In
-%this case, this is okay: we can prove the lemma for either
-%choice. Plus, since only the catch feature needs this rule, the other
-%effect rules are independent of this choice. }
+%\BD{This section needs a discussion of the two candidate rules for how put and
+%catch interact. This reflects the fact that sometimes there aren't single laws
+%governing the interactions of effects. In this case, this is okay: we can prove
+%the lemma for either choice. Plus, since only the catch feature needs this
+%rule, the other effect rules are independent of this choice. }
 
 %-------------------------------------------------------------------------------
 \subsection{Languages with State and Exceptions}
 
-Consider the effect theorem which fixes the evaluation monad to
-support exceptions and state. The statement of the theorem mentions
-both kinds of effects by requiring the evaluation function to be run
-with a well-formed state $\sigma$ and by concluding that well-typed
-expressions either throw an exception or return a value. The
-\textsc{WFM-Catch} case this theorem has the following goal:
+Consider the effect theorem which fixes the evaluation monad to support
+exceptions and state. The statement of the theorem mentions both kinds of
+effects by requiring the evaluation function to be run with a well-formed state
+$\sigma$ and by concluding that well-typed expressions either throw an exception
+or return a value. The \textsc{WFM-Catch} case this theorem has the following
+goal:
 \begin{gather*}
 (\Sigma \vdash \sigma~:~\Sigma) \\ \rightarrow \\
 \exists~\Sigma',\sigma',|v|.
@@ -74,36 +73,36 @@ expressions either throw an exception or return a value. The
 
 
 In order to apply the induction hypothesis to |e| and |h|, we need to precede
-them by a $|put|~\sigma$.  Hence, |put| $\sigma$ must be pushed under the |catch|
-statement through the use of a law governing the behavior of |put| and |catch|.
-There are different choices for this law, depending on the monad
-that implements both |MonadState| and |MonadError|. We consider
-two reasonable choices, based on the monad transformer compositions |ExcT x (StateT s Id)|
-and |StateT s (ExcT x Id)|:
+them by a $|put|~\sigma$.  Hence, |put| $\sigma$ must be pushed under the
+|catch| statement through the use of a law governing the behavior of |put| and
+|catch|.  There are different choices for this law, depending on the monad that
+implements both |MonadState| and |MonadError|. We consider two reasonable
+choices, based on the monad transformer compositions |ExcT x (StateT s Id)| and
+|StateT s (ExcT x Id)|:
 \begin{itemize}
 \item Either |catch| passes the current state into the handler:\\
- |put s_ >> catch e h == catch (put s_ >> e) h|
+  |put s_ >> catch e h == catch (put s_ >> e) h|
 \item Or |catch| runs the handler with the initial state:\\
-|put s_ >> catch e h == catch (put s_ >> e) (put s_ >> h)|
+  |put s_ >> catch e h == catch (put s_ >> e) (put s_ >> h)|
 \end{itemize}
-% There are other, more exotic interactions possible, but these two (alternative) rules capture the
-% standard understanding of how languages with exceptions and environments may work.
-The \textsc{WFM-Catch} case is provable under either choice.
-As the \ref{thm:SoundES} proof
-is written as an extensible theorem, the two cases are written as
-two separate proof algebras, each with a different assumption about
+% There are other, more exotic interactions possible, but these two
+% (alternative) rules capture the standard understanding of how languages with
+% exceptions and environments may work.
+The \textsc{WFM-Catch} case is provable under either choice.  As the
+\ref{thm:SoundES} proof is written as an extensible theorem, the two cases are
+written as two separate proof algebras, each with a different assumption about
 the behavior of the interaction. Since the cases for the other rules are
 impervious to the choice, they can be reused with either proof of
 \textsc{WFM-Catch}.
 
-% In either case, |catch| can be reduced further. If |put s_ >> eval e =
-% put s_' >> return v| the inductive hypothesis for |e| can be
-% applied. Alternatively, when |put s_ >> eval e = put s' >> throw t|,
-% the inductive hypothesis for |k| can be applied using |s'| and the
-% extended context $\Sigma'$ produced by the inductive hypothesis for
-% |e|. Note that \textsc{WFM-Catch} types |h >>= k| under all $\Sigma'$
-% precisely so that in the case that |catch| pass the effects from |eval
-% e| to the handler the proof can account for the extended environment.
+% In either case, |catch| can be reduced further. If |put s_ >> eval e = put s_'
+% >> return v| the inductive hypothesis for |e| can be applied. Alternatively,
+% when |put s_ >> eval e = put s' >> throw t|, the inductive hypothesis for |k|
+% can be applied using |s'| and the extended context $\Sigma'$ produced by the
+% inductive hypothesis for |e|. Note that \textsc{WFM-Catch} types |h >>= k|
+% under all $\Sigma'$ precisely so that in the case that |catch| pass the
+% effects from |eval e| to the handler the proof can account for the extended
+% environment.
 
 \begin{figure}
 \noindent\fbox{
@@ -177,18 +176,17 @@ impervious to the choice, they can be reused with either proof of
 %-------------------------------------------------------------------------------
 \subsection{Full Combination of Effects}
 
-A language with references, errors and lambda abstractions features
-four effects: state, exceptions, an environment and failure. The
-language theorem for such a language relies on the effect theorem
-\ref{thm:ESoundESRF} given in Figure~\ref{f:th:esrf}. The proof of
-\ref{thm:ESoundESRF} is similar to the previous effect theorem proofs, and
-makes use of the full set of interaction laws given in
-Figure~\ref{fig:Interaction+Laws}. Perhaps the most interesting
-observation here is that because the environment monad only makes
-local changes, we can avoid having to choose between laws regarding
-how it interacts with exceptions. Also note that since we are
-representing nontermination using a failure monad |FailMonad m|, the
-|catch_fail| law conforms to our desired semantics.
+A language with references, errors and lambda abstractions features four
+effects: state, exceptions, an environment and failure. The language theorem for
+such a language relies on the effect theorem \ref{thm:ESoundESRF} given in
+Figure~\ref{f:th:esrf}. The proof of \ref{thm:ESoundESRF} is similar to the
+previous effect theorem proofs, and makes use of the full set of interaction
+laws given in Figure~\ref{fig:Interaction+Laws}. Perhaps the most interesting
+observation here is that because the environment monad only makes local changes,
+we can avoid having to choose between laws regarding how it interacts with
+exceptions. Also note that since we are representing nontermination using a
+failure monad |FailMonad m|, the |catch_fail| law conforms to our desired
+semantics.
 
 \begin{figure}[!hb]
 \fbox{
@@ -240,12 +238,12 @@ representing nontermination using a failure monad |FailMonad m|, the
 %format MonadErrorState_1 = "\Varid{MonadErrorState}_1"
 %format MonadErrorState_2 = "\Varid{MonadErrorState}_2"
 
-% \BO{Maybe it would be worthwhile to say a few more words on these laws.
-% The interaction laws tend to be much more application-specific and really pin-down
-% particular semantic interactions between effects. We already say something earlier
-% regarding |put| and |catch|, but maybe we can have a more general statement and
-% also comment on some other laws. For example
-% |fail <> throw x|  prevents a particular monad configuration which is when
-% exceptions coincide with failure. This is because, in the particular application,
-% we intend that exceptions denote exceptional values, whereas failure denotes
+% \BO{Maybe it would be worthwhile to say a few more words on these laws.  The
+% interaction laws tend to be much more application-specific and really pin-down
+% particular semantic interactions between effects. We already say something
+% earlier regarding |put| and |catch|, but maybe we can have a more general
+% statement and also comment on some other laws. For example |fail <> throw x|
+% prevents a particular monad configuration which is when exceptions coincide
+% with failure. This is because, in the particular application, we intend that
+% exceptions denote exceptional values, whereas failure denotes
 % non-termination.}

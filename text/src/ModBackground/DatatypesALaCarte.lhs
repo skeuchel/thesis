@@ -73,7 +73,7 @@ that is isomorphic to the monolithic datatype from Figure
 
 
 
-\subsection{Automated Injections}
+\subsection{Automated Injections}\label{ssec:mod:smartconstructors}
 
 \begin{figure}[t]
 \fbox{

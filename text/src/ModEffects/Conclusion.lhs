@@ -29,6 +29,9 @@ hypotheses by hand would be too painful and error-prone.
 %%Ultimately we have shown new ways to develop meta-theory more
 %%modularly using functional programming reasoning techniques
 
+\steven{Point to Monad Zippers for modularly using two features that use
+  the same underlying effect.}
+
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "../../mod"

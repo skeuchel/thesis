@@ -19,7 +19,7 @@
 
 
 %===============================================================================
-\section{Modular Monadic Semantics}
+\section{Modular Monadic Semantics}\label{sec:mod:monadicsemantics}
 \input{src/ModEffects/Figures/FeatureEffects}
 
 % This section presents \Name's solution for modular effects and modular

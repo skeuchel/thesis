@@ -15,14 +15,22 @@
 \section{Monadic Type Safety}
 
 As demonstrated in Section \ref{ssec:mod:effectdependenttheorems}, soundness
-statements which hardwire the set of effects limit their modularity by rendering
-proofs for soundness statements with distinct effects incompatible.
+theorem which hardwire the set of effects limit their modularity by rendering
+proofs for soundness with distinct effects incompatible. In this Section we
+discuss how to split type soundness into smaller theorems and how to generalize
+the parts for modularization.
 
 %-------------------------------------------------------------------------------
 \subsection{Three-Step Approach}
 
 In order to preserve a measure of modularity, we do not prove type soundness
-directly for a given feature, but by means of a more generic theorem.
+directly for a given feature, but by means of more generic theorems. In order to
+maximize compatibility, the statement of the type soundness theorem of a feature
+cannot hardwire the set of effects. This statement must instead rephrase type
+soundness in a way that can adapt to any superset of a feature's effects. Hence,
+similar to the modularization of the semantics in Section
+\ref{sec:mod:monadicsemantics}, the idea is to abstract over any monad that
+provides the effects of a feature.
 
 %if False
 The technique of proving a theorem of interest by means of a more general
@@ -33,8 +41,23 @@ that setting, the more general theorem produces a weaker induction hypothesis
 for the theorem's proof.
 %endif
 
-Our approach to type soundness follows the core idea of this technique and
-relies on three theorems:
+Our approach to state and prove type soundness of features, is to establish that
+the monadic evaluation and typing algebras of a feature satisfy an extensible
+well-typing relation of computations, defined in terms of effect-specific typing
+rules. This relation forms the basis of a \emph{feature theorem} that has
+\emph{uniform shape} independent of specific features or effects (except for
+constraints on the monad). A feature's proof algebra for the feature theorem
+only uses the typing rules required for the effects specific to that
+feature. The final language combines the typing rules of all the language's
+effects into a closed relation and the \emph{feature theorem} for the complete
+set of features into a type soundness theorem of the whole language.
+
+As discussed in Section \ref{ssec:mod:effectdependenttheorems} the type
+soundness statement of a language still depends on the set of effects of all the
+features of a language. The statement is however independent of the set of
+features. This allows us to split the type soundness theorem further into a
+reusable \emph{effect theorem} and a \emph{language theorem}. In summary, we
+split the type soundness into three kinds of theorems:
 
 \begin{itemize}
 \item
@@ -49,23 +72,15 @@ relies on three theorems:
   for a specific language.
 \end{itemize}
 
-\noindent In order to maximize compatibility, the statement of the reusable
-feature theorem cannot hardwire the set of effects. This statement must instead
-rephrase type soundness in a way that can adapt to any superset of a feature's
-effects. Our solution is to have the feature theorem establish that the monadic
-evaluation and typing algebras of a feature satisfy an extensible
-well-formedness relation, defined in terms of effect-specific typing
-rules. Thus, a feature's proof of \FSound~uses only the typing rules
-required for the effects specific to that feature. The final language combines
-the typing rules of all the language's effects into a closed relation.
-
-\begin{figure}[t!]
+\begin{figure}[t]
   \fbox{
-  \includegraphics[scale = .77]{src/ModEffects/Figures/Dependency-1.pdf}
+  \includegraphics[width=.96\columnwidth]{src/ModEffects/Figures/Dependency-1.pdf}
    }
 \caption{Dependency Graph}
 \label{fig:Dep-Graph}
 \end{figure}
+\steven{There is an edge missing from FSound of Ref to LSound of AR.}
+
 
 Figure~\ref{fig:Dep-Graph} illustrates how these reusable pieces fit together to
 build a proof of soundness. Each feature provides a proof algebra for
@@ -112,7 +127,7 @@ reused in any language which supports that unique combination, e.g. both
 
 %-------------------------------------------------------------------------------
 
-\subsection{Computation Typing}
+\subsection{Typing of Monadic Computations}\label{sec:Thm+Reuse}
 \steven{Introduce the typing relation for values first and then the
   one for monadic computations. Make it clear that these are two separate
   things.}
@@ -138,22 +153,20 @@ reused in any language which supports that unique combination, e.g. both
 \vspace{-.4cm}
 \end{figure}
 
-%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-\label{sec:Thm+Reuse}
+The computation typing relation has the form: \[ \Sigma \vdash_M v_m : t_m \]
+The relation is polymorphic in an environment type |env| and an evaluation monad
+type |m|.  The parameters $\Sigma$, $v_m$ and $t_m$ have types |env|, |m Value|
+and |Maybe Type| respectively.
 
-The reusable feature theorem \ref{thm:FSound} states that |eval| and |typeof|
-are related by the extensible typing relation:
+The extensible feature theorem \ref{thm:FSound} states that |eval| and |typeof|
+are related by the typing relation:
+
 \begin{equation}
   \forall e, \Sigma.\quad\Sigma \vdash_M |eval e| : |typeof e|
 \tag{\textsc{FSound}}
 \label{thm:FSound}
 \end{equation}
 
-
-The extensible typing relation has the form: \[ \Sigma \vdash_M v_m : t_m \] The
-relation is polymorphic in an environment type |env| and an evaluation monad
-type |m|.  The parameters $\Sigma$, $v_m$ and $t_m$ have types |env|, |m Value|
-and |Maybe Type| respectively.
 
 % \BO{using |m_e| and
 %|m_t| may be confused with the monad type |m|.  Maybe some different
@@ -328,73 +341,66 @@ in an effectful language. Instead, case analyses are performed on the extensible
 typing relation in order to make the boolean feature theorem compatible with new
 effects. Case analyses over the extensible $\vdash_M$ relation are accomplished
 using extensible proof algebras which are folded over the derivations provided
-by the induction hypothesis, as outlined in Section~\ref{subsec:modproofs}.
+by the induction hypothesis, as outlined in
+Sections~\ref{ssec:mod:modularproofs} and \ref{ssec:modpred:proofs}.
+
 
 In order for the boolean feature's proof of \ref{thm:FSound} to be compatible
 with a new effect, each extensible case analysis requires a proof algebra for
-the new typing rules the effect introduces to the $\vdash_M$ relation. These
-proof algebras are examples of \emph{feature
-  interactions}~\cite{featureinteractions} from the setting of modular
-component-based frameworks. In essence, a feature interaction is functionality
-(e.g., a function or a proof) that is only necessary when two features are
-combined. Importantly, these proof algebras do not need to be provided up front
-when developing the boolean algebra, but can instead be modularly resolved by a
-separate feature for the interaction of booleans and the new effect.
-
-%if False
-\vspace{-2mm}
-\begin{multline} (\vdash_M m_c~:~t_c)~\rightarrow\\ (\vdash_M
-m_t~:~t_t)~\rightarrow~(\vdash_M m_e~:~t_e)~\rightarrow\\ \vdash_M
-\left(\hspace{-5mm} \begin{minipage}{37mm}
-
-> do  v <- m_c
->     case isBool v of
->        Just b   ->
->          if b  then m_t
->                else m_e
->        Nothing  -> stuck
-
-\end{minipage}
-\right) :
-\left(\hspace{-5mm}
-\begin{minipage}{35mm}
-
-> do  tc <- t_c
->     tt <- t_t
->     te <- t_e
->     guard (isTBool tc)
->     guard (eqT tt te)
->     return tt
-
-\end{minipage}
-\right)
-\tag{\textsc{WFM-If-Vc}}
-\label{thm:WFM+If+Vc}
-\end{multline}
-%endif
-
-
-The formulation of the properties proved by extensible case analysis has an
-impact on modularity. The conditional case of the previous proof can be
-dispatched by folding a proof algebra for the property \ref{thm:WFM+If+Vc} over
+the new typing rules the effect introduces to the $\vdash_M$ relation.  More
+concretely, the conditional case of the previous proof can be dispatched by
+folding a proof algebra for the property \ref{thm:WFM+If+Vc} over
 $\vdash_M~|eval v_c|~:~|typeof t_c|$. Each new effect induces a new case for
-this proof algebra, however, resulting in an interaction between booleans and
-every effect. \ref{thm:WFM+If+Vc} is specific to the proof of \ref{thm:FSound}
-in the boolean feature; proofs of \ref{thm:FSound} for other features require
-different properties and thus different proof algebras. Relying on such specific
-properties can lead to a proliferation of proof obligations for each new effect.
+this proof algebra, however.
+
+These proof algebras are examples of
+\emph{interactions}~\cite{featureinteractions} from the setting of modular
+component-based frameworks. In essence, an interaction is functionality (e.g., a
+function or a proof) that is only necessary when two components are combined.
+Our case is an interaction between the boolean feature and any effect.
+
+Importantly, these proof algebras do not need to be provided up front when
+developing the boolean algebra, but can instead be modularly resolved by later
+by separate proof algebras for the interaction of the boolean feature and each
+effect.
+
+Nevertheless, the formulation of the properties proved by extensible case
+analysis has an impact on modularity.  \ref{thm:WFM+If+Vc} is specific to the
+proof of \ref{thm:FSound} in the boolean feature; proofs of \ref{thm:FSound} for
+other features require different properties and thus different proof
+algebras. Relying on such specific properties can lead to a proliferation of
+proof obligations for each new effect.
+
+
+\subsection{Reusable Bind Sublemma}
 
 Alternatively, the boolean feature can use a proof algebra for a stronger
 property that is also applicable in other proofs, cutting down on the number of
 feature interactions. One such stronger, more general sublemma relates the
 monadic bind operation to well-typing:
-\begin{multline}
- (\Sigma\vdash_M~~ v_m ~:~t_m) \rightarrow \\
-   (\forall v~T~\Sigma'\supseteq\Sigma.~(\Sigma'\vdash~v~:~T) \rightarrow
-   ~\Sigma'\vdash_M~~ k_v~v~:~ k_t~T) \rightarrow \\
-   \Sigma\vdash_M~~v_m |>>=| k_v~:~t_m |>>=| k_t
-\tag{\textsc{WFM-Bind}}\label{thm:WFM+Bind}
-\end{multline}
+
+\begin{figure}[t]
+  \fbox{
+  \begin{minipage}{.95\columnwidth}
+      \hspace{-1cm} \infrule[WFM-Bind] {
+        \Sigma\vdash_M v_m : t_m \\
+        (\forall v~T~\Sigma'. (\Sigma'\supseteq\Sigma) \rightarrow (\Sigma'\vdash v : T) \rightarrow (\Sigma'\vdash_M k_v~v : k_t~T))
+      }
+      {
+       \Sigma\vdash_M (v_m |>>=| k_v) : (t_m |>>=| k_t)
+      }
+  \end{minipage}
+ }
+\caption{Reusable sublemma for monadic binds.}
+\label{fig:WFM+Pure}
+\vspace{-.4cm}
+\end{figure}
+
+
+%% \begin{multline}
+%%   \rightarrow \\
+%%     \rightarrow \\
+%% \end{multline}
 
 A proof of \textsc{WFM-If-Vc} follows from two applications of this stronger
 property. The advantage of \textsc{WFM-Bind} is clear: it can be reused to deal

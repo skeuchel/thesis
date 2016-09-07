@@ -80,7 +80,7 @@ proof algebra of a property |p| for the initial algebra and constructs
 a proof for every value of |Fix|.
 
 
-\subsection{Composing proofs}
+\subsection{Composing proofs}\label{ssec:modpred:proofs}
 
 The modular composition of signature and semantic functions in our approach is
 the same as in DTC and MTC. We now turn towoards the modular composition of

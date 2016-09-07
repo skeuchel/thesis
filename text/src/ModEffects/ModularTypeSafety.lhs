@@ -13,7 +13,7 @@
 %endif
 
 %===============================================================================
-\section{Effect Compositions}
+\section{Modular Effect Compositions}
 
 As we have seen, laws are essential for proofs of \ref{thm:FSound}. The proofs
 so far have involved only one effect and the laws regulate the behavior of that
@@ -247,3 +247,8 @@ semantics.
 % with failure. This is because, in the particular application, we intend that
 % exceptions denote exceptional values, whereas failure denotes
 % non-termination.}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../mod"
+%%% End:

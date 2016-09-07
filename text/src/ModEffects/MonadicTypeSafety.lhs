@@ -14,41 +14,41 @@
 
 \section{Modular Monadic Type Safety}
 
-%if False
-
-As demonstrated above, soundness statements which hardwire the set of effects
-limit their modularity by rendering proofs for soundness statements with
-distinct effects incompatible.
+As demonstrated in Section \ref{ssec:mod:effectdependenttheorems}, soundness
+statements which hardwire the set of effects limit their modularity by rendering
+proofs for soundness statements with distinct effects incompatible.
 
 %-------------------------------------------------------------------------------
 \subsection{Three-Step Approach}
 
-%endif
-
 In order to preserve a measure of modularity, we do not prove type soundness
-directly for a given feature, but by means of a more generic theorem. The
-technique of proving a theorem of interest by means of a more general theorem is
-well-known. For a conventional monolithic language, for instance, type soundness
-is often established for any well-formed typing context, even though the main
-interest lies with the more specific initial, empty context. In that setting,
-the more general theorem produces a weaker induction hypothesis for the
-theorem's proof.
+directly for a given feature, but by means of a more generic theorem.
+
+%if False
+The technique of proving a theorem of interest by means of a more general
+theorem is well-known. For a conventional monolithic language, for instance,
+type soundness is often established for any well-formed typing context, even
+though the main interest lies with the more specific initial, empty context.  In
+that setting, the more general theorem produces a weaker induction hypothesis
+for the theorem's proof.
+%endif
 
 Our approach to type soundness follows the core idea of this technique and
 relies on three theorems:
 
 \begin{itemize}
-\item \FSound:
-  a reusable \emph{feature theorem} that is only aware of the effects that
-  a feature uses
- 
-\item \ESound:
- an \emph{effect theorem} for a fixed set of known effects, and
- 
-\item \LSound: a \emph{language theorem} which combines the two to prove
-  soundness for a specific language.
+\item
+  \FSound: a reusable \emph{feature theorem} that is only aware of the effects
+  that a feature uses,
+
+\item
+  \ESound: an \emph{effect theorem} for a fixed set of known effects, and
+
+\item
+  \LSound: a \emph{language theorem} which combines the two to prove soundness
+  for a specific language.
 \end{itemize}
- 
+
 \noindent In order to maximize compatibility, the statement of the reusable
 feature theorem cannot hardwire the set of effects. This statement must instead
 rephrase type soundness in a way that can adapt to any superset of a feature's
@@ -58,7 +58,7 @@ well-formedness relation, defined in terms of effect-specific typing
 rules. Thus, a feature's proof of \FSound~uses only the typing rules
 required for the effects specific to that feature. The final language combines
 the typing rules of all the language's effects into a closed relation.
- 
+
 \begin{figure}[t!]
   \fbox{
   \includegraphics[scale = .77]{src/ModEffects/Figures/Dependency-1.pdf}
@@ -113,6 +113,9 @@ reused in any language which supports that unique combination, e.g. both
 %-------------------------------------------------------------------------------
 
 \subsection{Extensible Typing Relation}
+\steven{Introduce the extensible typing relation for values first and then the
+  one for monadic computations. Make it clear that these are two separate
+  things.}
 \begin{figure}[t]
   \fbox{
   \begin{minipage}{.95\columnwidth}
@@ -162,14 +165,13 @@ instantiate |env| and |m| in a way that satisfies all the
 constraints imposed by the typing rules used in its features.
 
 Figure~\ref{fig:WFM+Pure} lists the two base typing rules of this
-relation. These do not constrain the evaluation monad and environment
-types and are the only rules needed for pure features. The
-\textsc{(WFM-Illtyped)} rule denotes that nothing can be
-said about computations (|m_e|) which are ill-typed.
-The \textsc{(WFM-Return)} rule ensures that well-typed computations only
-yield values of the expected type.
+relation. These do not constrain the evaluation monad and environment types and
+are the only rules needed for pure features. The \textsc{(WFM-Illtyped)} rule
+denotes that nothing can be said about computations (|m_e|) which are ill-typed.
+The \textsc{(WFM-Return)} rule ensures that well-typed computations only yield
+values of the expected type.
 
-\subsection{Soundness for a Pure Feature}
+\subsection{Monolithic Soundness for a Pure Feature}
 
 To see how the reusable theorem works for a pure feature, consider the proof
 of soundness for the boolean feature.
@@ -179,40 +181,50 @@ of soundness for the boolean feature.
 that \ref{thm:FSound} holds for the boolean feature. The proof has two cases.
 The boolean literal case is handled by a trivial application of
 \textsc{(WFM-Return)}. The second case, for conditionals, is more
-interesting\footnote{We omit the environment $\Sigma$ to avoid clutter.}.
-\vspace{-1mm}
-\begin{multline*}
-(\vdash_M |eval e_c|~:~|typeof e_c|) \rightarrow \\
-(\vdash_M |eval e_t|~:~|typeof e_t|) \rightarrow \\
-   (\vdash_M |eval e_e|~:~|typeof e_e|) \rightarrow \\
-  \hspace{-3mm}\vdash_M \left(\hspace{-8mm}
-\begin{minipage}{45mm}
-
-> do  v <- eval e_c
->     case isBool v of
->        Just b   ->
->          if b  then eval e_t
->                else eval e_e
->        Nothing  -> stuck
-
-\end{minipage}
-\right) :
-\left(\hspace{-8mm}
-\begin{minipage}{45mm}
-
-> do  t_c <- typeof e_c
->     t_t <- typeof e_t
->     t_e <- typeof e_e
->     guard (isTBool t_c)
->     guard (eqT t_t t_e)
->     return t_t
-
-\end{minipage}
-\right)
+interesting\footnote{We omit the environment $\Sigma$ to avoid clutter.}:
+%
+\begin{align*}
+\begin{array}{l}
+  (\vdash_M |eval e_c| : |typeof e_c|) \rightarrow
+  (\vdash_M |eval e_t| : |typeof e_t|) \rightarrow
+  (\vdash_M |eval e_e| : |typeof e_e|) \rightarrow \\ \\
+  %\multicolumn{2}{l}{
+  \vdash_M
+  \left(
+    \hspace{-8mm}
+    \begin{minipage}{43mm}
+      \begin{spec}
+        do
+          v <- eval e_c
+          case isBool v of
+            Just b   ->
+              if b  then eval e_t
+                    else eval e_e
+            Nothing  -> stuck
+      \end{spec}
+    \end{minipage}
+  \right) :
+  \left(
+    \hspace{-8mm}
+    \begin{minipage}{43mm}
+      \begin{spec}
+        do
+          t_c <- typeof e_c
+          t_t <- typeof e_t
+          t_e <- typeof e_e
+          guard (isTBool t_c)
+          guard (eqT t_t t_e)
+          return t_t
+      \end{spec}
+  \end{minipage}
+  \right)
+  %}
+  \\
+\end{array}
 \tag{\textsc{WFM-If-Vc}}
 \label{thm:WFM+If+Vc}
-\end{multline*}
-\vspace{-2mm}
+\end{align*}
+
 % \BO{Another comment. Earlier we talk about the monad |m| (lowercase), here we use
 % the subscript |M| (uppercase). Should these be the same?}
 
@@ -246,58 +258,66 @@ into two cases depending on whether |e_c|, |e_t|, or |e_e| was typed with
 \textsc{(WFM-Illtyped)}.
 
 \begin{itemize}
-\item If any of the three derivations uses \textsc{(WFM-Illtyped)}, the result
-  of |typeof| is |fail|. As |fail| is the zero of the typing monad,
-  \textsc{(WFM-Illtyped)} resolves the case.
+\item
+  If any of the three derivations uses \textsc{(WFM-Illtyped)}, the result of
+  |typeof| is |fail|. Hence \textsc{(WFM-Illtyped)} resolves the case.
 
-\item Otherwise, each of the subderivations was built with \textsc{(WFM-Return)}
-  and the evaluation and typing expressions can be simplified using the
+\item
+  Otherwise, each of the subderivations was built with \textsc{(WFM-Return)} and
+  the evaluation and typing expressions can be simplified using the
   |return_bind| monad law.
- \[ \hspace{-5mm}\vdash_M \left(\hspace{-8mm}
-\begin{minipage}{45mm}
 
-> case isBool v_c of
->    Just b   ->
->      if b  then return v_t
->            else return v_e
->    Nothing  -> stuck
+  \begin{align*}
+    \begin{array}{l}
+    \vdash_M
+    \left(
+      \hspace{-8mm}
+      \begin{minipage}{47mm}
+        \begin{spec}
+          case isBool v_c of
+             Just b ->
+               if b  then return v_t
+                     else return v_e
+             Nothing  -> stuck
+        \end{spec}
+      \end{minipage}
+    \right) :
+    \left(
+      \hspace{-8mm}
+      \begin{minipage}{43mm}
+        \begin{spec}
+          do
+            guard (isTBool t_c)
+            guard (eqT t_t t_e)
+            return t_t
+        \end{spec}
+      \end{minipage}
+    \right)
+    \end{array}
+  \end{align*}
 
-\end{minipage}
-\right) :
-\left(\hspace{-8mm}
-\begin{minipage}{45mm}
+  After simplification, the typing expression has replaced the bind with
+  explicit values which can be reasoned with. If |isTBool t_c| is |false|, then
+  the typing expression reduces to |fail| and well-formedness again follows from
+  the \textsc{WFM-Illtyped} rule. Otherwise |t_c == TBool|, and we can apply the
+  canonical forms lemma
+    \[ \vdash |v| : |TBool| \rightarrow \exists b. |isBool v == Just b| \]
+  to establish that |v_c| is of the form |Just b|, reducing the evaluation to
+  either |return v_e| or |return v_t|. A similar case analysis on |eqT t_t t_e|
+  will either produce |fail| or |return t_t|. The former is trivially true, and
+  both $\vdash_M |return v_t|:|return t_t|$ and $\vdash_M |return v_e|:|return
+  t_t|$ hold in the latter case from the induction hypotheses.
 
-> do  guard (isTBool t_c)
->     guard (eqT t_t t_e)
->     return t_t
-
-\end{minipage}
-\right)
-\]
-After simplification, the typing expression has replaced the bind with
-explicit values which can be reasoned with. If |isTBool t_c| is |false|, then
-the typing expression reduces to |fail| and well-formedness again follows from the
-\textsc{WFM-Illtyped} rule. Otherwise |t_c == TBool|, and we
-can apply the inversion lemma
-\[ \vdash |v| : |TBool| \rightarrow \exists b. |isBool v == Just b| \] to
-establish that |v_c| is of the form |Just b|, reducing the evaluation
-to either |return v_e| or |return v_t|. A similar case analysis on
-|eqT t_t t_e| will either produce |fail| or |return t_t|. The former
-is trivially true, and both $\vdash_M |return v_t|:|return
-t_t|$ and $\vdash_M |return v_e|:|return t_t|$ hold
-in the latter case from the induction hypotheses.
-%
-% \tom{Need more clarification here.}
-% In
-% the \textsc{WFM-Return} case, |(do v_c <- eval c; ...)| simplifies to
-% either |Stuck|, |eval t|, or |eval e|. In the first case, we can push
-% the type information in the refinement type of |T_c'| from the
-% \textsc{WFM-Return} rule used to build the current case into the body
-% of the bind expression to ensure that |do T_c <- typeof c; ...| will
-% evaluate to |fail|, from which \textsc{WFM-Untyped} applies. The
-% refinement type of the |T_c'| monad can be used analogously in the
-% other two cases to ensure that |typeof c| always produces |TBool|, and
-% \textsc{WFM-Return} can then be applied.
+  % \tom{Need more clarification here.}
+  % In the \textsc{WFM-Return} case, |(do v_c <- eval c; ...)| simplifies to
+  % either |Stuck|, |eval t|, or |eval e|. In the first case, we can push the
+  % type information in the refinement type of |T_c'| from the
+  % \textsc{WFM-Return} rule used to build the current case into the body of the
+  % bind expression to ensure that |do T_c <- typeof c; ...| will evaluate to
+  % |fail|, from which \textsc{WFM-Untyped} applies. The refinement type of the
+  % |T_c'| monad can be used analogously in the other two cases to ensure that
+  % |typeof c| always produces |TBool|, and \textsc{WFM-Return} can then be
+  % applied.
 \end{itemize}
 
 \subsection{Modular Sublemmas}

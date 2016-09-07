@@ -83,6 +83,9 @@ features used in our case study of Section~\ref{sec:CaseStudy} are given in Figu
 %-------------------------------------------------------------------------------
 \subsection{Example: References}
 \input{src/ModEffects/Figures/References_Figure}
+\steven{This section needs to explicate that values and computations are two
+  distinct sorts unlike SOS where values are a subset of expressions. The typing
+  relation is a relation on values only.}
 Figure~\ref{fig:references} illustrates this approach with definitions for the
 functor for expressions and the evaluation and typing algebras for the
 reference feature. Other features have similar definitions.
@@ -118,7 +121,7 @@ the failure monad to denote ill-typing.
 % Similarly to the evaluation algebra, an observation function |isTRef| is used.
 
 %-------------------------------------------------------------------------------
-\subsection{Effect-Dependent Theorems}
+\subsection{Effect-Dependent Theorems}\label{ssec:mod:effectdependenttheorems}
 \input{src/ModEffects/Figures/EffectTheorems}
 
 Monadic semantic function algebras are compatible with new effects and algebraic

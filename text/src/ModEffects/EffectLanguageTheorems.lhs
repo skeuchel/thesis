@@ -4,13 +4,23 @@
 %include macros.fmt
 %include Formatting.fmt
 
-\section{Monolithic Type Safety}
-%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-\subsection{Pure Language}
+%if False
 
-The second phase of showing type soundness is to prove a statement of
-soundness for a fixed set of effects. For pure effects, the
-soundness statement is straightforward:
+> {-# OPTIONS -XRankNTypes -XImpredicativeTypes -XTypeOperators -XMultiParamTypeClasses -XFlexibleInstances -XOverlappingInstances -XFlexibleContexts #-}
+
+> module Elaboration where
+
+%endif
+
+\section{Effect and Language Theorems}
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+The second phase of showing type soundness is the \emph{effect theorem}, that
+proves a statement of soundness for a fixed set of effects.
+
+\subsection{Pure Languages}
+
+For pure effects, the soundness statement is straightforward:
+
 \begin{equation}
 \forall |v_m|~|t|. \vdash_M | v_m : return t| \Rightarrow \exists |v|. |v_m
 == return v|~\wedge \vdash |v| : |t|
@@ -118,13 +128,12 @@ assumptions of
 \begin{figure}
   \fbox{
   \begin{minipage}{.95\columnwidth}
-     \hspace{-2.1cm}\begin{minipage}{1.25\columnwidth}
       \infrule[WFM-Throw]{
       }
       {
         \Sigma \vdash_M |throw x| ~:~ |t_m|
       }
-    \vspace{.25cm}
+      \vspace{.25cm}
       \infrule[WFM-Catch]
       {
         \Sigma \vdash_M |m >>= k|  ~:~ |t_m| \\
@@ -133,7 +142,6 @@ assumptions of
       {
          \Sigma \vdash_M |catch m h >>= k| ~:~ |t_m|
       }
-  \end{minipage}
   \end{minipage}
  }
 \caption{Typing rules for exceptional monadic values.}
@@ -158,13 +166,17 @@ essential for compatibility with the proofs algebras required by other
 features. As described in Section~\ref{sec:Thm+Reuse}, extensible proof algebras
 over the typing derivation will now need cases for the two new rules. To
 illustrate this, consider the proof algebra for the general purpose
-\ref{thm:WFM+Bind} property. This algebra requires a proof of:
-\begin{multline*}
- (\Sigma\vdash_M|catch e h >>= k| ~:~t_m) \rightarrow \\
-   (\forall v~T~\Sigma'\supseteq\Sigma.~(\Sigma'\vdash~v~:~T) \rightarrow
-   ~\Sigma'\vdash_M~~ k_v~v~:~ k_t~T) \rightarrow \\
+\textsc{WFM-Bind} property. This algebra requires a proof of:
+%
+\begin{align*}
+\begin{array}{l}
+  (\Sigma\vdash_M|catch e h >>= k| ~:~t_m) \rightarrow \\
+  (\forall v~T~\Sigma'\supseteq\Sigma.~(\Sigma'\vdash~v~:~T) \rightarrow \\
+  \Sigma'\vdash_M~~ k_v~v~:~ k_t~T) \rightarrow \\
    \Sigma\vdash_M(|catch e h >>= k|) |>>=| k_v:t_m |>>=| k_t
-\end{multline*}
+\end{array}
+\end{align*}
+
 
 %if False
 \begin{multline*} (\Sigma\vdash_M m_i ~:~
@@ -231,12 +243,15 @@ individual features.  \BD{Now that we've improved the previous section, we can
 \paragraph{Effect Theorem} The effect theorem, \ref{thm:ESoundE}, for a
 language whose only effect is exceptions reflects that the evaluation
 function is either a well-typed value or an exception.
-\begin{multline}
+%
+\begin{align*}
+\begin{array}{l}
 \forall |v_m|~|t|. \vdash_M |v_m : return t| \Rightarrow \\
-\exists x. |v_m == throw |~x \lor \exists |v|. |v_m == return v| \wedge \vdash |v| :
-|t|
-\tag{\textsc{ESound$_E$}}\label{thm:ESoundE}
-\end{multline}
+\exists x. |v_m == throw |~x \lor \exists |v|. |v_m == return v| \wedge \vdash |v| : |t|
+\end{array}
+\tag{\textsc{ESound$_E$}}
+\label{thm:ESoundE}
+\end{align*}
 The proof of \ref{thm:ESoundE} is again by induction on the derivation
 of $ \vdash_M$ |v_m : return t|. The irrelevant environment
 can be fixed to |()|, while the evaluation monad is the
@@ -251,28 +266,20 @@ monad is fixed to conclude that either $\exists |v|.|e' == return v|$ or
 $\exists |x|. |e' == throw x|$. In the former case, |catch e' h| can be reduced
 using |catch_return|, and the latter case is simplified using |catch_throw1|. In
 both cases, the conclusion then follows immediately from the assumptions of
-\textsc{WFM-Catch}.  The proof of the language theorem \ref{thm:SoundE} is
+\textsc{WFM-Catch}.  The proof of the language theorem \LSoundE is
 similar to \ref{thm:LSoundP} and is easily built from \ref{thm:ESoundE} and
 \ref{thm:FSound}.
 
 \begin{figure}
   \fbox{
   \begin{minipage}{.95\columnwidth}
-     \hspace{-1.5cm}\begin{minipage}{1.15\columnwidth}
       \infrule[WFM-Get]
       {
         \forall \sigma, \Sigma\vdash\sigma~\rightarrow~\Sigma \vdash_M k~\sigma:t_m
       }
       {
-        \Sigma \vdash_M \hspace{-.5cm}
-        \parbox{2cm}{
-          \begin{spec}
-            get >>=
-          \end{spec}
-        } \hspace{-.5cm}
-        k~:~t_m
+        \Sigma \vdash_M ~ |get >>= k| ~:~ t_m
       }
-      \vspace{.25cm}
       \infrule[WFM-Put]
       {
          \Sigma' \vdash \sigma \andalso
@@ -280,14 +287,8 @@ similar to \ref{thm:LSoundP} and is easily built from \ref{thm:ESoundE} and
          \Sigma' \vdash_M k : t_m
       }
       {
-       \Sigma \vdash_M \hspace{-.5cm}
-         \parbox{2cm}{
-          \begin{spec}
-             put s_ >> k
-          \end{spec}
-        } : t_m
+       \Sigma \vdash_M ~ |put s_ >> k| ~:~ t_m
       }
-  \end{minipage}
   \end{minipage}
  }
 \caption{Typing rules for stateful monadic values.}
@@ -301,7 +302,7 @@ similar to \ref{thm:LSoundP} and is easily built from \ref{thm:ESoundE} and
 \paragraph{Typing Rules}
 
 Figure~\ref{fig:WFM+State} lists the two typing rules for stateful computations.
-To understand the formulation of these rules, consider \ref{thm:SoundS}, the
+To understand the formulation of these rules, consider \LSoundS, the
 statement of soundness for a language with a stateful evaluation function. The
 statement accounts for both the typing environment $\Sigma$ and evaluation
 environment $\sigma$ by imposing the invariant that $\sigma$ is well-formed with
@@ -344,6 +345,7 @@ invariants in order to apply the rules.
 
 \paragraph{Effect Theorem}
 
+%format Sigma = "\Sigma"
 The effect theorem for mutable state proceeds again by induction over the typing
 derivation. The evaluation monad is fixed to |StateT Sigma Id| and the
 environment type is fixed to |[Type]| with the obvious definitions for
@@ -380,12 +382,13 @@ term well-formedness found in first-order representations.
 %the soundness proofs to induct over an equivalence relation, the
 %details of which are covered in the MTC paper~\cite{mtc}.
 
-\paragraph{The Environment Effect} Unlike in MTC, \name neatly hides the
-variable environment of the evaluation function with a reader monad
-|MonadReader|. This new effect introduces the two new typing rules listed in
-Figure~\ref{fig:WFM+Environment}.  Unsurprisingly, these typing rule are similar
-to those of Figure~\ref{fig:WFM+State}. The rule for |ask| is essentially the
-same as \textsc{WFM-Get}. The typing rule for |local| differs slightly from
+\paragraph{The Environment Effect} \name neatly hides the variable environment
+of the evaluation function with a reader monad |MonadReader|, unlike
+\textsc{MTC} which passes the environment explicitly. This new effect introduces
+the two new typing rules listed in Figure~\ref{fig:WFM+Environment}.
+Unsurprisingly, these typing rule are similar to those of
+Figure~\ref{fig:WFM+State}. The rule for |ask| is essentially the same as
+\textsc{WFM-Get}. The typing rule for |local| differs slightly from
 \textsc{WFM-Put}. Its first premise ensures that whenever |f| is applied to an
 environment that is well-formed in the original typing environment $\Gamma$, the
 resulting environment is well-formed in some new environment $\Gamma'$. The
@@ -404,13 +407,7 @@ the |local| expression in some |k| is the same as with |put|.
         ~\Gamma \vdash_M k~\gamma:t_m
       }
       {
-        \Gamma \vdash_M \hspace{-.5cm}
-        \parbox{2cm}{
-          \begin{spec}
-            ask >>=
-          \end{spec}
-        } \hspace{-.5cm}
-        k~:~t_m
+        \Gamma \vdash_M ~ |ask >>= k| ~:~ t_m
       }
       \vspace{.25cm}
       \infrule[WFM-Local]
@@ -421,12 +418,7 @@ the |local| expression in some |k| is the same as with |put|.
           \forall v.~\vdash v~:~t'_m \rightarrow \Gamma \vdash_M (k~v) : t_m \andalso
       }
       {
-        \Gamma \vdash_M \hspace{-.4cm}
-          \parbox{2cm}{
-           \begin{spec}
-              local f m >>= k
-           \end{spec}
-         } \hspace{.4cm}~:~t_m
+        \Gamma \vdash_M ~ |local f m >>= k| ~:~ t_m
       }
       \vspace{.25cm}
       \infrule[WFM-Bot]{}{
@@ -463,6 +455,250 @@ monad. This allows terminating features to be completely oblivious to whether a
 bounded or standard fold is used for the evaluation function, resulting in a
 much cleaner semantics. \textsc{WFM-Bot} allows $\bot$ to have any type.
 
+
+
+%===============================================================================
+\subsection{Modular Effect Compositions}
+
+As we have seen, laws are essential for proofs of \ref{thm:FSound}. The proofs
+so far have involved only up to one effect and the laws regulate the behavior of
+that effect's primitive operations.
+
+Languages often involve more than one effect, however. Hence, the proofs of
+effect theorems must reason about the interaction between multiple effects.
+There is a trade-off between fully instantiating the monad for the language as
+we have done previously, and continuing to reason about a constrained
+polymorphic monad. The former is easy for reasoning, while the latter allows the
+same language proof to be instantiated with different implementations of the
+monad. In the latter case, additional \emph{effect interaction} laws are
+required.
+
+%\BD{This section needs a discussion of the two candidate rules for how put and
+%catch interact. This reflects the fact that sometimes there aren't single laws
+%governing the interactions of effects. In this case, this is okay: we can prove
+%the lemma for either choice. Plus, since only the catch feature needs this
+%rule, the other effect rules are independent of this choice. }
+
+%-------------------------------------------------------------------------------
+\subsection{State and Exceptions}
+
+Consider the effect theorem which fixes the evaluation monad to support
+exceptions and state. The statement of the theorem mentions both kinds of
+effects by requiring the evaluation function to be run with a well-formed state
+$\sigma$ and by concluding that well-typed expressions either throw an exception
+or return a value. The \textsc{WFM-Catch} case this theorem has the following
+goal:
+\begin{gather*}
+(\Sigma \vdash \sigma~:~\Sigma) \\ \rightarrow \\
+\exists~\Sigma',\sigma',|v|.
+\left\{\begin{array}{c}
+|put|~\sigma |>> catch e h >>= k == put|~\sigma' |>>
+ return v| \\ \Sigma' \vdash |v| : |t| \\
+\end{array}\right\} \\
+\vee \\
+\exists~\Sigma',\sigma',|x|.
+\left\{\begin{array}{c}
+|put|~\sigma |>> catch e h >>= k == put|~\sigma' |>>
+ throw x| \\
+ \Sigma' \vdash \sigma'~:~\Sigma'
+\end{array}\right\}
+\end{gather*}
+% \begin{multline}
+% \Sigma \vdash \sigma~:~\Sigma \Rightarrow \\
+% \exists~\Sigma'~\sigma'~|v|. |put|~\sigma |>> catch e h >>= k == put|~\sigma' |>>
+%  return v| \\\wedge \Sigma' \vdash |v| : |t| \\
+% \bigvee~
+% \exists~\Sigma'~\sigma'~|t|. |put|~\sigma |>> catch e h >>= k == put|~\sigma' |>>
+%  throw t| \wedge \\
+%  \Sigma' \vdash \sigma'~:~\Sigma'
+% \end{multline}\BO{Please add some brakets to make the scoping of quantifiers clearer.}
+
+%Building a language with references and exceptions produces yet
+%another statement of type soundness.
+
+
+In order to apply the induction hypothesis to |e| and |h|, we need to precede
+them by a $(|put|~\sigma)$.  Hence, $(|put|~\sigma)$ must be pushed under the
+|catch| statement through the use of a law governing the behavior of |put| and
+|catch|.  There are different choices for this law, depending on the monad that
+implements both |MonadState| and |MonadError|. We consider two reasonable
+choices, based on the monad transformer compositions |ExcT x (StateT s Id)| and
+|StateT s (ExcT x Id)|:
+\begin{itemize}
+\item Either |catch| passes the current state into the handler:
+  \begin{spec}
+    put s_ >> catch e h == catch (put s_ >> e) h
+  \end{spec}
+\item Or |catch| runs the handler with the initial state:
+  \begin{spec}
+    put s_ >> catch e h == catch (put s_ >> e) (put s_ >> h)
+  \end{spec}
+\end{itemize}
+% There are other, more exotic interactions possible, but these two
+% (alternative) rules capture the standard understanding of how languages with
+% exceptions and environments may work.
+The \textsc{WFM-Catch} case is provable under either choice.  As the
+\ESoundES~proof is written as an extensible theorem, the two cases are
+written as two separate proof algebras, each with a different assumption about
+the behavior of the interaction. Since the cases for the other rules are
+impervious to the choice, they can be reused with either proof of
+\textsc{WFM-Catch}.
+
+% In either case, |catch| can be reduced further. If |put s_ >> eval e = put s_'
+% >> return v| the inductive hypothesis for |e| can be applied. Alternatively,
+% when |put s_ >> eval e = put s' >> throw t|, the inductive hypothesis for |k|
+% can be applied using |s'| and the extended context $\Sigma'$ produced by the
+% inductive hypothesis for |e|. Note that \textsc{WFM-Catch} types |h >>= k|
+% under all $\Sigma'$ precisely so that in the case that |catch| pass the
+% effects from |eval e| to the handler the proof can account for the extended
+% environment.
+
+\begin{figure}[t]
+\noindent\fbox{
+\begin{minipage}{0.98\columnwidth}
+\vspace{-.2cm}
+\begin{align*}
+\begin{array}{l}
+\forall \Sigma,\Gamma,\delta,\gamma,\sigma,|e|_E,|e|_T.
+  \left\{\begin{array}{c}
+   \gamma,\delta\vdash~|e|_E\equiv|e|_T \\
+   \Sigma \vdash \sigma~:~\Sigma \\
+   \Sigma \vdash \gamma~:~\Gamma \\
+  |typeof e|_T| == return t| \\
+  \end{array}\right\}
+\rightarrow \\
+\hspace{0.25cm} \exists~\Sigma',\sigma',|v|.
+  \left\{\begin{array}{c}
+  |local (\ _._| \gamma |) (put|~\sigma |>> eval e|_E|)| \\
+   |== local (\ _._| \gamma |) (put|~\sigma' |>> return v)| \\
+  \Sigma' \vdash |v| : |t| \\
+  \end{array}\right\}
+ \vee \\
+\hspace{0.25cm} \exists~\Sigma',\sigma',|v|.
+  \left\{\begin{array}{c}
+  |local (\ _._| \gamma |) (put|~\sigma |>> eval e|_E|)| \\
+  |== local (\ _._| \gamma |(put|~\sigma' |>>| \bot |)| \\
+  \Sigma' \vdash \sigma'~:~\Sigma'  \\
+  \Sigma' \supseteq \Sigma
+  \end{array}\right\}
+ \vee \\
+\hspace{0.25cm} \exists~\Sigma',\sigma',|v|.
+  \left\{\begin{array}{c}
+ |local (\ _._| \gamma |) (put|~\sigma |>> eval e|_E|)| \\
+ |== local (\ _._| \Gamma |(put|~\sigma' |>> throw t)|  \\
+ \Sigma' \vdash \sigma'~:~\Sigma' \\
+ \Sigma' \supseteq \Sigma \\
+         \end{array}\right\}
+\end{array}
+ \tag{\textsc{ESound}$_\mathit{ESRF}$}
+  \label{thm:ESoundESRF}
+\end{align*}
+
+% \begin{multline}
+% \forall \Sigma,\Gamma,\delta,\gamma,\sigma,|e|_E,|e|_T. \quad
+% \gamma,\delta\vdash,|e|_E\equiv|e|_T \Rightarrow \\
+% \Sigma \vdash \sigma,:,\Sigma \Rightarrow
+% \Sigma \vdash \gamma,:,\Gamma \Rightarrow
+% |typeof e|_T| == return t| \Rightarrow \\
+% \exists,\Sigma',\sigma',|v|. |local (\ _._| \gamma |) (put|,\sigma |>> eval
+% e|_E|) =| \\
+%    |local (\ _._| \gamma |) (put|,\sigma' |>> return v)| \wedge \Sigma' \vdash |v| : |t| \\
+% \bigvee
+% \exists,\Sigma',\sigma',|v|. |local (\ _._| \gamma |) (put|,\sigma |>> eval
+% e|_E|) =| \\
+%  |local (\ _._| \gamma |(put|,\sigma' |>>|
+%  \bot |)| \wedge \Sigma' \vdash \sigma',:,\Sigma'
+% \wedge \Sigma' \supseteq \Sigma\\
+% \bigvee
+% \exists,\Sigma',\sigma',|v|. |local (\ _._| \gamma |) (put|,\sigma |>> eval
+% e|_E|) =| \\
+%  |local (\ _._| \Gamma |(put|,\sigma' |>>
+%  throw t)| \wedge \Sigma' \vdash \sigma',:,\Sigma'
+% \wedge \Sigma' \supseteq \Sigma \\
+% \tag{\textsc{Sound}$_\mathit{ESRF}$}
+% \label{thm:LSoundESRF}
+% \end{multline}
+\end{minipage}
+}
+\caption{Effect theorem statement for languages with errors, state, an environment and failure.}
+\label{f:th:esrf}
+\vspace{-.4cm}
+\end{figure}
+
+%-------------------------------------------------------------------------------
+\subsection{State, Reader and Exceptions}
+
+A language with references, errors and lambda abstractions features four
+effects: state, exceptions, an environment and failure. The language theorem for
+such a language relies on the effect theorem \ref{thm:ESoundESRF} given in
+Figure~\ref{f:th:esrf}. The proof of \ref{thm:ESoundESRF} is similar to the
+previous effect theorem proofs, and makes use of the full set of interaction
+laws given in Figure~\ref{fig:Interaction+Laws}. Perhaps the most interesting
+observation here is that because the environment monad only makes local changes,
+we can avoid having to choose between laws regarding how it interacts with
+exceptions. Also note that since we are representing nontermination using a
+failure monad |FailMonad m|, the |catch_fail| law conforms to our desired
+semantics.
+
+\begin{figure}[t]
+\fbox{
+\hspace{-10pt}\begin{minipage}{.98\columnwidth}
+\scriptsize
+\hspace{.65cm}\ruleline{Exceptional Environment}
+< class (MonadError x m, MonadEnvironment  m) => MonadErrorEnvironment x g m where
+<   local_throw      :: local f (throw e) == throw e
+<   local_catch      :: local f (catch e h) ==
+<                             catch (local f e) (\x._ local f (h x))
+
+\hspace{.65cm}\ruleline{Exceptional Failure}
+< class (MonadError x m, FailMonad m) => MonadFailState x m where
+<   catch_fail       :: catch fail h == fail
+<   fail_neq_throw   :: fail <> throw x
+
+\hspace{.65cm}\ruleline{Exceptional State Failure}
+< class (MonadError x m, MonadState s m, FailMonad m) => MonadFailErrorState x m where
+<    put_fail_throw  :: put s_ >> fail <> put s_' >> throw x
+
+\hspace{.65cm}\ruleline{Exceptional State}
+< class (MonadError x m, FailMonad m) => MonadErrorState x m where
+<   put_ret_throw :: put s_ >> return a <> put s_' >> throw x
+<   put_throw        :: forall A B. put s_ >> throw_A x == put s_' >> throw_A x ->
+<                    put s_ >> throw_B x == put s_' >> throw_B x
+
+\hspace{.65cm}\ruleline{Alternate Exceptional State laws}
+< class (MonadError x m, FailMonad m) => MonadErrorState_1 x m where
+<   put_catch1        :: put s_ >> catch e h == catch (put s_ >> e) h
+\hspace{.65cm}\ruleline{Or}
+< class (MonadError x m, FailMonad m) => MonadErrorState_2 x m where
+<   put_catch2       :: put env >> catch e h ==
+<                       catch (put s_ >> e) (\x -> put s_ >> h x)
+
+\end{minipage}
+}
+
+\caption{Interaction laws}
+
+\label{fig:Interaction+Laws}
+\end{figure}
+
+%\BD{Maybe we
+%should just move this section and figures to the case study?}
+
+%format throw_A = "\Varid{throw}_\Varid{A}"
+%format throw_B = "\Varid{throw}_\Varid{B}"
+%format <> = "\not\equiv"
+%format MonadErrorState_1 = "\Varid{MonadErrorState}_1"
+%format MonadErrorState_2 = "\Varid{MonadErrorState}_2"
+
+% \BO{Maybe it would be worthwhile to say a few more words on these laws.  The
+% interaction laws tend to be much more application-specific and really pin-down
+% particular semantic interactions between effects. We already say something
+% earlier regarding |put| and |catch|, but maybe we can have a more general
+% statement and also comment on some other laws. For example |fail <> throw x|
+% prevents a particular monad configuration which is when exceptions coincide
+% with failure. This is because, in the particular application, we intend that
+% exceptions denote exceptional values, whereas failure denotes
+% non-termination.}
 
 %%% Local Variables:
 %%% mode: latex

@@ -6,7 +6,7 @@
 \begin{figure*}[t]
   \begin{center}
   \fbox{
-        \includegraphics[scale = .85]{src/ModEffects/Figures/CaseStudyFigure.pdf}
+        \includegraphics[width=.96\columnwidth]{src/ModEffects/Figures/CaseStudyFigure.pdf}
    }
   \end{center}
   \caption{Dependency and size information for the features and effects used in the case study.}
@@ -25,10 +25,9 @@ errors and lambda abstractions.
 
 The study builds twenty eight different combinations of the features which are
 all possible combinations with at least one feature providing
-values.\footnote{Also available at \url{http://www.cs.utexas.edu/~bendy/3MT}}
-Figure~\ref{fig:MiniMLSyntax} presents the syntax of the expressions,
-values, and types provided; each line is annotated with the feature
-that provides that set of definitions.
+values. Figure~\ref{fig:MiniMLSyntax} presents the syntax of the expressions,
+values, and types provided; each line is annotated with the feature that
+provides that set of definitions.
 
 Four kinds of feature interactions appear in the case study.
 
@@ -155,3 +154,9 @@ the effect theorem for its set of effects.
 %%   }
 %% \end{center}
 %% Each sublemma of the above table requires on average 50 LoC per effect.
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../mod"
+%%% End:

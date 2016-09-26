@@ -1,0 +1,53 @@
+
+\chapter{Background}
+\input{src/GenBackground/Introduction}
+\input{src/GenBinding/Introduction}
+\clearpage
+\input{src/GenBinding/Overview}
+
+\chapter{Specification}
+\input{src/GenBinding/Specification}
+
+\chapter{Semantics}\label{ch:semantics}
+
+The previous chapter has introduced the \Knot~specification language for
+abstract syntax. This chapter generically defines the semantics of \Knot in
+terms of a de Bruijn representation. We assume a given and fixed well-formed
+specification $\spec$ in the rest of this chapter. The discussion follows these
+consecutive steps:
+
+\begin{enumerate}
+\item Section \ref{sec:sem:terms} declares \emph{abstract syntax terms} that are
+  valid with respect to the specification and defines the \emph{semantics of
+    binding specifications}.
+\item \emph{Shifting and substitution functions} operating on terms are defined
+  in Section \ref{sec:operation}. This is necessary boilerplate that is needed
+  to define
+\item \emph{evaluation of expressions} which is the topic of Section
+  \ref{sec:exprsemantics}.
+\item The \emph{interpretation of relation specifications} is discussed in
+  Section \ref{sec:relationsemantics}.
+\end{enumerate}
+
+\input{src/GenBinding/TermSemantics}
+\input{src/GenBinding/Operations}
+\input{src/GenBinding/RelationSemantics}
+
+\chapter{Boilerplate Lemmas}
+\input{src/GenBinding/WellScopedness}
+\input{src/GenBinding/RelShifting}
+\input{src/GenBinding/RelSubstitution}
+
+\chapter{Code generation}
+\input{src/GenBinding/Generation}
+
+\chapter{Evaluation}
+\input{src/GenBinding/CaseStudy}
+\input{src/GenBinding/RelatedWork}
+\input{src/GenBinding/Conclusion}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../main"
+%%% End:

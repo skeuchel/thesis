@@ -1,0 +1,152 @@
+\newcommand{\gray}[1]{\text{\colorbox{light-gray}{${#1}$}}}
+\newcommand{\highlight}[1]{\colorbox{light-gray}{$\displaystyle #1$}}
+
+\newcommand{\todoc}[2]{{\textcolor{#1} {\textbf{[[#2]]}}}}
+%\newcommand{\todo}[1]{{\todoc{red}{\textbf{[[#1]]}}}}
+
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\newcommand{\todored}[1]{\todoc{red}  {\textbf{[[#1]]}}}
+\newcommand{\todoblue}[1]{\todoc{blue}{\textbf{[[#1]]}}}
+\newcommand{\todogreen}[1]{\todoc{green}{\textbf{[[#1]]}}}
+
+\newcommand{\TODO}[1]{\todored{#1}}
+
+% \newcommand{\tom}[1]{\marginpar{\textcolor{brown}{TOM}}\textcolor{brown}{#1}}
+% \newcommand{\new}[1]{\marginpar{\textcolor{blue}{NEW}}\textcolor{blue}{#1}}
+% \newcommand{\steven}[1]{\marginpar{\textcolor{red}{STEVEN}}\textcolor{red}{#1}}
+% \newcommand{\stevennote}[2]{\marginpar{\textcolor{red}{#1}}\textcolor{red}{#2}}
+\newcommand{\scw}[1]{\marginpar{\textcolor{green}{SCW}}\textcolor{green}{#1}}
+% \newcommand{\tom}[1]{}
+% \newcommand{\new}[1]{}
+% \newcommand{\steven}[1]{}
+% \newcommand{\stevennote}[2]{}
+% \newcommand{\scw}[1]{}
+
+\newcommand{\ov}[1]{\overline{#1}}
+\newcommand{\cpar}[1]{{\texttt{(}{#1}\texttt{)}}}
+\newcommand{\cbrc}[1]{{\texttt{\{}{#1}\texttt{\}}}}
+\newcommand{\cbrk}[1]{{\texttt{[}{#1}\texttt{]m}}}
+\newcommand{\ccol}{\texttt{:}}
+\newcommand{\cass}{\texttt{:=}}
+\newcommand{\cto}{~\texttt{->}~}
+
+\newcommand{\fieldref}[2]{\cpar{{#1}\,\texttt{@}\,{#2}}}
+\newcommand{\fieldbind}[2]{\cpar{{#1}\,\ccol\,{#2}}}
+\newcommand{\fieldsub}[2]{\cpar{{#1}\,\ccol\,{#2}}}
+\newcommand{\evalbs}[2]{{\llbracket\:{#1}\:\rrbracket_{#2}}}
+\newcommand{\evalbig}[3]{[{#1}] {#2} \Downarrow {#3}}
+\newcommand{\evalbigf}[3]{{#1}({#2}) \Downarrow {#3}}
+\newcommand{\evalsym}[3]{{\llbracket\: {#1} \mid {#2} \:\rrbracket_{#3}}}
+\newcommand{\evalrbs}[4]{{\llbracket\: {#1} \:\rrbracket_{{#3},{#4}}}}
+\newcommand{\symflatten}[3]{{{#1} \vdash_E {#2} \Downarrow {#3}}}
+
+
+\newcommand{\fprod}{\ensuremath{F_\times}\xspace}
+\newcommand{\Coq}{\textsc{Coq}\xspace}
+\newcommand{\POPLmark}{\textsc{POPLmark}\xspace}
+\newcommand{\Knot}{\textsc{Knot}\xspace}
+\newcommand{\Needle}{\textsc{Needle}\xspace}
+\newcommand{\LNGen}{\textsc{LNGen}\xspace}
+\newcommand{\DbGen}{\textsc{DbGen}\xspace}
+\newcommand{\Ott}{\textsc{Ott}\xspace}
+\newcommand{\Romeo}{\textsc{Romeo}\xspace}
+\newcommand{\AutoSubst}{\textsc{AutoSubst}\xspace}
+\newcommand{\GMeta}{\textsc{GMeta}\xspace}
+\newcommand{\SystemF}{System~F\xspace}
+\newcommand{\SystemFsub}{\ensuremath{\text{System~F}_{<:}}\xspace}
+\newcommand{\LF}{\textlambda LF\xspace}
+\newcommand{\CoC}{\textsc{CoC}\xspace}
+\newcommand{\stlc}{\ensuremath{\lambda}\xspace}
+\newcommand{\stlcprod}{\ensuremath{\lambda_{\times}}\xspace}
+\newcommand{\F}{\ensuremath{F}\xspace}
+\newcommand{\fsub}{\ensuremath{F_{<:}}}
+\newcommand{\fsubprod}{\ensuremath{F_{<:,\times}}}
+\newcommand{\Unbound}{\textsc{Unbound}\xspace}
+\newcommand{\lomega}{\ensuremath{\lambda_{\omega}}\xspace}
+\newcommand{\fomega}{\ensuremath{F_{\omega}}\xspace}
+\newcommand{\fseqlet}{\ensuremath{F_\text{seq}}}
+\newcommand{\fsubrcd}{\ensuremath{F_{<:,\text{rcd}}}}
+\newcommand{\fexists}{\ensuremath{F_{\exists}}\xspace}
+
+\newcommand{\spec}{\mathit{spec}}
+\newcommand{\decl}{\mathit{decl}}
+\newcommand{\namedecl}{\mathit{namedecl}}
+
+\newcommand{\knotkeyword}[1]{{\texttt{#1}}}
+\newcommand{\namespace}{\knotkeyword{namespace}}
+\newcommand{\sort}{\knotkeyword{sort}}
+\newcommand{\function}{\knotkeyword{fun}}
+\newcommand{\env}{\knotkeyword{env}}
+\newcommand{\relation}{\knotkeyword{relation}}
+\newcommand{\subst}{\knotkeyword{subst}}
+\newcommand{\In}{\knotkeyword{In}}
+
+\newcommand{\sortdecl}{\mathit{sortdecl}}
+\newcommand{\condecl}{\mathit{condecl}}
+\newcommand{\bsi}{\mathit{bsi}}
+\newcommand{\bindspec}{\mathit{bs}}
+\newcommand{\fundecl}{\mathit{fundecl}}
+\newcommand{\funclause}{\mathit{funclause}}
+
+\newcommand{\envdecl}{\mathit{envdecl}}
+\newcommand{\envclause}{\mathit{envclause}}
+\newcommand{\reldecl}{\mathit{reldecl}}
+\newcommand{\ruledecl}{\mathit{ruledecl}}
+\newcommand{\formula}{\mathit{fml}}
+\newcommand{\lookup}{\mathit{lookup}}
+\newcommand{\jmv}{\mathit{j}}
+\newcommand{\judgement}{\mathit{jmt}}
+\newcommand{\rulebindspec}{\mathit{rbs}}
+\newcommand{\rbsi}{\mathit{rbsi}}
+\newcommand{\symbolicterm}{\mathit{sym}}
+\newcommand{\symboliccoterm}{\mathit{cosym}}
+\newcommand{\symbolicweaken}{\mathbf{weaken}}
+\newcommand{\symboliccoweaken}{\mathbf{coweaken}}
+\newcommand{\symbolicsubst}{\mathbf{subst}}
+\newcommand{\symbolicenv}{\theta}
+\newcommand{\LENV}{\mathcal{L}}
+\newcommand{\VENV}{\mathcal{V}}
+\newcommand{\RENV}{\mathcal{R}}
+\newcommand{\dom}{\text{dom}}
+\newcommand{\domain}[1]{{\dom~{#1}}}
+
+\newcommand{\wfbindspec}[3]{\LENV; {#1} \vdash {#2}}  %  : {#3}
+\newcommand{\wfsym}[3]{\LENV; {#1} \vdash {#2} : {#3}}
+\newcommand{\wfruledecl}[4]{\vdash_{#1,#2,#3} #4}
+\newcommand{\wfformula}[2]{\LENV \vdash_{#1} {#2}}
+
+\newcommand{\judg}[4]{{#1} \models_{#2} {#3} ; {#4}}
+\newcommand{\judgsimpl}[3]{{#1} \models_{#2} {#3}}
+\newcommand{\lookupenv}[5]{{ ({#1}:{#2}) \in_{{#3},{#4}} {#5}}}
+
+\newcommand{\eqtreflcon}{\text{qrf}}
+\newcommand{\eqttranscon}{\text{qtr}}
+\newcommand{\eqtsymcon}{\text{qsm}}
+\newcommand{\eqtregcon}{\text{qcn}}
+
+\newcommand{\eqt}{\text{eqt}}
+\newcommand{\eqtrefl}[3]{\eqtreflcon~{#1}~{#2}~{#3}}
+\newcommand{\eqttrans}[2]{\eqttranscon~{#1}~{#2}}
+\newcommand{\eqtsym}[1]{\eqtsymcon~{#1}}
+\newcommand{\eqtreg}[2]{\eqtregcon~{#1}~{#2}}
+\newcommand{\sh}[3]{\text{sh}_{#1}~{#2}~{#3}}
+\newcommand{\su}[4]{\text{su}_{#1}~{#2}~{#3}~{#4}}
+\newcommand{\shstar}{{\text{sh}^{*}}}
+\newcommand{\wk}[2]{\shstar~{#1}~{#2}}
+\newcommand{\eqtshiftweaken}[2]{\text{qhw}~{#1}~{#2}}
+\newcommand{\eqtshiftsubst}[2]{\text{qhu}~{#1}~{#2}}
+\newcommand{\eqtsubstweaken}[1]{\text{quw}~{#1}}
+\newcommand{\eqtsubstsubst}[1]{\text{quu}~{#1}}
+\newcommand{\eqtcongweaken}[2]{\text{qcw}~{#1}~{#2}}
+%% \newcommand{\eqterm}[8]{\LENV;{#1};{#2};{#3} \models {#4} : ({#5} \vdash {#6} = {#7} : {#8})}
+\newcommand{\eqterm}[8]{{#4} \models_{\LENV,{#1},{#2},{#3}} ({#5} \vdash {#6} = {#7} : {#8})}
+\newcommand{\knotbox}[1]{{\hspace{-1em}\framebox{\mbox{\ensuremath{#1}}}}}
+
+\newcommand{\wsterm}[7]{({#3}) \models_{#5} ({#4} \vdash_{#7} {#6})}
+\newcommand{\wnindex}[7]{({#3}) \models_{#5} ({#4} \vdash_{#7} {#6})}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "Main"
+%%% End:

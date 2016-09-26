@@ -86,3 +86,153 @@
 %format indArith     = ind "_{" A "}"
 %format inIFix       = "\Varid{in_{IF}}"
 %format outIFix      = "\Varid{out_{IF}}"
+
+%format vl1  = "\Varid{vl}_1"
+%format vl2  = "\Varid{vl}_2"
+%format Γ    = "\Gamma"
+%format Γ1   = Γ "_1"
+%format Γ2   = Γ "_2"
+%format Γ3   = Γ "_3"
+%format Δ    = "{\Delta}"
+%format Δ1   = "{\Delta_1}"
+%format Δ2   = "{\Delta_2}"
+%format Δ3   = "{\Delta_3}"
+%format Δ'   = "{\Delta'}"
+
+%format ⊢    = "\vdash"
+%format ∈    = "\in"
+%format p1   = p "_1"
+%format p2   = p "_2"
+%format p3   = p "_3"
+%format e1   = e "_1"
+%format e2   = e "_2"
+%format e3   = e "_3"
+%format t1   = t "_1"
+%format t2   = t "_2"
+%format t3   = t "_3"
+%format s1   = s "_1"
+%format s2   = s "_2"
+%format s3   = s "_3"
+%format S1   = S "_1"
+%format S2   = S "_2"
+%format S3   = S "_3"
+%format T1   = T "_1"
+%format T2   = T "_2"
+%format T3   = T "_3"
+%format T11  = T "_{11}"
+%format T12  = T "_{12}"
+%format T13  = T "_{13}"
+%format T21  = T "_{21}"
+%format T22  = T "_{22}"
+%format T23  = T "_{23}"
+
+%format α    = "\alpha"
+%format αi   = α "_" i
+%format β    = "\beta"
+%format βs   = \beta "{" s "}"
+%format η    = "\eta"
+%format τ    = "\tau"
+%format τ₁    = τ "_1"
+%format τ₂    = τ "_2"
+%format τ1    = τ "_1"
+%format τ2    = τ "_2"
+%format τ'
+%format ε    = "\epsilon"
+%format Φ    = "\Phi"
+%format ≠    = "\neq"
+%format mα   = "m_\alpha"
+%format mβ   = "m_\beta"
+%format sα   = "s_\alpha"
+%format sβ   = "s_\beta"
+%format λ    = "\lambda"
+%format Λ    = "\Lambda"
+
+%format Ψ    = "\Psi"
+%format →    = "\rightarrow"
+%format ⇒    = "\Rightarrow"
+%format ↦    = "\mapsto"
+%format ⊆    = "\subseteq"
+%format ∘    = "\circ"
+%format ∧    = "\wedge"
+%format ∀    = "\forall"
+%format n₁   = n "_1"
+%format nᵢ   = n "_i"
+%format e₁   = e "_1"
+%format e₂   = e "_2"
+%format shiftN  =  shift "_\mathbb{N}"
+%format substT = subst "_" T
+%format substN = subst "_\mathbb{N}"
+%format substt = subst "_" t
+%format subste = subst "_" e
+
+%format shifte = shift "_" e
+%format shiftα = shift "_" α
+%format substα = subst "_" α
+%format shiftβ = shift "_" β
+%format substβ = subst "_" β
+%format shiftα'  = shift' "_" α
+%format substα'  = subst' "_" α
+%format shiftβ'  = shift' "_" β
+%format substβ'  = subst' "_" β
+%format substℕα = subst "_{\mathbb{N},\alpha}"
+%format weakenα = weaken "_" α
+
+%format liftα = lift "_{\alpha}"
+%format lifts = lift "_" s
+
+%format (overlinei (x)) = "\igcomp{" x "}{\igmv{i}}"
+%format (overline (x)) = "\overline{" x "}"
+
+%format fun       = "\mathbf{fun}"
+%format sort      = "\mathbf{sort}"
+%format namespace = "\mathbf{namespace}"
+%format env       = "\mathbf{env}"
+
+%format pat1   = pat "_1"
+%format pat2   = pat "_2"
+%format pat3   = pat "_3"
+
+%format bs_i    = bs "_" i
+%format tm_T    = tm "_" T
+%format tm_Ti   = tm "_{" T "," i "}"
+%format tm_E    = tm "_" E
+%format S_i     = S "_" i
+%format T_i     = T "_" i
+%format u_i     = u "_" i
+
+%format xα      = "x_" α
+%format bα      = "b_" α
+%format bβ      = "b_" β
+%format Sα      = "S_" α
+%format Sβ      = "S_" β
+%format Iα      = "1_" α
+%format Iβ      = "1_" β
+%format ⟦       = "\llbracket\:"
+%format ⟧       = "\:\rrbracket"
+%format ϑ       = "\vartheta"
+%format ϑt      = "{\vartheta}{t}"
+%format ϑx      = "{\vartheta}{x}"
+%format θ       = "\theta"
+
+%format (subscript (x) (y)) = "{" x "}_{" y "}"
+%format (box (stuff)) = "\hspace{-1em}\framebox{\mbox{\ensuremath{" stuff "}}}"
+%format (mathit x)    = "\mathit{" x "}"
+
+%format ►       = "\triangleright_\alpha"
+%format ►►      = "\triangleright_\beta"
+
+%format e_1 = e "_1"
+%format e_2 = e "_2"
+%format inα      = ∈ "_" α
+%format inβ      = ∈ "_" β
+%format inγ      = ∈ "_" γ
+%format ∨        = "\vee"
+%format •        = "\bullet"
+
+%format (bindspec (bs) (s)) = "[" bs "]" s
+%format dom      = "\dom"
+
+%format (evalsym (bs) sym th) = "{\evalsym{" bs "}{" sym "}{" th "}}"
+%format (evalrbs (rbs) l e th) = "{\evalrbs{" rbs "}{" l "}{" e "}{" th "}}"
+%format LENV = "\LENV"
+%format (symflatten l r b) = "{\symflatten{" l "}{" r "}{" b "}}"

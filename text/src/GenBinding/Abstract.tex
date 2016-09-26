@@ -1,0 +1,50 @@
+
+To lighten the burden of programming language mechanization, many approaches
+have been developed that tackle the substantial boilerplate which arises from
+variable binders. Unfortunately, existing approaches for first-order
+representations are limited to the boilerplate that concerns the syntax of
+languages and do not tackle common boilerplate lemmas that arise for semantic
+relations such as typing. Consequently, the human mechanizer is still burdened
+with proving these substantial boilerplate lemmas manually.
+
+We address this issue by extending the \Knot specification language with
+definitions of relations on top of the existing support for
+syntactic sorts. The language ensures that the expressions that appear in
+these relation definitions are well-scoped and explicitates when terms cross
+binders to avoid capture. We also extend \Knot's code generator \Needle to produce
+specialized \Coq definitions, including boilerplate such as well-scopedness,
+weakening and
+substitution lemmas for relations.
+
+%% In cases where the substitution lemma cannot be derived fully automatically,
+%% \Needle leaves proof obligations for the human mechanizer.
+
+Our evaluation shows on average 73\% savings in comparison to an unassisted
+approach and 34\% to an assisted approach without support for relations in a
+case-study of type-safety mechanizations for 10 languages. In particular we set
+a new record for the \POPLmark challenge (1a + 2a) by providing a solution in
+under 200 lines of code.
+
+%% (defun savings (smaller bigger)
+%%   (let*
+%%     ((pcts (-zip-with
+%%              (lambda (x y) (/ (float x) y))
+%%              smaller
+%%              bigger))
+%%      (l (length pcts))
+%%     )
+%%     (- 1.0 (expt (-product pcts) (/ 1.0 l)))
+%%   )
+%% )
+%%
+%% (let
+%%    ((manual '(150 316 454 676 731 768 1061 787 882))
+%%     (esop '(83 198 118 269 247 289 476 504 591))
+%%     (popl '(54 149 75 108 171 157 193 325 341 420))
+%%    )
+%%    (cons (savings popl esop) (savings popl manual)))
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../Main"
+%%% End:

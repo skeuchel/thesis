@@ -4,3 +4,57 @@ Mechanizing formal meta-theory in proof assistants is crucial, both for the
 increased confidence in complex designs and as a basis for technologies such as
 proof-carrying code.  Formal reasoning in proof assistants, also known as
 mechanization, has high development costs.
+
+To lighten the burden of programming language mechanization, many
+approaches have been developed that tackle the substantial boilerplate which
+arises from variable binders. Unfortunately, the existing approaches are limited
+in scope.
+%% STEVEN: This is still valid, but I hope it's not misleading the reader into
+%% thinking we deal with typing relations directly.
+As a consequence, the human mechanizer is still unnecessarily burdened with
+binder boilerplate and discouraged from taking on richer languages.
+
+This paper presents \Knot, a new approach that substantially extends the support
+for binder boilerplate. \Knot is a highly expressive language for natural and
+concise specification of syntax with binders. Its meta-theory constructively
+guarantees the coverage of a considerable amount of binder boilerplate for
+well-formed specifications, including that for well-scoping of terms and context
+lookups. \Knot also comes with a code generator, \Needle, that specializes the
+generic boilerplate for convenient embedding in \Coq and provides a tactic
+library for automatically discharging proof obligations that frequently come up
+in proofs of weakening and substitution lemmas of type-systems.
+
+Our evaluation shows, that Needle \& Knot significantly reduce the size of
+language mechanizations (by 40\% in our case study). Moreover, as far as we
+know, \Knot enables the most concise mechanization of the \POPLmark Challenge
+(1a + 2a) and is two-thirds the size of the next smallest. Finally, \Knot allows
+us to mechanize for instance dependently-typed languages, which is notoriously
+challenging because of dependent contexts and mutually-recursive sorts with
+variables.
+
+%% POPL 2014 Submission
+%%
+%%   A key concern in the mechanization of programming language metatheory is
+%%   the representation of terms with variable binding. The properties of
+%%   operations manipulating terms are notoriously burdensome to prove and the
+%%   amount of work required to scale formalizations to realistic programming
+%%   languages with rich binding forms is deemed infeasible. This is a pity,
+%%   because we lose the practical benefits of mechanizing real programming
+%%   languages.
+%%
+%%   We present a new solution to generically handle the boilerplate involved in
+%%   mechanizations that scales to rich binding forms and advanced rules of
+%%   scoping. We define a new specification language for abstract syntax with
+%%   binding and implement a code generator that produces \Coq code for the
+%%   representation of the abstract syntax, syntactic operations and proofs of
+%%   their properties.
+%%
+%%   We illustrate how our approach removes the burden of variable binding
+%%   boilerplate in the mechanization of realistic programming languages on a
+%%   list of example specifications and a solution of the PoplMark challenge
+%%   based on the generated code.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../Main"
+%%% End:

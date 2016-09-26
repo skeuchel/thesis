@@ -20,7 +20,11 @@
 
 % Figures (titlepage among others)
 \usepackage{color}
+\usepackage{pgfplots}
 \usepackage{graphicx}
+\usepackage{mathtools}
+\usepackage[all,cmtip]{xy}
+\usepackage{mathpartir}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsthm}
@@ -28,6 +32,10 @@
 \usepackage{bcprules}
 \usepackage{comment}
 \usepackage{float}
+\usepackage{xspace}
+\usepackage{booktabs}
+\usepackage{textgreek}
+
 
 % page dimensions
 % taken from Michael's book, the name of this page format is StudienPartitur
@@ -307,6 +315,12 @@
      \end{exampleTheoremEnv}
   }
 
+\newtheorem{thm}{Theorem}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{defn}[thm]{Definition}
+%% \newtheorem{example}[thm]{Example}
+
 
 % One can be sure to be in math mode.
 \newcommand{\pred}[1]{\ensuremath{#1}}
@@ -344,3 +358,7 @@
 }{
 \newcommand{\revisionBoundary}{}
 }
+
+\definecolor{gray}{gray}{0.7}
+\definecolor{dark-gray}{gray}{0.4}
+\definecolor{light-gray}{gray}{0.8}

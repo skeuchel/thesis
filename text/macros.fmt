@@ -200,3 +200,8 @@
 %format xxx = "\times"
 %format |- = "\vdash"
 %format ~= = "\equiv"
+
+%format indArith2 = ind "_{" A "}^2"
+%format inMTC     = "{{\Conid{in}}_{" M "}}"
+%format outMTC    = "{{\Conid{out}}_{" M "}}"
+%format foldMTC   = "{{" fold "}_{" M "}}"

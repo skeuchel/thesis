@@ -9,7 +9,7 @@
 In Section \ref{sec:mod:datatypesalacarte} we focused on programming in
 Haskell. In this Section we turn our attention towards performing modular
 constructions of datatypes, functions and inductive proofs in a proof-assistant
-like Coq.
+like Agda or Coq.
 
 \subsection{Modular Definitions in Coq}
 
@@ -22,11 +22,11 @@ like Coq.
 
 Unfortunately, we cannot directly translate the definitions of the
 \emph{Datatypes \`a la Carte} approach of Section
-\ref{sec:mod:datatypesalacarte} to a proof assistant like Agda or Coq. They
-commonly require all datatype definitions to be to be \emph{strictly-positive}
-so that they denote proper inductive definitions.  Lifting this restriction,
+\ref{sec:mod:datatypesalacarte} to a proof-assistant. These assistants commonly
+require all datatype definitions to be to be \emph{strictly-positive} so that
+all datatypes denote proper inductive definitions.  Lifting this restriction,
 i.e. allowing arbitrary non strictly-positive recursive datatypes, renders the
-theory of the proof assistant inconsistent \cite{cpdt}.
+theory of the proof-assistant inconsistent \cite{cpdt}.
 
 
 We define \emph{strictly positive types} (SPT) by using the following generative
@@ -41,9 +41,10 @@ and |mu| represent coproduct, cartesian product, exponentiation
 and least fixed point construction.
 %}
 
-For |FixDTC f| to be strictly positive this means that the argument
-functor |f| has to be strictly-positive, i.e. it corresponds to a term
-built with the above grammar with one free type variable.
+For |FixDTC f| from Section \ref{sec:mod:datatypesalacarte} to be strictly
+positive means that the argument functor |f| has to be strictly-positive,
+i.e. it corresponds to a term built with the above grammar with one free type
+variable.
 
 
 %{
@@ -58,7 +59,7 @@ This is a valid Haskell declaration, but it does not satisfy the positivity
 requirements and is hence rejected by Coq. While Coq can automatically determine
 the positivity for any concrete functor by inspecting its definition, it cannot
 do so for an abstract functor like the one that appears in the definition of
-|FixDTC|. Hence, Coq also rejects |FixDTC|.
+|FixDTC|. Hence, Coq conservatively rejects |FixDTC|.
 %}
 
 Of course, we have no intention of using non-strictly positive functors for our

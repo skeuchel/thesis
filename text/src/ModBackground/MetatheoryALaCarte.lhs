@@ -171,11 +171,11 @@ along functor composition.
 \paragraph{Modular Algebras}
 MTC defines a single generic Coq type class, |FAlg|, for the definition of
 semantic algebras that encompasses both, ordinary |F|-algebras and Mendler
-algebras. Semantic functions can be explicitly named and |FAlg| take a (|name|)
+algebras. Semantic functions can be explicitly named and |FAlg| take this |name|
 as an index. The |Mixin| type slightly generalizes Mendler algebras by using an
 additional type parameter instead of the universal type quantification. This
-generalization is also useful for defining non-inductive language features such
-as general recursion or higher-order binders.
+generalization is useful for defining non-inductive language features such as
+general recursion or higher-order binders.
 
 Feature compositions are handled generically by the following instance:
 

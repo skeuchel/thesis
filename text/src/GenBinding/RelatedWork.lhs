@@ -23,7 +23,7 @@ The \Ott tool \cite{ottjfp} allows the specification of concrete syntax of
 languages, including binding specifications, and of inductive relations on
 terms. However, well-scoping of relations is left unchecked in \Ott.  While \Ott
 only generates datatype and function definitions for syntax and relations in multiple
-proof assistants, support for lemmas is provided by the additional
+proof-assistants, support for lemmas is provided by the additional
 \LNGen\cite{lngen} tool which generates locally-nameless \Coq definitions
 from an \Ott specification. It also generates syntax-related boilerplate but
 does not tackle boilerplate for semantic relations.

@@ -607,7 +607,7 @@ $$
 \end{table}
 
 Table \ref{fig:systemfexists:casestudy} summarizes the effort required to
-mechanize \fexists in the \Coq proof assistant in terms of the de Bruijn
+mechanize \fexists in the \Coq proof-assistant in terms of the de Bruijn
 representation.  It lists the lines of \Coq code for different parts divided in
 binder-related \emph{boilerplate} and other \emph{useful} code.  The
 \emph{specification} row shows the code necessary to fully specify the syntax

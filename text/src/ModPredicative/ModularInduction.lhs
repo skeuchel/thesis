@@ -25,14 +25,13 @@ Consider the induction principle |indArith| for arithmetic expression.
 
 %}
 
-It takes a proposition |p| as parameter and inductive steps |hl| and
-|ha| for each case of the initial algebra. We say that |hl| and |ha|
-together form a \emph{proof algebra} of |p|. An inductive step
-consists of showing |p| for an application of the initial algebra
-given proofs of |p| for all recursive positions. In case of a literal
-we have no recursive positions and in case of addition we have two.
-Proof algebras for other datatypes differ in the number of cases and
-the number of recursive positions.
+It takes a proposition |p| as parameter and inductive steps |hl| and |ha| for
+each case of the initial algebra. We say that |hl| and |ha| together form a
+\emph{proof algebra} of |p|. An inductive step consists of showing |p| for an
+application of the initial algebra given proofs of |p| for all recursive
+positions. In case of a literal we have no recursive positions and in case of
+addition we have two. Proof algebras for other datatypes differ in the number of
+cases and the number of recursive positions.
 
 \paragraph{All modalities}
 In the following we develop a uniform representation of proof algebras to allow
@@ -44,7 +43,9 @@ a|) in an (|f a|).
 
 \paragraph{Example}
 The following type |ArithAll| is an example of an all modality for arithmetic
-expressions.
+expressions. The constructor |ALit| encodes that the all modality holds for
+literals and |AAdd| encodes that the all modality holds for |(Add x y)| if |p|
+holds for both recursive positions |x| and |y|.
 
 < data ArithAll a p :: ArithF a -> Prop where
 <   ALit  ::                ArithAll a p (Lit n)
@@ -80,13 +81,13 @@ proof algebra of a property |p| for the initial algebra and constructs
 a proof for every value of |Fix|.
 
 
-\subsection{Composing proofs}\label{ssec:modpred:proofs}
+\subsection{Composing Proofs}\label{ssec:modpred:proofs}
 
-The modular composition of signature and semantic functions in our approach is
-the same as in DTC and MTC. We now turn towoards the modular composition of
-proofs. Composing two instances of the |PFunctor| class is straightforward by
-inspecting the value of |xs| of the coproduct (|(f :+: g) a|) of the two
-functors.
+The modular composition of signatures and semantic functions in our approach,
+based on co-products of functors, is the same as in DTC and MTC. We now turn
+towards the modular composition of proofs. Composing two instances of the
+|PFunctor| class is straightforward by inspecting the value of |xs| of the
+coproduct (|(f :+: g) a|) of the two functors.
 
 \begin{figure}[t]
 \fbox{

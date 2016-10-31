@@ -280,15 +280,18 @@
 \newcommand{\pindex}[1]{\myIndex{#1}{#1}}
 
 % Commands for making todo notes. \todo/1 is also available.
-\ifdraft{
-\newcommand{\sk}[1]{\todo[color=green]{SK: #1}}
-\newcommand{\steven}[1]{\todo[color=green]{SK: #1}}
-\newcommand{\tom}[1]{\todo[color=red]{Tom: #1}}
-}{
-\newcommand{\sk}[1]{}
-\newcommand{\steven}[1]{}
-\newcommand{\tom}[1]{}
-}
+%\ifdraft{
+\newcommand{\sk}[2]{\marginpar{\textcolor{green}{SK: #2}}\textcolor{green}{#1}}
+\newcommand{\steven}[1]{\marginpar{\textcolor{green}{SK}}\textcolor{green}{#1}}
+\newcommand{\tom}[1]{\marginpar{\textcolor{green}{TOM}}\textcolor{green}{#1}}
+\newcommand{\scw}[1]{\marginpar{\textcolor{green}{SCW}}\textcolor{green}{#1}}
+\newcommand{\new}[1]{\marginpar{\textcolor{blue}{NEW}}\textcolor{blue}{#1}}
+%}{
+%\newcommand{\sk}[1]{}
+%\newcommand{\steven}[1]{}
+%\newcommand{\tom}[1]{}
+%\newcommand{\new}[1]{#1}
+%}
 
 % A command for making a structural note, which is different from a todo note.
 % These notes won't appear in the list of todos.

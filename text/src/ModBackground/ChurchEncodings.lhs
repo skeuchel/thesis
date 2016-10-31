@@ -7,11 +7,10 @@
 
 \section{Church Encodings}\label{sec:mod:churchencodings}
 
-\subsection{Reasoning with Church encodings}
+\subsection{Reasoning with Church Encodings}
 
 %{
 %format .         = "."
-%format indArith2 = ind "_{" A "}^2"
 
 Church encodings have problems supporting proper induction principles,
 like the induction principle for arithmetic expressions |indArith| in
@@ -20,8 +19,8 @@ Section \ref{ssec:modularinductivereasoning}. MTC uses a
 
 < indArith2 ::
 <   forall ((p   :: (Arith -> Prop)).
-<   forall ((hl  :: (forall n. p (InMTC (Lit n)))).
-<   forall ((ha  :: (forall x y. p x -> p y -> p (InMTC (Add x y)))).
+<   forall ((hl  :: (forall n. p (inMTC (Lit n)))).
+<   forall ((ha  :: (forall x y. p x -> p y -> p (inMTC (Add x y)))).
 <   Algebra ArithF (exists a. p a)
 
 The induction principle uses a dependent sum type to turn a proof
@@ -52,18 +51,17 @@ universal property of folds.
 <        (forall e. h (inMTC e) = alg h e) ->
 <          h e = foldMTC alg e
 
-In an initial algebra representation of an inductive datatype, we have
-a single implementation of a fold operator that can be proven
-correct. In MTC's approach based on Church-encodings however, each
-term consists of a separate fold implementation that must satisfy the
-universal property.
+In an initial algebra representation of an inductive datatype, we have a single
+implementation of a fold operator that can be proven correct. In MTC's approach
+based on Church encodings however, each term consists of a separate fold
+implementation that must satisfy the universal property.
 
 \end{enumerate}
 
-Hence, in order to enable reasoning MTC must provide a proof of the
-universal property of folds for every value of a modular datatype that
-is used in a proof. This is mostly done by packaging a term and the
-proof of the universal property of its fold in a dependent sum type.
+Hence, in order to enable reasoning MTC must provide a proof of the universal
+property of folds for every value of a modular datatype that is used in a
+proof. This is mostly done by packaging a term and the proof of the universal
+property of its fold in a dependent sum type.
 
 > type FixUP f = exists ((x :: FixMTC f)). UniversalProperty f x
 

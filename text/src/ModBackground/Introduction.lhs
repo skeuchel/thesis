@@ -9,7 +9,8 @@ modify their behavior. At the same time, unprincipled copy-\&-paste approaches,
 even performed by automated tools, are not acceptable. Components must have a
 meaning beyond their textual form and independently of a particular composition;
 they must support \emph{modular reasoning}. \sk{Discuss statically-typed
-  components as one form of modular reasoning to ensure absence of type errors.}
+  components as one form of modular reasoning to ensure absence of type
+  errors.}{}
 
 \subsection{Modular Programming Languages}
 \sk{This should first talk about modularity in the specification of programming

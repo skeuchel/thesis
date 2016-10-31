@@ -376,7 +376,7 @@ Similarly, for \textsc{WFM-Put} we have that |put|~$\sigma$~|>> eval e == put|~$
 \subsection{Lambda}
 
 The case study represents the binders of the lambda feature using
-PHOAS~\cite{PHOAS} to avoid many of the boilerplate definitions and proofs about
+PHOAS~\cite{phoas} to avoid many of the boilerplate definitions and proofs about
 term well-formedness found in first-order representations.
 %The parametricity of the expression functor requires
 %the soundness proofs to induct over an equivalence relation, the

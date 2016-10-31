@@ -21,24 +21,23 @@ conservative restrictions and rejects both: a) DTC's type level fixed-points
 because it cannot see that the definition is always strictly-positive, and b)
 DTC's fold operator because it cannot determine termination automatically.
 
-MTC solves both problems by using extensible Church-encodings. However, MTC's
-use of extensible Church-encodings is unsatisfactory and this solution leaves
-much to be desired.
+MTC solves both problems by using extensible Church encodings. However, MTC's
+use of extensible Church encodings is unsatisfactory and the solution leaves
+much to be desired:
 
 \begin{enumerate}
 \item
-  By using Church-encodings MTC is forced to rely on an impredicative sort and
-  uses Coq's impredicative-set option, which is known to be inconsistent with
-  some standard axioms of classical mathematics.
-
-  %% This option is known to lead to logical inconsistency, and thus
-  %% undermines all formal results obtained in MTC.
+  By using Church encodings MTC is forced to rely on an impredicative sort and
+  uses Coq's \texttt{impredicative-set} option, which is known to be
+  inconsistent with some standard axioms of classical mathematics. Moreover,
+  this restricts the approach to systems that allow impredicative encodings
+  and thus rules out systems that are fully predicative like Agda.
 
 \item
-  The fixpoint combinator provided by Church-encodings admits too many
+  The fixpoint combinator provided by Church encodings admits too many
   functors. For inductive reasoning, only strictly-positive functors are valid,
   i.e, those functors whose fixpoints are inductive datatypes. Yet,
-  Church-encodings do not rule out other functors.  Hence, in order to reason
+  Church encodings do not rule out other functors.  Hence, in order to reason
   only about inductive values, MTC requires a witness of inductivity: the
   universal property of folds. Since every value comes with its own
   implementation of the fold operator, MTC needs to keep track of a different
@@ -51,23 +50,28 @@ much to be desired.
   fixpoints.
 
 \item
-  Church-encodings do not support proper induction principles. MTC relies on a
+  Church encodings do not support proper induction principles. MTC relies on a
   \emph{poor-man's induction principle} instead and requires the user to provide
   additional well-formedness proofs.  Even though these can be automated with
   proof tactics, they nevertheless complicate the use of the framework.
 
 \end{enumerate}
 
-
+\new{
 We take a better approach to the problem by applying well-known datatype-generic
 programming (DGP) techniques to represent modular datatypes, to build functions
 from functor algebras with generic folds and to compose proofs from proof
-algebras by means of generic induction. Moreover, for certain functionality and
-proofs our approach can achieve more reuse than MTC: instead of composing
-modular components we provide a single generic definition once and for all.
+algebras by means of generic induction. This overcomes the above shortcomings:
+1. it does not assume \texttt{impredicative-set} or any axioms 2. a witness of
+inductivity is always associated with the type, i.e. a container instance for a
+functor, and not with values and 3. the generic induction principle is a proper
+one that does not rely on any additional well-formedness conditions. Moreover,
+for certain functionality and proofs our approach can achieve more reuse than
+MTC: instead of composing modular components we provide a single generic
+definition once and for all.
+}
 
 \paragraph{Outline}
-
 In our approach to modular reasoning we take a top down approach. We first
 present the user-facing programming in Section
 \ref{sec:mod:strictlypositivefunctors} based on type classes for

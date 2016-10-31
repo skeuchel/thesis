@@ -13,21 +13,18 @@
 
 \section{Polynomial Functors}\label{sec:mod:polynomial}
 
-In the previous section we have implemented generic functions for
-functorial mappings, fixed points, folds and generic proofs about
-their properties.
+In the previous section we have implemented generic functions for functorial
+mappings, fixed points, folds and generic proofs about their properties.
 
-Other common functionality can be treated with generic implementations
-as well. In this section we look at a generic implementation of
-equality testing and proofs about its correctness. These functions are
-used for example in the MTC framework in the implementation of a
-modular type-checker that tests if both branches of an |if| expression
-have the same type and that the function and argument type of a
-function application are compatible. Furthermore for reasoning about
-functions that use equality testing we need proofs about its
-correctness. We thus include the equality function and the properties
-in an equality type class that is shown in Figure
-\ref{fig:equalityclass}.
+Other common functionality can be provided with generic implementations as
+well. In this section we look at a generic implementation of equality testing
+and proofs about its correctness. Equality testing is used for example in the
+MTC framework in the implementation of a modular type-checker that tests if both
+branches of an |if| expression have the same type and that the function and
+argument type of a function application are compatible. Furthermore for
+reasoning about functions that use equality testing we need proofs of its
+correctness. We thus include the equality function and the properties in an
+equality type class that is shown in Figure \ref{fig:equalityclass}.
 
 
 \begin{figure}[t]
@@ -52,18 +49,18 @@ in an equality type class that is shown in Figure
 \end{figure}
 
 
-When choosing an approach to generic programming there is a trade-off
-between the expressivity of the approach, i.e. the collection of types
-it covers, and the functionality that can be implemented generically
-using this approach. The container universe is a very expressive
-universe for which we have generically implemented folds and hence is
-well-suited as a solution for modularly defining datatypes and
-functions. However, it is too expressive for implementing equality
-generically as it also includes function types.
+When choosing an approach to generic programming there is a trade-off between
+the expressivity of the approach, i.e. the collection of types it covers, and
+the functionality that can be implemented generically using the approach. The
+container universe is a very expressive universe that supports a generic
+definitoin of fold and hence is well-suited as a solution for modularly defining
+datatypes and functions. However, it is too expressive for implementing equality
+generically as it also includes function types for which equality is in general
+not decidable.
 
-So instead we restrict ourselves to the universe of polynomial
-functors to implement equality generically. \steven{Motivate the
-choice of the universe. Add a citation.}
+So instead we restrict ourselves to the universe of polynomial functors to
+implement equality generically. \steven{Motivate the choice of the universe. Add
+  a citation.}
 
 \subsection{Universe}
 
@@ -173,33 +170,34 @@ disjoint union of the positions of the shapes of the components.
 
 The next essential piece for completing the universe embedding are
 conversions between the interpretations of the codes. The function
-|ptoUnary| converts the polynomial interpretation to the container
+|ptoCont| converts the polynomial interpretation to the container
 intepretation.
 
-< ptoUnary ::  (c :: Poly) ->
-<              ExtP c a -> Ext (PolyS c |> PolyP c) a
-< ptoUnary U        EU         = Ext () (\p -> case p of)
-< ptoUnary I        (EI a)     = Ext () (\() -> a)
-< ptoUnary (C c d)  (EL x)     = Ext (Left s) pf
-<   where  Ext s pf = ptoUnary c x
-< ptoUnary (C c d)  (ER y)     = Ext (Right s) pf
-<   where  Ext s pf = ptoUnary c y
-< ptoUnary (P c d)  (EP x y)   = Ext  (s1 , s2)
-<                                     (\p -> case p of
-<                                        Left p   -> pf1 p
-<                                        Right p  -> pf2 p)
-<   where  Ext s1 pf1 = ptoUnary c x
-<          Ext s2 pf2 = ptoUnary d y
+< ptoCont ::  (c :: Poly) ->
+<             ExtP c a -> Ext (PolyS c |> PolyP c) a
+< ptoCont U        EU         = Ext () (\p -> case p of)
+< ptoCont I        (EI a)     = Ext () (\() -> a)
+< ptoCont (C c d)  (EL x)     = Ext (Left s) pf
+<   where  Ext s pf = ptoCont c x
+< ptoCont (C c d)  (ER y)     = Ext (Right s) pf
+<   where  Ext s pf = ptoCont c y
+< ptoCont (P c d)  (EP x y)   = Ext  (s1 , s2)
+<                                    (\p -> case p of
+<                                       Left p   -> pf1 p
+<                                       Right p  -> pf2 p)
+<   where  Ext s1 pf1 = ptoCont c x
+<          Ext s2 pf2 = ptoCont d y
 
-Similarly we define the function |pfromUnary| that performs the conversion
-in the opposite direction. We omit the implementation.
+Similarly we define the function |pfromCont| that performs the conversion in the
+opposite direction. We omit the implementation.
 
-< pfromUnary ::
+< pfromCont ::
 <   (c :: Poly) -> Ext (PolyS c |> PolyP c) a -> ExtP c a
 
-To transport properties across these conversion functions we need to prove
-that they are inverses. These proofs proceed by inducting over the code;
-we omit them here.
+To transport properties, like the correctness of equality in Figure
+\ref{fig:equalityclass}, across these conversion functions we need to prove that
+they are inverses. These proofs proceed by inducting over the code; we omit them
+here.
 
 As the last step we derive an instance of |Container| from an instance of
 |Polynomial|. This way all the generic functionality of containers is also
@@ -207,8 +205,8 @@ available for polynomial functors.
 
 < instance Polynomial f => Container f where
 <   cont    =  PolyS pcode |> PolyP pcode
-<   from    =  ptoUnary pcode . pfrom
-<   to      =  pto . pfromUnary pcode
+<   from    =  ptoCont pcode . pfrom
+<   to      =  pto . pfromCont pcode
 <   fromTo  =  ...
 <   toFrom  =  ...
 
@@ -223,9 +221,9 @@ polynomial functor universe directly.
 
 > data FixP (c :: Poly) = FixP (ExtP c (FixP c))
 
-We define the generic equality function |geq| mutually recursively
-with |go| that recurses over the codes and forms an equality function
-for a partially constructed fixed point.
+We define the generic equality function |geq| mutually recursively with |go|
+that recurses over the codes and forms an equality function for a partially
+constructed fixed point.
 
 < geq :: (c :: Poly) -> FixP c -> FixP c -> Bool
 < geq c (FixP x) (FixP y) = go c x y
@@ -241,16 +239,15 @@ for a partially constructed fixed point.
 <     go (P c d)  (EP x x')  (EP y y')  =
 <       go c x y && go d x' y'
 
-In the same vein we can prove the properties of the |Eq| type class
-for this equality function using mutual induction over fixed points
-and partially constructed fixed points.
+In the same vein we can prove the properties of the |Eq| type class for this
+equality function using mutual induction over fixed points and partially
+constructed fixed points.
 
-Of course |FixP c| and |Fix (PolyS c ||> PolyP c)| are isomorphic and
-we can transport functions and their properties across this
-isomorphism to get a generic equality function on the fixed point
-defined by containers for a conventional polynomial functor which can
-be used to instantiate the |Eq| type class in Figure
-\ref{fig:equalityclass}.
+Of course |FixP c| and |Fix (PolyS c ||> PolyP c)| are isomorphic and we can
+transport functions and their properties across this isomorphism to get a
+generic equality function on the fixed point defined by containers for a
+conventional polynomial functor which can be used to instantiate the |Eq| type
+class in Figure \ref{fig:equalityclass}.
 
 < instance Polynomial f => Eq (Fix f)
 

@@ -52,9 +52,9 @@ In this section we review containers for generic programming and show
 how to resolve the problem of implementing folds and induction in a
 modular way by using generic implementations.
 
-An important property of this universe is that all strictly-positive functors
-can be represented as containers~\cite{constructingstrictlypositivetypes}. In
-this respect we do not loose any expressivity.
+An important property of the container universe is that it can represent all
+strictly-positive functors~\cite{constructingstrictlypositivetypes}. Hence, we
+do not loose any expressivity.
 
 \subsection{Universe}
 
@@ -122,7 +122,7 @@ The isomorphism between |ArithF| and |Ext ArithC| is witnessed
 by the following two conversion functions.
 
 < from :: ArithF a -> Ext ArithC a
-< from (Lit i)   = Ext (LitS i) (\p -> case p of)
+< from (Lit i)   = Ext (LitS i) (\p -> case p of {})
 < from (Add x y) = Ext AddS pf
 <   where  pf :: ArithP AddS -> a
 <          pf AddP1 = x
@@ -131,10 +131,10 @@ by the following two conversion functions.
 < to (Ext (LitS i)  pf) = Lit i
 < to (Ext AddS      pf) = Add (pf AddP1) (pf AddP2)
 
-Literals do not have recursive positions and hence we cannot come up
-with a value. In Coq one needs to refute the position value |p ::
-ArithP (Lit i)| as its type is uninhabited. We use a case distinction
-without alternatives as an elimination.
+Literals do not have recursive positions and hence we cannot come up with a
+position value. In Coq one needs to refute the position value |p :: ArithP (Lit
+i)| as its type is uninhabited. We use a case distinction without alternatives
+as an elimination.
 
 \paragraph{Coproducts}
 
@@ -274,7 +274,7 @@ functions to concrete functors and give instances for |Functor|,
 < instance Container f => Functor f where
 <   fmap f    = to . gfmap f . from
 < instance Container f => PFunctor f where
-<   All Q     = GAll Q . from
+<   All q     = GAll q . from
 < instance Container f => SPF f where
 <   Fix       = W S P
 <   inFix     = sup . from
@@ -318,16 +318,15 @@ datatypes. These relations are represented by inductive families where
 a constructor of the family corresponds to a rule defining the
 relation.
 
-When using logical relations over extensible datatypes the set of
-rules must be extensible as well. For instance, a well-typing relation
-of values |WTValue :: (Value, Type) -> Prop| must be extended with new
-rules when new cases are added to |Value|.
+When using logical relations over extensible datatypes the set of rules must be
+extensible as well. For instance, a well-typing relation of values |WTValue ::
+(Value, Type) -> Prop| must be extended with new rules when new cases are added
+to |Value|.
 
-Extensibility of inductive families is obtained in the same way as for
-inductive datatypes by modularly building inductive families as
-fixpoints of functors between inductive families. The following
-indexed functor |WTNatF| covers the rule that a natural number value
-has a natural number type.
+Extensibility of inductive families is obtained in the same way as for inductive
+datatypes by modularly building inductive families as fixpoints of functors
+between inductive families. The following indexed functor |WTNatF| covers the
+rule that a natural number value has a natural number type.
 
 < data WTNatF (wfv :: (Fix vf, Fix tf) -> Prop) ::
 <         (Value, Type) -> Prop where
@@ -335,7 +334,7 @@ has a natural number type.
 <            WTNat wfv (vi n, tnat)
 
 MTC constructs fixed points of indexed functors also by means of
-Church-encodings. The indexed variants of algebras and fixed points
+Church encodings. The indexed variants of algebras and fixed points
 are
 
 < type IAlgebra i (f :: (i -> Prop) -> i -> Prop) a =
@@ -343,29 +342,40 @@ are
 < type IFixMTC i (f :: (i -> Prop) -> i -> Prop) j =
 <    forall a. IAlgebra i f a -> a j
 
-For type-soundness proofs we perform folds over proof-terms in order
-to establish propositions on the indices and hence make use of the
-fold operation provided by Church-encodings. However, contrary to
-inductive datatypes we do not make use of propositions on proof-terms
-and hence do not need an induction principle for them. This also means
-that we do not need to keep track of the universal property of folds
-for proof-terms. Figure \ref{fig:indexedstrictlypositivefunctor}
-defines the type class |ISPF| that collects the necessary functions
-for modularly building logical relations.
+\new{
+For type-soundness proofs we perform folds over proof-terms in order to
+establish propositions on the indices and hence make use of the fold operation
+provided by Church encodings. However, contrary to inductive datatypes we do not
+make use of propositions on proof-terms and hence do not need an induction
+principle for them. This also means that we do not need to keep track of the
+universal property of folds for proof-terms.  Figure
+\ref{fig:indexedstrictlypositivefunctor} defines the type class |ISPF| that
+collects the necessary reasoning interface for modularly building logical
+relations and indexed folds.
+}
+
+\new{
+Since |Prop| is \emph{impredicative} in \Coq and induction-principles and
+universal properties are of no concern here, MTC's approach to modular inductive
+relations is sufficient for type-soundness proofs in \Coq and we can universally
+instantiate |ISPF| with the definitions from MTC. However, other kinds of
+meta-theoretic proofs may require induction principles for proof terms and the
+approach is still limited to systems that support impredicativity.
+}
 
 Alternatively we can use a universe of indexed containers
-\cite{indexedcontainers}. An |i|-indexed container is essentially a
-container together with an assignment of indices for each shape and
-each position of that shape.
+\cite{indexedcontainers} that does not have the above restrictions. An
+|i|-indexed container is essentially a container together with an assignment of
+indices for each shape and each position of that shape.
 
-More formally, an |i|-indexed container |S ||> P ||> R| is given by a
-family of shapes |S :: i -> *| and family of position types |P :: (j
-:: i) -> S j -> *| and an assignment |R :: (j :: i) -> (s :: S j) -> P
-j s -> i| of indices for positions. Figure \ref{fig:indexedcontainers}
-gives the definition of the extension and the fixed point of an
-indexed container. Similarly to containers, one can generically define
-a fold operator for all indexed containers and construct the coproduct
-of two indexed containers.
+More formally, an |i|-indexed container |S ||> P ||> R| is given by a family of
+shapes |S :: i -> *| and family of position types |P :: (j :: i) -> S j -> *|
+and an assignment |R :: (j :: i) -> (s :: S j) -> P j s -> i| of indices for
+positions. Figure \ref{fig:indexedcontainers} gives the definition of the
+extension and the fixed point of an indexed container. Similarly to containers,
+one can generically define a fold operator for all indexed containers and
+construct the coproduct of two indexed containers.
+
 
 \begin{figure}[t]
 \fbox{
@@ -396,11 +406,10 @@ of two indexed containers.
 \label{fig:indexedcontainers}
 \end{figure}
 
-
-Fixed points and fold operators can be defined generically on that
-universe similarly to Section \ref{ssec:contfixandfold}. Indexed
-containers are also closed under coproducts and indexed algebras can
-be modularly composed using type classes.
+Fixed points and fold operators can be defined generically on that universe
+similarly to Section \ref{ssec:contfixandfold}. Indexed containers are also
+closed under coproducts and indexed algebras can be modularly composed using
+type classes.
 
 
 %%% Local Variables:

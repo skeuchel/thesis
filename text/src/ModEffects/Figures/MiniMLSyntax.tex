@@ -1,23 +1,23 @@
 \begin{figure}[t]
-  \begin{center}
-    \begin{minipage}{\columnwidth}
-      \begin{center}
-        \fbox{
-        \hspace{-.3cm}
-          \begin{tabular}{r@{~}c@{~}lr}
-            {\tt e} & ::= & {\tt $\mathbb{N}$ $|$ e + e} & \textit{Arith}\\
-            & $|$ &  {\tt $\mathbb{B}$ $|$ {\bf if} e {\bf then} e {\bf else} e} & \textit{Bool} \\
-           %% & $|$ & {\tt {\bf case} e {\bf of \{ z} $\Rightarrow$ e $\mathbf{;}$ {\bf S} n $\Rightarrow$ e\}} & \textit{NatCase}\\
-            & $|$ & {\tt {\bf lam} x : T.e $|$ e e $|$ x} & \textit{Lambda}\\
-            & $|$ & {\tt {\bf ref} e $|$ !e $|$ e:=e} & \textit{References}\\
-            & $|$ & {\tt {\bf try} e {\bf with} e} $|$ {\bf error} & \textit{Errors}\\
-           %%  & $|$ & {\tt {\bf fix} x : T.e} & \textit{Recursion}\\
-          \end{tabular}
-        }
-      \end{center}
-    \end{minipage}
-    \begin{minipage}{\columnwidth}
+  \centering
+  \begin{minipage}{\columnwidth}
+    \begin{center}
+      \fbox{
       \hspace{-.3cm}
+        \begin{tabular}{r@{~}c@{~}lr}
+          {\tt e} & ::= & {\tt $\mathbb{N}$ $|$ e + e} & \textit{Arith}\\
+          & $|$ &  {\tt $\mathbb{B}$ $|$ {\bf if} e {\bf then} e {\bf else} e} & \textit{Bool} \\
+         %% & $|$ & {\tt {\bf case} e {\bf of \{ z} $\Rightarrow$ e $\mathbf{;}$ {\bf S} n $\Rightarrow$ e\}} & \textit{NatCase}\\
+          & $|$ & {\tt {\bf lam} x : T.e $|$ e e $|$ x} & \textit{Lambda}\\
+          & $|$ & {\tt {\bf ref} e $|$ !e $|$ e:=e} & \textit{References}\\
+          & $|$ & {\tt {\bf try} e {\bf with} e} $|$ {\bf error} & \textit{Errors}\\
+         %%  & $|$ & {\tt {\bf fix} x : T.e} & \textit{Recursion}\\
+        \end{tabular}
+      }
+    \end{center}
+  \end{minipage}
+  \begin{minipage}{\columnwidth}
+    \hspace{-.3cm}
     \begin{tabular}{cc}
       \begin{minipage}{.48\columnwidth}
         \fbox{
@@ -43,8 +43,7 @@
         }
       \end{minipage}
     \end{tabular}
-    \end{minipage}
-  \end{center}
+  \end{minipage}
   \caption{mini-ML expressions, values, and types}
   \label{fig:MiniMLSyntax}
 \end{figure}

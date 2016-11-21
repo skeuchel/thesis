@@ -4,6 +4,10 @@
 %include Formatting.fmt
 %include macros.fmt
 
+%format Sigma = "\Varid{\Sigma}"
+%format mu = "\sigma''"
+%format sigma = "\Varid{\sigma}"
+
 %if False
 
 > {-# OPTIONS -XRankNTypes -XDeriveFunctor -XFlexibleContexts #-}
@@ -51,10 +55,10 @@ with type:
 
 < (MonadState m s, MonadError m x) => Mendler (RefF :+: ErrF) (m a)
 
-The combination imposes both type class constraints while
-the monad type remains extensible with new effects. The complete set of
-effects used by the evaluation functions for the five language
-features used in our case study of Section~\ref{sec:CaseStudy} are given in Figure~\ref{fig:FeatureEffects}.
+The combination imposes both type class constraints while the monad type remains
+extensible with new effects. The complete set of effects used by the evaluation
+functions for the five language features used in our case study of
+Section~\ref{sec:mod:casestudy} are given in Figure~\ref{fig:FeatureEffects}.
 
 
 %if False
@@ -83,12 +87,10 @@ features used in our case study of Section~\ref{sec:CaseStudy} are given in Figu
 %-------------------------------------------------------------------------------
 \subsection{Example: References}
 \input{src/ModEffects/Figures/References_Figure}
-\steven{This section needs to explicate that values and computations are two
-  distinct sorts unlike SOS where values are a subset of expressions. The typing
-  relation is a relation on values only.}
-Figure~\ref{fig:references} illustrates this approach with definitions for the
-functor for expressions and the evaluation and typing algebras for the
-reference feature. Other features have similar definitions.
+
+Figure~\ref{fig:mod:references:datatypes} illustrates this approach with
+definitions for the functor for expressions and the evaluation and typing
+algebras for the reference feature. Other features have similar definitions.
 
 For the sake of presentation the definitions are slightly simplified from the
 actual ones in Coq. For instance, we have omitted issues related to the
@@ -100,12 +102,17 @@ values, unit values, reference types and unit types. There are also matching
 functions |isLoc| and |isTRef| for checking whether a term is a location value
 or a reference type, respectively.
 
-The type |RefF| is the functor for references. It has constructors for creating
-references (|Ref|), dereferencing (|DeRef|) and assigning (|Assign|)
-references. The evaluation algebra |evalRef| uses the state monad for its
-reference environment, which is captured in the type class constraint
-|MonadState Store m|.  The typing algebra (|typeofRef|) is also monadic, using
-the failure monad to denote ill-typing.
+The type |RefF| is the functor for expressions of references. It has
+constructors for creating references (|Ref|), dereferencing (|DeRef|) and
+assigning (|Assign|) references. The evaluation algebra |evalRef| uses the
+state monad for its reference environment, which is captured in the type class
+constraint |MonadState Store m|.  The typing algebra (|typeofRef|) is also
+monadic, using the failure monad to denote ill-typing.
+
+%% \steven{This section needs to explain that values and computations are two
+%% distinct sorts where values are a subset of expressions. The typing relation
+%% is a relation on values only.}
+
 
 % The definition of the algebra is quite straightforward.  itself is standard
 % and looks almost like the monolithic version defined over a non-extensible
@@ -121,42 +128,92 @@ the failure monad to denote ill-typing.
 % Similarly to the evaluation algebra, an observation function |isTRef| is used.
 
 %-------------------------------------------------------------------------------
-\subsection{Effect-Dependent Theorems}\label{ssec:mod:effectdependenttheorems}
-\input{src/ModEffects/Figures/EffectTheorems}
+\subsection{Effect-Dependent Theorems}
+\label{ssec:mod:effectdependenttheorems}
+%%\input{src/ModEffects/Figures/EffectTheorems}
 
 Monadic semantic function algebras are compatible with new effects and algebraic
 laws facilitate writing extensible proofs over these monadic algebras. Effects
 introduce further challenges to proof reuse, however: each combination of
 effects induces its own type soundness statement. Consider the theorem
-\LSoundS~in Figure \ref{thm:LSoundS} for a language with references
-which features a store $\sigma$ and a store typing $\Sigma$ that are related
-through the store typing judgement $\Sigma \vdash \sigma$. The initial store
-$\sigma$ is well-formed w.r.t. the initial store typing $\Sigma$, the final
-store typing $\Sigma'$ is an extension of the initial one, and the final store
-$\sigma'$ is well-formed w.r.t. $\Sigma'$. The |put| operation is used to
-constrain the initial and final store of the monadic computation.
+\ref{thm:LSoundS}%~in Figure \ref{fig:mod:effecttheorems}
+for a language with references which features a store $\sigma$ and a store
+typing $\Sigma$ that are related through the store typing judgement
+$\Sigma \vdash \sigma$:
+%
+\begin{gather*}
+  \forall e, t, \Sigma, \sigma.
+      \left\{\begin{array}{c}
+      | typeof e == return t | \\
+      \Sigma \vdash \sigma
+      \end{array}\right\} \rightarrow \\
+    \exists v, \Sigma', \sigma'.
+     \left\{\begin{array}{c}
+     |put sigma >> eval e == put mu >> return v| \\
+     \Sigma' \supseteq \Sigma \\
+     \Sigma' \vdash v : t \\
+     \Sigma' \vdash \sigma'
+     \end{array}\right\}
+  \tag{\textsc{LSound}$_S$}
+  \label{thm:LSoundS}
+\end{gather*}
+%
+\noindent The initial store $\sigma$ is well-formed w.r.t. the initial store
+typing $\Sigma$, the final store typing $\Sigma'$ is an extension of the initial
+one, and the final store $\sigma'$ is well-formed w.r.t. $\Sigma'$. The |put|
+operation is used to constrain the initial and final store of the monadic
+computation.
 
-Contrast this with the theorem \LSoundE~for a language with errors,
+Contrast this with the theorem \ref{thm:LSoundE}~for a language with errors,
 which must account for the computation possibly ending in an exception being
-thrown which is modeled by a disjunction in the conclusion.
-
-
+thrown which is modeled by a disjunction in the conclusion:
+%
+\begin{gather*}
+  \forall e, t. |typeof e == return t| \rightarrow \\
+    (\exists v. |eval e == return v| \wedge \vdash v : t) \vee
+    (\exists x. |eval e == throw x|)
+  \tag{\textsc{LSound}$_E$}
+  \label{thm:LSoundE}
+\end{gather*}
+%
 Clearly, the available effects are essential for the formulation of the
 theorem. A larger language which involves both exceptions and state requires yet
-another theorem \LSoundES~where the impact of both effects cross-cut one
-another\footnote{A similar proliferation of soundness theorems can be found in
-  TAPL~\cite{pierce}.}:
+another theorem \ref{thm:LSoundES}~where the impact of both effects cross-cut
+one another\footnote{A similar proliferation of soundness theorems can be found
+  in TAPL~\cite{pierce}.}:
+%
+\begin{gather*}
+  \forall e, t, \Sigma, \sigma.
+      \left\{\begin{array}{c}
+      | typeof e == return t | \\
+      \Sigma \vdash \sigma
+      \end{array}\right\}
+   \rightarrow \\
+    \exists v, \Sigma', \sigma'.
+     \left\{\begin{array}{c}
+     |put sigma >> eval e == put mu >> return v| \\
+     \Sigma' \supseteq \Sigma \\
+     \Sigma' \vdash v : t \\
+     \Sigma' \vdash \sigma'
+     \end{array}\right\} \\
+  \vee \\
+    \exists x.
+     |put sigma >> eval e == throw x|
+  \tag{\textsc{LSound}$_\mathit{ES}$}
+  \label{thm:LSoundES}
+\end{gather*}
 
 % \BO{Wondering whether some additional notes on $\Sigma$ related portions is
 % useful.}
 
-Modular formulations of \LSoundS~and \LSoundE~are useless for proving a modular
-variant of \LSoundES~because their induction hypotheses have the wrong form. The
-hypothesis for \LSoundE~requires the result to be of the form |return v|,
-disallowing |put mu >> return v| (the form required by \LSoundS).  Similarly,
-the hypothesis for \LSoundS~does not account for exceptions occurring in
-subterms. In general, without anticipating additional effects, type soundness
-theorems with fixed sets of effects cannot be reused modularly.
+Modular formulations of \ref{thm:LSoundS}~and \ref{thm:LSoundE}~are useless for
+proving a modular variant of \ref{thm:LSoundES}, because their induction
+hypotheses have the wrong form. The hypothesis for \ref{thm:LSoundE}~requires
+the result to be of the form |return v|, disallowing |put mu >> return v| (the
+form required by \ref{thm:LSoundS}).  Similarly, the hypothesis for
+\ref{thm:LSoundS}~does not account for exceptions occurring in subterms. In
+general, without anticipating additional effects, type soundness theorems with
+fixed sets of effects cannot be reused modularly.
 
 \begin{comment}
 These type classes and operations enable us to write evaluation
@@ -184,14 +241,13 @@ class Monad m where
     (>>=)   :: m a -> (a -> m b) -> m b
 \end{spec}
 
-The type |m a| describes computations of type |m|
-which produce values of type |a| when executed.
-The function | return | lifts a value of type |a| into a
-(pure) computation that simply produces the value. The \emph{bind} function
-| >>= | composes a computation |m a|, which produces values of type |a|,
-with a function that accepts a value of type |a| and returns
-a computation of type |b|. The convenient function |>>| defines a special case of bind
-that discards the intermediate value:
+The type |m a| describes computations of type |m| which produce values of type
+|a| when executed.  The function | return | lifts a value of type |a| into a
+(pure) computation that simply produces the value. The \emph{bind} function |
+>>= | composes a computation |m a|, which produces values of type |a|, with a
+function that accepts a value of type |a| and returns a computation of type
+|b|. The convenient function |>>| defines a special case of bind that discards
+the intermediate value:
 
 < (>>) :: Monad m => m a -> m b -> m b
 < ma >> mb = ma >>= \_ -> mb

@@ -29,8 +29,9 @@ substitution in sort and environment terms and lookups in environments.
 \subsection{Shifting}\label{ssec:shifting}
 
 \begin{figure}[t]
-  \begin{center}
-    \fbox{\begin{minipage}{0.98\columnwidth}
+  \centering
+  \fbox{
+    \begin{minipage}{0.98\columnwidth}
       \[\begin{array}{@@{}l@@{\hspace{1mm}}c@@{\hspace{1mm}}lr}
           c   & ::=  & 0 \mid |S|~c ~~   & \text{Cutoffs}
         \end{array}
@@ -88,9 +89,8 @@ substitution in sort and environment terms and lookups in environments.
       \end{tabular}
     \end{minipage}
   }
-  \end{center}
-\caption{Shifting of terms}
-\label{fig:shift}
+  \caption{Shifting of terms}
+  \label{fig:shift}
 \end{figure}
 
 Shifting adapts indices when a variable |x| is inserted into the context.

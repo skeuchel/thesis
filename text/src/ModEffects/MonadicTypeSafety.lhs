@@ -4,6 +4,8 @@
 %include macros.fmt
 %include Formatting.fmt
 
+%format env  = "\Varid{env}"
+
 %if False
 
 > {-# OPTIONS -XRankNTypes -XImpredicativeTypes -XTypeOperators -XMultiParamTypeClasses -XFlexibleInstances -XOverlappingInstances -XFlexibleContexts #-}
@@ -12,7 +14,7 @@
 
 %endif
 
-\section{Monadic Type Safety}
+\section{Monadic Type Safety}\label{sec:mod:monadictypesafety}
 
 As demonstrated in Section \ref{ssec:mod:effectdependenttheorems}, soundness
 theorem which hardwire the set of effects limit their modularity by rendering
@@ -73,11 +75,18 @@ split the type soundness into three kinds of theorems:
 \end{itemize}
 
 \begin{figure}[t]
+  \centering
   \fbox{
-  \includegraphics[width=.96\columnwidth]{src/ModEffects/Figures/Dependency-1.pdf}
-   }
-\caption{Dependency Graph}
-\label{fig:Dep-Graph}
+    \begin{minipage}{.98\columnwidth}
+      \begin{center}
+        \includegraphics
+          [width=.8\columnwidth]
+          {src/ModEffects/Figures/Dependency-1.pdf}
+      \end{center}
+    \end{minipage}
+  }
+  \caption{Dependency Graph}
+  \label{fig:Dep-Graph}
 \end{figure}
 \steven{There is an edge missing from FSound of Ref to LSound of AR.}
 
@@ -128,35 +137,37 @@ reused in any language which supports that unique combination, e.g. both
 %-------------------------------------------------------------------------------
 
 \subsection{Typing of Monadic Computations}\label{sec:Thm+Reuse}
-\steven{Introduce the typing relation for values first and then the
-  one for monadic computations. Make it clear that these are two separate
-  things.}
+%
 \begin{figure}[t]
+  \centering
   \fbox{
-  \begin{minipage}{.95\columnwidth}
-     \hspace{-1.5cm}\begin{minipage}{1.15\columnwidth}
-      \infrule[WFM-Illtyped]{}{
-        \Sigma \vdash_M |v_m| ~:~ |fail|
-      }
-      \vspace{.25cm}
-      \hspace{-1cm} \infrule[WFM-Return] {
-         \Sigma \vdash v ~:~ t
-      }
-      {
-       \Sigma \vdash_M |return v| ~:~ |return t|
-      }
-  \end{minipage}
-  \end{minipage}
- }
-\caption{Typing rules for pure monadic values.}
-\label{fig:WFM+Pure}
-\vspace{-.4cm}
+    \begin{minipage}{.95\columnwidth}
+       \hspace{-1.5cm}\begin{minipage}{1.15\columnwidth}
+          \infrule[WFM-Illtyped]{}{
+            \Sigma \vdash_M |v_m| ~:~ |fail|
+          }
+          \vspace{.25cm}
+          \hspace{-1cm} \infrule[WFM-Return] {
+             \Sigma \vdash v ~:~ t
+          }
+          {
+           \Sigma \vdash_M |return v| ~:~ |return t|
+          }
+      \end{minipage}
+    \end{minipage}
+   }
+  \caption{Typing rules for pure monadic values.}
+  \label{fig:WFM+Pure}
 \end{figure}
 
-The computation typing relation has the form: \[ \Sigma \vdash_M v_m : t_m \]
-The relation is polymorphic in an environment type |env| and an evaluation monad
-type |m|.  The parameters $\Sigma$, $v_m$ and $t_m$ have types |env|, |m Value|
-and |Maybe Type| respectively.
+For type-soundness we make use of two separate typing relations: a relation for
+values and one for computations. The value typing relation
+\[ \Sigma \vdash v : t \] is implicitly parameterized by an environment type
+$|env|$ and has three indices: an environment $\Sigma$, a value $v$ and a type
+$t$. The computation typing relation has the form:
+\[ \Sigma \vdash_M v_m : t_m \] The relation is polymorphic in an environment
+type |env| and an evaluation monad type |m|. The parameters $\Sigma$, $v_m$ and
+$t_m$ have types |env|, |(m Value)| and |(Maybe Type)| respectively.
 
 The extensible feature theorem \ref{thm:FSound} states that |eval| and |typeof|
 are related by the typing relation:
@@ -172,15 +183,15 @@ are related by the typing relation:
 %|m_t| may be confused with the monad type |m|.  Maybe some different
 %variable names are better? (This is low priority: if there's time,
 %because we need to make sure everything is consistently patched)}.
-The modular typing rules for this relation can impose constraints on
-the environment type |env| and monad type |m|. A particular language must
-instantiate |env| and |m| in a way that satisfies all the
-constraints imposed by the typing rules used in its features.
+The modular typing rules for this relation can impose constraints on the
+environment type |env| and monad type |m|. A particular language must
+instantiate |env| and |m| in a way that satisfies all the constraints imposed by
+the typing rules used in its features.
 
 Figure~\ref{fig:WFM+Pure} lists the two base typing rules of this
 relation. These do not constrain the evaluation monad and environment types and
 are the only rules needed for pure features. The \textsc{(WFM-Illtyped)} rule
-denotes that nothing can be said about computations (|m_e|) which are ill-typed.
+denotes that nothing can be said about computations (|v_m|) which are ill-typed.
 The \textsc{(WFM-Return)} rule ensures that well-typed computations only yield
 values of the expected type.
 
@@ -197,45 +208,45 @@ The boolean literal case is handled by a trivial application of
 interesting\footnote{We omit the environment $\Sigma$ to avoid clutter.}:
 %
 \begin{align*}
-\begin{array}{l}
-  (\vdash_M |eval e_c| : |typeof e_c|) \rightarrow
-  (\vdash_M |eval e_t| : |typeof e_t|) \rightarrow
-  (\vdash_M |eval e_e| : |typeof e_e|) \rightarrow \\ \\
-  %\multicolumn{2}{l}{
-  \vdash_M
-  \left(
-    \hspace{-8mm}
-    \begin{minipage}{43mm}
-      \begin{spec}
-        do
-          v <- eval e_c
-          case isBool v of
-            Just b   ->
-              if b  then eval e_t
-                    else eval e_e
-            Nothing  -> stuck
-      \end{spec}
+  \begin{array}{l}
+    (\vdash_M |eval e_c| : |typeof e_c|) \rightarrow
+    (\vdash_M |eval e_t| : |typeof e_t|) \rightarrow
+    (\vdash_M |eval e_e| : |typeof e_e|) \rightarrow \\ \\
+    %\multicolumn{2}{l}{
+    \vdash_M
+    \left(
+      \hspace{-8mm}
+      \begin{minipage}{43mm}
+        \begin{spec}
+          do
+            v <- eval e_c
+            case isBool v of
+              Just b   ->
+                if b  then eval e_t
+                      else eval e_e
+              Nothing  -> stuck
+        \end{spec}
+      \end{minipage}
+    \right) :
+    \left(
+      \hspace{-8mm}
+      \begin{minipage}{43mm}
+        \begin{spec}
+          do
+            t_c <- typeof e_c
+            t_t <- typeof e_t
+            t_e <- typeof e_e
+            guard (isTBool t_c)
+            guard (eqT t_t t_e)
+            return t_t
+        \end{spec}
     \end{minipage}
-  \right) :
-  \left(
-    \hspace{-8mm}
-    \begin{minipage}{43mm}
-      \begin{spec}
-        do
-          t_c <- typeof e_c
-          t_t <- typeof e_t
-          t_e <- typeof e_e
-          guard (isTBool t_c)
-          guard (eqT t_t t_e)
-          return t_t
-      \end{spec}
-  \end{minipage}
-  \right)
-  %}
-  \\
-\end{array}
-\tag{\textsc{WFM-If-Vc}}
-\label{thm:WFM+If+Vc}
+    \right)
+    %}
+    \\
+  \end{array}
+  \tag{\textsc{WFM-If-Vc}}
+  \label{thm:WFM+If+Vc}
 \end{align*}
 
 % \BO{Another comment. Earlier we talk about the monad |m| (lowercase), here we use
@@ -310,16 +321,17 @@ into two cases depending on whether |e_c|, |e_t|, or |e_e| was typed with
   \end{align*}
 
   After simplification, the typing expression has replaced the bind with
-  explicit values which can be reasoned with. If |isTBool t_c| is |false|, then
-  the typing expression reduces to |fail| and well-formedness again follows from
-  the \textsc{WFM-Illtyped} rule. Otherwise |t_c == TBool|, and we can apply the
-  canonical forms lemma
-    \[ \vdash |v| : |TBool| \rightarrow \exists b. |isBool v == Just b| \]
-  to establish that |v_c| is of the form |Just b|, reducing the evaluation to
-  either |return v_e| or |return v_t|. A similar case analysis on |eqT t_t t_e|
-  will either produce |fail| or |return t_t|. The former is trivially true, and
-  both $\vdash_M |return v_t|:|return t_t|$ and $\vdash_M |return v_e|:|return
-  t_t|$ hold in the latter case from the induction hypotheses.
+  explicit values which can be reasoned with. If |(isTBool t_c)| is |false|,
+  then the typing expression reduces to |fail| and well-formedness again follows
+  from the \textsc{WFM-Illtyped} rule. Otherwise |(t_c == TBool)|, and we can
+  apply the canonical forms lemma
+  \[ \vdash |v| : |TBool| \rightarrow \exists b. |isBool v == Just b| \] to
+  establish that |v_c| is of the form |(Just b)|, reducing the evaluation to
+  either |return v_e| or |return v_t|. A similar case analysis on |(eqT t_t
+  t_e)| will either produce |fail| or |(return t_t)|. The former is trivially
+  true, and both $\vdash_M |return v_t|:|return t_t|$ and
+  $\vdash_M |return v_e|:|return t_t|$ hold in the latter case from the
+  induction hypotheses.
 
   % \tom{Need more clarification here.}
   % In the \textsc{WFM-Return} case, |(do v_c <- eval c; ...)| simplifies to
@@ -350,8 +362,8 @@ with a new effect, each extensible case analysis requires a proof algebra for
 the new typing rules the effect introduces to the $\vdash_M$ relation.  More
 concretely, the conditional case of the previous proof can be dispatched by
 folding a proof algebra for the property \ref{thm:WFM+If+Vc} over
-$\vdash_M~|eval v_c|~:~|typeof t_c|$. Each new effect induces a new case for
-this proof algebra, however.
+$\vdash_M~|eval v_c|~:~|typeof t_c|$. However, each new effect induces a new
+case for this proof algebra.
 
 These proof algebras are examples of
 \emph{interactions}~\cite{featureinteractions} from the setting of modular
@@ -376,33 +388,34 @@ proof obligations for each new effect.
 
 Alternatively, the boolean feature can use a proof algebra for a stronger
 property that is also applicable in other proofs, cutting down on the number of
-feature interactions. One such stronger, more general sublemma relates the
-monadic bind operation to well-typing:
+feature interactions. One such stronger, more general sublemma \textsc{WFM-Bind}
+is shown in Figure \ref{rule:WFM-Bind}. It relates the monadic bind operation to
+well-typing. If the two subcomputations $v_m$ and $t_m$ on the left-hand side of
+the bind yield values |v| and |t|, then invoking the continuations $k_v$ and
+$k_t$ with these values gives rise to well-typed computations. The rule requires
+this for any possible well-typed combination of |v| and |t|.
 
 \begin{figure}[t]
+  \centering
   \fbox{
-  \begin{minipage}{.95\columnwidth}
+    \begin{minipage}{.95\columnwidth}
       \hspace{-1cm} \infrule[WFM-Bind] {
         \Sigma\vdash_M v_m : t_m \\
-        (\forall v~T~\Sigma'. (\Sigma'\supseteq\Sigma) \rightarrow (\Sigma'\vdash v : T) \rightarrow (\Sigma'\vdash_M k_v~v : k_t~T))
+        (\forall v~t~\Sigma'. (\Sigma'\supseteq\Sigma) \rightarrow
+        (\Sigma'\vdash v : t) \rightarrow
+        (\Sigma'\vdash_M k_v~v : k_t~t))
       }
       {
        \Sigma\vdash_M (v_m |>>=| k_v) : (t_m |>>=| k_t)
       }
-  \end{minipage}
- }
-\caption{Reusable sublemma for monadic binds.}
-\label{fig:WFM+Pure}
-\vspace{-.4cm}
+    \end{minipage}
+  }
+  \caption{Reusable sublemma for monadic binds.}
+  %% \tag{\textsc{WFM-Bind}}
+  \label{rule:WFM-Bind}
 \end{figure}
 
-
-%% \begin{multline}
-%%   \rightarrow \\
-%%     \rightarrow \\
-%% \end{multline}
-
-A proof of \textsc{WFM-If-Vc} follows from two applications of this stronger
+A proof of \ref{thm:WFM+If+Vc} follows from two applications of this stronger
 property. The advantage of \textsc{WFM-Bind} is clear: it can be reused to deal
 with case analyses in other proofs of \ref{thm:FSound}, while a proof of
 \ref{thm:WFM+If+Vc} has only a single use. The disadvantage is that

@@ -20,8 +20,9 @@ and types provided by the features; each line is annotated with the feature that
 provides that set of definitions.
 
 \begin{figure}[t]
-  \begin{center}
-    \fbox{\begin{minipage}{0.98\columnwidth}
+  \centering
+  \fbox{
+    \begin{minipage}{0.98\columnwidth}
       \begin{tabular*}{\columnwidth}{r@@{\;}c@@{\;}l@@{\hspace{30mm}}r}
         \texttt{e} & ::=    & \texttt{$\mathbb{N}$ $\mid$ e + e}                                                                     & \textit{Arith}     \\
                    & $\mid$ & \texttt{$\mathbb{B}$ $\mid$ \textbf{if} e \textbf{then} e \textbf{else} e}                             & \textit{Bool}      \\
@@ -34,8 +35,8 @@ provides that set of definitions.
                    & $\mid$ & \texttt{$\mathbb{B}$}                               & \textit{Bool}   &  &            & $\mid$ & \texttt{bool}              & \textit{Bool}   \\ 
                    & $\mid$ & \texttt{\textbf{closure} e $\mathtt{\overline{V}}$} & \textit{Lambda} &  &            & $\mid$ & \texttt{T $\rightarrow$ T} & \textit{Lambda} \\ 
       \end{tabular*}
-    \end{minipage}}
-  \end{center}
+    \end{minipage}
+  }
   \caption{mini-ML expressions, values, and types}
   \label{fig:mini-ml-syntax}
 \end{figure}
@@ -115,23 +116,22 @@ which include both the universe of containers and polynomial functors and the
 generic implementations of fold, induction and equality.
 
 \begin{table*}[t]
-  \begin{center}
-    \begin{tabular}{lrrrl}
-      \toprule
-        \textbf{Module} & \textbf{Spec} & \textbf{Proof} & \textbf{Total} & \textbf{Description}               \\
-      \midrule
-        Containers      & 687           & 229            & 916            & Universe of containers).           \\
-        Equality        & 100           & 33             & 133            & Equality for polynomial functors.  \\
-        FJ\_tactics     & 193           & 99             & 292            & Tactic library.                    \\
-        Functors        & 629           & 142            & 771            & Functors, algebras and coproducts. \\
-        Polynomial      & 336           & 251            & 587            & Universe of polynomial functors.   \\
-        Sum             & 14            & 0              & 14             & \todo{Merge into Functors.}        \\
-        Vec             & 143           & 105            & 248            & \todo{Merge into Polynomial.}      \\
-      \midrule
-        Total           & 2102          & 859            & 2961           &                                    \\
-      \bottomrule
-    \end{tabular}
-  \end{center}
+  \centering
+  \begin{tabular}{lrrrl}
+    \toprule
+      \textbf{Module} & \textbf{Spec} & \textbf{Proof} & \textbf{Total} & \textbf{Description}               \\
+    \midrule
+      Containers      & 687           & 229            & 916            & Universe of containers).           \\
+      Equality        & 100           & 33             & 133            & Equality for polynomial functors.  \\
+      FJ\_tactics     & 193           & 99             & 292            & Tactic library.                    \\
+      Functors        & 629           & 142            & 771            & Functors, algebras and coproducts. \\
+      Polynomial      & 336           & 251            & 587            & Universe of polynomial functors.   \\
+      Sum             & 14            & 0              & 14             & \todo{Merge into Functors.}        \\
+      Vec             & 143           & 105            & 248            & \todo{Merge into Polynomial.}      \\
+    \midrule
+      Total           & 2102          & 859            & 2961           &                                    \\
+    \bottomrule
+  \end{tabular}
   \caption{Size statistic for the GDTC modular reasoning framework}
   \label{tbl:gdtc:sizeframework}
 \end{table*}
@@ -152,41 +152,39 @@ implementation by about \todo{??} LoC to 600 LoC. Table
 implemented as part of the case study.
 
 \begin{table*}[t]
-  \begin{center}
-    \begin{tabular}{lrrr}
-      \toprule
-        \textbf{Feature} & \textbf{Spec} & \textbf{Proof} & \textbf{Total} \\
-      \midrule
-        Arith            & 441           & 213            & 654            \\
-        Bool             & 474           & 215            & 689            \\
-        Lambda           & 626           & 328            & 954            \\
-        Mu               & 211           & 31             & 242            \\
-        NatCase          & 353           & 82             & 435            \\
-      \bottomrule
-    \end{tabular}
-  \end{center}
+  \centering
+  \begin{tabular}{lrrr}
+    \toprule
+      \textbf{Feature} & \textbf{Spec} & \textbf{Proof} & \textbf{Total} \\
+    \midrule
+      Arith            & 441           & 213            & 654            \\
+      Bool             & 474           & 215            & 689            \\
+      Lambda           & 626           & 328            & 954            \\
+      Mu               & 211           & 31             & 242            \\
+      NatCase          & 353           & 82             & 435            \\
+    \bottomrule
+  \end{tabular}
   \caption{Size statistic for the GDTC modular reasoning framework}
   \label{tbl:gdtc:sizefeatures}
 \end{table*}
 
 \begin{table*}[t]
-  \begin{center}
-    \begin{tabular}{lrrrl}
-      \toprule
-        \textbf{Module} & \textbf{Specification} & \textbf{Proof} & \textbf{Total} & \textbf{Description} \\
-      \midrule
-        Names  & 458 & 160 & 618 & \\
-        PNames & 394 & 187 & 581 & \\
-      \bottomrule
-    \end{tabular}
-  \end{center}
+  \centering
+  \begin{tabular}{lrrrl}
+    \toprule
+      \textbf{Module} & \textbf{Specification} & \textbf{Proof} & \textbf{Total} & \textbf{Description} \\
+    \midrule
+      Names  & 458 & 160 & 618 & \\
+      PNames & 394 & 187 & 581 & \\
+    \bottomrule
+  \end{tabular}
   \caption{Size statistic for the GDTC Framework}
   \label{tbl:gdtc:sizetypesafety}
 \end{table*}
 
 \begin{table*}[t]
-  \begin{center}
-    \begin{tabular}{lrr}
+  \centering
+  \begin{tabular}{lrr}
     \toprule
       \textbf{Composition} & \textbf{Spefication} & \textbf{Proof} \\
     \midrule
@@ -196,12 +194,10 @@ implemented as part of the case study.
       A   & 52  & 5  \\
       BL  & 60  & 61 \\
     \bottomrule
-    \end{tabular}
-  \end{center}
+  \end{tabular}
   \caption{Size statistics of the language  compositions}
   \label{tbl:gdtc:casestudy}
 \end{table*}
-
 
 
 \paragraph{Summary}

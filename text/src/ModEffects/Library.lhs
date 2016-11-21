@@ -51,7 +51,7 @@ Definition RefF_evalM (R : Set) (rec : R -> evalMR V ME)
 
 %===============================================================================
 
-\section{The \name Monad Library}
+\section{The \name Monad Library}\label{sec:mod:monadlibrary}
 
 \name includes a monad library to support effectful semantic functions using
 \emph{monads} and \emph{monad transformers}, and provides \emph{algebraic laws}
@@ -76,14 +76,15 @@ ways in order to support modular reasoning using algebraic laws:
 
 % TOM: This is not very important:
 %
-% Although the port of the MTL definitions was mostly straightforward
-% a notable difference is that the port does not use functional dependencies~\cite{jones00type}.
-% The reason is simply that Coq's implementation of type classes does
-% not support functional dependencies. However the use of functional
-% dependencies is mostly for convenience: in Haskell it allows the compiler to
-% improve type-inference. Since in Coq there is a lot less type-inference and
-% type annotations are most often required anyway, the lack of functional dependencies
-% is not a significant drawback.
+% Although the port of the MTL definitions was mostly straightforward a notable
+% difference is that the port does not use functional
+% dependencies~\cite{jones00type}.  The reason is simply that Coq's
+% implementation of type classes does not support functional
+% dependencies. However the use of functional dependencies is mostly for
+% convenience: in Haskell it allows the compiler to improve
+% type-inference. Since in Coq there is a lot less type-inference and type
+% annotations are most often required anyway, the lack of functional
+% dependencies is not a significant drawback.
 
 \subsection{Monad Classes}
 \input{src/ModEffects/Figures/3MT_Classes}
@@ -118,6 +119,8 @@ The primitive operations of each effect are defined in \emph{monad subclasses}
 |get| is a method of the |MonadState| class to retrieve the state without
 changing it.
 
+
+%-------------------------------------------------------------------------------
 \subsection{Algebraic Laws}
 Each monad (sub)class includes a set of algebraic laws that govern its
 operations.  These laws are an integral part of the definition of the monad type
@@ -130,12 +133,12 @@ The first three laws for the |Monad| class are standard, while the last law
 (|fmap_bind|) relates |fmap| and |bind| in the usual way.  Each monad subclass
 also includes its own set of laws. The laws for various subclasses can be found
 scattered throughout the functional programming literature, such as for
-failure~\cite{gibbons11just} and
-state~\cite{effectiveadvice,gibbons11just}. Yet, as far as we know, \name is the
-first to systematically bring them together. Furthermore, although most laws
-have been presented in the semantics literature in one form or another, we have
-not seen some of the laws in the functional programming literature.  One such
-example are the laws for the exception class:
+failure~\cite{justdoit} and state~\cite{justdoit,effectiveadvice}. Yet, as far
+as we know, \name is the first to systematically bring them
+together. Furthermore, although most laws have been presented in the semantics
+literature in one form or another, we have not seen some of the laws in the
+functional programming literature.  One such example are the laws for the
+exception class:
 
 \begin{itemize}
 \item The |bind_throw| law generalizes the |bind_fail| law: a sequential
@@ -182,7 +185,8 @@ building and running particular monads/transformers.
 classes, definitions and laws apart from the definitions discussed here. This
 includes infrastructure for other types of effects (e.g. writer effects), as
 well as other infrastructure from the MTL.  There are roughly 30 algebraic laws
-in total. \steven{Mention interaction laws between different effects.}
+in total.
+%\steven{Mention interaction laws between different effects.}
 %The complete code for \name can be found in the online repository.
 
 

@@ -42,7 +42,7 @@ thereby delay the problem of defining it to the specific functors. |SPF| also
 includes the functions |inFix| and |outFix| as members that fold/unfold one
 layer of the fixpoint.
 
-|SPF| is a sub-class of |Functor| so we would like to define a generic fold
+|SPF| is a subclass of |Functor| so we would like to define a generic fold
 operator similar to DTC's operator |foldDTC| from Section
 \ref{sec:mod:datatypesalacarte}.
 

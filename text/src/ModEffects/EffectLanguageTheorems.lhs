@@ -12,15 +12,15 @@
 
 %endif
 
-\section{Effect and Language Theorems}
-% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\section{Effect and Language Theorems}\label{sec:mod:effectlangtheorems}
+%-------------------------------------------------------------------------------
 The second phase of showing type soundness is the \emph{effect theorem}, that
 proves a statement of soundness for a fixed set of effects.
 
 \subsection{Pure Languages}
 
 For pure effects, the soundness statement is straightforward:
-
+%
 \begin{equation}
 \forall |v_m|~|t|. \vdash_M | v_m : return t| \Rightarrow \exists |v|. |v_m
 == return v|~\wedge \vdash |v| : |t|
@@ -41,7 +41,7 @@ features is similar to \ref{thm:ESoundP}:
 \begin{equation}
 \forall |e|, |t|. |typeof e == return t| \Rightarrow \exists |v|. |eval e
 == return v|~\wedge \vdash |v| : |t|
-\tag{\textsc{LSound}}\label{thm:LSoundP}
+\tag{\textsc{LSound}$_P$}\label{thm:LSoundP}
 \end{equation}
 
 The proof of \ref{thm:LSoundP} is an immediate consequence of the reusable
@@ -157,24 +157,32 @@ the exception monad, requiring new typing rules.
 
 \paragraph{Typing Rules}
 
+\steven{There is some inconsistency with the framework / case study code and the
+  presentation here . In the framework it seems that half of the definitions for
+  the exception part of the computation typing and the error feature specialize
+  the exception type to be unit. Yet the paper definitions here seem to specify
+  the more general case for the computation typing and the error feature is
+  consistently using unit.}
+
 Figure~\ref{fig:WFM+Except} lists the typing rules for monadic computations
-involving exceptions. \textsc{WFM-Throw} states that |throw x| is typeable with
-any type. \textsc{WFM-Catch} states that binding the results of both branches of
-a |catch| statement will produce a monad with the same type. While it may seem
-odd that this rule is formulated in terms of a continuation |>>= k|, it is
-essential for compatibility with the proofs algebras required by other
-features. As described in Section~\ref{sec:Thm+Reuse}, extensible proof algebras
-over the typing derivation will now need cases for the two new rules. To
-illustrate this, consider the proof algebra for the general purpose
-\textsc{WFM-Bind} property. This algebra requires a proof of:
+involving exceptions which are parameterized by a type |x| for exceptional
+values. \textsc{WFM-Throw} states that |(throw x)| is typeable with any
+type. \textsc{WFM-Catch} states that binding the results of both branches of a
+|catch| statement will produce a monad with the same type. While it may seem odd
+that this rule is formulated in terms of a continuation |>>= k|, it is essential
+for compatibility with the proofs algebras required by other features. As
+described in Section~\ref{sec:Thm+Reuse}, extensible proof algebras over the
+typing derivation will now need cases for the two new rules. To illustrate this,
+consider the proof algebra for the general purpose \textsc{WFM-Bind}
+property. This algebra requires a proof of:
 %
 \begin{align*}
-\begin{array}{l}
-  (\Sigma\vdash_M|catch e h >>= k| ~:~t_m) \rightarrow \\
-  (\forall v~T~\Sigma'\supseteq\Sigma.~(\Sigma'\vdash~v~:~T) \rightarrow \\
-  \Sigma'\vdash_M~~ k_v~v~:~ k_t~T) \rightarrow \\
-   \Sigma\vdash_M(|catch e h >>= k|) |>>=| k_v:t_m |>>=| k_t
-\end{array}
+  \begin{array}{l}
+    (\Sigma\vdash_M|catch e h >>= k| ~:~t_m) \rightarrow \\
+    (\forall v~t~\Sigma'\supseteq\Sigma.~(\Sigma'\vdash~v~:~t) \rightarrow
+        \Sigma'\vdash_M~k_v~v~:~k_t~t) \rightarrow \\
+     \Sigma\vdash_M(|catch e h >>= k|) |>>=| k_v:t_m |>>=| k_t
+  \end{array}
 \end{align*}
 
 
@@ -208,8 +216,8 @@ t_i)~\rightarrow~(\Sigma\vdash_M m_e~:~t_e)~\rightarrow \\ \Sigma
 %endif
 
 With the continuation, we can first apply the associativity law to reorder the
-binds so that \textsc{WFM-Catch} can be applied: |(catch e h >>= k) >>=| $k_v$
-|= catch e h >>= (k >>= |$k_v)$. The two premises of the rule follow immediately
+binds so that \textsc{WFM-Catch} can be applied: \[ |(catch e h >>= k) >>=| k_v
+|= catch e h >>= (k >>= |k_v). \] The two premises of the rule follow immediately
 from the inductive hypothesis of the lemma, finishing the proof. Without the
 continuation, the proof statement only binds |catch e h| to |v_m|, leaving no
 applicable typing rules.
@@ -245,12 +253,13 @@ language whose only effect is exceptions reflects that the evaluation
 function is either a well-typed value or an exception.
 %
 \begin{align*}
-\begin{array}{l}
-\forall |v_m|~|t|. \vdash_M |v_m : return t| \Rightarrow \\
-\exists x. |v_m == throw |~x \lor \exists |v|. |v_m == return v| \wedge \vdash |v| : |t|
-\end{array}
-\tag{\textsc{ESound$_E$}}
-\label{thm:ESoundE}
+  \begin{array}{l}
+    \forall |v_m|~|t|. \vdash_M |v_m : return t| \rightarrow \\
+      \exists x. |v_m == throw |~x \lor
+      \exists |v|. |v_m == return v| \wedge \vdash |v| : |t|
+  \end{array}
+  \tag{\textsc{ESound$_E$}}
+  \label{thm:ESoundE}
 \end{align*}
 The proof of \ref{thm:ESoundE} is again by induction on the derivation
 of $ \vdash_M$ |v_m : return t|. The irrelevant environment
@@ -261,13 +270,13 @@ The typing derivation is built from four rules: the two pure rules from
 Figure~\ref{fig:WFM+Pure} and the two exception rules from
 Figure~\ref{fig:WFM+Except}.  The case for the two pure rules is effectively the
 same as before, and \textsc{WFM-Throw} is straightforward. In the remaining
-case, |v_m == catch e' h|, and we can leverage the fact that the evaluation
-monad is fixed to conclude that either $\exists |v|.|e' == return v|$ or
-$\exists |x|. |e' == throw x|$. In the former case, |catch e' h| can be reduced
-using |catch_return|, and the latter case is simplified using |catch_throw1|. In
-both cases, the conclusion then follows immediately from the assumptions of
-\textsc{WFM-Catch}.  The proof of the language theorem \LSoundE is
-similar to \ref{thm:LSoundP} and is easily built from \ref{thm:ESoundE} and
+case, |(v_m == catch e' h)|, and we can leverage the fact that the evaluation
+monad is fixed to conclude that either $(\exists |v|.|e' == return v|)$ or
+$(\exists |x|. |e' == throw x|)$. In the former case, |catch e' h| can be
+reduced using |catch_return|, and the latter case is simplified using
+|catch_throw1|. In both cases, the conclusion then follows immediately from the
+assumptions of \textsc{WFM-Catch}.  The proof of the language theorem \LSoundE
+is similar to \ref{thm:LSoundP} and is easily built from \ref{thm:ESoundE} and
 \ref{thm:FSound}.
 
 \begin{figure}

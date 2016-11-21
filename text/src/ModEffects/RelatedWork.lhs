@@ -3,7 +3,7 @@
 %include forall.fmt
 %include Formatting.fmt
 
-\section{Related Work}
+\section{Related Work}\label{sec:mod:relatedwork}
 
 %This section discusses related work.
 %%The main novelty of our

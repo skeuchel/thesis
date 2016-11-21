@@ -4,24 +4,21 @@
 %include macros.fmt
 
 \begin{figure*}[t]
-  \begin{center}
+  \centering
   \fbox{
-        \includegraphics[width=.96\columnwidth]{src/ModEffects/Figures/CaseStudyFigure.pdf}
+     \includegraphics[width=.96\columnwidth]{src/ModEffects/Figures/CaseStudyFigure.pdf}
    }
-  \end{center}
   \caption{Dependency and size information for the features and effects used in the case study.}
   \label{fig:codesize}
 \end{figure*}
 
-\section{Case Study}
-\label{sec:CaseStudy}
+\section{Case Study}\label{sec:mod:casestudy}
 
-As a demonstration of the \Name~framework, we have built a set of five
-reusable language features and combined them to build a family of
-languages which includes a mini-ML~\cite{clement86mini-ML} variant
-with references and errors. The study includes pure boolean and
-arithmetic features as well as effectful features for references,
-errors and lambda abstractions.
+As a demonstration of the \Name~framework, we have built a set of five reusable
+language features and combined them to build a family of languages which
+includes a mini-ML~\cite{clement86mini-ML} variant with references and
+errors. The study includes pure boolean and arithmetic features as well as
+effectful features for references, errors and lambda abstractions.
 
 The study builds twenty eight different combinations of the features which are
 all possible combinations with at least one feature providing
@@ -80,8 +77,8 @@ dispatched by tactics hooked into the type class inference algorithm.
 
 %if False
 \begin{figure}[t]
-  \begin{center}
-    \begin{minipage}{\columnwidth}
+  \centering
+  \begin{minipage}{\columnwidth}
     \begin{tabular}{cc}
       \begin{minipage}{.48\columnwidth}
         \hspace{-.3cm}
@@ -110,21 +107,20 @@ dispatched by tactics hooked into the type class inference algorithm.
         }
       \end{minipage}
     \end{tabular}
-    \end{minipage}
-    \begin{minipage}{\columnwidth}
-      \begin{center}
-        \fbox{
-        \hspace{-.3cm}
-          \begin{tabular}{lrlr}
-            $P$  &  93    &   $ES$   & 297  \\
-            $E$  & 126    &   $ERF$  & 211  \\
-            $S$  & 164    &   $SRF$  & 274  \\
-            $RF$ & 162    &   $ESRF$ & 405  \\
-          \end{tabular}
-        }
-      \end{center}
-    \end{minipage}
-  \end{center}
+  \end{minipage}
+  \begin{minipage}{\columnwidth}
+    \begin{center}
+      \fbox{
+      \hspace{-.3cm}
+        \begin{tabular}{lrlr}
+          $P$  &  93    &   $ES$   & 297  \\
+          $E$  & 126    &   $ERF$  & 211  \\
+          $S$  & 164    &   $SRF$  & 274  \\
+          $RF$ & 162    &   $ESRF$ & 405  \\
+        \end{tabular}
+      }
+    \end{center}
+  \end{minipage}
   \caption{Implementation size in LoC}
   \label{fig:codesize}
 \end{figure}

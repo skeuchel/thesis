@@ -19,11 +19,11 @@
 
 \section{Datatypes \`a la Carte}\label{sec:mod:datatypesalacarte}
 
-The \emph{Datatypes \`a la Carte} (DTC) approach \cite{dtc} is a solution of the
-expression problem in the Haskell programming language.  This section reviews
-the core ideas behind DTC and presents the infrastructure for writing modular
-functions over modular datatypes.
+%The \emph{Datatypes \`a la Carte} (DTC) approach \cite{dtc} is a solution of
+%the expression problem in the Haskell programming language.
 
+This section reviews the core ideas behind DTC and presents the infrastructure
+for writing modular functions over modular datatypes.
 
 %% In the next section we discuss our adapted approach that works in the restricted
 %% Coq setting.

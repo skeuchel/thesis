@@ -4,24 +4,188 @@
 %include Formatting.fmt
 %include macros.fmt
 
+%if False
+
+\begin{code}
+import Prelude hiding (print)
+\end{code}
+
+%endif
+
+%format eval = "\Varid{eval}"
+%format interface = "\textsf{\textbf{interface}}"
+%format implements = "\textsf{\textbf{implements}}"
+%format public = "\textsf{\textbf{public}}"
+%format . = "."
+
 \section{Expression Problem}\label{sec:mod:expressionproblem}
 
 \begin{figure}[t]
 \fbox{\hspace{-5pt}
   \begin{minipage}{0.98\columnwidth}
-    \begin{code}
-      data Exp
+    \begin{spec}
+      data ArithExp
         =  Lit Int
-        |  Add e e
-        |  BLit Bool
-        |  If e e e
-    \end{code}
+        |  Add ArithExp ArithExp
+
+      eval :: ArithExp -> Int
+      eval (Lit i)      =  i
+      eval (Add e1 e2)  =  eval e1 + eval e2
+    \end{spec}
   \end{minipage}
 }
-\caption{Monolithic arithmetic and boolean expressions}
-\label{fig:mod:monolitichexpressions}
+\caption{Evaluation of arithmetic expressions (Haskell)}
+\label{fig:mod:monolithicexpressionshaskell}
 \end{figure}
 
+\begin{figure}[t]
+\fbox{\hspace{-5pt}
+  \begin{minipage}{0.98\columnwidth}
+    \begin{spec}
+      interface ArithExp {
+        int eval();
+      }
+      class Lit implements ArithExp {
+        public int lit;
+        public int eval() { return lit; }
+      }
+      class Add implements ArithExp {
+        public ArithExp e1, e2;
+        public int eval() { return e1.eval() + e2.eval(); }
+      }
+    \end{spec}
+  \end{minipage}
+}
+\caption{Evaluation of arithmetic expressions (Java)}
+\label{fig:mod:monolithicexpressionsjava}
+\end{figure}
+
+Consider the Haskell program for the evaluation of simple arithmetic expressions
+in Figure \ref{fig:mod:monolithicexpressionshaskell}. We have a datatype
+|ArithExp|, representing arithmetic expressions with constructor for integer
+literals and addition, and an evaluation function |eval :: ArithExp -> Int| that
+evaluates and expression to an integer value.
+
+Figure \ref{fig:mod:monolithicexpressionsjava} shows an equivalent Java
+program. The |ArithExp| interface contains an |int eval()| method. The two cases
+of a literal and an addition are handled by the two classes |Lit| and |Add| that
+implement |ArithExp|.
+
+%-------------------------------------------------------------------------------
+
+We can imagine to extend these programs in two dimensions:
+\begin{enumerate}
+  \item Adding a new case, e.g. a constructor for multiplication.
+  \item Adding a new operation, e.g. converting an expression to a string.
+\end{enumerate}
+
+\begin{figure}[t]
+\fbox{\hspace{-5pt}
+  \begin{minipage}{0.98\columnwidth}
+\begin{code}
+data ArithExp
+  =  Lit Int
+  |  Add ArithExp ArithExp
+  |  Mul ArithExp ArithExp
+
+eval :: ArithExp -> Int
+eval (Lit i)      =  i
+eval (Add e1 e2)  =  eval e1 + eval e2
+eval (Mul e1 e2)  =  eval e1 * eval e2
+
+print :: ArithExp -> String
+print (Lit i)      =  show i
+print (Add e1 e2)  =  "(" ++ print e1 ++ "+" ++ print e2 ++ ")"
+print (Mul e1 e2)  =  "(" ++ print e1 ++ "*" ++ print e2 ++ ")"
+\end{code}
+  \end{minipage}
+}
+\caption{Extended arithmetic expressions (Haskell)}
+\label{fig:mod:monolithicexpressionshaskellextended}
+\end{figure}
+
+In Haskell, performing the second extension in our example is easy: we add one
+more function to the program in a new module
+
+\begin{spec}
+print :: ArithExp -> String
+print (Lit i)      =  show i
+print (Add e1 e2)  =  "(" ++ print e1 ++ "+" ++ print e2 ++ ")"
+\end{spec}
+
+However, covering a new case inevitabyl requires to edit existing code: it has
+to be added to |ArithExp| datatype declaration and, for totality, also to
+existing functions. Figure \ref{fig:mod:monolithicexpressionshaskellextended}
+show the code with both extensions.
+
+%-------------------------------------------------------------------------------
+
+\begin{figure}[t]
+\fbox{\hspace{-5pt}
+  \begin{minipage}{0.98\columnwidth}
+    \begin{spec}
+      interface ArithExp {
+        int eval();
+        String print();
+      }
+      class Lit implements ArithExp {
+        public int lit;
+        public int eval() { return lit; }
+        public String print() { return String.valueOf(lit); }
+      }
+      class Add implements ArithExp {
+        public ArithExp e1, e2;
+        public int eval() { return e1.eval() + e2.eval(); }
+        public String print() {
+          return e1.print().concat("+").concat(e2.print());
+        }
+      }
+      class Mul implements ArithExp {
+        public ArithExp e1, e2;
+        public int eval() { return e1.eval() + e2.eval(); }
+        public String print() {
+          return e1.print().concat("*").concat(e2.print());
+        }
+      }
+    \end{spec}
+  \end{minipage}
+}
+\caption{Extended arithmetic expressions (Java)}
+\label{fig:mod:monolithicexpressionsjava}
+\end{figure}
+
+In Java the situation is reversed. The multiplication case can easily be added
+by creating a new class |Mul| that implements |Exp|.
+
+\begin{spec}
+class Mul implements ArithExp {
+  public ArithExp e1, e2;
+  public int eval () { return e1.eval() * e2.eval(); }
+}
+\end{spec}
+
+However, the conversion to a |String| inevitably requires editing the existing
+code and adding a new method to the |ArithExp| interface and existing
+implementation of that interface \footnote{We disregard the toString() method
+  that is part of the base class |Object|}. Figure
+\ref{fig:mod:monolithicexpressionshaskellextended} show the code with both
+extensions.
+
+%-------------------------------------------------------------------------------
+
+Performing such extensions in both dimensions simultaneously and modularly, i.e.
+without changing or recompiling the existing code, and keeping the code
+type-safe was coined as \emph{the expression problem} by Wadler
+\cite{expression-problem}. Solutions to the expression problem exists in
+multiple languages: Wadler \cite{expression-problem} presents a solution in Java
+using Generics and the \emph{Datatypes \`a la Carte} (DTC) approach \cite{dtc}
+is a well-known solution in the Haskell programming language. In both of these
+solutions modularity has to be catered for from the beginning however, i.e. we
+can not resuse the datatype declaration and interface declarations from this
+section, but ones that account for modular extensions. We will call such
+datatypes in Haskell that can be modularlyextended a \emph{modular datatype} and
+use the term \emph{modular function} for modularly extensible functions that are
+defined on modular datatypes.
 
 %%% Local Variables:
 %%% mode: latex

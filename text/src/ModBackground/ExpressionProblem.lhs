@@ -187,6 +187,14 @@ datatypes in Haskell that can be modularlyextended a \emph{modular datatype} and
 use the term \emph{modular function} for modularly extensible functions that are
 defined on modular datatypes.
 
+Our goal to modularly engineer programming language meta-theory adds a third
+dimension to the expression problem: modular proofs of statements about modular
+functions on modular datatypes. In the remainder of this chapter we first
+present the DTC approach (Section \ref{sec:mod:datatypesalacarte}) and then
+discuss stumbling and building blocks to extend the approach to support modular
+reasoning (Sections
+\ref{sec:mod:reasoningalacarte,sec:mod:churchencodings,sec:mod:mtc}).
+
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "../../mod"

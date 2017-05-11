@@ -62,9 +62,9 @@ import Prelude hiding (print)
 
 Consider the Haskell program for the evaluation of simple arithmetic expressions
 in Figure \ref{fig:mod:monolithicexpressionshaskell}. We have a datatype
-|ArithExp|, representing arithmetic expressions with constructor for integer
+|ArithExp|, representing arithmetic expressions with constructors for integer
 literals and addition, and an evaluation function |eval :: ArithExp -> Int| that
-evaluates and expression to an integer value.
+evaluates an expression to an integer value.
 
 Figure \ref{fig:mod:monolithicexpressionsjava} shows an equivalent Java
 program. The |ArithExp| interface contains an |int eval()| method. The two cases
@@ -73,7 +73,7 @@ implement |ArithExp|.
 
 %-------------------------------------------------------------------------------
 
-We can imagine to extend these programs in two dimensions:
+We can extend these programs along two dimensions:
 \begin{enumerate}
   \item Adding a new case, e.g. a constructor for multiplication.
   \item Adding a new operation, e.g. converting an expression to a string.
@@ -105,7 +105,7 @@ print (Mul e1 e2)  =  "(" ++ print e1 ++ "*" ++ print e2 ++ ")"
 \end{figure}
 
 In Haskell, performing the second extension in our example is easy: we add one
-more function to the program in a new module
+more function to the program
 
 \begin{spec}
 print :: ArithExp -> String
@@ -113,10 +113,10 @@ print (Lit i)      =  show i
 print (Add e1 e2)  =  "(" ++ print e1 ++ "+" ++ print e2 ++ ")"
 \end{spec}
 
-However, covering a new case inevitabyl requires to edit existing code: it has
-to be added to |ArithExp| datatype declaration and, for totality, also to
+However, covering a new case inevitably requires modifying existing code: it has
+to be added to the |ArithExp| datatype declaration and, for totality, also to
 existing functions. Figure \ref{fig:mod:monolithicexpressionshaskellextended}
-show the code with both extensions.
+shows the code with both extensions.
 
 %-------------------------------------------------------------------------------
 
@@ -166,9 +166,9 @@ class Mul implements ArithExp {
 
 However, the conversion to a |String| inevitably requires editing the existing
 code and adding a new method to the |ArithExp| interface and existing
-implementation of that interface \footnote{We disregard the toString() method
-  that is part of the base class |Object|}. Figure
-\ref{fig:mod:monolithicexpressionshaskellextended} show the code with both
+implementations of that interface.\footnote{We disregard the |toString()| method
+  that is part of the base class |Object|.} Figure
+\ref{fig:mod:monolithicexpressionshaskellextended} shows the code with both
 extensions.
 
 %-------------------------------------------------------------------------------
@@ -176,19 +176,19 @@ extensions.
 Performing such extensions in both dimensions simultaneously and modularly, i.e.
 without changing or recompiling the existing code, and keeping the code
 type-safe was coined as \emph{the expression problem} by Wadler
-\cite{expression-problem}. Solutions to the expression problem exists in
+\cite{expression-problem}. Solutions to the expression problem exist in
 multiple languages: Wadler \cite{expression-problem} presents a solution in Java
 using Generics and the \emph{Datatypes \`a la Carte} (DTC) approach \cite{dtc}
 is a well-known solution in the Haskell programming language. In both of these
-solutions modularity has to be catered for from the beginning however, i.e. we
-can not resuse the datatype declaration and interface declarations from this
-section, but ones that account for modular extensions. We will call such
-datatypes in Haskell that can be modularlyextended a \emph{modular datatype} and
+solutions modularity has to be anticipated and catered for from the beginning however. Indeed, we
+cannot reuse the datatype declaration and interface declarations from this
+section, but have to use ones that account for modular extensions. We will call 
+a Haskell datatype that can be modularly extended a \emph{modular datatype} and
 use the term \emph{modular function} for modularly extensible functions that are
 defined on modular datatypes.
 
 Our goal to modularly engineer programming language meta-theory adds a third
-dimension to the expression problem: modular proofs of statements about modular
+dimension to the expression problem: \emph{modular proofs} of statements about modular
 functions on modular datatypes. In the remainder of this chapter we first
 present the DTC approach (Section \ref{sec:mod:datatypesalacarte}) and then
 discuss stumbling and building blocks to extend the approach to support modular

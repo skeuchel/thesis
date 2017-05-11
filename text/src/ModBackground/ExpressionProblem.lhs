@@ -192,8 +192,8 @@ dimension to the expression problem: modular proofs of statements about modular
 functions on modular datatypes. In the remainder of this chapter we first
 present the DTC approach (Section \ref{sec:mod:datatypesalacarte}) and then
 discuss stumbling and building blocks to extend the approach to support modular
-reasoning (Sections
-\ref{sec:mod:reasoningalacarte,sec:mod:churchencodings,sec:mod:mtc}).
+reasoning (Sections \ref{sec:mod:reasoningalacarte},
+\ref{sec:mod:churchencodings} and \ref{sec:mod:mtc}).
 
 %%% Local Variables:
 %%% mode: latex

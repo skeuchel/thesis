@@ -1,34 +1,35 @@
-\section{Modular Definitions}
 
-Modularity is one of the holy grails of software engineering. The dream is to be
-able build new software systems entirely from reusable components, that have
+Formal mechanization of programming language meta-theory is a big endeavor due
+the high implementation costs. Therefore reuse is crucial and indeed, the
+\textsc{PoplMark} challenge~\cite{poplmark} identifies \emph{component reuse} as
+one of several key issues of large-scale mechanizations. Unfortunately the
+current practice to achieve reuse is to copy an existing formalization,
+\emph{change the existing definitions} manually, integrate new features and to
+subsequently \emph{patch up the proofs} to cater for the changes. This
+unprincipled approach to reuse leaves much to be desired. First, editing and
+patching the existing definitions breaks \emph{abstraction}, a core principle of
+computer science. Ideally we would reuse existing code via an interface that
+provides functionality (for programming) and behavior (for reasoning). Second,
+this approach demotes \emph{isolation} of new features from existing ones, which
+hinders backporting any improvements to the existing functionality within the
+new formalization to the existing formalization.
+
+It is therefore desirable to apply established and \emph{principled software
+engineering methods} for reusability. One of the holy grails of reuse in
+software engineering is \emph{modularity}. The dream is to be
+able to build new software systems entirely from reusable components, that have
 been written independently and can (potentially) be reused in many different
-configurations for different applications. Increasingly more modularity demands
-are being made: without modifying components, it must be possible to augment or
-modify their behavior. At the same time, unprincipled copy-\&-paste approaches,
-even performed by automated tools, are not acceptable. Components must have a
-meaning beyond their textual form and independently of a particular composition;
-they must support \emph{modular reasoning}. \sk{Discuss statically-typed
-  components as one form of modular reasoning to ensure absence of type
-  errors.}{}
+configurations for different applications. Because confidence and correctness
+requirements in software systems rise, increasingly more modularity demands are
+being made: components must have a meaning beyond a particular composition; they
+must also support \emph{modular reasoning}.
 
-\subsection{Modular Programming Languages}
-\sk{This should first talk about modularity in the specification of programming
-  language features and the move on to discuss modularity in the context of
-  metatheory.}
-The \textsc{PoplMark} challenge \cite{poplmark} identifies
-% \emph{variable binding}, \emph{complex inductions},
-% \emph{experimentation} and
-\emph{component reuse} as one of several key issues of formal mechanization of
-programming language meta-theory. Reuse is crucial because formalizations have
-high costs. Unfortunately the current practice to achieve reuse is to copy an
-existing formalization and to change the existing definitions manually to
-integrate new features and to subsequently \emph{patch up the proofs} to cater
-for the changes.
-
-Building modular reusable components is a key issue in reducing these costs. A
-stumbling block for reuse is that inductive definitions and proofs are closed to
-extension. This is a manifestation of the expression problem.
+A stumbling block for applying the modularity principle to programming language
+formalization is that traditional inductive definitions and proofs are closed to
+extension. It is therefore necessary to develop modular reasoning principles
+first; in fact, \emph{modular induction principles}, because we want to stay as
+close to established proof techniques as possible.  Opening induction
+definitions for extensibility is a manifestation of the expression problem.
 
 %% This is a manifestation of the expression problem that has been
 %% addressed by the Meta-Theory \`a la Carte (MTC) framework in the context of

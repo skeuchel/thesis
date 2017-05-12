@@ -17,47 +17,68 @@
 
 %endif
 
+%-------------------------------------------------------------------------------
+
 \section{Datatypes \`a la Carte}\label{sec:mod:datatypesalacarte}
 
-%The \emph{Datatypes \`a la Carte} (DTC) approach \cite{dtc} is a solution of
+%The  (DTC) approach \cite{dtc} is a solution of
 %the expression problem in the Haskell programming language.
 
-This section reviews the core ideas behind DTC and presents the infrastructure
-for writing modular functions over modular datatypes.
+This section reviews the core ideas behind \emph{Datatypes \`a la Carte} (DTC),
+a well-known Haskell solution to the expression problem, and presents the
+infrastructure for writing modular functions over modular datatypes.
 
 %% In the next section we discuss our adapted approach that works in the restricted
 %% Coq setting.
 
 
-\subsection{Fixpoints}
-
+\subsection{Fixed-points}
 
 \begin{figure}[t]
 \fbox{
   \begin{minipage}{0.98\columnwidth}
     \begin{code}
-      data ArithF  e = Lit  Int   | Add e e
-      data BoolF   e = BLit Bool  | If e e e
+      data Exp  =  Lit  Int   | Add Exp Exp
+                |  BLit Bool  | If Exp Exp Exp
 
-      data FixDTC f = InDTC { outDTC :: f (FixDTC f) }
-      data (:+:) f g a = Inl (f a) | Inr (g a)
+    \end{code}
+    \hrule
+    \begin{code}
+      data ArithF  exp = LitF  Int   | AddF exp exp
+      data BoolF   exp = BLitF Bool  | IfF exp exp exp
     \end{code}
   \end{minipage}
 }
-\caption{Modular datatypes in DTC}
-\label{fig:mod:modulardatatypesdtc}
+\caption{Arithmetic and logical expressions}
+\label{fig:mod:arithlogicexpressions}
 \end{figure}
 
 The main idea behind DTC is to open the recursion of datatypes and model the
-fixed point explicitly. Abstracting over the recursive positions of the datatype
-for monolithic expression in Figure \ref{fig:mod:monolitichexpressions} yields a
+fixed point explicitly. Consider the monolithic datatype |Exp| for simple
+arithmetic and logical expressions in Figure \ref{fig:mod:arithlogicexpressions}
+(top). Abstracting over the recursive positions of |Exp| yields a
 \emph{signature functor} that we can then split up into functors |ArithF| and
-|BoolF| -- shown in Figure \ref{fig:mod:modulardatatypesdtc} -- to capture the
-signature of features in isolation.
+|BoolF| -- shown in Figure \ref{fig:mod:arithlogicexpressions} (bottom) -- to
+capture the signature of features in isolation.
 
-The type-level fixed-point combinator |FixDTC| creates a recursive datatype from
-a signature. For example |ArithDTC| is a type that features only arithmetic
-expressions.
+%-------------------------------------------------------------------------------
+
+\begin{figure}[t]
+\fbox{
+  \begin{minipage}{0.98\columnwidth}
+    \begin{code}
+      data FixDTC  f      =  InDTC { outDTC :: f (FixDTC f) }
+      data (:+:)   f g a  =  Inl (f a) | Inr (g a)
+    \end{code}
+  \end{minipage}
+}
+\caption{Datatypes \`a la Carte fixed-point}
+\label{fig:mod:fixdtc}
+\end{figure}
+
+The type-level fixed-point combinator |FixDTC| in Figure \ref{fig:mod:fixdtc}
+creates a recursive datatype from a signature. For example |ArithDTC| is a type
+that features only arithmetic expressions.
 
 > type ArithDTC = FixDTC ArithF
 
@@ -67,11 +88,11 @@ of the coproduct of |ArithF| and |BoolF|
 
 > type ExpDTC = FixDTC (ArithF :+: BoolF)
 
-essentially \footnote{Which means modulo non-termination.} yields a datatype
-that is isomorphic to the monolithic datatype from Figure
-\ref{fig:mod:monolitichexpressions}.
+essentially\footnote{Which means modulo non-termination.} yields a datatype that
+is isomorphic to the monolithic datatype |Exp| from Figure
+\ref{fig:mod:arithlogicexpressions} (top).
 
-
+%-------------------------------------------------------------------------------
 
 \subsection{Automated Injections}\label{ssec:mod:smartconstructors}
 
@@ -82,10 +103,8 @@ that is isomorphic to the monolithic datatype from Figure
       class f :<: g where
         inj      :: f a -> g a
         prj      :: g a -> Maybe (f a)
-        inj_prj  :: forall a (ga :: g a) (fa :: f a).
-          prj ga = Just fa -> ga = inj fa
-        prj_inj  :: forall a (fa :: f a).
-          prj (inj fa) = Just fa
+        inj_prj  :: forall a (ga :: g a) (fa :: f a).  prj ga = Just fa -> ga = inj fa
+        prj_inj  :: forall a (fa :: f a).              prj (inj fa) = Just fa
 
       inject :: (f :<: g) => f (FixDTC g) -> FixDTC g
       inject x = FixDTC (inj x)
@@ -109,7 +128,6 @@ that is isomorphic to the monolithic datatype from Figure
 
 \label{fig:subfunctorrelation}
 \end{figure}
-
 
 Combining signatures makes writing expressions difficult. For example the
 arithmetic expression |3 + 4| is represented as the term
@@ -140,39 +158,37 @@ To facilitate writing expressions and make reuse possible we use the sub-functor
 member function |inj| injects the sub-functor |f| into the super-functor |g|. In
 our case we need injections of functors into coproducts which are automated
 using type class machinery. \footnote{Coq's type-class mechanism performs
-  backtracking. These instances do not properly work in Haskell. See \cite{dtc}
-  for a partial solution.}
-
+backtracking. These instances do not properly work in Haskell. See \cite{dtc}
+for a partial solution.} The |prj| member function is a partial inverse of
+|inj|. With it we can test if a specific sub-functor was used to build the top
+layer of a value. This operation fails if another sub-functor was used. The type
+class also includes the laws |inj_prj| and |prj_inj| that witness the partial
+inversion.\footnote{Using a hypothetical dependently-typed Haskell syntax.}
 
 The |inject| function is a variation of |inj| that additionally applies the
-constructor of the fixpoint type. Using the sub-functor relation we can define
-smart constructors for arithmetic expressions
+constructor of the fixed-point type |FixDTC|. Using the sub-functor relation we
+can define smart constructors for arithmetic expressions
 
-> lit :: (ArithF :<: f) => Int -> FixDTC f
-> lit i = inject (Lit i)
-> add :: (ArithF :<: f) => FixDTC f -> FixDTC f -> FixDTC f
-> add a b = inject (Add a b)
+> lit :: (ArithF :<: expf) => Int -> FixDTC expf
+> lit i = inject (LitF i)
+> add :: (ArithF :<: expf) => FixDTC expf -> FixDTC expf -> FixDTC expf
+> add a b = inject (AddF a b)
 
-that construct terms of any abstract super-functor |f| of |ArithF|. This is
-essential for modularity and reuse. We can define terms using the
-smart-constructors, but constructing a value of a specific fixpoint datatype is
-delayed. With these smart constructors the above example term becomes
+\noindent that construct terms of any abstract super-functor |expf| of
+|ArithF|. This is essential for modularity and reuse. We can define terms using
+the smart-constructors, but constructing a value of a specific fixed-point
+datatype is delayed. With these smart constructors the above example term
+becomes
 
-> ex1' :: (ArithF :<: f) => FixDTC f
+> ex1' :: (ArithF :<: expf) => FixDTC expf
 > ex1' = lit 3 `add` lit 4
 
+The |project| function is a variation of |prj| that strips the constructor of
+the fixed-point type |FixDTC|. Similarly to injections, we can automate
+projections for coproducts by adding corresponding definitions to the instances
+above.
 
-The |prj| member function is a partial inverse of |inj|. With it we can test if
-a specific sub-functor was used to build the top layer of a value. This
-operation fails if another sub-functor was used. The type class also includes
-proofs that witness the partial inversion. The |project| function is a variation
-of |prj| that strips the constructor of the fixpoint type. Similarly to
-injections, we can automate projections for coproducts by adding corresponding
-definitions to the instances above.
-
-
-
-
+%-------------------------------------------------------------------------------
 
 \subsection{Semantic Functions}
 
@@ -186,15 +202,15 @@ sentinel value to signal type errors during evaluation.
 \fbox{
 \hspace{-5pt}\begin{minipage}{1\columnwidth}
 
-> data NatValueF    v = VInt   Int
-> data BoolValueF   v = VBool  Bool
-> data StuckValueF  v = VStuck
-
-> vint :: (NatValueF :<: vf) => Int -> FixDTC vf
+> data IntValueF    val = VInt   Int
+> data BoolValueF   val = VBool  Bool
+> data StuckValueF  val = VStuck
+>
+> vint :: (IntValueF :<: valf) => Int -> FixDTC valf
 > vint i = inject (VInt i)
-> vbool :: (BoolValueF :<: vf) => Bool -> FixDTC vf
+> vbool :: (BoolValueF :<: valf) => Bool -> FixDTC valf
 > vbool b = inject (VBool b)
-> vstuck :: (StuckValueF :<: vf) => FixDTC vf
+> vstuck :: (StuckValueF :<: valf) => FixDTC valf
 > vstuck = inject VStuck
 
 \end{minipage}
@@ -211,10 +227,10 @@ follows:
 > foldDTC :: Functor f => Algebra f a -> FixDTC f -> a
 > foldDTC f (InDTC x) = f (fmap (foldDTC f) x)
 
-An algebra specifies one step of recursion that turns a value of type
-f a into the desired result type a. The fold uniformly applies this
-operation to an entire term. All semantic functions over a modular
-datatype are written as folds of an algebra.
+An \emph{algebra} specifies one step of recursion that turns a value of type |(f
+a)| into the desired result type |a|. The \emph{fold} uniformly applies this
+operation to an entire term. All semantic functions over a modular datatype are
+written as folds of an algebra.
 
 Using type classes, we can define and assemble algebras in a modular
 fashion. The class |FAlgebra| in Figure \ref{fig:falgebraclass}
@@ -230,17 +246,14 @@ using |Int| as the carrier.
 
 > class FAlgebra name f a where
 >   f_algebra   :: name -> Algebra f a
-
-> algebraPlus ::  Algebra f a -> Algebra g a ->
->                   Algebra (f :+: g) a
+>
+> algebraPlus ::  Algebra f a -> Algebra g a -> Algebra (f :+: g) a
 > algebraPlus f g (Inl a)  = f a
 > algebraPlus f g (Inr a)  = g a
-
+>
 > instance  (FAlgebra name f a, FAlgebra name g a) =>
 >             FAlgebra name (f :+: g) a where
->   f_algebra name =  algebraPlus
->                       (f_algebra name)
->                       (f_algebra name)
+>   f_algebra name =  algebraPlus (f_algebra name) (f_algebra name)
 
 \end{minipage}
 }
@@ -253,33 +266,31 @@ We use the name |Eval| to refer to the evaluation algebra.
 
 > data Eval = Eval
 
-The evaluation algebras are parameterized over an abstract
-super-functor |vf| for values. In case of |ArithF| we require that
-integral values are part of |vf| and for |BoolF| we require that
-boolean values are part of |vf|.
+The evaluation algebras are parameterized over an abstract super-functor |valf|
+for values. In case of |ArithF| we require that integral values are part of
+|valf| and for |BoolF| we require that boolean values are part of |valf|.
 
-In the case of an |Add| in the evaluation algebra for arithmetic
-expressions we need to project the results of the recursive calls to
-test whether integral values were produced. Otherwise a type error
-occurrs and the |stuck| value is returned.
+In the case of an |AddF| in the evaluation algebra for arithmetic expressions we
+need to project the results of the recursive calls to test whether integral
+values were produced. Otherwise a type error occurrs and the |stuck| value is
+returned.
 
-> instance  (NatValueF :<: vf, StuckValueF :<: vf) =>
->             FAlgebra Eval ArithF (FixDTC vf) where
->   f_algebra Eval (Lit i)     =  vint i
->   f_algebra Eval (Add a b)   =
->     case (project a, project b) of
+> instance  (IntValueF :<: valf, StuckValueF :<: valf) =>
+>             FAlgebra Eval ArithF (FixDTC valf) where
+>   f_algebra Eval (LitF i)     =  vint i
+>   f_algebra Eval (AddF a b)   =  case (project a, project b) of
 >       (Just (VInt a) , Just (VInt b))  -> vint (a + b)
 >       _                                -> vstuck
 
 Similarly, we have to test the result of the recursive call of the
 condition of an |If| term for boolean values.
 
-> instance  (BoolValueF :<: vf, StuckValueF :<: vf) =>
->             FAlgebra Eval BoolF (FixDTC vf) where
->   f_algebra Eval (BLit b)    =  vbool b
->   f_algebra Eval (If c t e)  =
->     case project c of
->       Just (VBool b) -> if b then t else e
+> instance  (BoolValueF :<: valf, StuckValueF :<: valf) =>
+>             FAlgebra Eval BoolF (FixDTC valf) where
+>   f_algebra Eval (BLitF b)    =  vbool b
+>   f_algebra Eval (IfF c t e)  =  case project c of
+>       Just (VBool b)  ->  if b then t else e
+>       _               ->  vstuck
 
 Function algebras for different signatures can be combined together to
 get an algebra for their coproduct. The necessary instance declaration
@@ -287,10 +298,9 @@ is also given in Figure \ref{fig:falgebraclass}. Finally, we can
 define an evaluation function for terms given an |FAlgebra| instance
 for |Eval|.
 
-> eval ::  (Functor f, FAlgebra Eval f (FixDTC vf)) =>
->            FixDTC f -> FixDTC vf
+> eval ::  (Functor f, FAlgebra Eval expf (FixDTC valf)) =>
+>          FixDTC expf -> FixDTC valf
 > eval = foldDTC (f_algebra Eval)
-
 
 
 %%% Local Variables:

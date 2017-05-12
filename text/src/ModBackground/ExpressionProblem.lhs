@@ -151,7 +151,7 @@ shows the code with both extensions.
   \end{minipage}
 }
 \caption{Extended arithmetic expressions (Java)}
-\label{fig:mod:monolithicexpressionsjava}
+\label{fig:mod:monolithicexpressionsjavaextended}
 \end{figure}
 
 In Java the situation is reversed. The multiplication case can easily be added
@@ -168,7 +168,7 @@ However, the conversion to a |String| inevitably requires editing the existing
 code and adding a new method to the |ArithExp| interface and existing
 implementations of that interface.\footnote{We disregard the |toString()| method
   that is part of the base class |Object|.} Figure
-\ref{fig:mod:monolithicexpressionshaskellextended} shows the code with both
+\ref{fig:mod:monolithicexpressionsjavaextended} shows the code with both
 extensions.
 
 %-------------------------------------------------------------------------------
@@ -176,16 +176,16 @@ extensions.
 Performing such extensions in both dimensions simultaneously and modularly, i.e.
 without changing or recompiling the existing code, and keeping the code
 type-safe was coined as \emph{the expression problem} by Wadler
-\cite{expression-problem}. Solutions to the expression problem exist in
-multiple languages: Wadler \cite{expression-problem} presents a solution in Java
-using Generics and the \emph{Datatypes \`a la Carte} (DTC) approach \cite{dtc}
-is a well-known solution in the Haskell programming language. In both of these
-solutions modularity has to be anticipated and catered for from the beginning however. Indeed, we
-cannot reuse the datatype declaration and interface declarations from this
-section, but have to use ones that account for modular extensions. We will call 
-a Haskell datatype that can be modularly extended a \emph{modular datatype} and
-use the term \emph{modular function} for modularly extensible functions that are
-defined on modular datatypes.
+\cite{expression-problem}. Solutions to the expression problem exist in multiple
+languages: Wadler \cite{expression-problem} presents a solution in Java using
+Generics and the \emph{Datatypes \`a la Carte} (DTC) approach \cite{dtc} is a
+well-known solution in the Haskell programming language. In both of these
+solutions, modularity has to be anticipated and catered for from the beginning
+however. Indeed, we cannot reuse the datatype declaration and interface
+declarations from this section, but have to use ones that account for modular
+extensions. We will call a Haskell datatype that can be modularly extended a
+\emph{modular datatype} and use the term \emph{modular function} for modularly
+extensible functions that are defined on modular datatypes.
 
 Our goal to modularly engineer programming language meta-theory adds a third
 dimension to the expression problem: \emph{modular proofs} of statements about modular

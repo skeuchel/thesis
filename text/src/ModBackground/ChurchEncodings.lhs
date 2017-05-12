@@ -7,27 +7,31 @@
 
 \section{Church Encodings}\label{sec:mod:churchencodings}
 
-The Meta-Theory \`a la Carte (MTC) framework's solution to define type-level
+The Meta-Theory \`a la Carte (MTC) \cite{mtc} framework's solution to define type-level
 fixed-points in a proof-assistant setting is to use Church encodings to encode
 strictly-positive algebraic datatypes, or more precisely: B\"ohm-Berarducci
-encodings\cite{bohm85automatic}.
+encodings \cite{bohm85automatic}.
 
 \subsection{Encoding algebraic datatypes}
 
-The untyped \lambda-calclus only provides functions as primitives, but these can
-be used to encode other datatypes. This technique has already been used by
-Alonzo and is hence named Church encoding. Church numerals are functions
+The untyped \textlambda-calclus only provides functions as primitives, but these can
+be used to encode other datatypes. This technique was first used by
+Alonzo Church and is hence named Church encoding. Church numerals are functions
 representing the natural numbers. The idea is that the Church numeral $c_n$ for
 the natural number $n$ applies a function $s$ $n$-times to a value $z$ similarly
 to how we get $n$ by taking $n$-times the successor of zero. We can construct
 the Church numeral for any concretely given natural number:
-
+%{
+%format c0
+%format c1
+%format c2
 \begin{spec}
-  c_0 = \s. \z. z
-  c_1 = \s. \z. s z
-  c_2 = \s. \z. s (s z)
+  c0 = \s._ \z._ z
+  c1 = \s._ \z._ s z
+  c2 = \s._ \z._ s (s z)
   ...
 \end{spec}
+%}
 
 
 

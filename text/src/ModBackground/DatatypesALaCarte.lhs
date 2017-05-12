@@ -24,7 +24,7 @@
 %The  (DTC) approach \cite{dtc} is a solution of
 %the expression problem in the Haskell programming language.
 
-This section reviews the core ideas behind \emph{Datatypes \`a la Carte} (DTC),
+This section reviews the core ideas behind \emph{Datatypes \`a la Carte} (DTC) \cite{dtc},
 a well-known Haskell solution to the expression problem, and presents the
 infrastructure for writing modular functions over modular datatypes.
 
@@ -88,7 +88,7 @@ of the coproduct of |ArithF| and |BoolF|
 
 > type ExpDTC = FixDTC (ArithF :+: BoolF)
 
-essentially\footnote{Which means modulo non-termination.} yields a datatype that
+essentially\footnote{Which due to laziness in Haskell means modulo non-termination.} yields a datatype that
 is isomorphic to the monolithic datatype |Exp| from Figure
 \ref{fig:mod:arithlogicexpressions} (top).
 

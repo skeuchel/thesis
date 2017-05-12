@@ -29,7 +29,8 @@ formalization is that traditional inductive definitions and proofs are closed to
 extension. It is therefore necessary to develop modular reasoning principles
 first; in fact, \emph{modular induction principles}, because we want to stay as
 close to established proof techniques as possible.  Opening induction
-definitions for extensibility is a manifestation of the expression problem.
+definitions for extensibility is a manifestation of the \emph{expression
+problem}\cite{expression-problem}.
 
 %% This is a manifestation of the expression problem that has been
 %% addressed by the Meta-Theory \`a la Carte (MTC) framework in the context of

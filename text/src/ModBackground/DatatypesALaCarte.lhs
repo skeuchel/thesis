@@ -157,7 +157,7 @@ To facilitate writing expressions and make reuse possible we use the sub-functor
 |f :<: g| relation shown in Figure \ref{fig:subfunctorrelation} (top). The
 member function |inj| injects the sub-functor |f| into the super-functor |g|. In
 our case we need injections of functors into coproducts which are automated
-using type class machinery. \footnote{Coq's type-class mechanism performs
+using type class machinery.\footnote{Coq's type-class mechanism performs
 backtracking. These instances do not properly work in Haskell. See \cite{dtc}
 for a partial solution.} The |prj| member function is a partial inverse of
 |inj|. With it we can test if a specific sub-functor was used to build the top
@@ -272,7 +272,7 @@ for values. In case of |ArithF| we require that integral values are part of
 
 In the case of an |AddF| in the evaluation algebra for arithmetic expressions we
 need to project the results of the recursive calls to test whether integral
-values were produced. Otherwise a type error occurrs and the |stuck| value is
+values were produced. Otherwise a type error occurs and the |stuck| value is
 returned.
 
 > instance  (IntValueF :<: valf, StuckValueF :<: valf) =>
@@ -292,11 +292,10 @@ condition of an |If| term for boolean values.
 >       Just (VBool b)  ->  if b then t else e
 >       _               ->  vstuck
 
-Function algebras for different signatures can be combined together to
-get an algebra for their coproduct. The necessary instance declaration
-is also given in Figure \ref{fig:falgebraclass}. Finally, we can
-define an evaluation function for terms given an |FAlgebra| instance
-for |Eval|.
+Function algebras for different signatures can be combined to get an algebra for
+their coproduct. The necessary instance declaration is also given in Figure
+\ref{fig:falgebraclass}. Finally, we can define an evaluation function for terms
+given an |FAlgebra| instance for |Eval|.
 
 > eval ::  (Functor f, FAlgebra Eval expf (FixDTC valf)) =>
 >          FixDTC expf -> FixDTC valf

@@ -11,7 +11,7 @@ Haskell. In this Section we turn our attention towards performing modular
 constructions of datatypes, functions and inductive proofs in a proof-assistant
 like Agda or Coq.
 
-\subsection{Modular Definitions in Coq}
+%\subsection{Modular Definitions in Coq}
 
 %{
 %format tau = "\tau"
@@ -67,7 +67,8 @@ application and would like to provide the evidence of strict-positivity to the
 fixpoint type constructor. Mini-Agda~\cite{miniagda} for example allows
 programmers to annotate strictly-positive and negative positions of type
 constructors. Unfortunately, Agda and Coq do not provide us with this
-possibility and a different approach is needed.
+possibility and a different approach is needed to define type-level fixed-points
+and fold operators. 
 
 
 

@@ -7,6 +7,30 @@
 
 \section{Church Encodings}\label{sec:mod:churchencodings}
 
+The Meta-Theory \`a la Carte (MTC) framework's solution to define type-level
+fixed-points in a proof-assistant setting is to use Church encodings to encode
+strictly-positive algebraic datatypes, or more precisely: B\"ohm-Berarducci
+encodings\cite{bohm85automatic}.
+
+\subsection{Encoding algebraic datatypes}
+
+The untyped \lambda-calclus only provides functions as primitives, but these can
+be used to encode other datatypes. This technique has already been used by
+Alonzo and is hence named Church encoding. Church numerals are functions
+representing the natural numbers. The idea is that the Church numeral $c_n$ for
+the natural number $n$ applies a function $s$ $n$-times to a value $z$ similarly
+to how we get $n$ by taking $n$-times the successor of zero. We can construct
+the Church numeral for any concretely given natural number:
+
+\begin{spec}
+  c_0 = \s. \z. z
+  c_1 = \s. \z. s z
+  c_2 = \s. \z. s (s z)
+  ...
+\end{spec}
+
+
+
 \subsection{Reasoning with Church Encodings}
 
 %{
@@ -19,8 +43,8 @@ Section \ref{ssec:modularinductivereasoning}. MTC uses a
 
 < indArith2 ::
 <   forall ((p   :: (Arith -> Prop)).
-<   forall ((hl  :: (forall n. p (inMTC (Lit n)))).
-<   forall ((ha  :: (forall x y. p x -> p y -> p (inMTC (Add x y)))).
+<   forall ((hl  :: (forall n. p (inMTC (LitF n)))).
+<   forall ((ha  :: (forall x y. p x -> p y -> p (inMTC (AddF x y)))).
 <   Algebra ArithF (exists a. p a)
 
 The induction principle uses a dependent sum type to turn a proof

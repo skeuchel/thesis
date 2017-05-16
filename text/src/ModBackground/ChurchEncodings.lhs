@@ -35,16 +35,17 @@
 \section{Church Encodings}\label{sec:mod:churchencodings}
 
 The Meta-Theory \`a la Carte (MTC) \cite{mtc} framework's solution to define
-type-level fixed-points in a proof-assistant setting is to use Church encodings
-to encode strictly-positive algebraic datatypes, or more precisely:
-B\"ohm-Berarducci encodings \cite{bohm85automatic}.
+type-level fixed-points in a proof-assistant setting is to use Church
+encodings, or B\"ohm-Berarducci encodings to be precise
+\cite{bohm85automatic}, to encode strictly-positive algebraic datatypes.
 
-\subsection{Encoding algebraic datatypes}
+\subsection{Encoding Algebraic Datatypes}
 
-The untyped \textlambda-calclus only provides functions as primitives, but these can
+The untyped \textlambda-calclus only provides functions as primitives. Yet, this is
+no limitation as they can
 be used to encode other datatypes. This technique was first used by
-Alonzo Church and is hence named Church encoding. Church numerals are functions
-representing the natural numbers. The idea is that the Church numeral $c_n$ for
+Alonzo Church and is hence named Church encoding. For instance, the Church encoding
+of natural numbers is known as Church numerals. The idea is that the Church numeral $c_n$ for
 the natural number $n$ applies a function $s$ $n$-times to a value $z$ similarly
 to how we get $n$ by taking $n$-times the successor of zero. We can construct
 the Church numeral for any concretely given natural number:
@@ -55,8 +56,8 @@ the Church numeral for any concretely given natural number:
   ...
 \end{spec}
 
-In other words, the $n$-th Church numeral corresponds to the specialization of
-the natural number fold to $n$. In fact, typing the above combinators in Haskell
+In other words, the $n$-th Church numeral corresponds to 
+the fold over natural numbers instantiated for the number $n$. In fact, typing the above combinators in Haskell
 yields the familiar type |c_n :: forall a. (a -> a) -> a -> a|. B\"ohm and
 Berarducci \cite{bohm85automatic} proved that such an encoding is not limited to
 simple datatypes like the naturals, but that all strictly-positive (and
@@ -66,11 +67,12 @@ that the encoding is an isomorphism.
 Specializing the type of DTC's generic fold operator from Section
 \ref{sec:mod:datatypesalacarte}
 
-< foldDTC :: Functor f => Algebra f a -> FixDTC f -> a|
+< foldDTC :: Functor f => Algebra f a -> FixDTC f -> a
 
-yields the type |Algebra f a -> a| that we use to define the Church encoding
-type-level fixed-point combinator |FixC| in Figure \ref{fig:mod:fixchurch}. The
-genreic fold operator |foldC| for this fixed-point is simply the application of
+for a particular datatype |FixDTC f|
+yields the type |Algebra f a -> a| that we use in Figure \ref{fig:mod:fixchurch} to define the 
+type-level fixed-point combinator |FixC| for the Church encoding of that datatype. The
+generic fold operator |foldC| for this fixed-point is simply the application of
 a value to the given algebra. We can also define one-level folding |inC| and
 unfolding |outC| of the fixed-point which are also given in Figure
 \ref{fig:mod:fixchurch}. These can in turn be used to define new |inject| and
@@ -85,23 +87,23 @@ constructors.
 \fbox{
   \begin{minipage}{0.98\columnwidth}
 
-> type FixC f = forall a. Algebra f a -> a
->
-> foldC :: Algebra f a -> FixC f -> a
-> foldC alg x = x alg
->
-> inC :: forall f. Functor f => f (FixC f) -> FixC f
-> inC x = \alg -> alg (fmap (foldC alg) x)
->
-> outC :: forall f. Functor f => FixC f -> f (FixC f)
-> outC = foldC @f @(f (FixC f)) (fmap @f @(f (FixC f)) @(FixC f) inC)
+< type FixC f = forall a. Algebra f a -> a
+<
+< foldC :: Algebra f a -> FixC f -> a
+< foldC alg x = x alg
+<
+< inC :: forall f. Functor f => f (FixC f) -> FixC f
+< inC x = \alg -> alg (fmap (foldC alg) x)
+< 
+< outC :: forall f. Functor f => FixC f -> f (FixC f)
+< outC = foldC (fmap inC)
 
   \hrule
 
-> inject :: (Functor g, f :<: g) => f (FixC g) -> FixC g
-> inject x = inC $ inj x
-> project :: (Functor g, f :<: g) => FixC g -> Maybe (f (FixC g))
-> project x = prj $ outC x
+< inject :: (Functor g, f :<: g) => f (FixC g) -> FixC g
+< inject x = inC (inj x)
+< project :: (Functor g, f :<: g) => FixC g -> Maybe (f (FixC g))
+< project x = prj (outC x)
 
   \end{minipage}
 }
@@ -117,11 +119,11 @@ constructors.
 %{
 %format .         = "."
 
-The encoding of strictly-positive types carries over to (and can be extended in)
-\cite{pfenning90inductively} the Calculus of Constructions (CoC). However,
+The Church encoding of strictly-positive types carries over to (and can be extended in)
+the Calculus of Constructions (CoC) \cite{pfenning90inductively}. However,
 proper structural induction principles for Church encodings are not provable in
 CoC \cite{pfenning90inductively}. Such induction principles have to be assumed
-instead. MTC side-steps this issue and uses a weaker form of induction for which
+as axioms instead. MTC side-steps this issue and uses a weaker form of induction for which
 it adapts the proof methods used in the \emph{initial algebra semantics of data
   types}~\cite{goguen77initial,malcolm90thesis} -- in particular \emph{universal
   properties} -- to support inductive proofs over Church encodings.

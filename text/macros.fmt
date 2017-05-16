@@ -209,3 +209,8 @@
 %format inMTC     = "{{\Conid{in}}_{" M "}}"
 %format outMTC    = "{{\Conid{out}}_{" M "}}"
 %format foldMTC   = "{{" fold "}_{" M "}}"
+
+%format FixC      = "{{\Conid{Fix}}_{" C "}}"
+%format foldC     = "{{\Varid{fold}}_{" C "}}"
+%format inC       = "{{\Conid{in}}_{" C "}}"
+%format outC      = "{{\Conid{out}}_{" C "}}"

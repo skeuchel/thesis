@@ -5,12 +5,39 @@
 %include macros.fmt
 %include exists.fmt
 
+%format c0
+%format c1
+%format c2
+%format c_n = "{{" c "}_{" n "}}"
+
+%if False
+
+> {-# LANGUAGE ExplicitForAll #-}
+> {-# LANGUAGE TypeFamilies #-}
+> {-# LANGUAGE ScopedTypeVariables #-}
+> {-# LANGUAGE TypeOperators #-}
+> {-# LANGUAGE MultiParamTypeClasses #-}
+> {-# LANGUAGE FlexibleInstances #-}
+> {-# LANGUAGE FlexibleContexts #-}
+> {-# LANGUAGE RankNTypes #-}
+> {-# LANGUAGE ImpredicativeTypes #-}
+> {-# LANGUAGE TypeApplications #-}
+>
+> module ChurchEncodings where
+>
+> import DatatypesALaCarte
+
+%endif
+
+
+%-------------------------------------------------------------------------------
+
 \section{Church Encodings}\label{sec:mod:churchencodings}
 
-The Meta-Theory \`a la Carte (MTC) \cite{mtc} framework's solution to define type-level
-fixed-points in a proof-assistant setting is to use Church encodings to encode
-strictly-positive algebraic datatypes, or more precisely: B\"ohm-Berarducci
-encodings \cite{bohm85automatic}.
+The Meta-Theory \`a la Carte (MTC) \cite{mtc} framework's solution to define
+type-level fixed-points in a proof-assistant setting is to use Church encodings
+to encode strictly-positive algebraic datatypes, or more precisely:
+B\"ohm-Berarducci encodings \cite{bohm85automatic}.
 
 \subsection{Encoding algebraic datatypes}
 
@@ -21,63 +48,118 @@ representing the natural numbers. The idea is that the Church numeral $c_n$ for
 the natural number $n$ applies a function $s$ $n$-times to a value $z$ similarly
 to how we get $n$ by taking $n$-times the successor of zero. We can construct
 the Church numeral for any concretely given natural number:
-%{
-%format c0
-%format c1
-%format c2
 \begin{spec}
   c0 = \s._ \z._ z
   c1 = \s._ \z._ s z
   c2 = \s._ \z._ s (s z)
   ...
 \end{spec}
-%}
+
+In other words, the $n$-th Church numeral corresponds to the specialization of
+the natural number fold to $n$. In fact, typing the above combinators in Haskell
+yields the familiar type |c_n :: forall a. (a -> a) -> a -> a|. B\"ohm and
+Berarducci \cite{bohm85automatic} proved that such an encoding is not limited to
+simple datatypes like the naturals, but that all strictly-positive (and
+parameterized) datatypes can be encoded in System~F in this fashion and proved
+that the encoding is an isomorphism.
+
+Specializing the type of DTC's generic fold operator from Section
+\ref{sec:mod:datatypesalacarte}
+
+< foldDTC :: Functor f => Algebra f a -> FixDTC f -> a|
+
+yields the type |Algebra f a -> a| that we use to define the Church encoding
+type-level fixed-point combinator |FixC| in Figure \ref{fig:mod:fixchurch}. The
+genreic fold operator |foldC| for this fixed-point is simply the application of
+a value to the given algebra. We can also define one-level folding |inC| and
+unfolding |outC| of the fixed-point which are also given in Figure
+\ref{fig:mod:fixchurch}. These can in turn be used to define new |inject| and
+|project| functions for the definition of smart constructors and feature
+specific algebras. DTC's machinery for taking the coproduct of functors and
+algebras carries over to the new fixed-point unchanged. User-defined algebras
+for semantic functions only need to be altered to use the new smart
+constructors.
 
 
+\begin{figure}[t]
+\fbox{
+  \begin{minipage}{0.98\columnwidth}
+
+> type FixC f = forall a. Algebra f a -> a
+>
+> foldC :: Algebra f a -> FixC f -> a
+> foldC alg x = x alg
+>
+> inC :: forall f. Functor f => f (FixC f) -> FixC f
+> inC x = \alg -> alg (fmap (foldC alg) x)
+>
+> outC :: forall f. Functor f => FixC f -> f (FixC f)
+> outC = foldC @f @(f (FixC f)) (fmap @f @(f (FixC f)) @(FixC f) inC)
+
+  \hrule
+
+> inject :: (Functor g, f :<: g) => f (FixC g) -> FixC g
+> inject x = inC $ inj x
+> project :: (Functor g, f :<: g) => FixC g -> Maybe (f (FixC g))
+> project x = prj $ outC x
+
+  \end{minipage}
+}
+\caption{Fixed-points and fold using Church encodings}
+\label{fig:mod:fixchurch}
+\end{figure}
+
+
+%-------------------------------------------------------------------------------
 
 \subsection{Reasoning with Church Encodings}
 
 %{
 %format .         = "."
 
-Church encodings have problems supporting proper induction principles,
-like the induction principle for arithmetic expressions |indArith| in
-Section \ref{ssec:modularinductivereasoning}. MTC uses a
-\emph{poor-man's induction principle} |indArith2| instead.
+The encoding of strictly-positive types carries over to (and can be extended in)
+\cite{pfenning90inductively} the Calculus of Constructions (CoC). However,
+proper structural induction principles for Church encodings are not provable in
+CoC \cite{pfenning90inductively}. Such induction principles have to be assumed
+instead. MTC side-steps this issue and uses a weaker form of induction for which
+it adapts the proof methods used in the \emph{initial algebra semantics of data
+  types}~\cite{goguen77initial,malcolm90thesis} -- in particular \emph{universal
+  properties} -- to support inductive proofs over Church encodings.
+Consider the type signature of the function |indArith2| that represents an
+induction principles for the |ArithF| feature \cite{mtc}:
 
 < indArith2 ::
-<   forall ((p   :: (Arith -> Prop)).
-<   forall ((hl  :: (forall n. p (inMTC (LitF n)))).
-<   forall ((ha  :: (forall x y. p x -> p y -> p (inMTC (AddF x y)))).
+<   forall ((p   :: (FixC ArithF -> Prop)).
+<   forall ((hl  :: (forall n. p (inC (LitF n)))).
+<   forall ((ha  :: (forall x y. p x -> p y -> p (inC (AddF x y)))).
 <   Algebra ArithF (exists a. p a)
 
-The induction principle uses a dependent sum type to turn a proof
-algebras into a regular algebra. The algebra builds a copy of the
-original term and a proof that the property holds for the copy. The
-proof for the copy can be obtained by folding with this algebra. In
+The induction principle uses a dependent sum type to turn a proof algebra,
+consisting of the functions |hl| and |ha|, into a regular algebra. The algebra
+builds a copy of the original term and a proof that the property holds for the
+copy. The proof for the copy can be obtained by folding with this algebra. In
 order to draw conclusions about the original term two additional
 \emph{well-formedness} conditions have to be proven.
 %}
 \begin{enumerate}
 
-\item The proof-algebra has to be well-formed in the sense that it
-really builds a copy of the original term instead of producing an
-arbitrary term. This proof needs to be done only once for every
-induction principle of every functor and is about 20 LoC per
-feature. The use of this well-formedness proof is completely automated
-using type-classes and hence hidden from the user.
+\item The proof-algebra has to be well-formed in the sense that it really builds
+  a copy of the original term instead of producing an arbitrary term. This proof
+  needs to be done only once for every induction principle of every functor and
+  is usually short and straightforward.
 
-\item The fold operator used to build the proof using the algebra
-needs to be a proper fold operator, i.e. it needs to satisfy the
-universal property of folds.
+  In the MTC framework, the well-formedness proof is about 20 LoC per feature
+  and its use is completely automated using type-classes and hence hidden from
+  the user.
 
-< foldMTC :: Algebra f a -> FixMTC f -> a
-< foldMTC alg fa = fa alg
-<
-< type UniversalProperty (f :: * -> *) (e :: FixMTC f)
-<   =  forall a (alg :: Algebra f a) (h :: FixMTC f -> a).
-<        (forall e. h (inMTC e) = alg h e) ->
-<          h e = foldMTC alg e
+\item The fold operator used to build the proof using the algebra needs to be a
+  proper fold operator, i.e. it needs to satisfy the universal property of
+  folds.
+
+< type UniversalProperty (f :: * -> *) (e :: FixC f)
+<   =  forall a (alg :: Algebra f a) (h :: FixC f -> a).
+<        (forall e. h (inC e) = alg h e) ->
+<          h e = foldC alg e
 
 In an initial algebra representation of an inductive datatype, we have a single
 implementation of a fold operator that can be proven correct. In MTC's approach
@@ -91,18 +173,18 @@ property of folds for every value of a modular datatype that is used in a
 proof. This is mostly done by packaging a term and the proof of the universal
 property of its fold in a dependent sum type.
 
-> type FixUP f = exists ((x :: FixMTC f)). UniversalProperty f x
+\begin{spec}
+type FixUP f = exists ((x :: FixC f)). UniversalProperty f x
+\end{spec}
 
-The main novelty of MTC is its modular approach to inductive proofs. Regular
-structural induction is not available for Church encodings, so MTC adapts the
-proof methods used in the \emph{initial algebra semantics of data
-  types}~\cite{goguen77initial,malcolm90thesis} -- in particular \emph{universal
-  properties} -- to support modular inductive proofs over Church
-encodings. Proofs are written in the same modular style as functions, using
+One of the main novelties of MTC is that this approach to induction also gives
+use modularity: Proofs are written in the same modular style as functions, using
 proof algebras (class |PAlg| in Figure~\ref{fig:SalCa_Typeclasses}).  These
-algebras are folded over the terms and can be modularly combined.  Unlike
-function algebras, proof algebras are subject to an additional constraint which
-ensures the validity of the proofs (|proj_eq|).
+algebras are folded over the terms and can be modularly combined.
+
+% Unlike
+% function algebras, proof algebras are subject to an additional constraint which
+% ensures the validity of the proofs (|proj_eq|).
 
 % For instance, the law
 %|proj_eq| states that the new term produced by application of the

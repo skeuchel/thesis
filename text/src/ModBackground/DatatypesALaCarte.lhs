@@ -12,7 +12,9 @@
 > {-# LANGUAGE MultiParamTypeClasses #-}
 > {-# LANGUAGE FlexibleInstances #-}
 > {-# LANGUAGE FlexibleContexts #-}
-
+>
+> module DatatypesALaCarte where
+>
 > import Control.Arrow
 
 %endif
@@ -37,16 +39,15 @@ infrastructure for writing modular functions over modular datatypes.
 \begin{figure}[t]
 \fbox{
   \begin{minipage}{0.98\columnwidth}
-    \begin{code}
-      data Exp  =  Lit  Int   | Add Exp Exp
-                |  BLit Bool  | If Exp Exp Exp
 
-    \end{code}
-    \hrule
-    \begin{code}
-      data ArithF  exp = LitF  Int   | AddF exp exp
-      data BoolF   exp = BLitF Bool  | IfF exp exp exp
-    \end{code}
+> data Exp  =  Lit  Int   | Add Exp Exp
+>           |  BLit Bool  | If Exp Exp Exp
+
+  \hrule
+
+> data ArithF  exp = LitF  Int   | AddF exp exp
+> data BoolF   exp = BLitF Bool  | IfF exp exp exp
+
   \end{minipage}
 }
 \caption{Arithmetic and logical expressions}
@@ -66,10 +67,10 @@ capture the signature of features in isolation.
 \begin{figure}[t]
 \fbox{
   \begin{minipage}{0.98\columnwidth}
-    \begin{code}
-      data FixDTC  f      =  InDTC { outDTC :: f (FixDTC f) }
-      data (:+:)   f g a  =  Inl (f a) | Inr (g a)
-    \end{code}
+
+> data FixDTC  f      =  InDTC { outDTC :: f (FixDTC f) }
+> data (:+:)   f g a  =  Inl (f a) | Inr (g a)
+
   \end{minipage}
 }
 \caption{Datatypes \`a la Carte fixed-point}
@@ -133,9 +134,9 @@ Combining signatures makes writing expressions difficult. For example the
 arithmetic expression |3 + 4| is represented as the term
 
 > ex1 :: FixDTC (ArithF :+: BoolF)
-> ex1 = InDTC (Inl   (Add
->                       (InDTC (Inl (Lit 3)))
->                       (InDTC (Inl (Lit 4)))))
+> ex1 = InDTC (Inl   (AddF
+>                       (InDTC (Inl (LitF 3)))
+>                       (InDTC (Inl (LitF 4)))))
 
 Writing such expressions manually is too cumbersome and unreadable. Moreover, if
 we extend the datatype with a new signature, other injections are needed.
@@ -143,13 +144,13 @@ we extend the datatype with a new signature, other injections are needed.
 
 %if False
 \begin{code}
-class f :<: g where
-  inj :: f a -> g a
-  prj :: g a -> Maybe (f a)
-inject :: (f :<: g) => f (FixDTC g) -> FixDTC g
-inject x = InDTC $ inj x
-project :: (f :<: g) => FixDTC g -> Maybe (f (FixDTC g))
-project x = prj $ outDTC x
+  class f :<: g where
+    inj :: f a -> g a
+    prj :: g a -> Maybe (f a)
+  inject :: (f :<: g) => f (FixDTC g) -> FixDTC g
+  inject x = InDTC $ inj x
+  project :: (f :<: g) => FixDTC g -> Maybe (f (FixDTC g))
+  project x = prj $ outDTC x
 \end{code}
 %endif
 
@@ -282,8 +283,8 @@ returned.
 >       (Just (VInt a) , Just (VInt b))  -> vint (a + b)
 >       _                                -> vstuck
 
-Similarly, we have to test the result of the recursive call of the
-condition of an |If| term for boolean values.
+Similarly, we have to test the result of the recursive call of the condition of
+an |IfF| term for boolean values.
 
 > instance  (BoolValueF :<: valf, StuckValueF :<: valf) =>
 >             FAlgebra Eval BoolF (FixDTC valf) where
@@ -297,8 +298,8 @@ their coproduct. The necessary instance declaration is also given in Figure
 \ref{fig:falgebraclass}. Finally, we can define an evaluation function for terms
 given an |FAlgebra| instance for |Eval|.
 
-> eval ::  (Functor f, FAlgebra Eval expf (FixDTC valf)) =>
->          FixDTC expf -> FixDTC valf
+> eval :: (Functor expf, FAlgebra Eval expf (FixDTC valf)) =>
+>         FixDTC expf -> FixDTC valf
 > eval = foldDTC (f_algebra Eval)
 
 

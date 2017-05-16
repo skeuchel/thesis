@@ -187,7 +187,7 @@ The type class |WF_FAlg| provides a well-formedness condition for every
 composite algebra. Finally, the type class |PAlg| provides the definitions for
 proof algebras that we discuss in Section \ref{ssec:mod:modularproofs}.
 
-\paragraph{Example}
+%% \paragraph{Example}
 
 
 
@@ -340,6 +340,13 @@ affecting or overriding existing code.
 % The
 % Bool feature introduces a new typing judgment, WT-BOOL for boolean
 % values.
+
+\paragraph{Outlook}
+In the following chapter we present a different approach to encoding
+fixed-points and folds using universes and datatype-generic programming that
+overcomes several shortcomings of MTC's use of Church encodings: it is entirely
+predicative, admits proper strong induction principles and does not require
+well-formedness proofs for proof algebras.
 
 
 %%% Local Variables:

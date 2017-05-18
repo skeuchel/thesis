@@ -13,18 +13,19 @@
 
 %endif
 
-\section{Metatheory \`a la Carte}\label{sec:mod:mtc}
+\section{Mendler folds}\label{sec:mod:mendler}
 
-This section summarizes the necessary parts of the \emph{Meta-Theory \`a la
-  Carte} (MTC) approach to modular datatypes in Coq.  For the full details of
-MTC, we refer the reader to the original paper~\cite{mtc}.  MTC encodes data
-types and folds with a variant of Church
-encodings~\cite{bohm85automatic,pfenning90inductively} based on Mendler
-folds~\cite{uustalu00mendler}.
+MTC encodes data types and folds with a variant of Church encodings based on
+Mendler folds~\cite{uustalu00mendler}. The benefit of this encoding is that we
+have more control over the evaluation: 1) it allows us to explicitly define the
+evaluation order of recursive positions instead of relying on the evaluation
+order of the meta-language and 2) model general-recursive evaluation via bounded
+fixed-points.
 
 
 %-------------------------------------------------------------------------------
-\subsection{Mendler Church Encodings and Folds for Semantics}
+\paragraph{Mendler Church Encodings}
+%and Folds for Semantics}
 
 %format Fix = "\Varid{Fix}"
 %format fold = "\Varid{fold}"
@@ -34,6 +35,7 @@ folds~\cite{uustalu00mendler}.
   \begin{minipage}{\columnwidth}
     \begin{code}
       type MAlgebra f a = forall r. (r -> a) -> f r -> a
+      type Mixin r f a = (r -> a) -> f r -> a
 
       type MFix f = forall a . MAlgebra f a -> a
 
@@ -56,6 +58,11 @@ prevents case analysis, or any type of inspection, on those arguments.  Mendler
 folds (|mfold fa alg|) are defined by directly applying a Church encoded value
 |fa| to a Mendler algebra |alg|. All these definitions are non-recursive and can
 thus be expressed in Coq.
+
+The |Mixin| type slightly generalizes Mendler algebras by using an additional
+type parameter instead of the universal type quantification. This generalization
+is useful for defining non-inductive language features such as general recursion
+or higher-order binders.
 
 
 %% \footnote{ %% Some definitions requireimpredicativity.
@@ -82,7 +89,6 @@ expressions supporting boolean literals and conditionals as shown in Figure
 
       myEval :: MFix BoolF -> Value
       myEval = mfold ifAlg
-
     \end{code}
   \end{minipage}
 }
@@ -95,10 +101,6 @@ The evaluation algebra |ifAlg| for this language takes the function argument
 explicit. The evaluation function |myEval| simply folds the |ifAlg| algebra.
 
 
-%% Unlike conventional Church encodings and folds, and indicate the evaluation
-%% order.
-%% This allows us to control evaluation and avoid relying on the
-%% evaluation order of the meta-language.
 
 %if False
 
@@ -130,62 +132,60 @@ do not type-check.
 
 
 
-%-------------------------------------------------------------------------------
-\subsection{Modular Composition of Features}\label{sec:comp}
-
-\input{src/ModBackground/Figures/SalCa_TypeClasses}
-
-MTC adapts the \emph{Data Types \`a la Carte} (DTC)~\cite{dtc} approach for
-composing |F|-algebras to Mendler algebras. MTC defines a number of type classes
-with laws in order to support proofs.  These classes and laws are summarized in
-the table in Figure~\ref{fig:SalCa_Typeclasses}.  The second column notes
-whether the base instances of a particular class are provided by the user or are
-automatically inferred with a default instance. Importantly, instances of all
-these classes for feature compositions (using |:+:|) are built automatically.
-
-
-\paragraph{Modular Functors}
-The |Functor| and functor subtyping |:<:| classes are a direct adaptation
-of the corresponding DTC type classes.
-
-%% class provides the |fmap| method and is an adaptation of
-%% the corresponding type class in Haskell. In contrast with the Haskell
-%% version, the two functor laws are part of the definition. The class |
-%% :<: | represents a subtyping relation between two functors |f| and
-%% |g|.
-
-%% Because feature syntax is defined by means of
-%% functors, such as |BoolF|, it can easily be composed with functor
-%% composition:
+%% %-------------------------------------------------------------------------------
+%% \subsection{Modular Composition of Features}\label{sec:comp}
 %%
-%% This class is an adaptation of the corresponding class in DTC and
-%% it includes two additional laws which govern the behavior of functor
-%% projection and injection (|inj_prj| and |prj_inj|).
+%% %\input{src/ModBackground/Figures/SalCa_TypeClasses}
+%%
+%% MTC adapts the \emph{Data Types \`a la Carte} (DTC)~\cite{dtc} approach for
+%% composing |F|-algebras to Mendler algebras. MTC defines a number of type classes
+%% with laws in order to support proofs.  These classes and laws are summarized in
+%% the table in Figure~\ref{fig:SalCa_Typeclasses}.  The second column notes
+%% whether the base instances of a particular class are provided by the user or are
+%% automatically inferred with a default instance. Importantly, instances of all
+%% these classes for feature compositions (using |:+:|) are built automatically.
+%%
+%%
+%% \paragraph{Modular Functors}
+%% The |Functor| and functor subtyping |:<:| classes are a direct adaptation
+%% of the corresponding DTC type classes.
+%%
+%% %% class provides the |fmap| method and is an adaptation of
+%% %% the corresponding type class in Haskell. In contrast with the Haskell
+%% %% version, the two functor laws are part of the definition. The class |
+%% %% :<: | represents a subtyping relation between two functors |f| and
+%% %% |g|.
+%%
+%% %% Because feature syntax is defined by means of
+%% %% functors, such as |BoolF|, it can easily be composed with functor
+%% %% composition:
+%% %%
+%% %% This class is an adaptation of the corresponding class in DTC and
+%% %% it includes two additional laws which govern the behavior of functor
+%% %% projection and injection (|inj_prj| and |prj_inj|).
+%%
+%% The class |WF_Functor| ensures that |fmap| distributes through injection, and
+%% the class |DistinctSubFunctor| ensures that injections from two different
+%% subfunctors are distinct. These properties are necessary to modularize reasoning
+%% along functor composition.
 
-The class |WF_Functor| ensures that |fmap| distributes through injection, and
-the class |DistinctSubFunctor| ensures that injections from two different
-subfunctors are distinct. These properties are necessary to modularize reasoning
-along functor composition.
+
+%% \paragraph{Modular Algebras}
+%% MTC defines a single generic Coq type class, |FAlg|, for the definition of
+%% semantic algebras that encompasses both, ordinary |F|-algebras and Mendler
+%% algebras. Semantic functions can be explicitly named and |FAlg| take this |name|
+%% as an index.
 
 
-\paragraph{Modular Algebras}
-MTC defines a single generic Coq type class, |FAlg|, for the definition of
-semantic algebras that encompasses both, ordinary |F|-algebras and Mendler
-algebras. Semantic functions can be explicitly named and |FAlg| take this |name|
-as an index. The |Mixin| type slightly generalizes Mendler algebras by using an
-additional type parameter instead of the universal type quantification. This
-generalization is useful for defining non-inductive language features such as
-general recursion or higher-order binders.
-
-Feature compositions are handled generically by the following instance:
-
-< instance (FAlg n t a f, FAlg n a g) => FAlg n t a (f :+: g) where
-<   f_algebra eval (Inl fexp)  = f_algebra eval fexp
-<   f_algebra eval (Inr gexp)  = f_algebra eval gexp
-
-The type class |WF_FAlg| provides a well-formedness condition for every
-composite algebra. Finally, the type class |PAlg| provides the definitions for
-proof algebras that we discuss in Section \ref{ssec:mod:modularproofs}.
+%% Feature compositions are handled generically by the following instance:
+%%
+%% < instance (FAlg n t a f, FAlg n a g) => FAlg n t a (f :+: g) where
+%% <   f_algebra eval (Inl fexp)  = f_algebra eval fexp
+%% <   f_algebra eval (Inr gexp)  = f_algebra eval gexp
+%%
+%% The type class |WF_FAlg| provides a well-formedness condition for every
+%% composite algebra. Finally, the type class |PAlg| provides the definitions for
+%% proof algebras that we discuss in Section \ref{ssec:mod:modularproofs}.
 
 %% \paragraph{Example}
 
@@ -255,15 +255,15 @@ for pattern matching over those terms.
 %endif
 
 
-\subsection{Modular Proofs}\label{ssec:mod:modularproofs}
-
-Each feature builds extensible datatypes by abstracting them over a
-super-functor. Because this super-functor is abstract, the complete set of cases
-needed by a proof algebra is unknown within a feature. To perform induction, a
-feature must therefore dispatch proofs to an abstract proof algebra over this
-super-functor. The components of this proof algebra are built in a distributed
-fashion among individual features. These components can then be composed to
-build a complete proof algebra for a concrete composition of functors.
+%% \subsection{Modular Proofs}\label{ssec:mod:modularproofs}
+%%
+%% Each feature builds extensible datatypes by abstracting them over a
+%% super-functor. Because this super-functor is abstract, the complete set of cases
+%% needed by a proof algebra is unknown within a feature. To perform induction, a
+%% feature must therefore dispatch proofs to an abstract proof algebra over this
+%% super-functor. The components of this proof algebra are built in a distributed
+%% fashion among individual features. These components can then be composed to
+%% build a complete proof algebra for a concrete composition of functors.
 
 
 %if False

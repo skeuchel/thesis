@@ -109,7 +109,7 @@ coproduct (|(f :+: g) a|) of the two functors.
   \end{minipage}
 }
 \caption{Modular composition of proofs}
-\label{fig:mod:mendlerchurchencoding}
+\label{fig:mod:proofalgebras}
 \end{figure}
 
 

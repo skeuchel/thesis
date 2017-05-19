@@ -4,18 +4,19 @@ modular programming in Haskell. However, as outlined in Section
 \ref{sec:mod:reasoningalacarte} the transition to a proof-assistant, for modular
 reasoning, comes with major hurdles. DTC relies on a general fixed point
 combinator to define fixed points for arbitrary functors and uses a generic fold
-operation that is not structurally recursive. To keep logical consistency, Coq
+operation that is not structurally recursive. To keep logical consistency Coq
 applies conservative restrictions and rejects both: a) DTC's type level
 fixed-points because it cannot see that the definition is always
 strictly-positive, and b) DTC's fold operator because it cannot determine
 termination automatically.
 
-MTC solves both problems by using extensible Church encodings. However, MTC's
-use of extensible Church encodings is unsatisfactory and the solution leaves
-much to be desired. This chapter discusses an alternative implemnetation of MTC
-on top of a predicative universe of strictly-positive functors instead of Church
-encodings. The universe admits generic definitions of folds and proper strong
-induction that fulfill Coq's conservative restrictions.
+Meta-Theory \`a la Carte (MTC) \cite{mtc} solves both problems by using
+extensible Church encodings. However, MTC's use of Church encodings is
+unsatisfactory and the solution leaves much to be desired. This chapter
+discusses an alternative implementation of MTC on top of a predicative universe
+of strictly-positive functors instead of Church encodings. The universe admits
+generic definitions of folds and proper strong induction that fulfill Coq's
+conservative restrictions.
 
 \paragraph{Outline} We will first discuss the drawbacks of using Church
 encodings in Section \ref{sec:modpred:motivation} to motivate their replacement.
@@ -31,7 +32,7 @@ instantiate our interface. The universe of containers is very large and admits
 only a small number of generic functions. As a complement, we discuss the
 universe of polynomial functors in Section \ref{sec:mod:polynomial}, which
 admits more generic functions like generic equality, and show how to embed it in
-the universe of containers. We compare our approach direclty with MTC in Section
+the universe of containers. We compare our approach directly with MTC in Section
 \ref{sec:mod:casestudy} using a port of MTC's case study.
 
 %%% Local Variables:

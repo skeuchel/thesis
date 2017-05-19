@@ -14,7 +14,7 @@
 %endif
 
 \section{Modular Programming and Reasoning}
-\label{sec:mod:strictlypositivefunctors}
+\label{sec:modpred:strictlypositivefunctors}
 
 \new{
 This section defines an interface to our approach that is sufficient to program

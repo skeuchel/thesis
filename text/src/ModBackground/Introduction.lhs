@@ -30,11 +30,11 @@ for extensibility is a manifestation of the \emph{expression
   problem}~\cite{expression-problem}.
 
 This chapter covers background information on modular reasoning that forms the
-basis for Chapter 2 and 3. In particular, we summarizes techniques that are used
+basis for Chapter \ref{ch:modpreduniv} and \ref{ch:modmoneff}. In particular, we summarize techniques that are used
 in the \emph{Meta-Theory \`a la Carte} (MTC) framework, an existing solution for
-modular reasoning about programming languages in Coq, on which we heavily
-build. However, we limit ourselves to parts that are relevant to Chapters 2 and
-3 and refer the reader to the original paper~\cite{mtc} for full details.
+modular reasoning about programming languages in Coq, on which we
+build. However, we limit ourselves to parts that are relevant to Chapters  \ref{ch:modpreduniv} and \ref{ch:modmoneff}
+ and refer the reader to the original paper~\cite{mtc} for full details.
 
 %% This is a manifestation of the expression problem that has been
 %% addressed by the Meta-Theory \`a la Carte (MTC) framework in the context of

@@ -13,7 +13,7 @@
 
 %endif
 
-\section{Mendler folds}\label{sec:mod:mendler}
+\section{Mendler Folds}\label{sec:mod:mendler}
 
 MTC encodes data types and folds with a variant of Church encodings based on
 Mendler folds~\cite{uustalu00mendler}. The benefit of this encoding is that we

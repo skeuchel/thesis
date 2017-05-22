@@ -52,12 +52,12 @@
 \label{fig:strictlypositivefunctor}
 \end{figure}
 
-This section defines an interface to our approach that provides both, a
-programming part that is equivalent to DTC's functionality, and a reasoning
+This section defines an interface to our approach that provides both a
+programming part that is equivalent to DTC's functionality, and a novel reasoning
 part. The goal is to hide the implementation details as much as possible, by
 using an abstract declarative specification of what the implementation provides,
 and yet provide an interface that is sufficient enough to program with and
-reason about modular datatypes. We turn to a specific implementation using
+reason about modular datatypes. We turn to a specific implementation of this interface in terms of 
 containers in Section \ref{sec:mod:containers}.
 
 Similar to DTC
@@ -68,8 +68,8 @@ our approach relies on fixed-points of functors to model datatypes, folds to
 implement functions on datatypes and on abstraction over \emph{super-functors}
 and \emph{super-algebras} to achieve modularity in programming and reasoning.
 However, the modular composition of signature functor, function algebras and
-proof algebras is not an essential part of the fixed-point construction, but is
-rather dealt with in another layer. The only concern for the fixed-point
+proof algebras is not an essential part of the fixed-point construction. Instead it is
+dealt with in another layer. The only concern for the fixed-point
 construction in our interface is the support for modularity through opening up
 the recursion.
 
@@ -77,15 +77,15 @@ the recursion.
 The |SPF| type class in Figure \ref{fig:strictlypositivefunctor} is a core part
 of the interface that serves as a declarative specification of our requirements
 on functors and carries the required evidence. We discuss each concept that
-appear in the type class in turn starting with the programming related parts.
+appears in the type class in turn starting with the programming related parts.
 
 \paragraph{Fixed-Points}
 While we need the existence of a fixed-point type of \emph{abstract
-  super-functors}, it is inessential how it is constructed. This means that
+  super-functors}, it is inessential how this is constructed. This means that
 instead of providing a generic fixed-point type constructor like |FixDTC| we can
 alternatively provide a witness of the existence of a valid fixed-point in the
 type class, i.e. we make the fixed-point an associated type of the |SPF| type
-class. We thereby delay the problem of defining it until the final signature
+class. We thereby delay the problem of defining the fixpoint until the final signature
 functor composition is created. At this point the user can either use the
 generic fixed-point combinator that we define in Section
 \ref{sec:mod:containers} or even define his own. |SPF| also includes the initial

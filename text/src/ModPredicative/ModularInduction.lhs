@@ -8,9 +8,9 @@
 \subsection{Inductive Reasoning Interface}
 \label{sec:mod:modularinductivereasoning}
 
-The |SPF| typeclass also provides an interface for inductive reasoning. The last
-missing piece for reasoning is to have an induction principle available which is
-itself defined using multiple concepts.
+The |SPF| typeclass also provides an interface for inductive reasoning in terms
+of an induction principle. This induction principle is represented uniformly
+with the help of multiple concepts.
 
 \paragraph{Proof Algebras}
 

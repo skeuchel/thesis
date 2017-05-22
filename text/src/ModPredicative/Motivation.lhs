@@ -1,6 +1,7 @@
 \section{Motivation}\label{sec:modpred:motivation}
 
-The MTC framework uses Church encodings to represent modular datatypes, but
+The MTC framework uses Church encodings to represent modular datatypes. 
+Unfortunately 
 Church encodings have multiple drawbacks when it comes to reasoning:
 
 %% The recent work on \emph{Meta-Theory \`a la Carte} (MTC) \cite{mtc} is the
@@ -18,10 +19,10 @@ Church encodings have multiple drawbacks when it comes to reasoning:
 
 \begin{enumerate}
 \item
-  Church encodings are inherently impredicative and thus MTC is forced to rely
-  on an impredicative sort and uses Coq's \texttt{impredicative-set}
+  Church encodings are inherently impredicative and thus MTC has to rely on 
+  on an impredicative sort. Hence it is forced to use Coq's \texttt{impredicative-set}
   option. However, this option is inconsistent with standard axioms of classical
-  logic like the law of excluded middle or double negation elimination. This
+  logic like the law of excluded middle and double negation elimination. This
   also restricts the approach to systems that allow impredicative encodings and
   hence rules out systems that are fully predicative like Agda.
 
@@ -33,21 +34,22 @@ Church encodings have multiple drawbacks when it comes to reasoning:
   about inductive values, MTC requires a witness of inductivity: the universal
   property of folds. Since every value comes with its own implementation of the
   fold operator, MTC needs to keep track of a different such witness for every
-  value. It does so by decorating the value with its witness with the help of a
+  value. It does so by decorating each value with its witness with the help of a
   $\Sigma$-type.
 
   As a result of this decoration, the user is confronted with a mix of decorated
   and un-decorated values. This obviously impairs the readability of the code,
-  but it also creates confusion which variant is the proper one to use when
+  but also creates confusion about which variant is the proper one to use when
   stating propositions. Moreover, since proofs are opaque in Coq, it also causes
   problems for equality of terms.  Finally, the decoration makes it unclear
   whether MTC adequately encodes fixed-points.
 
 \item
-  B\"ohm and Berarducci isomorphism of strictly-positive datatypes and their
-  Church encodings in System~F \cite{bohm85automatic} is a meta-theoretic
-  result. In fact, currently it is impossible to prove induction principles for
-  Church encodings in Coq.
+  B\"ohm and Berarducci's isomorphism of strictly-positive datatypes and their
+  Church encodings in System~F \cite{bohm85automatic} is a purely meta-theoretic
+  result. Hence, we have the guarantee that an induction principle exists for
+  Church encodings of strictly-positive datatypes, yet Coq's theory is not
+  powerful enough to prove this for Church encodings directly expressed in Coq.
 
   MTC relies on a \emph{poor-man's induction principle} instead and requires the
   user to provide additional well-formedness proofs. Even though these can be
@@ -56,14 +58,15 @@ Church encodings have multiple drawbacks when it comes to reasoning:
 
 \end{enumerate}
 
-We take a better approach to the problem by applying well-known datatype-generic
-programming (DGP) techniques to represent modular datatypes, to build functions
-from functor algebras with generic folds and to compose proofs from proof
-algebras by means of generic induction. This overcomes the above shortcomings:
+We take an alternative approach by applying well-known datatype-generic programming (DGP)
+techniques to represent modular datatypes, to build functions from functor
+algebras with generic folds and to compose proofs from proof algebras by means
+of generic induction. This overcomes the above shortcomings:
 
 \begin{enumerate}
 \item
-  It does not assume \texttt{impredicative-set} or any axioms.
+  It does not assume \texttt{impredicative-set} or any axioms other than
+  standard functional extensionality.
 
 \item
   A witness of inductivity is always associated with the type, i.e. a type-class
@@ -71,12 +74,16 @@ algebras by means of generic induction. This overcomes the above shortcomings:
 
 \item
   The generic induction principle is a proper one that does not rely on any
-  additional well-formedness conditions. Moreover, for certain functionality and
+  additional well-formedness conditions. Moreover, for some functionality and
   proofs, our approach can achieve more reuse than MTC: instead of composing
   modular components we provide a single generic definition once and for all.
 \end{enumerate}
 
-
+Another difference with MTC is that we split the solution in different parts.
+The first part is the user-facing interface for inductive datatypes and their
+induction principles. The second part extends the interface with support for
+modularity. These two parts serve as a specification for the third part, which
+is an implementation of the interface in terms of container types.
 
 %% \paragraph{Outline}
 %% In our approach to modular reasoning we take a top down approach. We first

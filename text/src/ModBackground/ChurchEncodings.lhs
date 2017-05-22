@@ -99,12 +99,12 @@ Specializing the type of DTC's generic fold operator from Section
 
 < foldDTC :: Functor f => Algebra f a -> FixDTC f -> a
 
-for a particular datatype |FixDTC f|
-yields the type |Algebra f a -> a| that we use in Figure \ref{fig:mod:fixchurch} to define the
-type-level fixed-point combinator |FixC| for the Church encoding of that datatype. The
-generic fold operator |foldC| for this fixed-point is simply the application of
-a value to the given algebra. We can also define one-level folding |inC| and
-unfolding |outC| of the fixed-point which are also given in Figure
+for a particular datatype |FixDTC f| yields the type |Algebra f a -> a| that we
+use in Figure \ref{fig:mod:fixchurch} to define the type-level fixed-point
+combinator |FixC| for the Church encoding of that datatype. The generic fold
+operator |foldC| for this fixed-point is simply the application of a value to
+the given algebra. We can also define one-level folding |inC| and unfolding
+|outC| of the fixed-point which are also given in Figure
 \ref{fig:mod:fixchurch}. These can in turn be used to define new |inject| and
 |project| functions for the definition of smart constructors and feature
 specific algebras. DTC's machinery for taking the coproduct of functors and

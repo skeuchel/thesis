@@ -29,6 +29,14 @@
 %% motivation for the section and finally deliver everything until the
 %% end.}
 
+When instantiating modular functions to a specific set of signatures, we need an
+|SPF| instance for the coproduct of that set. As with algebras we would like to
+derive an instance for |f :+: g| given instances for |f| and |g| as we cannot
+expect the programmer to provide an instance for every possible set of
+signatures. Unfortunately, |SPF| does not include enough information about the
+functors to do this in a constructive way. What we need is a refinement of |SPF|
+that allows us to perform this construction.
+
 This paper uses techniques from datatype-generic programming (DGP) to
 get a compositional refinement of |SPF|. The problem of defining
 fixpoints for a class of functors also arises in many approaches to

@@ -4,14 +4,15 @@
 %include Formatting.fmt
 %include macros.fmt
 
-\subsection{Modular Inductive Reasoning}
+%-------------------------------------------------------------------------------
+\subsection{Inductive Reasoning Interface}
 \label{sec:mod:modularinductivereasoning}
 
-The |SPF| typeclass also provides an interface for reasoning. It
-includes proof terms that witness that folding/unfolding of the
-fixpoint type form inverse operations and that the provided fold
-operators satisfies the universal property of folds. The last missing
-piece for reasoning is to have an induction principle available.
+The |SPF| typeclass also provides an interface for inductive reasoning. The last
+missing piece for reasoning is to have an induction principle available which is
+itself defined using multiple concepts.
+
+\paragraph{Proof Algebras}
 
 %{
 %format . = "."
@@ -33,7 +34,7 @@ positions. In case of a literal we have no recursive positions and in case of
 addition we have two. Proof algebras for other datatypes differ in the number of
 cases and the number of recursive positions.
 
-\paragraph{All modalities}
+\paragraph{All Modalities}
 In the following we develop a uniform representation of proof algebras to allow
 their modularization. We use an \emph{all modality}~\cite{benke:universes} for
 functors to capture the proofs of recursive positions. Informally, the all
@@ -41,7 +42,6 @@ modality of a functor |f| and a predicate (|p :: a -> Prop|) is a new type (|All
 a p :: f a -> Prop|) that denotes that the predicate |p| holds for each (|x ::
 a|) in an (|f a|).
 
-\paragraph{Example}
 The following type |ArithAll| is an example of an all modality for arithmetic
 expressions. The constructor |ALit| encodes that the all modality holds for
 literals and |AAdd| encodes that the all modality holds for |(Add x y)| if |p|
@@ -51,11 +51,9 @@ holds for both recursive positions |x| and |y|.
 <   ALit  ::                ArithAll a p (Lit n)
 <   AAdd  :: p x -> p y ->  ArithAll a p (Add x y)
 
-
-\paragraph{Modality type class}
-We introduce a new typeclass |PFunctor| that carries the associated
-all modality type and make |SPF| a subclass of it. Using the all
-modality definition we can write |indArith| equivalently as
+We introduce a new typeclass |PFunctor| that carries the associated all modality
+type and make |SPF| a subclass of it. Using the all modality definition we can
+write |indArith| equivalently as
 
 %format indArith' = ind "_{" A "}\prime"
 
@@ -68,20 +66,22 @@ modality definition we can write |indArith| equivalently as
 
 %}
 
-The proof algebra is now a single parameter |h|. Note that |h| shows
-that |p| holds for an application of the initial algebra |inFix|. In
-the modular setting however, we only want to provide proofs for
-sub-algebras of the initial algebra that correspond to specific
-signatures and combine these \emph{proof sub-algebras} to a complete
-proof algebra for the initial algebra. To this end, we define proof
-algebras in Figure \ref{fig:strictlypositivefunctor} more generally
-over arbitrary algebras. As a last member of |SPF| we introduce |ind|
-that is an induction principle for the fixpoint type |Fix|. It takes a
-proof algebra of a property |p| for the initial algebra and constructs
-a proof for every value of |Fix|.
+The proof algebra is now a single parameter |h|. Note that |h| shows that |p|
+holds for an application of the initial algebra |inFix|. In the modular setting
+however, we only want to provide proofs for sub-algebras of the initial algebra
+that correspond to specific signatures and combine these \emph{proof
+  sub-algebras} to a complete proof algebra for the initial algebra. To this
+end, we define proof algebras in Figure \ref{fig:strictlypositivefunctor} more
+generally over arbitrary algebras |alg|.
+
+\paragraph{Induction Operator}
+As a last member of |SPF| we introduce |ind| that is an induction principle for
+the fixpoint type |Fix|. It takes a proof algebra of a property |p| for the
+initial algebra and constructs a proof for every value of |Fix|.
 
 
-\subsection{Composing Proofs}\label{ssec:modpred:proofs}
+%-------------------------------------------------------------------------------
+\section{Composing Proofs}\label{ssec:modpred:proofs}
 
 The modular composition of signatures and semantic functions in our approach,
 based on co-products of functors, is the same as in DTC and MTC. We now turn
@@ -112,7 +112,6 @@ coproduct (|(f :+: g) a|) of the two functors.
 \label{fig:mod:proofalgebras}
 \end{figure}
 
-
 As for function algebras, we can use a type class |ProofAlgebra| to define and
 assemble proof algebras in a modular fashion. The parameter |f| represents the
 underlying functor, |a| the carrier type, |alg| the underlying |f|-algebra and
@@ -124,17 +123,6 @@ algebras |falg| and |galg|. To avoid coherence concerns, we assume that algebras
 are always composed using the instance for function algebra composition and that
 |algebraPlus| is the function that builds the dictionary for the composition
 from the dictionary of the two subfunctors.
-
-\subsection{Non-modularity of strictly-positive types}
-
-
-When instantiating modular functions to a specific set of signatures, we need an
-|SPF| instance for the coproduct of that set. As with algebras we would like to
-derive an instance for |f :+: g| given instances for |f| and |g| as we cannot
-expect the programmer to provide an instance for every possible set of
-signatures. Unfortunately, |SPF| does not include enough information about the
-functors to do this in a constructive way. What we need is a refinement of |SPF|
-that allows us to perform this construction.
 
 
 %%% Local Variables:

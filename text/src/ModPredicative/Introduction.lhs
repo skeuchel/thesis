@@ -11,14 +11,14 @@ strictly-positive, and b) DTC's fold operator because it cannot determine
 termination automatically.
 
 Meta-Theory \`a la Carte (MTC) \cite{mtc} solves both problems by using
-extensible Church encodings. However, MTC's use of Church encodings is
-unsatisfactory and the solution leaves much to be desired. This chapter
-discusses an alternative implementation of MTC on top of a predicative universe
-of strictly-positive functors instead of Church encodings. The universe admits
-generic definitions of folds and proper strong induction that fulfill Coq's
-conservative restrictions.
+extensible Church encodings. However, MTC's use of Church encodings leaves much
+to be desired. This chapter discusses the problems that Church encodings bring
+with them in terms of reasoning and presents an alternative implementation of
+MTC based on a predicative universe of strictly-positive functors instead of
+Church encodings. The universe admits generic definitions of folds and proper
+strong induction that fulfill Coq's conservative restrictions.
 
-\paragraph{Outline} We will first discuss the drawbacks of using Church
+\paragraph{Outline} We first discuss the drawbacks of using Church
 encodings in Section \ref{sec:modpred:motivation} to motivate their replacement.
 Section \ref{sec:modpred:strictlypositivefunctors} presents the approach to
 modularized induction for our new representation. This results in a different
@@ -32,8 +32,10 @@ instantiate our interface. The universe of containers is very large and admits
 only a small number of generic functions. As a complement, we discuss the
 universe of polynomial functors in Section \ref{sec:mod:polynomial}, which
 admits more generic functions like generic equality, and show how to embed it in
-the universe of containers. We compare our approach directly with MTC in Section
-\ref{sec:mod:casestudy} using a port of MTC's case study.
+the universe of containers which provides us with additional reuse
+opportunities. We compare the universe basec solution directly with MTC's Church
+encoding solution in Section \ref{sec:mod:casestudy} using a port of MTC's case
+study.
 
 %%% Local Variables:
 %%% mode: latex

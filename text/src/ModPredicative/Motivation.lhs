@@ -105,7 +105,7 @@ algebras by means of generic induction. This overcomes the above shortcomings:
 
 Another difference with MTC is that we split the solution into a frontend and a
 backend part, as outlined in Figure \ref{fig:mod:layers}. Both parts are
-connected via a declaration specification of \emph{functors},
+connected via a declarative specification of \emph{functors},
 \emph{fixed-points}, \emph{folds} and \emph{induction principles}. The frontend
 extends the specification with support for modularity to form the user-facing
 interface and the backend is an implementation of the specification in terms of

@@ -1,8 +1,8 @@
 \section{Motivation}\label{sec:modpred:motivation}
 
-The MTC framework uses Church encodings to represent modular datatypes. 
-Unfortunately 
-Church encodings have multiple drawbacks when it comes to reasoning:
+The MTC framework uses Church encodings to represent modular datatypes.
+Unfortunately Church encodings have multiple drawbacks when it comes to
+reasoning:
 
 %% The recent work on \emph{Meta-Theory \`a la Carte} (MTC) \cite{mtc} is the
 %% first to improve this situation. It is a Coq framework for defining and
@@ -19,7 +19,7 @@ Church encodings have multiple drawbacks when it comes to reasoning:
 
 \begin{enumerate}
 \item
-  Church encodings are inherently impredicative and thus MTC has to rely on 
+  Church encodings are inherently impredicative and thus MTC has to rely on
   on an impredicative sort. Hence it is forced to use Coq's \texttt{impredicative-set}
   option. However, this option is inconsistent with standard axioms of classical
   logic like the law of excluded middle and double negation elimination. This
@@ -58,10 +58,10 @@ Church encodings have multiple drawbacks when it comes to reasoning:
 
 \end{enumerate}
 
-We take an alternative approach by applying well-known datatype-generic programming (DGP)
-techniques to represent modular datatypes, to build functions from functor
-algebras with generic folds and to compose proofs from proof algebras by means
-of generic induction. This overcomes the above shortcomings:
+We take an alternative approach by applying well-known datatype-generic
+programming (DGP) techniques to represent modular datatypes, to build functions
+from functor algebras with generic folds and to compose proofs from proof
+algebras by means of generic induction. This overcomes the above shortcomings:
 
 \begin{enumerate}
 \item
@@ -79,11 +79,38 @@ of generic induction. This overcomes the above shortcomings:
   modular components we provide a single generic definition once and for all.
 \end{enumerate}
 
-Another difference with MTC is that we split the solution in different parts.
-The first part is the user-facing interface for inductive datatypes and their
-induction principles. The second part extends the interface with support for
-modularity. These two parts serve as a specification for the third part, which
-is an implementation of the interface in terms of container types.
+\begin{figure}[t]
+  \centering
+  \fbox{
+    \begin{minipage}{0.95\textwidth}
+      \begin{tikzpicture}
+        \tikzset
+          { box/.style =
+            { align        = center,
+            }
+          }
+        \node
+          [ box
+          , text width     = \textwidth
+          , minimum height = 4cm
+          ] (A)
+          {};
+
+      \end{tikzpicture}
+    \end{minipage}
+  }
+  \caption{Layers}
+  \label{fig:mod:layers}
+\end{figure}
+
+Another difference with MTC is that we split the solution into a frontend and a
+backend part, as outlined in Figure \ref{fig:mod:layers}. Both parts are
+connected via a declaration specification of \emph{functors},
+\emph{fixed-points}, \emph{folds} and \emph{induction principles}. The frontend
+extends the specification with support for modularity to form the user-facing
+interface and the backend is an implementation of the specification in terms of
+container types.
+
 
 %% \paragraph{Outline}
 %% In our approach to modular reasoning we take a top down approach. We first

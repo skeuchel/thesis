@@ -186,7 +186,7 @@ implemented as part of the case study.
   \centering
   \begin{tabular}{lrr}
     \toprule
-      \textbf{Composition} & \textbf{Spefication} & \textbf{Proof} \\
+      \textbf{Composition} & \textbf{Specification} & \textbf{Proof} \\
     \midrule
       ABL & 90  & 86 \\
       AB  & 69  & 12 \\
@@ -247,7 +247,7 @@ as other semantic functions: as folds of an algebra.
 
 The carrier type of the algebra is |Fix d -> Bool| where |d| is the
 abstract super-functor for types. The properties of the equality
-typeclass from Figure \ref{fig:equalityclass} are established by
+type class from Figure \ref{fig:equalityclass} are established by
 proof-algebras. However, the implementation is not entirely modular.
 
 The algebra for the |FunType| functor relies on an additional function

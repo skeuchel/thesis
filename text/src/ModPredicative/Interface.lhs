@@ -53,15 +53,6 @@
 \label{fig:strictlypositivefunctor}
 \end{figure}
 
-This section defines an interface to our approach that provides both a
-programming part that is equivalent to DTC's functionality, and a novel
-reasoning part. The goal is to hide the implementation details as much as
-possible, by using an abstract declarative specification of what the
-implementation provides, and yet provide an interface that is sufficient enough
-to program with and reason about modular datatypes. We turn to a specific
-implementation of this interface in terms of containers in Section
-\ref{sec:mod:containers}.
-
 Similar to DTC
 %in Section \ref{sec:mod:datatypesalacarte}
 and MTC
@@ -70,10 +61,27 @@ our approach relies on fixed-points of functors to model datatypes, folds to
 implement functions on datatypes and on abstraction over \emph{super-functors}
 and \emph{super-algebras} to achieve modularity in programming and reasoning.
 However, the modular composition of signature functor, function algebras and
-proof algebras is not an essential part of the fixed-point construction. Instead it is
-dealt with in another layer. The only concern for the fixed-point
-construction in our interface is the support for modularity through opening up
-the recursion.
+proof algebras is not an essential part of the fixed-point construction. The
+only concern for the fixed-point construction in our interface is the support
+for modularity through opening up the recursion. We therefore separate the code
+concerning fixed-points into a backend layer and abstract over its
+implementation by defining a declarative specification of fixed-points and
+related definitions of algebras, folds, proof algebras and induction. This
+section describes the \emph{declarative specification} and Section
+\ref{sec:mod:containers} presents a backend implementation based on container
+types. The user-facing frontend differs from MTC mainly in the use of
+\emph{modular proof algebras} and \emph{modular induction principles}. These
+differences are discussed in Section \ref{sec:modpred:frontend}.
+
+%% This section defines an interface to our approach that provides both a
+%% programming part that is equivalent to DTC's functionality, and a novel
+%% reasoning part. The goal is to hide the implementation details as much as
+%% possible, by using an abstract declarative specification of what the
+%% implementation provides, and yet provide an interface that is sufficient enough
+%% to program with and reason about modular datatypes. We turn to a specific
+%% implementation of this interface in terms of containers in Section
+%% \ref{sec:mod:containers}.
+
 
 \subsection{Programming Interface}
 The |SPF| type class in Figure \ref{fig:strictlypositivefunctor} is a core part
@@ -119,62 +127,89 @@ that the fold operator satisfies the universal property of folds.
 \label{sec:mod:modularinductivereasoning}
 
 The |SPF| typeclass also provides an interface for inductive reasoning in terms
-of an induction principle. This induction principle is represented uniformly
-with the help of multiple concepts.
-
-\paragraph{Proof Algebras}
+of an induction principle. In general, the type of an induction principal
+depends on the number of constructors of a datatypes and their arities
+which makes a generic definition difficult.
 
 %{
 %format . = "."
 
-Consider the induction principle |indArith| for arithmetic expression.
+For example, consider the induction principle |indArith| for arithmetic
+expression:
 
-< indArith ::  forall (p   :: (Arith -> Prop)).
-<              forall (hl  :: (forall n.                   p (inFix (Lit n)))).
-<              forall (ha  :: (forall x y.  p x -> p y ->  p (inFix (Add x y)))).
-<              forall x. p x
+< indArith ::  forall ((p   :: Arith -> Prop)).
+<              forall ((hl  :: forall n.                   p (Lit n)))).
+<              forall ((ha  :: forall x y.  p x -> p y ->  p (Add x y)))).
+<              forall ((x :: Arith)). p x
 
 %}
 
 It takes a proposition |p| as parameter and inductive steps |hl| and |ha| for
-each case of the initial algebra. We say that |hl| and |ha| together form a
-\emph{proof algebra} of |p|. An inductive step consists of showing |p| for an
-application of the initial algebra given proofs of |p| for all recursive
-positions. In case of a literal we have no recursive positions and in case of
-addition we have two. Proof algebras for other datatypes differ in the number of
-cases and the number of recursive positions.
+each case. % of the initial algebra.
+We say that |hl| and |ha| together form a \emph{proof algebra} of |p|. An
+inductive step consists of showing |p| for an application of the initial algebra
+given proofs of |p| for all recursive positions. In case of a literal we have no
+recursive positions and in case of addition we have two. Proof algebras for
+other datatypes differ in the number of cases and the number of recursive
+positions.
+
+For a generic definition of induction, we first need to develop an \emph{uniform
+  representation of induction} which effectively boils down to developing a
+\emph{uniform representation of proof algebras} which is the subject of the
+remainder of this Section.
 
 \paragraph{All Modalities}
-In the following we develop a uniform representation of proof algebras to allow
-their modularization. We use an \emph{all modality}~\cite{benke:universes} for
-functors to capture the proofs of recursive positions. Informally, the all
-modality of a functor |f| and a predicate (|p :: a -> Prop|) is a new type (|All
-a p :: f a -> Prop|) that denotes that the predicate |p| holds for each (|x ::
-a|) in an (|f a|).
 
-The following type |ArithAll| is an example of an all modality for arithmetic
-expressions. The constructor |ALit| encodes that the all modality holds for
-literals and |AAdd| encodes that the all modality holds for |(Add x y)| if |p|
-holds for both recursive positions |x| and |y|.
+We first focus on the inputs of the proof algebra functions, i.e. the proofs
+that the induction predicate holds for recursive positions. We use an \emph{all
+  modality}~\cite{benke:universes} for signature functors to capture these
+proofs. Informally, the all modality of a functor |f| and a predicate (|p :: a
+-> Prop|) is a new type (|All a p :: f a -> Prop|) that denotes that the
+predicate |p| holds for each (|x :: a|) in an (|f a|).
+
+\paragraph{Example: Arithmetic Expressions}
+The following type |ArithAll| is an example of an all modality for the signature
+functor |ArithF| of arithmetic expressions. The constructor |ALit| encodes that
+the all modality holds for literals and |AAdd| encodes that the all modality
+holds for |(Add x y)| if |p| holds for both recursive positions |x| and |y|.
 
 < data ArithAll a p :: ArithF a -> Prop where
-<   ALit  ::                ArithAll a p (Lit n)
-<   AAdd  :: p x -> p y ->  ArithAll a p (Add x y)
+<   ALit  ::                ArithAll a p (LitF n)
+<   AAdd  :: p x -> p y ->  ArithAll a p (AddF x y)
 
-We introduce a new typeclass |PFunctor| that carries the associated all modality
-type and make |SPF| a subclass of it. Using the all modality definition we can
-write |indArith| equivalently as
 
+Using the all modality definition we can write |indArith| equivalently as
+
+%format inArith = "{\Varid{in}_{" Arith "}}"
 %format indArith' = ind "_{" A "}\prime"
+
+
+< indArith' ::  forall ((p  :: Arith -> Prop)).
+<               forall ((h  :: forall ((xs :: ArithF Arith)). ArithAll p xs -> p (inArith xs))).
+<               forall ((x :: Arith)). p x
+<
+< inArith :: ArithF Arith -> Arith
+< inArith (LitF n)    =  Lit n
+< inArith (AddF x y)  =  Add x y
+
+The induction principle now takes a \emph{single argument} |h| that represents
+the \emph{proof algebra} independent of the number of cases and arity of
+constructors. Notice in particular the result of |h|. The constructor
+applications in the result of the proof algebra functions of |indArith| are now
+combined into a single application of the initial algebra |inArith| of |Arith|.
+
+\paragraph{PFunctor Class}
+We introduce a new typeclass |PFunctor| that carries the associated all modality
+type and make |SPF| a subclass of it.
+
 
 %{
 %format . = "."
 
-< indArith' ::  forall p  :: (Arith -> Prop).
-<               forall h  :: (forall xs. ArithAll p xs -> p (inFix xs)).
-<               forall x. p x
 
 %}
+
+\paragraph{Proof Algebras}
 
 The proof algebra is now a single parameter |h|. Note that |h| shows that |p|
 holds for an application of the initial algebra |inFix|. In the modular setting

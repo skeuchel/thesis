@@ -235,7 +235,7 @@ of the above isomorphisms:
 
 \item
   The second, equationally constrained variant is used to track the universal
-  property of recursive positions. Unfortunately, MTC does not reuse \emph{all
+  property of recursive positions. Unfortunately, MTC does not use \emph{all
     modalities} as an \emph{abstract concept} and simply works with the generic
   definition directly. As a consequence, often both the decorated value |ps| and
   the undecorated one |xs| are in scope, creating additional noise for the user.
@@ -254,12 +254,11 @@ the mapping of a functor |f| generalizes to a dependent variant:
 
 < amap :: forall ((a :: *)) (p :: a -> Prop). (forall ((x :: a)). p x) -> (forall xs. All f a p xs)
 
-However, most of the structure of the modalities are not needed in the
-interface.  For instance, |amap| can be used to define an induction operator in
+The function |amap| can be used to define an induction operator in
 the same way that |fmap| can be used to define a fold operator. However, the
 same caveats apply: it is not obvious that this is a terminating definition. We
-adopt a similar solution: inline |amap| in the definition of the induction
-operator. Because we have no use for |amap| other than in the induction, it
+adopt a similar solution as for |fold|: inline |amap| in the definition of the induction
+operator. Hence, because we have no use for |amap| other than in the induction, it
 is unnecessary to include it in the interface.
 
 We include however one property |All_fmap| that is the propositional equivalence
@@ -278,8 +277,7 @@ In the |Arith| example, the induction principle |ind A'| now takes a uniformly
 represented proof algebra as a single parameter |h|. Note that |h| shows that
 |p| holds for an application of the initial algebra |inArith|. In the modular
 setting however, we want to provide proofs for sub-algebras of the initial
-algebra, or more generally, to any algebra not only the initial
-algebra.
+algebra, or more generally, of any (not necessarily initial) algebra.
 
 
 As an example, consider the example for combined arithmetic and logical expressions

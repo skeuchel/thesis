@@ -60,7 +60,8 @@ and MTC
 our approach relies on fixed-points of functors to model datatypes, folds to
 implement functions on datatypes and on abstraction over \emph{super-functors}
 and \emph{super-algebras} to achieve modularity in programming and reasoning.
-However, the modular composition of signature functor, function algebras and
+We do not lump all of these concepts together in one interface because 
+the modular composition of signature functor, function algebras and
 proof algebras is not an essential part of the fixed-point construction. The
 only concern for the fixed-point construction in our interface is the support
 for modularity through opening up the recursion. We therefore separate the code
@@ -127,7 +128,7 @@ that the fold operator satisfies the universal property of folds.
 \label{sec:mod:modularinductivereasoning}
 
 The |SPF| typeclass also provides an interface for inductive reasoning in terms
-of an induction principle. In general, the type of an induction principal
+of an induction principle. In general, the type of an induction principle
 depends on the number of constructors of a datatypes and their arities
 which makes a generic definition difficult.
 
@@ -135,7 +136,7 @@ which makes a generic definition difficult.
 %format . = "."
 
 For example, consider the induction principle |indArith| for arithmetic
-expression:
+expressions:
 
 < indArith ::  forall ((p   :: Arith -> Prop)).
 <              forall ((hl  :: forall n.                   p (Lit n)))).
@@ -153,10 +154,10 @@ recursive positions and in case of addition we have two. Proof algebras for
 other datatypes differ in the number of cases and the number of recursive
 positions.
 
-For a generic definition of induction, we first need to develop an \emph{uniform
+For a generic definition of induction, we first need to develop a \emph{uniform
   representation of induction} which effectively boils down to developing a
 \emph{uniform representation of proof algebras} which is the subject of the
-remainder of this Section.
+remainder of this section.
 
 \paragraph{All Modalities}
 

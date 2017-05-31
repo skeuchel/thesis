@@ -26,7 +26,7 @@ coproduct (|(f :+: g) a|) of the two functors.
         palgebra :: PAlgebra f a alg p
 
       instance  (ProofAlgebra f a falg p, ProofAlgebra g a galg p) =>
-            ProofAlgebra (f :+: a) a (algebraPlus falg galg) p where
+            ProofAlgebra (f :+: g) a (algebraPlus falg galg) p where
         palgebra (Inl xs)  axs = palgebra xs axs
         palgebra (Inr xs)  axs = palgebra xs axs
     \end{code}

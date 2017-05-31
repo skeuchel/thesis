@@ -128,7 +128,6 @@
 %format eval_X
 %format eval_alg = evalAlg
 %format exists = "\exists"
-%format exists = \exists
 %format exp1 = "\Varid{exp}_1"
 %format f_1 = "\Varid{f}_1"
 %format f_2 = "\Varid{f}_2"

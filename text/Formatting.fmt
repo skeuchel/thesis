@@ -68,6 +68,7 @@
 %format inFix        = "\Varid{in_{F}}"
 %format outFix       = "\Varid{out_{F}}"
 %format ArithAll     = "\Varid{Arith_{All}}"
+%format LogicAll     = "\Varid{Logic_{All}}"
 %format |>           = "{\;\triangleright\;}"
 %format :>           = "{\;\triangleright\;}"
 %format foldF        = "\Varid{fold_{F}}"

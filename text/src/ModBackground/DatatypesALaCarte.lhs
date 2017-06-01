@@ -191,7 +191,7 @@ above.
 
 %-------------------------------------------------------------------------------
 
-\subsection{Semantic Functions}
+\subsection{Semantic Functions}\label{sec:dtc:semanticfunctions}
 
 In this section we define evaluation for arithmetic and boolean
 expressions modularly. We use another modular datatype to represent

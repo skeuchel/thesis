@@ -7,28 +7,25 @@
 %-------------------------------------------------------------------------------
 \section{Modular Frontend}\label{sec:modpred:frontend}
 
-The modular composition of signatures and semantic functions in our approach,
-based on co-products of functors, is the same as in DTC and MTC. We now turn
-towards the modular composition of proofs. Composing two instances of the
-|PFunctor| class is straightforward by inspecting the value of |xs| of the
-coproduct (|(f :+: g) a|) of the two functors.
-
 \begin{figure}[t]
 \fbox{
   \begin{minipage}{\columnwidth}
     \begin{code}
       instance  (PFunctor f, PFunctor g) => PFunctor (f :+: g) where
-        type All a p xs =  case xs of
-                             Inl xs  -> All a p xs
-                             Inr xs  -> All a p xs
+          type All a p xs =  case xs of
+                               Inl xs  -> All a p xs
+                               Inr xs  -> All a p xs
+          all_fmap = ...
 
-      class ProofAlgebra f a alg p where
-        palgebra :: PAlgebra f a alg p
+      class PFunctor f =>
+          ProofAlgebra f a (alg :: Algebra f a) (p :: a -> Prop)
+        where
+          palgebra :: PAlgebra f a alg p
 
-      instance  (ProofAlgebra f a falg p, ProofAlgebra g a galg p) =>
+      instance (ProofAlgebra f a falg p, ProofAlgebra g a galg p) =>
             ProofAlgebra (f :+: g) a (algebraPlus falg galg) p where
-        palgebra (Inl xs)  axs = palgebra xs axs
-        palgebra (Inr xs)  axs = palgebra xs axs
+          palgebra (Inl xs)  axs = palgebra xs axs
+          palgebra (Inr xs)  axs = palgebra xs axs
     \end{code}
   \end{minipage}
 }
@@ -36,17 +33,32 @@ coproduct (|(f :+: g) a|) of the two functors.
 \label{fig:mod:proofalgebras}
 \end{figure}
 
-As for function algebras, we can use a type class |ProofAlgebra| to define and
-assemble proof algebras in a modular fashion. The parameter |f| represents the
-underlying functor, |a| the carrier type, |alg| the underlying |f|-algebra and
-|p| a property of the carrier.
+The modular composition of signatures and semantic functions in our approach,
+based on co-products of functors, is the same as in DTC and MTC and carries over
+largely unchanged to our declarative specification. Therefore we discuss only on
+the composition of modular proofs in this section.
 
-In the definition of the |ProofAlgebra| instance for functor composition we need
-to have access to the function |algebraPlus| that composes the two function
-algebras |falg| and |galg|. To avoid coherence concerns, we assume that algebras
-are always composed using the instance for function algebra composition and that
-|algebraPlus| is the function that builds the dictionary for the composition
-from the dictionary of the two sub-functors.
+Figure \ref{fig:mod:proofalgebras} contains the instance of the |PFunctor| class
+for a co-product |(f :+: g)|. For both, the associated type |All| and the
+property |all_fmap| a simple case distinction is sufficient.
+
+We use the type class |ProofAlgebra| to define and assemble proof algebras in
+a modular fashion which is also show in Figure \ref{fig:mod:proofalgebras}.
+The parameter |f| represents the underlying functor, |a| the
+carrier type, |alg| the underlying |f|-algebra and |p| a property of the
+carrier.
+
+In the definition of the |ProofAlgebra| instance for functor composition we use
+the the function |algebraPlus| from Figure \ref{fig:falgebraclass} in Section
+\ref{sec:dtc:semanticfunctions} that composes the two function algebras |falg|
+and |galg|. To compose two proof algebras for function algebras that come from
+the type-class |FAlgebra| and are composed via the |FAlgebra| instance for
+co-products we actually need to apply its dictionary creation function. In Coq
+this is not a problem because |algebraPlus| is definitionaly equal to the
+dictionary creation function, but this definition may potentially be
+insufficient in other systems. To avoid any coherence concerns, we further
+assume that algebras are always composed using the instance for function algebra
+composition.
 
 %%% Local Variables:
 %%% mode: latex

@@ -163,10 +163,10 @@ remainder of this section.
 
 We first focus on the inputs of the proof algebra functions, i.e. the proofs
 that the induction predicate holds for recursive positions. We use an \emph{all
-  modality}~\cite{benke:universes} for signature functors to capture these
-proofs. Informally, the all modality of a functor |f| and a predicate (|p :: a
--> Prop|) is a new type (|All a p :: f a -> Prop|) that denotes that the
-predicate |p| holds for each (|x :: a|) in an (|f a|).
+  modality}~\cite{benke:universes,morris2007constructing} for signature functors
+to capture these proofs. Informally, the all modality of a functor |f| and a
+predicate (|p :: a -> Prop|) is a new type (|All a p :: f a -> Prop|) that
+denotes that the predicate |p| holds for each (|x :: a|) in an (|f a|).
 
 \paragraph{Example: Arithmetic Expressions}
 The following type |ArithAll| is an example of an all modality for the signature
@@ -184,20 +184,20 @@ Using the all modality definition we can write |indArith| equivalently as
 %format inArith = "{\Varid{in}_{" Arith "}}"
 %format indArith' = ind "_{" A "}\prime"
 
-
 < indArith' ::  forall ((p  :: Arith -> Prop)).
 <               forall ((h  :: forall ((xs :: ArithF Arith)). ArithAll a p xs -> p (inArith xs))).
 <               forall ((x :: Arith)). p x
-<
-< inArith :: ArithF Arith -> Arith
-< inArith (LitF n)    =  Lit n
-< inArith (AddF x y)  =  Add x y
 
 The induction principle now takes a \emph{single argument} |h| that represents
 the \emph{proof algebra} independent of the number of cases and arity of
 constructors. Notice in particular the result of |h|. The constructor
 applications in the result of the proof algebra functions of |indArith| are now
-combined into a single application of the initial algebra |inArith| of |Arith|.
+combined into a single application of the initial algebra |inArith| of |ArithF|
+with carrier |Arith|:
+
+< inArith :: ArithF Arith -> Arith
+< inArith (LitF n)    =  Lit n
+< inArith (AddF x y)  =  Add x y
 
 \paragraph{Comparison to MTC}
 The all modality |ArithAll| shares the structure of its functor |ArithF|,
@@ -211,27 +211,35 @@ isomorphism:
 <   (exists (xs :: ArithF a)._ ArithAll a p xs) ~= (ArithF (exists (x :: a)._ p x))
 %}
 
-\noindent If access to the index is needed, as for example for the induction
-principles, we can relate the existentially quantified values via an equation:
+\noindent If access to the index |xs| is needed, as for example for the
+induction principles, we can relate the existentially quantified values via an
+equation:
 
 %{
 %format ~= = "\cong"
+%format projT1
 < forall ((a :: *)) (p :: a -> Prop) (xs :: ArithF a).
 <   (ArithAll a p xs) ~= (exists (ps :: ArithF (exists x._ p x))._ fmap projT1 ps == xs)
-%}
 
-This suggests, that we can define all modalities generically without requiring
-the definition of a separate type. Indeed, MTC uses the right-hand sides of both
-of the above isomorphisms:
+\noindent where |(projT1 :: (exists (x :: a)._ p x) -> a)| projects a
+$\Sigma$-type to its first component. This suggests, that we can define all
+modalities generically without requiring the definition of a separate
+type. Indeed, MTC uses the right-hand sides of both of the above isomorphisms:
 \begin{enumerate}
 \item The first, existentially quantified variant is used generally for proof
   algebras. This is a choice that follows directly from MTC's weak induction
   principle. The constraint on the existential values is proved by means of a
-  well-formedness requirements for proof algebras |palg :: Algebra ArithF
-  (exists x._ p x)|:
+  intricate well-formedness requirement for proof algebras |(palg :: Algebra
+  ArithF (exists x._ p x))|:
 
 <   forall ((xs :: ArithF (exists x._ p x))).
 <      projT1 (palg xs) == inject (fmap projT1 xs)
+
+  \noindent which expresses that the algebra behaves like a sub-algebra of the
+
+  initial algebra. This well-formedness proof can be done once for a signature
+  functor and subsequently reused for any proof algebra of that functor, but,
+  the user is still required to keep track of well-formedness properties.
 
 \item
   The second, equationally constrained variant is used to track the universal
@@ -240,37 +248,45 @@ of the above isomorphisms:
   definition directly. As a consequence, often both the decorated value |ps| and
   the undecorated one |xs| are in scope, creating additional noise for the user.
 \end{enumerate}
-
+%}
 
 \paragraph{PFunctor Class}
 To counter the proliferation of $\Sigma$-types and projections out of
-$\Sigma$-types we do not introduce a generic definition in our interface and
-work with an abstraction instead. To this end, we introduce a new typeclass
-|PFunctor| that carries the associated all modality type and make |SPF| a
-subclass of it.
+$\Sigma$-types we do not introduce a generic definition of an \emph{all
+  modality} in our interface and work with an abstraction instead. To this end,
+we introduce a new typeclass |PFunctor| that carries the associated all modality
+type and make |SPF| a subclass of it.
 
 All modalities share the structure of their associated functors. For example,
 the mapping of a functor |f| generalizes to a dependent variant:
 
 < amap :: forall ((a :: *)) (p :: a -> Prop). (forall ((x :: a)). p x) -> (forall xs. All f a p xs)
 
-The function |amap| can be used to define an induction operator in
-the same way that |fmap| can be used to define a fold operator. However, the
-same caveats apply: it is not obvious that this is a terminating definition. We
-adopt a similar solution as for |fold|: inline |amap| in the definition of the induction
-operator. Hence, because we have no use for |amap| other than in the induction, it
-is unnecessary to include it in the interface.
+The function |amap| can be used to define an induction operator in the same way
+that |fmap| can be used to define a fold operator. However, the same caveats
+apply: it is not obvious that this is a terminating definition. We adopt a
+similar solution as for |fold|: inline |amap| in the definition of the induction
+operator. Hence, because we have no use for |amap| other than in the induction,
+it is unnecessary to include it in the interface.
 
-We include however one property |All_fmap| that is the propositional equivalence
-underlying the generalization of the fmap fusion law \steven{Check!}:
+We include however one property |All_fmap| that is underlying the generalization
+of the fmap fusion law:
 
-< amap p . fmap f == amap (p . f)
+\[
+    \xymatrix{
+      |(x :: f a)| \ar[rr]^{\qquad|fmap g|} \ar[drrrr]_{|amap a (p . g) (q . g)|} & & |f b| \ar[rr]^{|amap b p q|\qquad\qquad} & & |All f b p (fmap g x)| \ar@@{}[d]||*=0[@@]{\cong} \\
+      & &      & & |All f a (p . g) x|
+    }
+\]
 
-This is used to derive another induction principle on pairs instead of single
-values which in turn is used to encode proof algebras of properties of equality
+|All_fmap| expresses the propositional equivalence of the types on the right
+side, albeit without a proof that these form an isomorphism. This property is
+used to derive another induction principle on pairs instead of single values
+which in turn is used to encode proof algebras of properties of equality
 functions.
 
 
+%-------------------------------------------------------------------------------
 \subsection{Proof Algebras}
 
 In the |Arith| example, the induction principle |ind A'| now takes a uniformly
@@ -279,11 +295,10 @@ represented proof algebra as a single parameter |h|. Note that |h| shows that
 setting however, we want to provide proofs for sub-algebras of the initial
 algebra, or more generally, of any (not necessarily initial) algebra.
 
-
-As an example, consider the example for combined arithmetic and logical expressions
-from Figure \ref{fig:mod:arithlogicexpressions} in Section
-\ref{sec:mod:datatypesalacarte}. The induction principle for the non-modular
-datatype |Exp| has the type
+As an example, consider the example for combined arithmetic and logical
+expressions from Figure \ref{fig:mod:arithlogicexpressions} in Section
+\ref{sec:mod:datatypesalacarte} with signature functor |ArithF :+: LogicF|. The
+induction principle for the non-modular datatype |Exp| has the type
 
 < indExp ::  forall ((p   :: Exp -> Prop)).
 <              forall ((hl  :: forall n.                            p (Lit n)))).
@@ -292,17 +307,32 @@ datatype |Exp| has the type
 <              forall ((hi  :: forall x y z.  p x -> p y -> p z ->  p (If x y z)))).
 <              forall ((x :: Exp)). p x
 
+For the purpose of modularity, we want to represent the proof algebras of
+specific features, i.e. signature sub-functors, separately and combine these
+\emph{proof sub-algebras} to a complete proof algebra for the initial
+algebra. The result type of proof sub-algebras still needs to be a value of the
+fixed-point type.  Hence, we inject the signature sub-functor, e.g. |ArithF|
+into the complete signature functor |ArithF :+: LogicF| and then apply the
+initial algebra, this is exactly what is performed by |inject|. We can thus
+rewrite the above induction principle into one which uses the uniform
+representation for each feature.
 
+< indExp' ::  forall ((p   :: Exp -> Prop))
+<               ((ha  :: forall ((xs :: ArithF Exp)). ArithAll Exp p xs -> p (inject xs)))
+<               ((hl  :: forall ((xs :: LogicF Exp)). LogicAll Exp p xs -> p (inject xs)))._
+<               forall ((x :: Exp)). p x
 
-%  specific signatures and combine these \emph{proof
-%   sub-algebras} to a complete proof algebra for the initial algebra. To this
-% end, we define proof algebras in Figure \ref{fig:strictlypositivefunctor} more
-% generally over arbitrary algebras |alg|.
+We will discuss how the proof sub-algebras can be composed into a proof-algebra
+for the intial algebra in Section \ref{sec:modpred:frontend}.
 
 \subsection{Induction Operator}
-As a last member of |SPF| we introduce |ind| that is an induction principle for
-the fixed-point type |Fix|. It takes a proof algebra of a property |p| for the
-initial algebra and constructs a proof for every value of |Fix|.
+As discussed above, similarly to |fold| a generic definition of an induction
+operator for abstract functors is not structurally recursive and we apply a
+similar solution to solve it: we delay the problem of defining induction to the
+point when the final composition is made and require its existence by adding an
+induction operator |ind| as a member of the |SPF| class. The |ind| operator
+takes a property |p| of |a| and proof algebra for the initial algebra and
+constructs a proof for every value of |Fix|.
 
 
 %%% Local Variables:

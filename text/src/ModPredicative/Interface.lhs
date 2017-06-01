@@ -295,9 +295,9 @@ represented proof algebra as a single parameter |h|. Note that |h| shows that
 setting however, we want to provide proofs for sub-algebras of the initial
 algebra, or more generally, of any (not necessarily initial) algebra.
 
-As an example, consider the example for combined arithmetic and logical
+As an example, consider the combined arithmetic and logical
 expressions from Figure \ref{fig:mod:arithlogicexpressions} in Section
-\ref{sec:mod:datatypesalacarte} with signature functor |ArithF :+: LogicF|. The
+\ref{sec:mod:datatypesalacarte} with signature functor |(ArithF :+: LogicF)|. The
 induction principle for the non-modular datatype |Exp| has the type
 
 < indExp ::  forall ((p   :: Exp -> Prop)).
@@ -310,28 +310,28 @@ induction principle for the non-modular datatype |Exp| has the type
 For the purpose of modularity, we want to represent the proof algebras of
 specific features, i.e. signature sub-functors, separately and combine these
 \emph{proof sub-algebras} to a complete proof algebra for the initial
-algebra. The result type of proof sub-algebras still needs to be a value of the
-fixed-point type.  Hence, we inject the signature sub-functor, e.g. |ArithF|
-into the complete signature functor |ArithF :+: LogicF| and then apply the
-initial algebra, this is exactly what is performed by |inject|. We can thus
+algebra. The result type of proof sub-algebras needs to be a value of the
+fixed-point type.  Hence, we inject the signature sub-functor, e.g. |ArithF|,
+into the complete signature functor, e.g. |(ArithF :+: LogicF)|, and then apply the
+initial algebra; this is exactly what is performed by |inject|. We can thus
 rewrite the above induction principle into one which uses the uniform
 representation for each feature.
 
-< indExp' ::  forall ((p   :: Exp -> Prop))
-<               ((ha  :: forall ((xs :: ArithF Exp)). ArithAll Exp p xs -> p (inject xs)))
-<               ((hl  :: forall ((xs :: LogicF Exp)). LogicAll Exp p xs -> p (inject xs)))._
+< indExp' ::  forall ((p   :: Exp -> Prop)).
+<               forall ((ha  :: forall ((xs :: ArithF Exp)). ArithAll Exp p xs -> p (inject xs))).
+<               forall ((hl  :: forall ((xs :: LogicF Exp)). LogicAll Exp p xs -> p (inject xs))).
 <               forall ((x :: Exp)). p x
 
 We will discuss how the proof sub-algebras can be composed into a proof-algebra
 for the intial algebra in Section \ref{sec:modpred:frontend}.
 
 \subsection{Induction Operator}
-As discussed above, similarly to |fold| a generic definition of an induction
+As discussed above, just like with |fold|, the generic definition of the induction
 operator for abstract functors is not structurally recursive and we apply a
 similar solution to solve it: we delay the problem of defining induction to the
-point when the final composition is made and require its existence by adding an
+point where the final composition is made and require its existence by adding an
 induction operator |ind| as a member of the |SPF| class. The |ind| operator
-takes a property |p| of |a| and proof algebra for the initial algebra and
+takes a property |p| of |a| and a proof algebra for the initial algebra and
 constructs a proof for every value of |Fix|.
 
 

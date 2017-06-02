@@ -208,7 +208,7 @@ numbers into the |Zero| and |Succ| cases. Figure \ref{fig:mod:natcases} shows
 the signature functors |ZeroF| (top) and |SuccF| (bottom) for the two cases,
 their all modalities and |PFunctor| instances.
 
-To avoid foreclosing the generic definition of fixed-points, folds and induction
+To avoid giving away the generic definition of fixed-points, folds and induction
 from Section \ref{sec:mod:containers}, we simply instantiate the |SPF| class
 manually with the non-modular datatype definition of naturals. The datatype
 and the |SPF| instance are show in Figure \ref{fig:mod:natfix}.

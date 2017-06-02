@@ -57,7 +57,7 @@ quantifiers in predicate logic (see Figure~\ref{fig:mod:propsastypes}, bottom) t
 properties.
 
 
-\subsection{Induction Principles}
+\subsection{Induction Principles}\label{sec:mod:inductionintro}
 Another feature commonly found in proof-assistants are inductive datatype
 definitions and reasoning about values of inductive types via recursion. As an
 example, consider a definition of natural numbers and addition:

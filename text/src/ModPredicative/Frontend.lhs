@@ -158,14 +158,14 @@ likewise for the fold and induction operators. Therefore |SPF| serves solely as
 a high-level interface class.
 
 In Section \ref{sec:mod:containers} we develop an approach that side-steps this
-issue. Instead of composing fixed-points, folds and induction along coproducts,
+issue. Instead of composing fixed-points, folds and induction along coproducts of arbitrary |SPF|s,
 we focus on the class of containers which are strictly-positive functors that
 are 1) closed under coproducts and 2) allow a generic instantiation of |SPF|'s
 interface.
 
 
 
-\subsection{Right-Neutrality of Addition}\label{mod:pred:bigproofexample}
+\subsection{Example: Right-Neutrality of Addition}\label{mod:pred:bigproofexample}
 
 \begin{figure}[t]
 \fbox{

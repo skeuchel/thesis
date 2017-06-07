@@ -226,12 +226,19 @@ Furthermore, we define a fold operator generically.
 < gfold alg (Sup (Ext s pf)) =
 <   alg (Ext s (\p -> gfold alg (pf p)))
 
-Note that this definition is essentially the same as the definition of
-|foldDTC| from Section \ref{sec:mod:datatypesalacarte}. Because of the
-generic implementation of |gfmap| we can inline it to expose the
-structural recursion. Coq accepts this definition, since the recursive
-call |gfold alg (pf p)| is performed on the structurally smaller
-argument |pf p|.
+We have obtained this definition by taking the usual definition 
+
+< gfold alg x =
+<   alg (gfmap (gfold alg) (unSup x))
+
+which is essentially the same as the definition of |foldDTC| from Section
+\ref{sec:mod:datatypesalacarte} and inlining the implementation of |gfmap|.
+Because this exposes the structural recursion, Coq accepts the definition.
+Indeed the recursive call |gfold alg (pf p)| is performed on the structurally
+smaller argument |pf p|.
+Note that, unlike for |foldDTC|,
+inlining is possible because |gfmap| is defined uniformly for 
+all containers.
 
 
 \subsection{Induction}\label{mod:pred:containerinduction}

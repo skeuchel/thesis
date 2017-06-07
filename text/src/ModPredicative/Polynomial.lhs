@@ -62,7 +62,7 @@ So instead we restrict ourselves to the universe of polynomial functors to
 implement equality generically. \steven{Motivate the choice of the universe. Add
   a citation.}
 
-\subsection{Universe}
+\subsection{Universe of Polynomial Functors}
 
 \begin{figure}[t]
 \fbox{
@@ -211,7 +211,7 @@ available for polynomial functors.
 <   toFrom  =  ...
 
 
-\subsection{Generic Equality}
+\subsection{Generic Equality}\label{sec:pred:polynomialequality}
 
 Performing the conversions between polynomial functors and containers in the
 definition of recursive functions makes it difficult to convince the termination

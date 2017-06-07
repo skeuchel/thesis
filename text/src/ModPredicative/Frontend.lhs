@@ -143,7 +143,29 @@ composition.
 % dictionary creation function, but this definition may potentially be
 % insufficient in other systems.
 
-\subsection{Right-Neutrality of Addition}
+
+\subsection{Non-Modularity of SPF}\label{mod:pred:spfnotmodular}
+When instantiating modular functions to a specific set of signatures, we need an
+|SPF| instance for the coproduct of that set. Ideally, as with algebras, we
+would like to derive an instance for |f :+: g| given instances for |f| and |g|,
+because we cannot expect the programmer to provide an instance for every
+possible set of signatures.
+
+Unfortunately, |SPF| does not include enough information about the functors to
+do this in a constructive way. We cannot construct the fixed-point of the
+coproduct |f :+: g| from the fixed-points of the summands |f| and |g| and
+likewise for the fold and induction operators. Therefore |SPF| serves solely as
+a high-level interface class.
+
+In Section \ref{sec:mod:containers} we develop an approach that side-steps this
+issue. Instead of composing fixed-points, folds and induction along coproducts,
+we focus on the class of containers which are strictly-positive functors that
+are 1) closed under coproducts and 2) allow a generic instantiation of |SPF|'s
+interface.
+
+
+
+\subsection{Right-Neutrality of Addition}\label{mod:pred:bigproofexample}
 
 \begin{figure}[t]
 \fbox{

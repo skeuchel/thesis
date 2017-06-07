@@ -22,6 +22,7 @@
 %endif
 
 
+%-------------------------------------------------------------------------------
 \section{Containers}\label{sec:mod:containers}
 
 %% \steven{Containers and generic programming help in getting valid
@@ -29,43 +30,66 @@
 %% motivation for the section and finally deliver everything until the
 %% end.}
 
-When instantiating modular functions to a specific set of signatures, we need an
-|SPF| instance for the coproduct of that set. As with algebras we would like to
-derive an instance for |f :+: g| given instances for |f| and |g| as we cannot
-expect the programmer to provide an instance for every possible set of
-signatures. Unfortunately, |SPF| does not include enough information about the
-functors to do this in a constructive way. What we need is a refinement of |SPF|
-that allows us to perform this construction.
+The type-class |SPF| of Section \ref{sec:modpred:strictlypositivefunctors}
+captures all the requirements on abstract functors for modular programming. We
+can modularly compose algebras and proof algebras for semantics functions and
+proofs. However, as discussed in Section \ref{mod:pred:spfnotmodular} |SPF|
+itself is not modular in the sense that we cannot construct coproducts
+(directly). In the example in Section \ref{mod:pred:bigproofexample} we avoided
+that issue by manually giving the instance of the |SPF| class for the sum of the
+signature functors |ArithF| and |LogicF|. This is essentially the approach taken
+by \cite{schwaab:mtp}.
 
-This paper uses techniques from datatype-generic programming (DGP) to
-get a compositional refinement of |SPF|. The problem of defining
-fixpoints for a class of functors also arises in many approaches to
-DGP and we can use the same techniques in our setting.
+In this section we go the last mile and implement a modular refinement of |SPF|
+using datatype-generic programming (DGP) in general and containers in
+particular. The problem of defining fixed-points for a class of functors also
+arises in many approaches to DGP and we can use the same techniques in our
+setting. Containers are one approach to DGP that models a class of functors
+which is 1) closed under coproducts 2) and admits a generic implementation of
+|SPF|'s methods that respects all the restrictions of the proof-assistant
+setting.
 
-In a dependently-typed setting it is common to use a universe for
-generic programming~\cite{dgpdt,benke:universes}. A universe consists
-of two important parts:
+Section \ref{mod:pred:universes} discusses universes in general and Section
+\ref{mod:pred:containeruniverse} and Section \ref{mod:pred:containeruniverse}
+reviews the universe of containers in particular.  Sections
+\ref{mod:pred:containercoproduct}, \ref{mod:pred:containerfixandfold} and
+\ref{mod:pred:containerinduction} discuss the implementation of coproducts,
+fixed-points \& folds and induction respectively. Finally in Section
+\ref{mod:pred:containerautomation} we bridge the gap to modular programming.
+We show how |Functor|, |PFunctor| and |SPF| are instantiated by containers
+and discuss the automation for composing the container instances of a set
+of signature functors.
+
+
+%-------------------------------------------------------------------------------
+\subsection{Generic Universes}\label{mod:pred:universes}
+In a dependently-typed setting it is common to use a universe for generic
+programming~\cite{dgpdt,benke:universes}. A universe consists of two important
+parts:
 
 \begin{enumerate}
 \item A set |Code| of codes that represent types in the universe.
 \item An interpretation function |Ext| that maps codes to types.
 \end{enumerate}
 
-
 There is a large number of approaches to DGP that vary in the class of types
 they can represent and the generic functions they admit. For our application we
 choose the universe of containers~\cite{constructingstrictlypositivetypes}.
 
-In this section we review containers for generic programming and show
-how to resolve the problem of implementing folds and induction in a
-modular way by using generic implementations.
-
 An important property of the container universe is that it can represent all
-strictly-positive functors~\cite{constructingstrictlypositivetypes}. Hence, we
+strictly-positive functors~\cite{constructingstrictlypositivetypes} and allows
+folds and induction to be implemented generically. Hence, we meet our goal and
 do not loose any expressivity.
 
-\subsection{Universe}
+In Section \ref{sec:mod:polynomial} we discuss the universe of polynomial
+functors. it is a sub-universe of containers in the sense that any polynomial
+functor is also a container, but the universe admits more generic functions.  We
+use this universe to supplement our approach with a generic implementation of
+equality in Section \ref{sec:pred:polynomialequality} to achieve more reuse.
 
+
+%-------------------------------------------------------------------------------
+\subsection{Container Universe}\label{mod:pred:containeruniverse}
 The codes of the container universe are of the form |S ||> P| where |S| denotes
 a type of shapes and |P :: S -> *| denotes a family of position types indexed by
 |S|. The extension |Ext c| of a container |c| in Figure
@@ -144,7 +168,7 @@ position value. In Coq one needs to refute the position value |p :: ArithP (Lit
 i)| as its type is uninhabited. We use a case distinction without alternatives
 as an elimination.
 
-\paragraph{Coproducts}
+\subsection{Coproducts}\label{mod:pred:containercoproduct}
 
 %{
 %format Splus = "S_{+}"
@@ -184,7 +208,7 @@ and positions of the coproduct and injection functions on the extensions.
 
 %}
 
-\subsection{Fixpoints and Folds}\label{ssec:contfixandfold}
+\subsection{Fixpoints and Folds}\label{mod:pred:containerfixandfold}
 
 The universe of containers allows multiple generic
 constructions. First of all, the fixpoint of a container is given by
@@ -210,14 +234,12 @@ call |gfold alg (pf p)| is performed on the structurally smaller
 argument |pf p|.
 
 
-\subsection{Induction}
-
-To define an induction principle for container types we proceed in the
-same way as in Section \ref{sec:mod:modularinductivereasoning} by
-defining proof algebras using an \emph{all
-modality}~\cite{benke:universes}. The all modality on containers is
-given generically by a $\Pi$-type that asserts that |q| holds at all
-positions.
+\subsection{Induction}\label{mod:pred:containerinduction}
+To define an induction principle for container types we proceed in the same way
+as in Section \ref{sec:mod:modularinductivereasoning} by defining proof algebras
+using an \emph{all-modality}~\cite{benke:universes}. The all-modality on
+containers is given generically by a $\Pi$-type that asserts that |q| holds at
+all positions.
 
 \begin{figure}[t]
 \fbox{
@@ -246,8 +268,8 @@ establish the proofs of the recursive positions before applying the
 proof algebra |palg|.
 
 
-
-\subsection{Container Class}
+%-------------------------------------------------------------------------------
+\subsection{Container Class}\label{mod:pred:containerautomation}
 
 \begin{figure}[t]
 \fbox{
@@ -291,12 +313,16 @@ functions to concrete functors and give instances for |Functor|,
 <   ...
 
 The important difference to the |SPF| class is that we can generically
-build the instance for the coproduct of two |Container| functors by
-using the coproduct of their containers.
+build the instance for the coproduct of two |Container| functors
 
 < instance (Container f, Container g) => Container (f :+: g)
 
+\noindent by using the coproduct of their containers with the generic coproduct
+construction from Section \ref{mod:pred:containercoproduct}.
 
+
+
+%-------------------------------------------------------------------------------
 \subsection{Extensible Inductive Relations}
 
 
@@ -350,7 +376,6 @@ are
 < type IFixMTC i (f :: (i -> Prop) -> i -> Prop) j =
 <    forall a. IAlgebra i f a -> a j
 
-\new{
 For type-soundness proofs we perform folds over proof-terms in order to
 establish propositions on the indices and hence make use of the fold operation
 provided by Church encodings. However, contrary to inductive datatypes we do not
@@ -360,16 +385,13 @@ universal property of folds for proof-terms.  Figure
 \ref{fig:indexedstrictlypositivefunctor} defines the type class |ISPF| that
 collects the necessary reasoning interface for modularly building logical
 relations and indexed folds.
-}
 
-\new{
 Since |Prop| is \emph{impredicative} in \Coq and induction-principles and
 universal properties are of no concern here, MTC's approach to modular inductive
 relations is sufficient for type-soundness proofs in \Coq and we can universally
 instantiate |ISPF| with the definitions from MTC. However, other kinds of
 meta-theoretic proofs may require induction principles for proof terms and the
 approach is still limited to systems that support impredicativity.
-}
 
 Alternatively we can use a universe of indexed containers
 \cite{indexedcontainers} that does not have the above restrictions. An

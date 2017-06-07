@@ -159,19 +159,19 @@ For a generic definition of induction, we first need to develop a \emph{uniform
 \emph{uniform representation of proof algebras} which is the subject of the
 remainder of this section.
 
-\subsection{All Modalities}
+\subsection{All-Modalities}
 
 We first focus on the inputs of the proof algebra functions, i.e. the proofs
-that the induction predicate holds for recursive positions. We use an \emph{all
-  modality}~\cite{benke:universes,morris2007constructing} for signature functors
-to capture these proofs. Informally, the all modality of a functor |f| and a
-predicate (|p :: a -> Prop|) is a new type (|All a p :: f a -> Prop|) that
+that the induction predicate holds for recursive positions. We use an
+\emph{all-modality}~\cite{benke:universes,morris2007constructing} for signature
+functors to capture these proofs. Informally, the all-modality of a functor |f|
+and a predicate (|p :: a -> Prop|) is a new type (|All a p :: f a -> Prop|) that
 denotes that the predicate |p| holds for each (|x :: a|) in an (|f a|).
 
 \paragraph{Example: Arithmetic Expressions}
-The following type |ArithAll| is an example of an all modality for the signature
+The following type |ArithAll| is an example of an all-modality for the signature
 functor |ArithF| of arithmetic expressions. The constructor |ALit| encodes that
-the all modality holds for literals and |AAdd| encodes that the all modality
+the all-modality holds for literals and |AAdd| encodes that the all-modality
 holds for |(Add x y)| if |p| holds for both recursive positions |x| and |y|.
 
 < data ArithAll a p :: ArithF a -> Prop where
@@ -179,7 +179,7 @@ holds for |(Add x y)| if |p| holds for both recursive positions |x| and |y|.
 <   AAdd  :: p x -> p y ->  ArithAll a p (AddF x y)
 
 
-Using the all modality definition we can write |indArith| equivalently as
+Using the all-modality definition we can write |indArith| equivalently as
 
 %format inArith = "{\Varid{in}_{" Arith "}}"
 %format indArith' = ind "_{" A "}\prime"
@@ -200,7 +200,7 @@ with carrier |Arith|:
 < inArith (AddF x y)  =  Add x y
 
 \paragraph{Comparison to MTC}
-The all modality |ArithAll| shares the structure of its functor |ArithF|,
+The all-modality |ArithAll| shares the structure of its functor |ArithF|,
 reminiscent of ornamentation \cite{mcbride2010ornamental}. In fact, we can
 represent it using the functor |ArithF| as witnessed by the following
 isomorphism:
@@ -222,11 +222,12 @@ equation:
 <   (ArithAll a p xs) ~= (exists (ps :: ArithF (exists x._ p x))._ fmap projT1 ps == xs)
 
 \noindent where |(projT1 :: (exists (x :: a)._ p x) -> a)| projects a
-$\Sigma$-type to its first component. This suggests, that we can define all
-modalities generically without requiring the definition of a separate
+$\Sigma$-type to its first component. This suggests, that we can define
+all-modalities generically without requiring the definition of a separate
 type. Indeed, MTC uses the right-hand sides of both of the above isomorphisms:
 \begin{enumerate}
-\item The first, existentially quantified variant is used generally for proof
+\item
+  The first, existentially quantified variant is used generally for proof
   algebras. This is a choice that follows directly from MTC's weak induction
   principle. The constraint on the existential values is proved by means of a
   intricate well-formedness requirement for proof algebras |(palg :: Algebra
@@ -243,19 +244,20 @@ type. Indeed, MTC uses the right-hand sides of both of the above isomorphisms:
 
 \item
   The second, equationally constrained variant is used to track the universal
-  property of recursive positions. Unfortunately, MTC does not use \emph{all
-    modalities} as an \emph{abstract concept} and simply works with the generic
-  definition directly. As a consequence, often both the decorated value |ps| and
-  the undecorated one |xs| are in scope, creating additional noise for the user.
+  property of recursive positions. Unfortunately, MTC does not use
+  \emph{all-modalities} as an \emph{abstract concept} and simply works with the
+  generic definition directly. As a consequence, often both the decorated value
+  |ps| and the undecorated one |xs| are in scope, creating additional noise for
+  the user.
 \end{enumerate}
 %}
 
 \paragraph{PFunctor Class}
 To counter the proliferation of $\Sigma$-types and projections out of
-$\Sigma$-types we do not introduce a generic definition of an \emph{all
-  modality} in our interface and work with an abstraction instead. To this end,
-we introduce a new typeclass |PFunctor| that carries the associated all modality
-type and make |SPF| a subclass of it.
+$\Sigma$-types we do not introduce a generic definition of an
+\emph{all-modality} in our interface and work with an abstraction instead. To
+this end, we introduce a new typeclass |PFunctor| that carries the associated
+all-modality type and make |SPF| a subclass of it.
 
 All modalities share the structure of their associated functors. For example,
 the mapping of a functor |f| generalizes to a dependent variant:

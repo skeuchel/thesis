@@ -235,10 +235,8 @@ which is essentially the same as the definition of |foldDTC| from Section
 \ref{sec:mod:datatypesalacarte} and inlining the implementation of |gfmap|.
 Because this exposes the structural recursion, Coq accepts the definition.
 Indeed the recursive call |gfold alg (pf p)| is performed on the structurally
-smaller argument |pf p|.
-Note that, unlike for |foldDTC|,
-inlining is possible because |gfmap| is defined uniformly for 
-all containers.
+smaller argument |pf p|.  Note that, unlike for |foldDTC|, inlining is possible
+because |gfmap| is defined uniformly for all containers.
 
 
 \subsection{Induction}\label{mod:pred:containerinduction}
@@ -246,7 +244,7 @@ To define an induction principle for container types we proceed in the same way
 as in Section \ref{sec:mod:modularinductivereasoning} by defining proof algebras
 using an \emph{all-modality}~\cite{benke:universes}. The all-modality on
 containers is given generically by a $\Pi$-type that asserts that |q| holds at
-all positions.
+all positions as shown in Figure \ref{fig:container_induction}.
 
 \begin{figure}[t]
 \fbox{
@@ -265,7 +263,7 @@ all positions.
     \end{minipage}
   }
 \caption{Container induction}
-\label{fig:container induction}
+\label{fig:container_induction}
 \end{figure}
 
 As with the implementation of the generic fold operations, enough
@@ -280,7 +278,7 @@ proof algebra |palg|.
 
 \begin{figure}[t]
 \fbox{
-\hspace{-5pt}\begin{minipage}{1\columnwidth}
+\begin{minipage}{1\columnwidth}
 
 < class Container (f :: * -> *) where
 <   cont    :: Cont
@@ -308,16 +306,28 @@ Via the isomorphisms |from| and |to| we can import all the generic
 functions to concrete functors and give instances for |Functor|,
 |PFunctor| and |SPF|.
 
+\begin{figure}[t]
+\fbox{
+\begin{minipage}{1\columnwidth}
+
 < instance Container f => Functor f where
 <   fmap f    = to . gfmap f . from
 < instance Container f => PFunctor f where
 <   All q     = GAll q . from
+<   all_fmap  = ...
 < instance Container f => SPF f where
 <   Fix       = W S P
 <   inFix     = sup . from
 <   outFix    = to . unSup
 <   fold alg  = gfold (alg . to)
 <   ...
+
+\end{minipage}
+}
+\caption{Container functor class}
+\label{fig:containerfunctorclass}
+\end{figure}
+
 
 The important difference to the |SPF| class is that we can generically
 build the instance for the coproduct of two |Container| functors
@@ -444,9 +454,9 @@ construct the coproduct of two indexed containers.
 \end{figure}
 
 Fixed points and fold operators can be defined generically on that universe
-similarly to Section \ref{ssec:contfixandfold}. Indexed containers are also
-closed under coproducts and indexed algebras can be modularly composed using
-type classes.
+similarly to Section \ref{mod:pred:containerfixandfold}. Indexed containers are
+also closed under coproducts and indexed algebras can be modularly composed
+using type classes.
 
 
 %%% Local Variables:

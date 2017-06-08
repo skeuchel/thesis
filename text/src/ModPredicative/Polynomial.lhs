@@ -7,25 +7,26 @@
 
 %if False
 
-> {-# LANGUAGE DataKinds, KindSignatures, GADTs, ExistentialQuantification, PolyKinds, TypeFamilies, TypeOperators, ScopedTypeVariables #-}
+> {-# LANGUAGE DataKinds, KindSignatures, GADTs, ExistentialQuantification #-}
+> {-# LANGUAGE PolyKinds, TypeFamilies, TypeOperators, ScopedTypeVariables #-}
 
 %endif
 
 \section{Polynomial Functors}\label{sec:mod:polynomial}
 
-In the previous section we have implemented generic functions for functorial
-mappings, fixed points, folds and generic proofs about their properties.
-
-Other common functionality can be provided with generic implementations as
-well. In this section we look at a generic implementation of equality testing
-and proofs about its correctness. Equality testing is used for example in the
-MTC framework in the implementation of a modular type-checker that tests if both
-branches of an |if| expression have the same type and that the function and
-argument type of a function application are compatible. Furthermore for
-reasoning about functions that use equality testing we need proofs of its
-correctness. We thus include the equality function and the properties in an
-equality type class that is shown in Figure \ref{fig:equalityclass}.
-
+When choosing an approach to generic programming there is a trade-off between
+the expressivity of the approach, i.e. the collection of types it covers, and
+the functionality that can be implemented generically using the approach. The
+container universe is a very expressive universe in the sense that it supports a
+large class of types, but therefore the set of generic functions that can be
+implemented for containers is limited.  In the previous section we have
+implemented generic functions for functorial mappings, fixed points, folds,
+induction and generic proofs about their properties for each container functor.
+Containers are therefore well-suited as a solution for modularly defining
+datatypes and functions. But containers also include function types. Therefore
+any functionality that is not defined or decidable on function types cannot be
+implemented generically for every container. An example of such functionality is
+\emph{equality}, which is in general not decidable for function types.
 
 \begin{figure}[t]
 \fbox{
@@ -48,21 +49,40 @@ equality type class that is shown in Figure \ref{fig:equalityclass}.
 \label{fig:equalityclass}
 \end{figure}
 
+Other universes provide a different trade-off: they admit less types but allow
+more generic functionality. In this section we look at a universe that supports
+a generic implementation of equality testing and proofs about its correctness.
+Equality testing is used for example in the MTC framework in the implementation
+of a modular type-checker that tests if both branches of an |if| expression have
+the same type and that the function and argument type of a function application
+are compatible.  Furthermore for reasoning about functions that use equality
+testing we need proofs of its correctness. For example, we want to proof that
+type-checked terms are indeed type-safe, i.e. they do not get stuck during
+evaluation. We thus include the equality function and the properties in an
+equality type class that is shown in Figure \ref{fig:equalityclass}.
 
-When choosing an approach to generic programming there is a trade-off between
-the expressivity of the approach, i.e. the collection of types it covers, and
-the functionality that can be implemented generically using the approach. The
-container universe is a very expressive universe that supports a generic
-definitoin of fold and hence is well-suited as a solution for modularly defining
-datatypes and functions. However, it is too expressive for implementing equality
-generically as it also includes function types for which equality is in general
-not decidable.
+We choose the universe of polynomial functors\cite{} for the generic
+implementation of equality. Polynomial functors are a sub-class of container
+functors and we use this fact to integrate polynomial functors into our approach
+and allow mixing them freely with any container functors. However, the universe
+of polynomial functors is not the only possible choice. There are universes of
+functors such as regular tree types \cite{ertt}\footnote{With one hole for the
+  parameter.} or finite containers\cite{} that lie strictly between polynomial
+and container functors and also allow a generic implementation of equality.
 
-So instead we restrict ourselves to the universe of polynomial functors to
-implement equality generically. \steven{Motivate the choice of the universe. Add
-  a citation.}
+But the universe of polynomial functors is well-studied since it can be encoded
+in a lot of languages, including e.g. Haskell with a moderate set of language
+extensions. Furthermore it is comparably easy to write instances for polynomial
+functors and a lot of signature functors that come up in practice are indeed
+polynomial functors.
 
-\subsection{Universe of Polynomial Functors}
+Section \ref{mod:poly:universe} presents the definition of polynomial functors
+and Section \ref{mod:poly:embedding} shows the embedding of polynomial functors
+into container functors. Generic equality for every fixed-point of a polynomial
+functors is defined in Section \ref{sec:pred:polynomialequality}
+
+%-------------------------------------------------------------------------------
+\subsection{Universe of Polynomial Functors}\label{mod:poly:universe}
 
 \begin{figure}[t]
 \fbox{
@@ -127,7 +147,7 @@ instance for |FunType| is the following, with proofs omitted:
 <   pfromToInverse     = ...
 
 
-\subsection{Universe Embedding}
+\subsection{Universe Embedding}\label{mod:poly:embedding}
 
 To write modular functions for polynomial functors we proceed in
 the same way as in Section \ref{sec:mod:containers} by showing that

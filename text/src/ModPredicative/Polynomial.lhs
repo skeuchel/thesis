@@ -56,25 +56,24 @@ Equality testing is used for example in the MTC framework in the implementation
 of a modular type-checker that tests if both branches of an |if| expression have
 the same type and that the function and argument type of a function application
 are compatible.  Furthermore for reasoning about functions that use equality
-testing we need proofs of its correctness. For example, we want to proof that
+testing we need proofs of its correctness. For example, we want to prove that
 type-checked terms are indeed type-safe, i.e. they do not get stuck during
 evaluation. We thus include the equality function and the properties in an
 equality type class that is shown in Figure \ref{fig:equalityclass}.
 
-We choose the universe of polynomial functors\cite{} for the generic
+We choose the universe of polynomial functors~\cite{} for the generic
 implementation of equality. Polynomial functors are a sub-class of container
-functors and we use this fact to integrate polynomial functors into our approach
+functors; we use this fact to integrate polynomial functors into our approach
 and allow mixing them freely with any container functors. However, the universe
 of polynomial functors is not the only possible choice. There are universes of
 functors such as regular tree types \cite{ertt}\footnote{With one hole for the
-  parameter.} or finite containers\cite{} that lie strictly between polynomial
+  parameter.} or finite containers \cite{} that lie strictly between polynomial
 and container functors and also allow a generic implementation of equality.
 
-But the universe of polynomial functors is well-studied since it can be encoded
-in a lot of languages, including e.g. Haskell with a moderate set of language
-extensions. Furthermore it is comparably easy to write instances for polynomial
-functors and a lot of signature functors that come up in practice are indeed
-polynomial functors.
+We use the universe of polynomial functors because it is well-studied and can
+be encoded in a lot of languages, including e.g. Haskell. Furthermore it is
+relatively easy to write instances for polynomial functors and a lot of
+signature functors that come up in practice are indeed polynomial functors.
 
 Section \ref{mod:poly:universe} presents the definition of polynomial functors
 and Section \ref{mod:poly:embedding} shows the embedding of polynomial functors

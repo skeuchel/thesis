@@ -61,19 +61,26 @@ type-checked terms are indeed type-safe, i.e. they do not get stuck during
 evaluation. We thus include the equality function and the properties in an
 equality type class that is shown in Figure \ref{fig:equalityclass}.
 
-We choose the universe of polynomial functors~\cite{} for the generic
-implementation of equality. Polynomial functors are a sub-class of container
-functors; we use this fact to integrate polynomial functors into our approach
-and allow mixing them freely with any container functors. However, the universe
-of polynomial functors is not the only possible choice. There are universes of
-functors such as regular tree types \cite{ertt}\footnote{With one hole for the
-  parameter.} or finite containers \cite{} that lie strictly between polynomial
-and container functors and also allow a generic implementation of equality.
+We choose the universe of univariate polynomial functors for the generic
+implementation of equality because it is well-studied, since it usually forms
+the basis of other datatype-generic programming approaches that take a
+\emph{sums-of-products view}~\cite{jansson1997polyp} on datatypes. It can also
+be encoded in a lot of languages. For example the |regular|
+library~\cite{vannoort2010lightweight,multirec} is an implementation in Haskell.
+Furthermore it is relatively easy to write instances for polynomial functors and
+a lot of signature functors that come up in practice are indeed polynomial
+functors.
 
-We use the universe of polynomial functors because it is well-studied and can
-be encoded in a lot of languages, including e.g. Haskell. Furthermore it is
-relatively easy to write instances for polynomial functors and a lot of
-signature functors that come up in practice are indeed polynomial functors.
+Polynomial functors are a sub-class of container functors; we use this fact to
+integrate polynomial functors into our approach by writing a universe embedding
+into containers and allow mixing them freely with any container functors.  Such
+universe embeddings have been studied by \cite{jpm:fcadgp}. However, the
+universe of polynomial functors is not the only possible choice. There are
+universes of functors such as regular tree types \cite{ertt} or finite
+containers~\cite{categoriesofcontainers} \footnote{Also known as dependent
+  polynomial functors \cite{dependentpolynomialfunctors} or shapely functors
+  \cite{lawoftraversals,shapelyfunctors}.} that lie strictly between polynomial
+and container functors and also allow a generic implementation of equality.
 
 Section \ref{mod:poly:universe} presents the definition of polynomial functors
 and Section \ref{mod:poly:embedding} shows the embedding of polynomial functors
@@ -85,17 +92,17 @@ functors is defined in Section \ref{sec:pred:polynomialequality}
 
 \begin{figure}[t]
 \fbox{
-\hspace{-5pt}\begin{minipage}{1\columnwidth}
+\begin{minipage}{1\columnwidth}
 
-> data Poly = U | I | C Poly Poly | P Poly Poly
-
-> data ExtP (c :: Poly) (a :: *) where
->   EU  :: ExtP U a
->   EI  :: a -> ExtP I a
->   EL  :: ExtP c a -> ExtP (C c d) a
->   ER  :: ExtP d a -> ExtP (C c d) a
->   EP  :: ExtP c a -> ExtP d a -> ExtP (P c d) a
-
+< data Poly = U | I | C Poly Poly | P Poly Poly
+<
+< data ExtP (c :: Poly) (a :: *) where
+<   EU  :: ExtP U a
+<   EI  :: a -> ExtP I a
+<   EL  :: ExtP c a -> ExtP (C c d) a
+<   ER  :: ExtP d a -> ExtP (C c d) a
+<   EP  :: ExtP c a -> ExtP d a -> ExtP (P c d) a
+<
 <  class Polynomial f where
 <    pcode              :: Poly
 <    pto                :: ExtP pcode a -> f a
@@ -105,18 +112,20 @@ functors is defined in Section \ref{sec:pred:polynomialequality}
 
 \end{minipage}
 }
-\caption{Polynomial functors}
+\caption{Polynomial Functors}
 \label{fig:polynomialuniverse}
 \end{figure}
 
-The codes |Poly| and interpretation |ExtP| of the polynomial functor
-universe are shown in Figure \ref{fig:polynomialuniverse}. A
-polynomial functor is either the constant unit functor |U|, the
-identity functor |I|, a coproduct |C p1 p2| of two functors, or the
-cartesian product |P p1 p2| of two functors. The interpretation |ExtP|
-is defined as an inductive family indexed by the codes.
+The codes |Poly| and interpretation |ExtP| of the polynomial functor universe
+are shown in Figure \ref{fig:polynomialuniverse}. A polynomial functor is either
+the constant unit functor |U|, the identity functor |I|, a coproduct |C p1 p2|
+of two functors, or the cartesian product |P p1 p2| of two functors. The
+interpretation |ExtP| is defined as an inductive family indexed by the codes.
+As before we define a type-class |Polynomial| that carries the conversion
+functions and isomorphism proofs. The definition of the class is also given in
+Figure \ref{fig:polynomialuniverse}.
 
-
+\paragraph{Example}
 As an example consider the functor |FunType| that can represent
 function types of an object language.
 
@@ -133,10 +142,7 @@ representation are given by
 > toFunType :: ExtP (P I I) a -> FunType a
 > toFunType (EP (EI x) (EI y)) = TArrow x y
 
-As before we define a type-class |Polynomial| that carries the
-conversion functions and isomorphism proofs. The definition of the
-class is also given in Figure \ref{fig:polynomialuniverse}. An
-instance for |FunType| is the following, with proofs omitted:
+An instance for |FunType| is the following, with proofs omitted:
 
 < instance Polynomial FunType where
 <   pcode              = P I I
@@ -146,34 +152,31 @@ instance for |FunType| is the following, with proofs omitted:
 <   pfromToInverse     = ...
 
 
+%-------------------------------------------------------------------------------
 \subsection{Universe Embedding}\label{mod:poly:embedding}
 
-To write modular functions for polynomial functors we proceed in
-the same way as in Section \ref{sec:mod:containers} by showing that
-|Polynomial| is closed under coproducts and building the functionality
-of the |SPF| type class generically.
+To write modular functions for polynomial functors we proceed in the same way as
+in Section \ref{sec:mod:containers} by showing that |Polynomial| is closed under
+coproducts and building the functionality of the |SPF| type class generically.
 
-However, that would duplicate the generic functionality and would
-prevent us from using polynomial functors with containers. Since
-containers are closed under products and coproducts we can embed the
-universe of polynomial functors in the universe of containers. In
-order to do this, we have to derive a shape type from the code of a
-polynomial functor and a family of position types for each shape. We
-can compute the shape by recursing over the code.
+However, that would duplicate the generic functionality and would prevent us
+from using polynomial functors with containers. Since containers are closed
+under products and coproducts we can embed the universe of polynomial functors
+in the universe of containers. In order to do this, we have to derive a shape
+type from the code of a polynomial functor and a family of position types for
+each shape which are defined in Figure \ref{fig:polynomialshapeppos}.
+
+\paragraph{Shapes and Positions}
+\begin{figure}[t]
+\fbox{
+\begin{minipage}{1\columnwidth}
 
 < PolyS :: Poly -> *
 < PolyS U        = ()
 < PolyS I        = ()
 < PolyS (C c d)  = PolyS c + PolyS d
 < PolyS (P c d)  = (PolyS c , PolyS d)
-
-The constant unit functor and the identity functor have only one shape
-which is represented by a unit type. As in section
-\ref{sec:mod:containers} the shape of a coproduct is the
-coproduct of the shapes of the summands and the shape of a product is
-the product of shapes of the factors. The definition of positions also
-proceeds by recursing over the code.
-
+<
 < PolyP :: (c :: Poly) -> PolyS c -> *
 < PolyP U        ()         = Empty
 < PolyP I        ()         = ()
@@ -182,45 +185,72 @@ proceeds by recursing over the code.
 < PolyP (P c d)  (s1 , s2)  =
 <   Either (PolyP c s1) (PolyP d s2)
 
-The constant unit functor does not have any positions and the identity
-functor has exactly one position. For coproducts the positions are the
-same as the ones of the chosen summand and for a product we take the
-disjoint union of the positions of the shapes of the components.
+\end{minipage}
+}
+\caption{Shapes and Positions of Polynomial Functors}
+\label{fig:polynomialshapeppos}
+\end{figure}
 
-The next essential piece for completing the universe embedding are
-conversions between the interpretations of the codes. The function
-|ptoCont| converts the polynomial interpretation to the container
-intepretation.
+We compute the shape by recursing over the code. The constant unit functor and
+the identity functor have only one shape which is represented by a unit type. As
+in section \ref{sec:mod:containers} the shape of a coproduct is the coproduct of
+the shapes of the summands and the shape of a product is the product of shapes
+of the factors.
 
-< ptoCont ::  (c :: Poly) ->
-<             ExtP c a -> Ext (PolyS c |> PolyP c) a
+The definition of positions also proceeds by recursing over the code.  The
+constant unit functor does not have any positions and the identity functor has
+exactly one position. For coproducts the positions are the same as the ones of
+the chosen summand and for a product we take the disjoint union of the positions
+of the shapes of the components.
+
+\paragraph{Conversion}
+
+\begin{figure}[t]
+\fbox{
+\begin{minipage}{1\columnwidth}
+
+< ptoCont ::  (c :: Poly) -> ExtP c a -> Ext (PolyS c |> PolyP c) a
 < ptoCont U        EU         = Ext () (\p -> case p of)
 < ptoCont I        (EI a)     = Ext () (\() -> a)
 < ptoCont (C c d)  (EL x)     = Ext (Left s) pf
 <   where  Ext s pf = ptoCont c x
 < ptoCont (C c d)  (ER y)     = Ext (Right s) pf
 <   where  Ext s pf = ptoCont c y
-< ptoCont (P c d)  (EP x y)   = Ext  (s1 , s2)
-<                                    (\p -> case p of
-<                                       Left p   -> pf1 p
-<                                       Right p  -> pf2 p)
+< ptoCont (P c d)  (EP x y)   = Ext (s1 , s2) (\p ->  case p of
+<                                                       Left p   -> pf1 p
+<                                                       Right p  -> pf2 p)
 <   where  Ext s1 pf1 = ptoCont c x
 <          Ext s2 pf2 = ptoCont d y
+<
+< pfromCont :: (c :: Poly) -> Ext (PolyS c |> PolyP c) a -> ExtP c a
+< pfromCont = ...
 
-Similarly we define the function |pfromCont| that performs the conversion in the
-opposite direction. We omit the implementation.
+\end{minipage}
+}
+\caption{Conversion between Polynomial Interpretations}
+\label{fig:polynomialcontainerconversion}
+\end{figure}
 
-< pfromCont ::
-<   (c :: Poly) -> Ext (PolyS c |> PolyP c) a -> ExtP c a
+The next essential piece for completing the universe embedding are conversions
+between the interpretations of the codes which are given in Figure
+\ref{fig:polynomialcontainerconversion}. The function |ptoCont| converts the
+polynomial interpretation to the container interpretation. Similarly we define
+the function |pfromCont| that performs the conversion in the opposite
+direction. We omit the implementation.
 
 To transport properties, like the correctness of equality in Figure
 \ref{fig:equalityclass}, across these conversion functions we need to prove that
 they are inverses. These proofs proceed by inducting over the code; we omit them
 here.
 
+\paragraph{Container Instance}
 As the last step we derive an instance of |Container| from an instance of
-|Polynomial|. This way all the generic functionality of containers is also
-available for polynomial functors.
+|Polynomial| in Figure \ref{fig:polynomialcontainerinstance}. This way all the
+generic functionality of containers is also available for polynomial functors.
+
+\begin{figure}[t]
+\fbox{
+\begin{minipage}{1\columnwidth}
 
 < instance Polynomial f => Container f where
 <   cont    =  PolyS pcode |> PolyP pcode
@@ -229,7 +259,14 @@ available for polynomial functors.
 <   fromTo  =  ...
 <   toFrom  =  ...
 
+\end{minipage}
+}
+\caption{Container Instance for Polynomial Functors}
+\label{fig:polynomialcontainerinstance}
+\end{figure}
 
+
+%-------------------------------------------------------------------------------
 \subsection{Generic Equality}\label{sec:pred:polynomialequality}
 
 Performing the conversions between polynomial functors and containers in the
@@ -247,16 +284,14 @@ constructed fixed point.
 < geq :: (c :: Poly) -> FixP c -> FixP c -> Bool
 < geq c (FixP x) (FixP y) = go c x y
 <   where
-<     go ::  (d :: Poly) ->
-<            ExtP d (FixP c) -> ExtP d (FixP c) -> Bool
+<     go ::  (d :: Poly) -> ExtP d (FixP c) -> ExtP d (FixP c) -> Bool
 <     go U        EU         EU         = True
 <     go I        (EI x)     (EI y)     = geq x y
 <     go (C c d)  (EL x)     (EL y)     = go c x y
 <     go (C c d)  (EL x)     (ER y)     = False
 <     go (C c d)  (ER x)     (EL y)     = False
 <     go (C c d)  (ER x)     (ER y)     = go d x y
-<     go (P c d)  (EP x x')  (EP y y')  =
-<       go c x y && go d x' y'
+<     go (P c d)  (EP x x')  (EP y y')  = go c x y && go d x' y'
 
 In the same vein we can prove the properties of the |Eq| type class for this
 equality function using mutual induction over fixed points and partially
@@ -264,9 +299,8 @@ constructed fixed points.
 
 Of course |FixP c| and |Fix (PolyS c ||> PolyP c)| are isomorphic and we can
 transport functions and their properties across this isomorphism to get a
-generic equality function on the fixed point defined by containers for a
-conventional polynomial functor which can be used to instantiate the |Eq| type
-class in Figure \ref{fig:equalityclass}.
+generic equality function on the fixed-point defined by containers which can be
+used to instantiate the |Eq| type class in Figure \ref{fig:equalityclass}.
 
 < instance Polynomial f => Eq (Fix f)
 

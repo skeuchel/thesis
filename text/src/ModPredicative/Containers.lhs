@@ -103,7 +103,7 @@ given shape we have a value of type |a|. We can define the functorial mapping
 
 \begin{figure}[t]
 \fbox{
-\hspace{-5pt}\begin{minipage}{1\columnwidth}
+\begin{minipage}{1\columnwidth}
 
 
 %if False
@@ -360,7 +360,7 @@ construction from Section \ref{mod:pred:containercoproduct}.
 
 \end{minipage}
 }
-\caption{Indexed strictly-positive functor class}
+\caption{Indexed Strictly-Positive Functor Class}
 \label{fig:indexedstrictlypositivefunctor}
 \end{figure}
 
@@ -411,9 +411,9 @@ meta-theoretic proofs may require induction principles for proof terms and the
 approach is still limited to systems that support impredicativity.
 
 Alternatively we can use a universe of indexed containers
-\cite{indexedcontainers} that does not have the above restrictions. An
-|i|-indexed container is essentially a container together with an assignment of
-indices for each shape and each position of that shape.
+\cite{indexedcontainers} that does not have the above restrictions. An indexed
+container is essentially a container together with an assignment of indices for
+each shape and each position of that shape.
 
 More formally, an |i|-indexed container |S ||> P ||> R| is given by a family of
 shapes |S :: i -> *| and family of position types |P :: (j :: i) -> S j -> *|
@@ -448,7 +448,7 @@ construct the coproduct of two indexed containers.
 
 \end{minipage}
 }
-\caption{i-indexed containers}
+\caption{Indexed Containers}
 
 \label{fig:indexedcontainers}
 \end{figure}

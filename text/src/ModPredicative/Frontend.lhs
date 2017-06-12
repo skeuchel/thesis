@@ -236,11 +236,11 @@ interface.
 \label{fig:mod:fullexample:spf}
 \end{figure}
 
-In this Section we develop a complete example to showcase how the previous
-definitions work. We modularly define a \emph{depth function} and a \emph{size
-  function} on expressions and show that the depth is always strictly smaller
-than the size. We compose expressions out of two features: arithmetic
-expressions and logical expressions that we define independently.
+In this section we develop a complete example to showcase how the previous
+definitions work. We modularly define a \emph{depth} and a \emph{size}
+  function on expressions and show that the depth is always strictly smaller
+than the size. We compose expressions out of two features  that we define independently: arithmetic
+and logical expressions.
 Figure \ref{fig:mod:fullexample:signatures} shows
 the signature functors |ArithF| (top) and |LogicF| (bottom) for the two cases,
 their all modalities and |PFunctor| instances.
@@ -290,9 +290,9 @@ and the |SPF| instance are show in Figure \ref{fig:mod:fullexample:spf}.
 \end{figure}
 
 Figure \ref{fig:mod:fullexample:semanticfunctions} shows the modular definition
-of the two semantics functions |depthOf| and |sizeOf|.  Each case and semantic
-function has a separate named |FAlgebra| instance and the semantics functions
-itself are defined as a fold over the fixed-point of any signature functor for
+of the two semantic functions |depthOf| and |sizeOf|.  Each feature/function
+combination has a separate named |FAlgebra| instance and the semantic functions
+themselves are defined as a fold over the fixed-point of any signature functor for
 which an |FAlgebra| exists, including the combined |ExpF| signature functor of
 arithmetic and logical expressions.
 
@@ -326,7 +326,7 @@ fixed-point of any signature functor with a |DepthSize| proof algebra instance.
   \end{code}
   \end{minipage}
 }
-\caption{Modular |plusZero| proof}
+\caption{Modular |DepthSize| proof}
 \label{fig:mod:natpluszero}
 \end{figure}
 

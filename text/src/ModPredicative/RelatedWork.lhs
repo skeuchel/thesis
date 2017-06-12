@@ -5,30 +5,10 @@
 
 \section{Related and Future Work}\label{sec:modp:related}
 
-
-\paragraph{DGP in proof-assistants}
-\move{Datatype-generic programming started out as a form of language extension such as
-PolyP \cite{jansson:polyp} or Generic Haskell \cite{loh:dsgh}. Yet Haskell has
-turned out to be powerful enough to implement datatype-generic programming in
-the language itself and over the time a vast number of DGP libraries for Haskell
-have been proposed
-\cite{cheney:ligd,syb,emgm,multirec,instantgenerics,uniplate,genericderiving}. Compared
-with a language extension, a library is much easier to develop and maintain.
-}
-
-\move{
-There are multiple proposals for performing datatype-generic programming in
-proof-assistants using the flexibility of dependent-types
-\cite{dgpcoq,altenkirch:gpwdtp,benke:universes,loh:gpif,indexedcontainers}. This
-setting not only allows the implementation of generic functions, but also of
-generic proofs. The approaches vary in terms of how strictly they follow the
-positivity or termination restrictions imposed by the proof-assistant. Some
-circumvent the type-checker at various points to simplify the development or
-presentation while others put more effort in convincing the type-checker and
-termination checker of the validity~\cite{ertt}. However, in any of the
-proposals there does not seem to be any fundamental problem caused by the
-positivity or termination restrictions.
-}
+There is a fairly large amount of related work on modular programming and
+datatype-generic proramming. Below we discuss the most relevant related to this
+chapter: work on modular proofs and datatype-generic programming in proof
+assistants.
 
 \paragraph{DGP for modular proofs}
 Modularly composing semantics and proofs about the semantics has also been
@@ -66,7 +46,6 @@ MTC's generic folds would be sufficient. However, MTC's Church encodings are
 rejected by Agda's type-checker because Agda is a fully predicative system.
 
 
-
 \paragraph{Combining different DGP approaches}
 We have shown an embedding of the universe of polynomial functors into the
 universe of containers. Similar inclusions between universes have been
@@ -84,40 +63,17 @@ any DGP library with a systematic treatment of universes where each generic
 function is defined at the most general universe that supports that function.
 
 
-\paragraph{DGP for abstract syntax}
-We have shown how to obtain more reuse by complementing modular definitions with
-a generic equality function and generic proofs of its properties. Of course,
-there is more generic functionality that can be covered by means of
-datatype-generic programming like traversals, pretty-printing, parsing
-etc..
-
-One very interesting idea is to use datatype-generic programming to handle
-variable binding \cite{cheney:synp,unbound}. Variable binding is an ubiquitous
-aspect of programming languages. Moreover, a lot of functionality like variable
-substitutions and free variable calculations is defined for many
-languages. Licata and Harper \cite{licata:ubc} and Keuchel and Jeuring
-\cite{sk:gcasr} define universes for datatypes with binding in Agda. Lee et
-al.~\cite{gmeta} develop a framework for first-order representations of variable
-binding in Coq that is based on the universe of regular tree types \cite{ertt}
-and that provides many of the so-called \emph{infrastructure lemmas} required
-when mechanizing programming language meta-theory (cf. Part \ref{part:gen}).
-
-\new{
-An interesting direction for future work is to combine a datatype-generic
-approach to variable binding with a datatype-generic approach to modular
-reasoning like ours to combine the benefits of both worlds and achieve more
-reuse.
-}
-
 \paragraph{Automatic derivation of instances}
 Most, if not all, generic programming libraries in Haskell use Template
 Haskell to derive the generic representation of user-defined types and
 to derive the conversion functions between them.
 
-The GMeta \cite{gmeta} framework includes a standalone tool that also
-performs this derivation for Coq. Similarly we also like to be able
-to derive instances for the |Container| and |Polynomial| classes
-automatically.
+The GMeta \cite{gmeta} framework includes a standalone tool that also performs
+this derivation for Coq. Similarly, deriving instances for |Container| and
+|Polynomial| classes automatically is possible. An alternative is presented in
+\cite{levitation}. Chapman et al.'s goal is to reflect the datatype declarations
+of the programming language automatically in the language itself, which are then
+immediately available for datatype-generic programming.
 
 
 %%% Local Variables:

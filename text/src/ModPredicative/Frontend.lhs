@@ -165,127 +165,164 @@ interface.
 
 
 
-\subsection{Example: Right-Neutrality of Addition}\label{mod:pred:bigproofexample}
+\subsection{Example: Depth vs. Size}\label{mod:pred:bigproofexample}
 
 \begin{figure}[t]
 \fbox{
   \begin{minipage}{\columnwidth}
 
     \begin{code}
-    data ZeroF a = ZeroF
+    data ArithF a = LitF Nat | AddF a a
       deriving Functor
-    data ZeroAll (a :: *) (p :: a -> *) :: ZeroF a -> * where
-        ZeroA :: ZeroAll a p ZeroF
-    instance PFunctor ZeroF where
-        type All ZeroF a = ZeroAll a
+
+    data ArithAll (a :: *) (p :: a -> *) :: ArithF a -> * where
+      ALitF :: forall ((n :: Nat)). ArithAll a p (LitF n)
+      AAddF :: forall ((a1 a2 :: a)). p a1 -> p a2 -> ArithAll a p (AddF a1 a2)
+
+    instance PFunctor ArithF where
+        type All ArithF a = ArithAll a
     \end{code}
 
     \hrule
 
     \begin{code}
-    data SuccF a = SuccF a
+    data LogicF a = BLitF Bool | IfF a a a
       deriving Functor
-    data SuccAll (a :: *) (p :: a -> *) :: SuccF a -> * where
-        SuccA :: p n -> SuccAll a p (SuccF n)
-    instance PFunctor SuccF where
-        type All SuccF a = SuccAll a
+
+    data LogicAll (a :: *) (p :: a -> *) :: LogicF a -> * where
+      ABLitF :: forall ((b :: Bool)). ArithAll a p (BLitF b)
+      AIfF   :: forall ((i t e :: a)). p i -> p t -> p e -> ArithAll a p (IfF i t e)
+
+    instance PFunctor LogicF where
+        type All LogicF a = LogicAll a
     \end{code}
   \end{minipage}
 }
-\caption{Decomposition of naturals}
-\label{fig:mod:natcases}
+\caption{Arithmetic and logical expressions}
+\label{fig:mod:fullexample:signatures}
 \end{figure}
 
 \begin{figure}[t]
 \fbox{
   \begin{minipage}{\columnwidth}
     \begin{code}
-    data Nat = Zero | Succ Nat
-    type NatF = ZeroF :+: SuccF
+    type ExpF = ArithF :+: LogicF
+    data Exp = Lit Nat | Add Exp Exp | BLit Bool | If Exp Exp Exp
 
-    instance SPF NatF where
-        type Fix NatF = Nat
-        inFix (Inl ZeroF)      = Zero
-        inFix (Inr (SuccF n))  = Succ n
-        outFix Zero     = Inl ZeroF
-        outFix (Succ n) = Inr (SuccF n)
-        --inoutinverse = Refl
-        --outininverse = Refl
-        fold alg Zero     = alg (Inl ZeroF)
-        fold alg (Succ n) = alg (Inr (SuccF (fold alg n)))
-        -- folduniqueness = ...
-        -- foldcomputation = Refl
-        -- ind = ...
+    instance SPF ExpF where
+        type Fix ExpF = Exp
+        inFix (Inl (LitF n))      = Lit n
+        inFix (Inl (AddF a1 a2))  = Add a1 a2
+        inFix (Inr (BLitF b))     = BLit b
+        inFix (Inr (IfF i t e))   = If i t e
+        outFix (Lit n)      = Inl (LitF n)
+        outFix (Add a1 a2)  = Inl (AddF a1 a2)
+        outFix (BLit b)     = Inr (BLitF b)
+        outFix (If i t e)   = Inr (IfF i t e)
+        inoutinverse = ...
+        outininverse = ...
+        fold alg (Lit n)      = alg (Inl (LitF n))
+        fold alg (Add a1 a2)  = alg (Inl (AddF (fold alg a1) (fold alg a2)))
+        fold alg (BLit b)     = alg (Inr (BLitF b))
+        fold alg (If i t e)   =
+          alg (Inr (If (fold alg i) (fold alg t) (fold alg e)))
+        folduniqueness  = ...
+        foldcomputation = ...
+        ind = ...
     \end{code}
   \end{minipage}
 }
-\caption{|SPF| instance for natural numbers}
-\label{fig:mod:natfix}
+\caption{|SPF| instance for expressions}
+\label{fig:mod:fullexample:spf}
 \end{figure}
 
 In this Section we develop a complete example to showcase how the previous
-definitions work. We will revisit the |plusZero| proof from Section
-\ref{sec:mod:inductionintro} and modularize it, i.e. splitting the natural
-numbers into the |Zero| and |Succ| cases. Figure \ref{fig:mod:natcases} shows
-the signature functors |ZeroF| (top) and |SuccF| (bottom) for the two cases,
+definitions work. We modularly define a \emph{depth function} and a \emph{size
+  function} on expressions and show that the depth is always strictly smaller
+than the size. We compose expressions out of two features: arithmetic
+expressions and logical expressions that we define independently.
+Figure \ref{fig:mod:fullexample:signatures} shows
+the signature functors |ArithF| (top) and |LogicF| (bottom) for the two cases,
 their all modalities and |PFunctor| instances.
 
 To avoid giving away the generic definition of fixed-points, folds and induction
 from Section \ref{sec:mod:containers}, we simply instantiate the |SPF| class
-manually with the non-modular datatype definition of naturals. The datatype
-and the |SPF| instance are show in Figure \ref{fig:mod:natfix}.
+manually with the non-modular datatype definition of expressions that contains
+both arithmentic and logical expressions. The datatype
+and the |SPF| instance are show in Figure \ref{fig:mod:fullexample:spf}.
 
 \begin{figure}[t]
 \fbox{
   \begin{minipage}{\columnwidth}
 
   \begin{code}
-  data Plus = Plus
-  instance FAlgebra Plus ZeroF (Nat -> Nat) where
-      falgebra Plus ZeroF n = n
-  instance FAlgebra Plus SuccF (Nat -> Nat) where
-      falgebra Plus (SuccF m) n = Succ (m n)
+  data DepthOf = DepthOf
+  depthOf :: (SPF f, FAlgebra DepthOf f Nat) => Fix f -> Nat
+  depthOf = fold (falgebra DepthOf)
 
-  plus :: (SPF f, FAlgebra Plus f) => Fix f -> Nat -> Nat
-  plus = fold (falgebra Plus)
+  instance FAlgebra DepthOf ArithF Nat where
+    falgebra DepthOf (LitF n)      = 0
+    falgebra DepthOf (AddF a1 a2)  = 1 + max a1 a2
+  instance FAlgebra DepthOf LogicF Nat where
+    falgebra DepthOf (BLitF n)     = 0
+    falgebra DepthOf (IfF i t e)   = 1 + max i (max t e)
   \end{code}
+
+  \hrule
+
+  \begin{code}
+  data SizeOf = SizeOf
+  sizeOf :: (SPF f, FAlgebra SizeOf f Nat) => Fix f -> Nat
+  sizeOf = fold (falgebra SizeOf)
+
+  instance FAlgebra SizeOf ArithF Nat where
+    falgebra SizeOf (LitF n)      = 1
+    falgebra SizeOf (AddF a1 a2)  = 1 + a1 + a2
+  instance FAlgebra SizeOf LogicF Nat where
+    falgebra SizeOf (BLitF n)     = 0
+    falgebra SizeOf (IfF i t e)   = 1 + i + t + e
+  \end{code}
+
   \end{minipage}
 }
-\caption{Modular addition function}
-\label{fig:mod:natplus}
+\caption{Modular semantic functions}
+\label{fig:mod:fullexample:semanticfunctions}
 \end{figure}
 
-Figure \ref{fig:mod:natplus} shows the modular definition of the |plus|
-function. Each case has a separate function-valued |Plus| algebra instance and
-the |plus| function itself is defined as a fold over the fixed-point of any
-signature functor for which a |Plus| algebra exists, including the |NatF|
-signature functor of natural numbers.
+Figure \ref{fig:mod:fullexample:semanticfunctions} shows the modular definition
+of the two semantics functions |depthOf| and |sizeOf|.  Each case and semantic
+function has a separate named |FAlgebra| instance and the semantics functions
+itself are defined as a fold over the fixed-point of any signature functor for
+which an |FAlgebra| exists, including the combined |ExpF| signature functor of
+arithmetic and logical expressions.
 
-Similarly, Figure \ref{fig:mod:natpluszero} defines proof algebra instances for
-each case separately. The final proof |plusZero| is again overloaded: we get the
-property for the fixed-point of any signature functor with a |PlusZero| proof
-algebra instance.
+Similarly, Figure \ref{fig:mod:natpluszero} defines proof algebra instances of
+|DepthSize| for each feature separately. We omit the proofs for brevity. The
+final proof |depthSize| is again overloaded: we get the property for the
+fixed-point of any signature functor with a |DepthSize| proof algebra instance.
 
 \begin{figure}[t]
 \fbox{
   \begin{minipage}{\columnwidth}
 
-
   \begin{code}
-  type PlusZero m = plus m Zero == m
+  type DepthSize e = depthOf e < sizeOf e
+  depthSize :: (SPF f, FAlgebra DepthOf f Nat,
+    FAlgebra SizeOf f Nat ProofAlgebra f (Fix f) inFix DepthSize) =>
+    forall ((e :: Fix f)). DepthSize e
+  depthSize = ind f DepthSize (palgebra f (Fix f) inFix DepthSize)
 
-  instance (ZeroF :<: f, SPF f) =>
-      ProofAlgebra ZeroF (Fix f) inject PlusZero
+  instance (SPF f, ...) =>
+      ProofAlgebra ArithF (Fix f) inject DepthSize
     where
-      palgebra ZeroA     = Refl
-  instance (SuccF :<: f, SPF f) =>
-      ProofAlgebra SuccF (Fix f) inject PlusZero
-    where
-      palgebra (SuccA q) = Cong Succ q
+      palgebra (ALitF n)            = ...
+      palgebra (AAddF a1 a2 p1 p2)  = ...
 
-  plusZero :: (SPF f, ProofAlgebra SuccF (Fix f) inFix PlusZero) =>
-      forall (m :: Fix f). PlusZero m
-  plusZero = ind f PlusZero (palgebra f (Fix f) (falgebra Plus) PlusZero)
+  instance (SPF f, ...) =>
+      ProofAlgebra LogicF (Fix f) inject DepthSize
+    where
+      palgebra (ABLitF b)           = ...
+      palgebra (AIfF a1 a2 p1 p2)   = ...
   \end{code}
   \end{minipage}
 }

@@ -259,7 +259,7 @@ $\Sigma$-types we do not introduce a generic definition of an
 this end, we introduce a new typeclass |PFunctor| that carries the associated
 all-modality type and make |SPF| a subclass of it.
 
-All modalities share the structure of their associated functors. For example,
+All-modalities share the structure of their associated functors. For example,
 the mapping of a functor |f| generalizes to a dependent variant:
 
 < amap :: forall ((a :: *)) (p :: a -> Prop). (forall ((x :: a)). p x) -> (forall xs. All f a p xs)

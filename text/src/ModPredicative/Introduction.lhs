@@ -34,7 +34,7 @@ universe of polynomial functors in Section \ref{sec:mod:polynomial}, which
 admits more generic functions like generic equality, and show how to embed it in
 the universe of containers which provides us with additional reuse
 opportunities. We compare the universe basec solution directly with MTC's Church
-encoding solution in Section \ref{sec:mod:casestudy} using a port of MTC's case
+encoding solution in Section \ref{sec:modpred:casestudy} using a port of MTC's case
 study.
 
 %%% Local Variables:

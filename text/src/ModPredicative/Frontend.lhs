@@ -4,6 +4,11 @@
 %include Formatting.fmt
 %include macros.fmt
 
+%format a1
+%format a2
+%format p1
+%format p2
+
 %if False
 
 > {-# LANGUAGE DeriveFunctor #-}
@@ -180,7 +185,8 @@ interface.
       AAddF :: forall ((a1 a2 :: a)). p a1 -> p a2 -> ArithAll a p (AddF a1 a2)
 
     instance PFunctor ArithF where
-        type All ArithF a = ArithAll a
+      type All ArithF a = ArithAll a
+      all_fmap = ...
     \end{code}
 
     \hrule
@@ -194,7 +200,8 @@ interface.
       AIfF   :: forall ((i t e :: a)). p i -> p t -> p e -> ArithAll a p (IfF i t e)
 
     instance PFunctor LogicF where
-        type All LogicF a = LogicAll a
+      type All LogicF a = LogicAll a
+      all_fmap = ...
     \end{code}
   \end{minipage}
 }
@@ -237,13 +244,13 @@ interface.
 \end{figure}
 
 In this section we develop a complete example to showcase how the previous
-definitions work. We modularly define a \emph{depth} and a \emph{size}
-  function on expressions and show that the depth is always strictly smaller
-than the size. We compose expressions out of two features  that we define independently: arithmetic
-and logical expressions.
-Figure \ref{fig:mod:fullexample:signatures} shows
-the signature functors |ArithF| (top) and |LogicF| (bottom) for the two cases,
-their all modalities and |PFunctor| instances.
+definitions work. We reuse one of \cite{tapl} basic examples of structural
+induction: Define a \emph{depth} and a \emph{size} function on expressions and
+show that the depth is always smaller than the size. We compose expressions out
+of two features that we define independently: arithmetic and logical
+expressions.  Figure \ref{fig:mod:fullexample:signatures} shows the signature
+functors |ArithF| (top) and |LogicF| (bottom) for the two features, their
+all-modalities and |PFunctor| instances.
 
 To avoid giving away the generic definition of fixed-points, folds and induction
 from Section \ref{sec:mod:containers}, we simply instantiate the |SPF| class

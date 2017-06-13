@@ -2,18 +2,19 @@
 %include forall.fmt
 %include polycode.fmt
 
-\section{Introduction}
-
-Formalizing the metatheory of languages with side-effects is a challenging
-problem. Existing non-modular formalizations typically assume a concrete set of
-effects that the feature of a particular language at hand is using. The
-\emph{semantic functions}, \emph{theorem statements} (such as
-\emph{type-soundness}) and corresponding \emph{proofs} of these formalizations
-have the concrete set of effects hardwired.
+Traditional proofs by \emph{structural induction} are not modular. The MTC and
+GDTC frameworks open up the recursion in these proofs to allow for
+extensibility. However, the closedness of inductive proofs is not the only
+concern that inhibits modularity in proofs. For instance, in the metatheory of
+programming languages with side-effects existing non-modular formalizations
+typically assume a concrete set of effects that the feature of a particular
+language at hand is using. The \emph{semantic functions}, \emph{theorem
+  statements} (such as \emph{type safety}) and corresponding \emph{proofs} of
+these formalizations have the concrete set of effects hardwired.
 
 
 %-------------------------------------------------------------------------------
-\subsection{No Effect Modularity}
+\paragraph{No Effect Modularity}
 
 %format refAlg = "\Varid{eval_{Ref}}"
 %format excAlg = "\Varid{eval_{Err}}"
@@ -32,7 +33,7 @@ evaluation algebras:
 MTC supports the composition of two algebras over different functors as long as
 they have the same carrier. That is not the case here, making the two algebras
 incompatible. This problem can be solved by anticipating both effects in both
-algebras:
+algebras by choosing a common and uniform carrier for both algebras:
 
 < refAlg :: Mendler RefF (Env -> (Maybe Value,Env))
 < excAlg :: Mendler ErrF (Env -> (Maybe Value,Env))
@@ -47,13 +48,18 @@ may introduce.
 
 Hence, a key challenge in modularizing effects is how to generalize every
 definition -- \emph{semantic functions}, \emph{theorem statements} and
-\emph{proofs} -- to a form that is \emph{general} enough to account for any
-desired set of \emph{potential effects} instead of hardwiring one specific set
-of effects.
+\emph{proofs} -- to a form that is \emph{uniform} and \emph{general} enough to
+account for any desired set of \emph{potential effects} instead of hardwiring
+one specific set of effects.
+
+This chapter introduces the 3MT approach to tackle the problem of modular
+type-safety proofs for effectful languages. We first give a high-level
+characterization of how the approach achieves \emph{uniformity} and thus
+\emph{modularity} before giving an outline of this chapter.
 
 
 %-------------------------------------------------------------------------------
-\subsection{Achieving Modularity}
+\paragraph{Modular Semantic Functions}
 Fortunately, for semantic functions there is already a good solution:
 \emph{monads} and \emph{monad transformers}. Monads are a well-established
 mechanism for defining the semantics of languages with effects. Moreover, monads
@@ -61,36 +67,23 @@ give a \emph{uniform representation} for effectful computations independent of
 the effects which is an important point for modularization. With the help of
 monad transformers, monads can be modularly composed.
 
-For each effect, a monad subclass captures a set of primitive operations.
-These abstract type classes form the main interface that is used for
-implementing and reasoning about features and their effects, instead of using a
-particular monad (or monad stack) directly. This ensures that definitions are
-general enough without assuming a concrete implementation. Reasoning about
-monadic programs is commonly performed using \emph{equational reasoning}
-\cite{justdoit, effectiveadvice} which is a prevalent techniques in functional
+For each effect, a monad subclass captures a set of primitive operations.  These
+abstract type classes form the main interface that is used for implementing and
+reasoning about features and their effects, instead of using a particular monad
+(or monad stack) directly. This ensures that definitions are general enough
+without assuming a concrete implementation. Reasoning about monadic programs is
+commonly performed using \emph{equational reasoning} \cite{justdoit,
+  effectiveadvice} which is a prevalent techniques in functional
 programming. For each of the monad type-classes, a set of algebraic laws governs
 the interaction between primitive operations.
 
 
 %-------------------------------------------------------------------------------
-\subsection{Overview}
-
-This chapter uses introduces the 3MT approach to tackle modular type-safety
-proofs for effectful languages.
-
-\paragraph{Semantics}
-Monads form the underlying mechanism to define the semantics of languages
-denotationally and monad transformers are used to modularize the
-semantics. Section \ref{sec:mod:monadlibrary} introduces the 3MT monad library
-that we use throughout this chapter and Section \ref{sec:mod:monadicsemantics}
-combines \emph{modular datatypes} and \emph{monads} to define denotational
-semantics with effects on a per-feature basis, without fixing the particular set
-of effects or language constructs
-
-\paragraph{Soundness}
+\paragraph{Modular Soundness Proofs}
 To solve the key challenge of modularizing and reusing theorems and proofs of
 type soundness, we split the classic type soundness theorems into three separate
 parts:
+
 \begin{enumerate}
 \item
   Reusable \emph{feature theorems} capture the essence of type soundness for an
@@ -124,13 +117,32 @@ parts:
   feature and effect theorems into an overall proof.
 \end{enumerate}
 %
+
+\paragraph{Outline}
+
+Monads form the underlying mechanism to define the semantics of languages
+denotationally and monad transformers are used to modularize the
+semantics. Section \ref{sec:mod:monadlibrary} introduces the 3MT monad library
+that we use throughout this chapter.
+
+Section \ref{sec:mod:monadicsemantics} presents a monadic and uniform
+representation of algebras of semantic function to define denotational semantics
+with effects without fixing the particular set of effects. It further combined
+combines the \emph{modular datatypes} of MTC/GDTC and \emph{monads/monad
+  transformers} to define semantic function algebras on a per-feature basis, and
+thus make the denotational semantics also independent of a particular set of
+language features.
+
 Section \ref{sec:mod:monadictypesafety} examines \emph{feature theorems} and
 Section \ref{sec:mod:effectlangtheorems} concerns itself with \emph{effect
   theorems} and \emph{language theorems}. Section \ref{sec:mod:casestudy}
 discusses our case study of 5 features with their feature theorems, 8 different
 effect theorems and 28 fully mechanized languages, including a mini-ML variant
-with errors and references and Section \ref{sec:mod:relatedwork} compares
-our approach to related work.
+with errors and references.
+
+%Finally, Section \ref{sec:mod:relatedwork} compares our approach to related
+%work.
+
 % before concluding in Section \ref{sec:mod:conclusion}.
 
 

@@ -3,6 +3,7 @@
 %include forall.fmt
 %include macros.fmt
 
+\section{Scientific Output}
 In previous work~\cite{mtc} we have shown that it is possible to
 modularize meta-theory along two dimensions: 1) language constructs and
 2) operations and proofs. A significant limitation of that work is

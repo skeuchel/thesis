@@ -39,26 +39,34 @@
 % the basic mechanisms which will allow modular reasoning about such
 % definitions.\BO{add forward references here?}
 
-Features can utilize the monad library included with \name to
-construct algebras for semantic functions which are compatible with a
-range of effects. These modular monadic algebras have the form:
+Features can utilize the monad library included with \name to construct algebras
+for semantic functions. In order to support extensible effects, a feature needs
+to abstract over the monad implementation used. Any implementation which
+includes the required operations is valid. These operations are captured in type
+classes and each class offers a set of primitive operations. The abstract type
+classes form the main interface that is used for implementing and reasoning
+about features and their effects, instead of using a particular monad (or monad
+stack) directly. This ensures that definitions are general enough without
+assuming a concrete implementation.
+
+Take for example monadic evaluation algebras for references and error:
 
 < evalRef  :: MonadState Store m => MAlgebra RefF (m a)
 < evalErr  :: MonadError () m => MAlgebra ErrF (m a)
 
+
 \noindent These algebras use monad subclasses such as |MonadState| and
-|MonadError| to \emph{constrain} the monad required by the feature,
-% Unlike the approach in Section~\ref{m},
-allowing the monad to have more effects than those used in the feature.
-These two algebras can be combined to create a new evaluation algebra
-with type:
+|MonadError| to \emph{constrain} the monad required by the feature, allowing the
+monad to have more effects than those used in the feature.  These two algebras
+can be combined to create a new evaluation algebra with type:
 
 < (MonadState m s, MonadError m x) => Mendler (RefF :+: ErrF) (m a)
 
 The combination imposes both type class constraints while the monad type remains
 extensible with new effects. The complete set of effects used by the evaluation
 functions for the five language features used in our case study of
-Section~\ref{sec:mod:casestudy} are given in Figure~\ref{fig:FeatureEffects}.
+Section~\ref{sec:modeffects:casestudy} are given in
+Figure~\ref{fig:FeatureEffects}.
 
 
 %if False
@@ -89,8 +97,9 @@ Section~\ref{sec:mod:casestudy} are given in Figure~\ref{fig:FeatureEffects}.
 \input{src/ModEffects/Figures/References_Figure}
 
 Figure~\ref{fig:mod:references:datatypes} illustrates this approach with
-definitions for the functor for expressions and the evaluation and typing
-algebras for the reference feature. Other features have similar definitions.
+definitions for the signature functor for expressions and the evaluation and
+typing algebras for the reference feature. Other features have similar
+definitions.
 
 For the sake of presentation the definitions are slightly simplified from the
 actual ones in Coq. For instance, we have omitted issues related to the

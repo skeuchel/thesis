@@ -88,14 +88,6 @@ ways in order to support modular reasoning using algebraic laws:
 
 \subsection{Monad Classes}
 \input{src/ModEffects/Figures/3MT_Classes}
-In order to support extensible effects, a feature needs to abstract over the
-monad implementation used. Any implementation which includes the required
-operations is valid. These operations are captured in type classes and each
-class offers a set of primitive operations. The abstract type classes form the
-main interface that is used for implementing and reasoning about features and
-their effects, instead of using a particular monad (or monad stack)
-directly. This ensures that definitions are general enough without assuming a
-concrete implementation.
 
 Figure~\ref{fig:mod:monadclasses} summarizes the library's key classes,
 definitions and laws. The type class |Monad| describes the basic interface of
@@ -173,13 +165,13 @@ exception class:
 \input{src/ModEffects/Figures/3MT_Transformers}
 
 Particular monads can be built from basic monad types such as the identity monad
-(|Identity|) and monad transformers including the failure (|FailT|), mutable
-state (|StateT|), and exception (|ErrorT|) transformers that are shown in Figure
-\ref{fig:mod:monadtransformers}. These transformers are combined into different
-monad stacks with |Identity| at the bottom. Constructor and extractor functions
-such as |StateT| and |runStateT| provide the signatures of the functions for
-building and running particular monads/transformers.
-
+|(Identity)| and monad transformers including the failure |(FailT)|, mutable
+state |(StateT)|, reader |(ReaderT)|, and exception |(ErrorT)| transformers that
+are shown in Figure \ref{fig:mod:monadtransformers}. These transformers are
+combined into different monad stacks with |(Identity)| at the
+bottom. Constructor and extractor functions such as |(StateT)| and |(runStateT)|
+provide the signatures of the functions for building and running particular
+monads/transformers.
 
 \subsection{Discussion} Our monad library contains a number of other
 classes, definitions and laws apart from the definitions discussed here. This

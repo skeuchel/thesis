@@ -29,12 +29,12 @@ For pure effects, the soundness statement is straightforward:
 
 Each effect theorem is proved by induction over the derivation of $\vdash_M$
 |v_m : return t|. \ref{thm:ESoundP} fixes the irrelevant environment type to the
-type |()| and the evaluation monad to the pure monad |Id|. Since the evaluation
-monad is fixed, the proof of \ref{thm:ESoundP} only needs to consider the pure
-typing rules of Figure~\ref{fig:WFM+Pure}. The proof of the effect theorem is
-straightforward: \textsc{WFM-Illtyped} could not have been used to derive
-$\vdash_M |v_m : return t|$, and \textsc{WFM-Return} provides both a witness for
-|v| and a proof that it is of type |t|.
+unit type |()| and the evaluation monad to the pure monad |Id|. Since the
+evaluation monad is fixed, the proof of \ref{thm:ESoundP} only needs to consider
+the pure typing rules of Figure~\ref{fig:WFM+Pure}. The proof of the effect
+theorem is straightforward: \textsc{WFM-Illtyped} could not have been used to
+derive $\vdash_M |v_m : return t|$, and \textsc{WFM-Return} provides both a
+witness for |v| and a proof that it is of type |t|.
 
 The statement of soundness for a pure language built from a particular set of
 features is similar to \ref{thm:ESoundP}:
@@ -157,12 +157,12 @@ the exception monad, requiring new typing rules.
 
 \paragraph{Typing Rules}
 
-\steven{There is some inconsistency with the framework / case study code and the
-  presentation here . In the framework it seems that half of the definitions for
-  the exception part of the computation typing and the error feature specialize
-  the exception type to be unit. Yet the paper definitions here seem to specify
-  the more general case for the computation typing and the error feature is
-  consistently using unit.}
+% \steven{There is some inconsistency with the framework / case study code and the
+%   presentation here . In the framework it seems that half of the definitions for
+%   the exception part of the computation typing and the error feature specialize
+%   the exception type to be unit. Yet the paper definitions here seem to specify
+%   the more general case for the computation typing and the error feature is
+%   consistently using unit.}
 
 Figure~\ref{fig:WFM+Except} lists the typing rules for monadic computations
 involving exceptions which are parameterized by a type |x| for exceptional
@@ -261,10 +261,9 @@ function is either a well-typed value or an exception.
   \tag{\textsc{ESound$_E$}}
   \label{thm:ESoundE}
 \end{align*}
-The proof of \ref{thm:ESoundE} is again by induction on the derivation
-of $ \vdash_M$ |v_m : return t|. The irrelevant environment
-can be fixed to |()|, while the evaluation monad is the
-exception monad |ExcT x Id|.
+The proof of \ref{thm:ESoundE} is again by induction on the derivation of
+$ \vdash_M$ |v_m : return t|. The irrelevant environment can be fixed to the
+unit type |()|, while the evaluation monad is the exception monad |ExcT x Id|.
 
 The typing derivation is built from four rules: the two pure rules from
 Figure~\ref{fig:WFM+Pure} and the two exception rules from
@@ -365,7 +364,7 @@ $\supseteq$.
 The proof case for the two pure rules is again straightforward.
 \item
 For \textsc{WFM-Get} we have that |put|~$\sigma$~|>> eval e ==
-put|~$\sigma$~|>> get >>= k|. After reducing this to |k| $\sigma$ with the
+put|~$\sigma$~|>> get >>= k|. After reducing this to (|k| $\sigma$) with the
 |put_get| law, the result follows immediately from the rule's assumptions.
 \item
 Similarly, for \textsc{WFM-Put} we have that |put|~$\sigma$~|>> eval e == put|~$\sigma$~|>> put|~$\sigma'$ |>> k|. After reducing this to |put|~$\sigma'$ |>> k| with the |put_put| law, the result again follows immediately from the rule's assumptions.
@@ -637,18 +636,6 @@ impervious to the choice, they can be reused with either proof of
 %-------------------------------------------------------------------------------
 \subsection{State, Reader and Exceptions}
 
-A language with references, errors and lambda abstractions features four
-effects: state, exceptions, an environment and failure. The language theorem for
-such a language relies on the effect theorem \ref{thm:ESoundESRF} given in
-Figure~\ref{f:th:esrf}. The proof of \ref{thm:ESoundESRF} is similar to the
-previous effect theorem proofs, and makes use of the full set of interaction
-laws given in Figure~\ref{fig:Interaction+Laws}. Perhaps the most interesting
-observation here is that because the environment monad only makes local changes,
-we can avoid having to choose between laws regarding how it interacts with
-exceptions. Also note that since we are representing nontermination using a
-failure monad |FailMonad m|, the |catch_fail| law conforms to our desired
-semantics.
-
 \begin{figure}[t]
 \fbox{
 \hspace{-10pt}\begin{minipage}{.98\columnwidth}
@@ -689,6 +676,18 @@ semantics.
 
 \label{fig:Interaction+Laws}
 \end{figure}
+
+A language with references, errors and lambda abstractions features four
+effects: state, exceptions, an environment and failure. The language theorem for
+such a language relies on the effect theorem \ref{thm:ESoundESRF} given in
+Figure~\ref{f:th:esrf}. The proof of \ref{thm:ESoundESRF} is similar to the
+previous effect theorem proofs, and makes use of the full set of interaction
+laws given in Figure~\ref{fig:Interaction+Laws}. Perhaps the most interesting
+observation here is that because the environment monad only makes local changes,
+we can avoid having to choose between laws regarding how it interacts with
+exceptions. Also note that since we are representing nontermination using a
+failure monad |FailMonad m|, the |catch_fail| law conforms to our desired
+semantics.
 
 %\BD{Maybe we
 %should just move this section and figures to the case study?}

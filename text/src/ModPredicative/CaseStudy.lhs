@@ -125,10 +125,10 @@ reduction in code size.
 \end{table*}
 
 By moving to a datatype-generic approach the underlying framework for modular
-datatypes and modular relations and modular reasoning grew from about 1200 LoC
-to about 2500 LoC. Table \ref{tbl:gdtc:sizeframework} shows a detailed breakdown
-of the different modules which include both the universe of containers and
-polynomial functors and the generic implementations of fold, induction and
+datatypes and modular relations and modular reasoning grew from about 1,200 LoC
+to about 2,500 LoC. Table \ref{tbl:gdtc:sizeframework} shows a detailed
+breakdown of the different modules which include both the universe of containers
+and polynomial functors and the generic implementations of fold, induction and
 equality.
 
 \begin{table*}[t]
@@ -159,7 +159,7 @@ save code by eliminating the need to reason about universal properties. However
 the GDTC approach also requires instance declarations for containers, in
 particular indexed container instances for predicates on environments, which are
 new obligations and nullify any savings. Both the MTC and the GDTC version are
-about 1200 LoC.
+about 1,200 LoC.
 
 \begin{table*}[t]
   \centering
@@ -179,7 +179,7 @@ about 1200 LoC.
       Total           & 2367          & 548            & 2915           &  & 3283          & 872            & 4155           \\
     \bottomrule
   \end{tabular}
-  \caption{Size statistics of the meta-theory mechanizations.}
+  \caption{Size statistics of the feature mechanizations.}
   \label{tbl:gdtc:sizefeatures}
 \end{table*}
 

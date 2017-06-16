@@ -1,12 +1,14 @@
 %include lhs2TeX.fmt
 %include forall.fmt
 %include polycode.fmt
+%include Formatting.fmt
+%include macros.fmt
 
 Traditional proofs by \emph{structural induction} are not modular. The MTC and
 GDTC frameworks open up the recursion in these proofs to allow for
 extensibility. However, the closedness of inductive proofs is not the only
 concern that inhibits modularity in proofs. For instance, in the metatheory of
-programming languages with side-effects existing non-modular formalizations
+programming languages with side-effects, existing non-modular formalizations
 typically assume a concrete set of effects that the feature of a particular
 language at hand is using. The \emph{semantic functions}, \emph{theorem
   statements} (such as \emph{type safety}) and corresponding \emph{proofs} of
@@ -18,7 +20,6 @@ these formalizations have the concrete set of effects hardwired.
 
 %format refAlg = "\Varid{eval_{Ref}}"
 %format excAlg = "\Varid{eval_{Err}}"
-%format ErrF = "\Varid{Err}_F"
 
 The statement of type soundness for a language depends intimately on the effects
 it uses, making it particularly difficult to achieve modularity. Consider
@@ -94,7 +95,7 @@ parts:
     affect} the existing feature theorem proofs.
 
   To achieve the abstraction over other effects, a feature uses a polymorphic
-  monad that is constrained by monad subclasses. As a consequence, it only
+  monad that is constrained by monad sub-classes. As a consequence, it only
   establishes the well-typing of the resulting denotations with respect to the
   effects of the declared subclass constraints.
 
@@ -106,7 +107,7 @@ parts:
   monad and all the effects it provides.
 
   Effect theorems reason fully at the level of denotations and abstract over the
-  details of language features like syntax and semantic functions. Consequentely
+  details of language features like syntax and semantic functions. Consequently
   the same effect theorem will work for any languages that use the particular
   combination of effects captured by the theorem.
 
@@ -127,15 +128,15 @@ that we use throughout this chapter.
 
 Section \ref{sec:mod:monadicsemantics} presents a monadic and uniform
 representation of algebras of semantic function to define denotational semantics
-with effects without fixing the particular set of effects. It further combined
-combines the \emph{modular datatypes} of MTC/GDTC and \emph{monads/monad
-  transformers} to define semantic function algebras on a per-feature basis, and
-thus make the denotational semantics also independent of a particular set of
-language features.
+with effects without fixing the particular set of effects. It further combines
+the \emph{modular datatypes} of MTC/GDTC and \emph{monads/monad transformers} to
+define semantic function algebras on a per-feature basis, and thus make the
+denotational semantics also independent of a particular set of language
+features.
 
 Section \ref{sec:mod:monadictypesafety} examines \emph{feature theorems} and
 Section \ref{sec:mod:effectlangtheorems} concerns itself with \emph{effect
-  theorems} and \emph{language theorems}. Section \ref{sec:mod:casestudy}
+  theorems} and \emph{language theorems}. Section \ref{sec:modeffects:casestudy}
 discusses our case study of 5 features with their feature theorems, 8 different
 effect theorems and 28 fully mechanized languages, including a mini-ML variant
 with errors and references.

@@ -340,7 +340,7 @@ construction from Section \ref{mod:pred:containercoproduct}.
 
 
 %-------------------------------------------------------------------------------
-\subsection{Extensible Inductive Relations}
+\subsection{Extensible Inductive Relations}\label{sec:pred:extensiblerelations}
 
 
 \begin{figure}[t]
@@ -364,12 +364,11 @@ construction from Section \ref{mod:pred:containercoproduct}.
 \label{fig:indexedstrictlypositivefunctor}
 \end{figure}
 
-Many properties are expressed as logical relations over
-datatypes. These relations are represented by inductive families where
-a constructor of the family corresponds to a rule defining the
-relation.
+Many properties are expressed as relations over datatypes. These relations are
+represented by inductive families where a constructor of the family corresponds
+to a rule defining the relation.
 
-When using logical relations over extensible datatypes the set of rules must be
+When using relations over extensible datatypes the set of rules must be
 extensible as well. For instance, a well-typing relation of values |WTValue ::
 (Value, Type) -> Prop| must be extended with new rules when new cases are added
 to |Value|.
@@ -400,8 +399,8 @@ make use of propositions on proof-terms and hence do not need an induction
 principle for them. This also means that we do not need to keep track of the
 universal property of folds for proof-terms.  Figure
 \ref{fig:indexedstrictlypositivefunctor} defines the type class |ISPF| that
-collects the necessary reasoning interface for modularly building logical
-relations and indexed folds.
+collects the necessary reasoning interface for modularly building relations and
+indexed folds.
 
 Since |Prop| is \emph{impredicative} in \Coq and induction-principles and
 universal properties are of no concern here, MTC's approach to modular inductive

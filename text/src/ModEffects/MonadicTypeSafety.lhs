@@ -45,9 +45,9 @@ for the theorem's proof.
 
 Our approach to state and prove type soundness of features, is to establish that
 the monadic evaluation and typing algebras of a feature satisfy an extensible
-well-typing relation of computations, defined in terms of effect-specific typing
-rules. This relation forms the basis of a \emph{feature theorem} that has
-\emph{uniform shape} independent of specific features or effects (except for
+well-typing relation of computations, defined in terms of \emph{effect-specific
+  typing rules}. This relation forms the basis of a \emph{feature theorem} that
+has \emph{uniform shape} independent of specific features or effects (except for
 constraints on the monad). A feature's proof algebra for the feature theorem
 only uses the typing rules required for the effects specific to that
 feature. The final language combines the typing rules of all the language's
@@ -88,16 +88,16 @@ split the type soundness into three kinds of theorems:
   \caption{Dependency Graph}
   \label{fig:Dep-Graph}
 \end{figure}
-\steven{There is an edge missing from FSound of Ref to LSound of AR.}
+% \steven{There is an edge missing from FSound of Ref to LSound of AR.}
 
 
 Figure~\ref{fig:Dep-Graph} illustrates how these reusable pieces fit together to
 build a proof of soundness. Each feature provides a proof algebra for
 \ref{thm:FSound} which relies on the typing rules (\textsc{WFM-X}) for the
 effects it uses. Each unique statement of soundness for a combination of effects
-requires a new proof of \ESound. The proof of \ref{thm:LSoundP} for a particular
-language is synthesized entirely from a single proof of \ESound~and a
-combination of proof algebras for \FSound.
+requires a new proof of \ESound. The proof of \LSound~for a particular language
+is synthesized entirely from a single proof of \ESound~and a combination of
+proof algebras for \FSound.
 
 Note that there are several dimensions of modularity here. A feature's proof of
 \ref{thm:FSound} only depends on the typing rules for the effects that feature
@@ -105,7 +105,7 @@ uses and can thus be used in any language which includes those typing rules. The
 typing rules themselves can be reused by any number of different
 features. \ESound~depends solely on a specific combination of effects and can be
 reused in any language which supports that unique combination, e.g. both
-\LSoundA~and \LSoundAR~use \ESoundES.
+\LSoundR~and \LSoundAR~use \ESoundS.
 
 
 % around an extensible relation, which relates two monadic computations.  To
@@ -327,7 +327,7 @@ into two cases depending on whether |e_c|, |e_t|, or |e_e| was typed with
   apply the canonical forms lemma
   \[ \vdash |v| : |TBool| \rightarrow \exists b. |isBool v == Just b| \] to
   establish that |v_c| is of the form |(Just b)|, reducing the evaluation to
-  either |return v_e| or |return v_t|. A similar case analysis on |(eqT t_t
+  either |(return v_e)| or |(return v_t)|. A similar case analysis on |(eqT t_t
   t_e)| will either produce |fail| or |(return t_t)|. The former is trivially
   true, and both $\vdash_M |return v_t|:|return t_t|$ and
   $\vdash_M |return v_e|:|return t_t|$ hold in the latter case from the
@@ -346,15 +346,16 @@ into two cases depending on whether |e_c|, |e_t|, or |e_e| was typed with
 \end{itemize}
 
 \subsection{Modular Sublemmas}
+
 The above proof assumed that only the pure typing rules of
-Figure~\ref{fig:WFM+Pure} were used to type the subexpressions of the |if|
-expression, which is clearly not the case when the boolean feature is included
-in an effectful language. Instead, case analyses are performed on the extensible
-typing relation in order to make the boolean feature theorem compatible with new
-effects. Case analyses over the extensible $\vdash_M$ relation are accomplished
-using extensible proof algebras which are folded over the derivations provided
-by the induction hypothesis, as outlined in
-Sections~\ref{ssec:mod:modularproofs} and \ref{ssec:modpred:proofs}.
+Figure~\ref{fig:WFM+Pure} were used to type the subexpressions of the
+if-expression, which is clearly not the case when the boolean feature is
+included in an effectful language. Instead, case analyses are performed on the
+extensible typing relation in order to make the boolean feature theorem
+compatible with new effects. Case analyses over the extensible $\vdash_M$
+relation are accomplished using extensible proof algebras which are folded over
+the derivations provided by the induction hypothesis, as outlined in
+Section~\ref{sec:pred:extensiblerelations}.
 
 
 In order for the boolean feature's proof of \ref{thm:FSound} to be compatible
@@ -418,10 +419,11 @@ this for any possible well-typed combination of |v| and |t|.
 A proof of \ref{thm:WFM+If+Vc} follows from two applications of this stronger
 property. The advantage of \textsc{WFM-Bind} is clear: it can be reused to deal
 with case analyses in other proofs of \ref{thm:FSound}, while a proof of
-\ref{thm:WFM+If+Vc} has only a single use. The disadvantage is that
-\textsc{WFM-Bind} may not hold for some new effect, while the weaker
-\ref{thm:WFM+If+Vc} does, possibly excluding some feature combinations. As
-\textsc{WFM-Bind} is a desirable property for typing rules, the case study
+\ref{thm:WFM+If+Vc} has only a single use.
+% The disadvantage is that
+% \textsc{WFM-Bind} may not hold for some new effect, while the weaker
+% \ref{thm:WFM+If+Vc} does, possibly excluding some feature combinations.
+As \textsc{WFM-Bind} is a desirable property for typing rules, the case study
 focuses on that approach.
 
 % \BD{Maybe we

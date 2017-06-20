@@ -49,7 +49,8 @@ Table \ref{tbl:3mt:sizeframework} gives an overview of the size in \emph{lines
 consists of about 3,550 LoC of which 1,200 LoC comprise the MTC implementation
 of modular datatypes and modular induction, 1,550 LoC comprise the
 implementation of the monad transformers and their algebraic laws and finally
-the infrastructure for monadic type safety consists of 800 LoC.
+the infrastructure for monadic type safety consists of 800 LoC. All of this code
+is not specific to language features and is therefore reusable.
 
 \begin{table*}[t]
   \centering
@@ -67,7 +68,7 @@ the infrastructure for monadic type safety consists of 800 LoC.
   \label{tbl:3mt:sizemonadictyping}
 \end{table*}
 
-A breakdown of the size of the effect implementation is given in Table
+A breakdown of the size of the effect implementations is given in Table
 \ref{tbl:3mt:sizemonadictyping}. These include the modular typing rules for the
 specified effect and a proof algebra for the reusable bind lemma of these rules.
 
@@ -96,9 +97,8 @@ specified effect and a proof algebra for the reusable bind lemma of these rules.
 
 The size in LoC of the implementation of semantic evaluation and typing
 functions and the reusable feature theorem for each language feature is given in
-Table \ref{tbl:3mt:sizefeatures}.
-
-Three kinds of feature interactions appear in the case study.
+Table \ref{tbl:3mt:sizefeatures}. Two kinds of feature interactions appear in
+the case study.
 
 \begin{itemize}
 \item
@@ -110,17 +110,11 @@ Three kinds of feature interactions appear in the case study.
   to this equivalence relation. In our case study only the |Lambda| feature
   includes binders. The equivalence relations and liftings of the other features
   are contained in the modules |ArithEqv|, |BoolEqv|, |ErrorEqv| and |RefEqv|
-  which are also listed in Table \ref{tbl:3mt:sizefeatures}.
-
-\item
-  The effect theorems that feature an environment typing $\Sigma$, such as those
-  for state or reader, need a weakening sub-lemma which states that each
-  well-formed value under $\Sigma$ is also well-formed under a conservative
-  extension:
-  \[ \Sigma \vdash v ~:~ t  \\ \rightarrow \\
-     \Sigma' \supseteq \Sigma \\ \rightarrow \\
-     \Sigma' \vdash v ~:~ t
-  \]
+  which are also listed in Table \ref{tbl:3mt:sizefeatures}. Together, they
+  represent about 16\% of the LoC of the feature implementations. However, this
+  code does not represent feature interactions with the |Lambda| feature, but
+  rather with variable binding and is reusable in combination with other
+  features that use binding.
 
 \item
   Inversion lemmas for the well-formed value relation, such as in the proof of
@@ -129,7 +123,9 @@ Three kinds of feature interactions appear in the case study.
   numbers, boolean, store locations and closures. Except for closures, these
   inversion lemmas are dispatched by tactics hooked into the type class
   inference algorithm. For the closure inversion, manually written proof
-  algebras are used.
+  algebras are used. These are implemented in the modules |Lambda_Arith|,
+  |Lambda_Bool| and |Lambda_Ref| which together form amount to 200 LoC or about
+  4\% of the feature specific code and are thus negligible.
 
 % \item
 %   The sublemmas of reusable feature theorems for properties such as
@@ -138,9 +134,6 @@ Three kinds of feature interactions appear in the case study.
 %   relation, these new judgements must have proof algebra instances for the
 %   sublemmas.
 \end{itemize}
-
-The proofs of the second and third kind of feature interactions are
-contained in the modules |Lambda_Arith|, |Lambda_Bool| and |Lambda_Ref|.
 
 %% The last kind of interactions require more work and comprise the
 %% biggest part of the code dealing with feature interactions.
@@ -175,7 +168,20 @@ contained in the modules |Lambda_Arith|, |Lambda_Bool| and |Lambda_Ref|.
 Table \ref{tbl:3mt:sizeeffecttheorem} lists the sizes of the effect theorems for
 each set of effects used in the case study. The letters in the module name
 encode the effect set: |P = Pure| (no effects), |E = Exceptions|, |R = Reader|,
-|F = Fail| and |S = State|.
+|F = Fail| and |S = State|. The effect theorems are completely un-modular, but
+are reusable for languages that use the specific set of effects.  With an
+average of 220 LoC, these effect theorems are much smaller than the modular
+feature implementations.
+
+  % The effect theorems that feature an environment typing $\Sigma$, such as those
+  % for state or reader, need a weakening sub-lemma which states that each
+  % well-formed value under $\Sigma$ is also well-formed under a conservative
+  % extension:
+  % \[ \Sigma \vdash v ~:~ t  \\ \rightarrow \\
+  %    \Sigma' \supseteq \Sigma \\ \rightarrow \\
+  %    \Sigma' \vdash v ~:~ t
+  % \]
+
 
 \begin{table*}[t]
   \centering
@@ -208,6 +214,10 @@ of effects. Table \ref{tbl:3mt:sizelanguages} contains a detailed overview. The
 letters encode the set of used features: |A = Arith, B = Bool, E = Error, L =
 Lambda| and |R = References|.
 
+Apart from the language specific compositions, our approach significantly
+reduces the amount of un-reusable code. The code with the least reuse are the
+effect theorems. However, for any language composition, the size of the effect
+theorem is overshadowed by the size of the feature implementations.
 
 %%% Local Variables:
 %%% mode: latex

@@ -10,6 +10,27 @@ datatype-generic proramming. Below we discuss the most relevant related to this
 chapter: work on modular proofs and datatype-generic programming in proof
 assistants.
 
+\paragraph{DGP in proof-assistants}
+Datatype-generic programming started out as a form of language extension such as
+PolyP \cite{jansson:polyp} or Generic Haskell \cite{loh:dsgh}. Yet Haskell has
+turned out to be powerful enough to implement datatype-generic programming in
+the language itself and over the time a vast number of DGP libraries for Haskell
+have been proposed
+\cite{cheney:ligd,syb,emgm,multirec,instantgenerics,uniplate,genericderiving}. Compared
+with a language extension, a library is much easier to develop and maintain.
+
+There are multiple proposals for performing datatype-generic programming in
+proof-assistants using the flexibility of dependent-types
+\cite{dgpcoq,altenkirch:gpwdtp,benke:universes,loh:gpif,indexedcontainers}. This
+setting not only allows the implementation of generic functions, but also of
+generic proofs. The approaches vary in terms of how strictly they follow the
+positivity or termination restrictions imposed by the proof-assistant. Some
+circumvent the type-checker at various points to simplify the development or
+presentation while others put more effort in convincing the type-checker and
+termination checker of the validity~\cite{ertt}. However, in any of the
+proposals there does not seem to be any fundamental problem caused by the
+positivity or termination restrictions.
+
 \paragraph{DGP for modular proofs}
 Modularly composing semantics and proofs about the semantics has also been
 addressed by \cite{schwaab:mtp} in the context of programming language

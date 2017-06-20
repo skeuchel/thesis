@@ -1,4 +1,283 @@
 \chapter{Introduction}
-\input{src/Introduction/Metatheory}
-\input{src/Introduction/Mechanization}
-\input{src/Introduction/Background}
+
+Meta-theory of programming language concerns itself with the study of properties
+of languages, their formal semantics and implementations.
+
+One of the goals is to prove properties about all programs written in a
+language.  For example type-safety, memory-safety and resource-safety are
+properties that express absence of type errors during execution, usage of
+uninitialized or freed memory and dangling resources.
+
+
+\begin{itemize}
+\item
+  Derive properties for all programs written in a language, like memory-safety,
+  type-safety, resources-safety, termination, absence of deadlocks, race
+  conditions and starvation.
+
+\item
+  Prove correctness (preservation of semantics) of program analyses or compiler
+  transformations.
+
+  by looking formally on the semantics, type systems and implementations like
+  compilers or interpreters.
+\end{itemize}
+
+%-------------------------------------------------------------------------------
+\section{Metatheory}
+
+{ % STLCBOOL SCOPE
+
+\newcommand{\stlcbool}{\ensuremath{\lambda_{\mathbb{B}}}\xspace}
+\newcommand{\bool}{\text{bool}}
+\newcommand{\true}{\textbf{true}}
+\newcommand{\false}{\textbf{false}}
+\newcommand{\ite}[3]{\textbf{if}~{#1}~\textbf{then}~{#2}~\textbf{else}~{#3}}
+\newcommand{\typing}[3]{{#1} \vdash {#2} : {#3}}
+\renewcommand{\eval}[2]{{#1} \longrightarrow {#2}}
+
+To formally talk and reason about programming languages and their semantics, we
+first need to define terminology and notational conventions and make their
+meaning precise. This section explains necessary fundamental concepts for the
+formal treatment of programming languages by example of a small language
+\stlcbool: a simply-typed lambda calculus with booleans. We formally define the
+\emph{abstract syntax}, \emph{static type system} and \emph{evaluation} of
+\stlcbool using inductive definition and show how to reason inductively about
+them.
+
+%-------------------------------------------------------------------------------
+\paragraph{Syntax}
+
+\begin{figure}[t]
+  \centering
+  \fbox{
+    \begin{minipage}{\columnwidth}
+    \begin{tabular}{lcll}
+      $x,y$           & ::=    &                            & term variable    \\
+      $\tau,\sigma$   & ::=    &                            & type             \\
+                      & $\mid$ & $\tau \to \tau$            & function type    \\
+                      & $\mid$ & $\bool$                    & boolean type     \\
+      $e$             & ::=    &                            & term             \\
+                      & $\mid$ & $\true$                    & true constant    \\
+                      & $\mid$ & $\false$                   & false constant   \\
+                      & $\mid$ & $\ite{e}{e}{e}$            & conditional      \\
+                      & $\mid$ & $x$                        & term variable    \\
+                      & $\mid$ & $\lambda x:\tau.e$         & term abstraction \\
+                      & $\mid$ & $e~e$                      & application      \\
+      $\Gamma$        & ::=    &                            & type context     \\
+                      & $\mid$ & $\epsilon$                 & empty context    \\
+                      & $\mid$ & $\Gamma, x:\tau$           & term binding     \\
+    \end{tabular}
+    \end{minipage}
+  }
+  \caption{\stlcbool syntax}
+  \label{fig:intro:stlcboolsyntax}
+\end{figure}
+
+The syntax of \stlcbool is given in Figure \ref{fig:intro:stlcboolsyntax}. We
+use a convention that is close to standard \textsc{EBnf} grammars. Elided in the
+grammar are syntactic constructs like parentheses. We use parentheses freely to
+resolve ambiguities in terms even if the grammar does not define them. Any
+implementation that deals with the concrete syntax of a programming language has
+of course to be more rigorous.
+
+The grammar in Figure \ref{fig:intro:stlcboolsyntax} defines several
+\emph{syntactic sorts} for \stlcbool. The \emph{meta-variable} $e$ stands for
+expressions of \stlcbool of which there are 6 different kinds. An expression can
+either a boolean constant $\true$ or $\false$, a conditional form
+$\ite{e_c}{e_t}{e_e}$, an \emph{object-language variable} (represented by the
+meta-variable $x$), the definition of a function as a \textlambda-abstraction
+$(\lambda x:\tau.e)$ or the application of an expression $e_1$ to another
+expression $e_2$. Of course we only want to apply expressions $e_1$ that
+represent functions: either by being a \textlambda-abstraction or evaluating to
+one. Applying any \emph{value} other than a \textlambda-abstraction is a
+\emph{type error}.
+
+The grammar also includes the meta-variable $\tau$ that describe the types of
+\stlcbool. Each \textlambda-abstraction contains a \emph{type annotation} $\tau$
+for the argument variable $x$. The denotation is that the function represented
+by the \textlambda-abstraction expects a value of type $\tau$ when it is
+applied. We discuss types and typing contexts $\Gamma$ in more detail in the
+next paragraph.
+
+%-------------------------------------------------------------------------------
+\paragraph{Typing}
+
+A \emph{type system} is an assignment of types to expressions. This assignment
+takes only the syntax of expressions into account but not their denotation.
+Usually not all expressions are typeable and un-typeable expressions are
+rejected. In this sense, a type system can be seen as a \emph{syntactic
+  restriction} on expressions. Also some expressions can be assigned multiple,
+incomparable types.
+
+Both, the partiality and the
+
+\begin{figure}[t]
+  \centering
+  \fbox{
+    \begin{minipage}{\columnwidth}
+      \framebox{\mbox{$\typing{\Gamma}{e}{\tau}$}}\\
+      \vspace{-5mm}
+      \[ \begin{array}{c}
+           \inferrule* [right=\textsc{TTrue}]
+             {
+             }
+             {\typing{\Gamma}{\true}{\bool}
+             } \quad
+           \inferrule* [right=\textsc{TFalse}]
+             {
+             }
+             {\typing{\Gamma}{\false}{\bool}
+             } \\\\
+           \inferrule* [right=\textsc{TIf}]
+             {\typing{\Gamma}{e_c}{\bool} \\
+              \typing{\Gamma}{e_t}{\tau} \\
+              \typing{\Gamma}{e_e}{\tau}
+             }
+             {\typing{\Gamma}{\ite{e_c}{e_t}{e_e}}{\tau}
+             } \\\\
+           \inferrule* [right=\textsc{TVar}]
+             {x : \tau \in \Gamma
+             }
+             {\typing{\Gamma}{x}{\tau}
+             } \quad
+           \inferrule* [right=\textsc{TAbs}]
+             {\typing{\Gamma,y:\sigma}{e}{\tau}
+             }
+             {\typing{\Gamma}{(\lambda y:\sigma. e)}{(\sigma\to\tau)}
+             } \\\\
+           \inferrule*[right=\textsc{TApp}]
+             {\typing{\Gamma}{e_1}{\sigma \to \tau} \\
+              \typing{\Gamma}{e_2}{\sigma}
+             }
+             {\typing{\Gamma}{e_1~e_2}{\tau}
+             }
+         \end{array}
+       \]
+    \end{minipage}
+  }
+  \caption{\stlcbool typing rules}
+  \label{fig:intro:stlcbooltyping}
+\end{figure}
+
+
+
+\begin{figure}[t]
+  \centering
+  \fbox{
+    \begin{minipage}{\columnwidth}
+      \framebox{\mbox{$\eval{e}{e}$}}\\
+      \vspace{-5mm}
+      \[ \begin{array}{c}
+           \inferrule* [right=\textsc{EIfTrue}]
+             {
+             }
+             {\eval{\ite{\true}{e_t}{e_e}}{e_t}
+             } \\\\
+           \inferrule* [right=\textsc{EIfFalse}]
+             {
+             }
+             {\eval{\ite{\false}{e_t}{e_e}}{e_e}
+             } \\\\
+           \inferrule* [right=\textsc{EIf}]
+             {\eval{e_c}{e_c'}
+             }
+             {\eval{\ite{e_c}{e_t}{e_e}}{\ite{e_c'}{e_t}{e_e}}
+           } \\\\
+           \inferrule* [right=\textsc{EAppAbs}]
+             {
+             }
+             {\eval{(\lambda x:\tau.e_1)~e_2}{[x \mapsto e_2]e_1}
+             } \\\\
+           \inferrule* [right=\textsc{EApp}]
+             {\eval{e_1}{e_2'}
+             }
+             {\eval{e_1~e_2}{e_1'~e_2}
+             } \\\\
+         \end{array}
+       \]
+    \end{minipage}
+  }
+  \caption{\stlcbool reduction rules}
+  \label{fig:intro:stlcbooleval}
+\end{figure}
+
+} % STLCBOOL SCOPE
+
+%% The meta-theory of programming language semantics and type-systems is highly
+%% complex due to the management of many details. Formal proofs are long and prone
+%% to subtle errors that can invalidate large amounts of work. In order to
+%% guarantee the correctness of formal meta-theory, techniques for mechanical
+%% formalization in proof-assistants have received much attention in recent years.
+%%
+%% %-------------------------------------------------------------------------------
+%% \section{Mechanization}
+%% Mechanizing formal meta-theory in proof-assistants is crucial, both for the
+%% increased confidence in complex designs and as a basis for technologies such as
+%% proof-carrying code.  Formal reasoning in proof-assistants, also known as
+%% mechanization, has high development costs.
+%%
+%% To lighten the burden of programming language mechanization, many
+%% approaches have been developed that tackle the substantial boilerplate which
+%% arises from variable binders. Unfortunately, the existing approaches are limited
+%% in scope.
+%% %% STEVEN: This is still valid, but I hope it's not misleading the reader into
+%% %% thinking we deal with typing relations directly.
+%% As a consequence, the human mechanizer is still unnecessarily burdened with
+%% binder boilerplate and discouraged from taking on richer languages.
+%%
+%% This paper presents \Knot, a new approach that substantially extends the support
+%% for binder boilerplate. \Knot is a highly expressive language for natural and
+%% concise specification of syntax with binders. Its meta-theory constructively
+%% guarantees the coverage of a considerable amount of binder boilerplate for
+%% well-formed specifications, including that for well-scoping of terms and context
+%% lookups. \Knot also comes with a code generator, \Needle, that specializes the
+%% generic boilerplate for convenient embedding in \Coq and provides a tactic
+%% library for automatically discharging proof obligations that frequently come up
+%% in proofs of weakening and substitution lemmas of type-systems.
+%%
+%% Our evaluation shows, that Needle \& Knot significantly reduce the size of
+%% language mechanizations (by 40\% in our case study). Moreover, as far as we
+%% know, \Knot enables the most concise mechanization of the \POPLmark Challenge
+%% (1a + 2a) and is two-thirds the size of the next smallest. Finally, \Knot allows
+%% us to mechanize for instance dependently-typed languages, which is notoriously
+%% challenging because of dependent contexts and mutually-recursive sorts with
+%% variables.
+%%
+%% %-------------------------------------------------------------------------------
+%% \section{Binding}
+%%
+%% To lighten the burden of programming language mechanization, many approaches
+%% have been developed that tackle the substantial boilerplate which arises from
+%% variable binders. Unfortunately, existing approaches for first-order
+%% representations are limited to the boilerplate that concerns the syntax of
+%% languages and do not tackle common boilerplate lemmas that arise for semantic
+%% relations such as typing. Consequently, the human mechanizer is still burdened
+%% with proving these substantial boilerplate lemmas manually.
+%%
+%% %% POPL 2014 Submission
+%% %%
+%% %%   A key concern in the mechanization of programming language metatheory is
+%% %%   the representation of terms with variable binding. The properties of
+%% %%   operations manipulating terms are notoriously burdensome to prove and the
+%% %%   amount of work required to scale formalizations to realistic programming
+%% %%   languages with rich binding forms is deemed infeasible. This is a pity,
+%% %%   because we lose the practical benefits of mechanizing real programming
+%% %%   languages.
+%% %%
+%% %%   We present a new solution to generically handle the boilerplate involved in
+%% %%   mechanizations that scales to rich binding forms and advanced rules of
+%% %%   scoping. We define a new specification language for abstract syntax with
+%% %%   binding and implement a code generator that produces \Coq code for the
+%% %%   representation of the abstract syntax, syntactic operations and proofs of
+%% %%   their properties.
+%% %%
+%% %%   We illustrate how our approach removes the burden of variable binding
+%% %%   boilerplate in the mechanization of realistic programming languages on a
+%% %%   list of example specifications and a solution of the PoplMark challenge
+%% %%   based on the generated code.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../Main"
+%%% End:

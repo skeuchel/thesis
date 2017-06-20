@@ -82,6 +82,32 @@ conjecture that, in a nominal interpretation of \Knot, the binding functions of
 \cite{bindingoperators} and that we can generically derive equivariance proofs
 of semantics relations.
 
+%-------------------------------------------------------------------------------
+\paragraph{DGP for abstract syntax}
+We have shown how to obtain more reuse by complementing modular definitions with
+a generic equality function and generic proofs of its properties. Of course,
+there is more generic functionality that can be covered by means of
+datatype-generic programming like traversals, pretty-printing, parsing
+etc..
+
+One very interesting idea is to use datatype-generic programming to handle
+variable binding \cite{cheney:synp,unbound}. Variable binding is an ubiquitous
+aspect of programming languages. Moreover, a lot of functionality like variable
+substitutions and free variable calculations is defined for many
+languages. Licata and Harper \cite{licata:ubc} and Keuchel and Jeuring
+\cite{sk:gcasr} define universes for datatypes with binding in Agda. Lee et
+al.~\cite{gmeta} develop a framework for first-order representations of variable
+binding in Coq that is based on the universe of regular tree types \cite{ertt}
+and that provides many of the so-called \emph{infrastructure lemmas} required
+when mechanizing programming language meta-theory (cf. Part \ref{part:gen}).
+
+\section{Future Work}
+\steven{Move to thesis conclusion}
+An interesting direction for future work is to combine a datatype-generic
+approach to variable binding with a datatype-generic approach to modular
+reasoning like ours to combine the benefits of both worlds and achieve more
+reuse.
+
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "../Main"

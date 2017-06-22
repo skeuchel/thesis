@@ -79,32 +79,33 @@ algebras by means of generic induction. This overcomes the above shortcomings:
   modular components we provide a single generic definition once and for all.
 \end{enumerate}
 
-\begin{figure}[t]
-  \centering
-  \fbox{
-    \begin{minipage}{0.95\textwidth}
-      \begin{tikzpicture}
-        \tikzset
-          { box/.style =
-            { align        = center,
-            }
-          }
-        \node
-          [ box
-          , text width     = \textwidth
-          , minimum height = 4cm
-          ] (A)
-          {};
-
-      \end{tikzpicture}
-    \end{minipage}
-  }
-  \caption{Layers}
-  \label{fig:mod:layers}
-\end{figure}
+%\begin{figure}[t]
+%  \centering
+%  \fbox{
+%    \begin{minipage}{0.95\textwidth}
+%      \begin{tikzpicture}
+%        \tikzset
+%          { box/.style =
+%            { align        = center,
+%            }
+%          }
+%        \node
+%          [ box
+%          , text width     = \textwidth
+%          , minimum height = 4cm
+%          ] (A)
+%          {};
+%
+%      \end{tikzpicture}
+%    \end{minipage}
+%  }
+%  \caption{Layers}
+%  \label{fig:mod:layers}
+%\end{figure}
 
 Another difference with MTC is that we split the solution into a frontend and a
-backend part, as outlined in Figure \ref{fig:mod:layers}. Both parts are
+backend part %, as outlined in Figure \ref{fig:mod:layers}
+. Both parts are
 connected via a declarative specification of \emph{functors},
 \emph{fixed-points}, \emph{folds} and \emph{induction principles}. The frontend
 extends the specification with support for modularity to form the user-facing

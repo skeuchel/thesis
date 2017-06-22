@@ -23,6 +23,31 @@ uninitialized or freed memory and dangling resources.
   compilers or interpreters.
 \end{itemize}
 
+
+\begin{itemize}
+\item Type-checking Java programs is in general undecidable~\cite{grigore2017}.
+  Decidability of type-checking does not have an impact on properties that we
+  get for type-checked programs, but for example it opens up attack vectors on
+  (web) services that deal with Java code.
+\item
+
+  Improving the correctness of C compilers is a worthy goal: C code is part of
+  the trusted computing base for almost every modern computer system including
+  mission-critical financial servers and life- critical pacemaker firmware.
+\end{itemize}
+
+From \cite{yang2011bugs}:
+
+\blockquote{ The striking thing about our \textsc{CompCert} results is that the
+  middle-end bugs we found in all other compilers are absent. As of early 2011,
+  the under-development version of \textsc{CompCert} is the only compiler we
+  have tested for which \textsc{Csmith} cannot find wrong-code errors. This is
+  not for lack of trying: we have devoted about six CPU-years to the task. The
+  apparent unbreakability of \textsc{CompCert} supports a strong argument that
+  developing compiler optimizations within a proof framework, where safety
+  checks are explicit and machine-checked, has tangible benefits for compiler
+  users.}
+
 %-------------------------------------------------------------------------------
 \section{Metatheory}
 
@@ -42,7 +67,7 @@ meaning precise. This section explains necessary fundamental concepts for the
 formal treatment of programming languages by example of a small language
 \stlcbool: a simply-typed lambda calculus with booleans. We formally define the
 \emph{abstract syntax}, \emph{static type system} and \emph{evaluation} of
-\stlcbool using inductive definition and show how to reason inductively about
+\stlcbool using inductive definitions and show how to reason inductively about
 them.
 
 %-------------------------------------------------------------------------------
@@ -84,16 +109,17 @@ of course to be more rigorous.
 The grammar in Figure \ref{fig:intro:stlcboolsyntax} defines several
 \emph{syntactic sorts} for \stlcbool. The \emph{meta-variable} $e$ stands for
 expressions of \stlcbool of which there are 6 different kinds. An expression can
-either a boolean constant $\true$ or $\false$, a conditional form
+either be a boolean constant $\true$ or $\false$, a conditional form
 $\ite{e_c}{e_t}{e_e}$, an \emph{object-language variable} (represented by the
 meta-variable $x$), the definition of a function as a \textlambda-abstraction
 $(\lambda x:\tau.e)$ or the application of an expression $e_1$ to another
 expression $e_2$. Of course we only want to apply expressions $e_1$ that
 represent functions: either by being a \textlambda-abstraction or evaluating to
 one. Applying any \emph{value} other than a \textlambda-abstraction is a
-\emph{type error}.
+\emph{type error}. We make this more precise below in Section
+\ref{sec:intro:typesafety}.
 
-The grammar also includes the meta-variable $\tau$ that describe the types of
+The grammar also includes the meta-variable $\tau$ that describes the types of
 \stlcbool. Each \textlambda-abstraction contains a \emph{type annotation} $\tau$
 for the argument variable $x$. The denotation is that the function represented
 by the \textlambda-abstraction expects a value of type $\tau$ when it is
@@ -105,12 +131,11 @@ next paragraph.
 
 A \emph{type system} is an assignment of types to expressions. This assignment
 takes only the syntax of expressions into account but not their denotation.
-Usually not all expressions are typeable and un-typeable expressions are
-rejected. In this sense, a type system can be seen as a \emph{syntactic
-  restriction} on expressions. Also some expressions can be assigned multiple,
+\steven{But with a denotation in mind.}  Usually not all expressions are
+typeable and un-typeable expressions are rejected. In this sense, a type system
+can be seen as a \emph{syntactic restriction} on expressions. Also in some
+languages there are expressions that can be assigned multiple, potentially
 incomparable types.
-
-Both, the partiality and the
 
 \begin{figure}[t]
   \centering
@@ -160,6 +185,68 @@ Both, the partiality and the
   \label{fig:intro:stlcbooltyping}
 \end{figure}
 
+Both, the partiality and the ambiguity of types, suggests a \emph{relational}
+rather than a \emph{functional} assignment. Such a relation is defined in Figure
+\ref{fig:intro:stlcbooltyping}. The box in the upper left corner
+\framebox{\mbox{$\typing{\Gamma}{e}{\tau}$}} defines the shape and notation that
+we use for the relation. In this case it's a ternary relation between a typing
+context $\Gamma$, an expression $e$ and a type $\tau$.
+
+The remainder of the figure defines the relation using Gentzen-style inference
+rules~\cite{gentzen1935}. In general rules take the form
+\[
+  \inferrule* [right=\textsc{Name}]
+    {J_1 \\ J_2 \\ \ldots \\ J_n
+    }
+    {J
+    }
+\]
+where \textsc{Name} is an optional name for the rule that allows us to refer to
+it. The meta-variable $J$ stands for judgements, which in our case are usually
+mathematical statements in propositional or first-order logic. The judgements
+$J_1, \ldots, J_n$ above the horizontal line are the premises of the rule, and
+the judgement $J$ below the line is the conclusion. The conclusion will always
+involve the relation that is being defined.
+
+The typing relation in Figure \ref{fig:intro:stlcbooleval} is defined using six
+rules. The two rules \textsc{TTrue} and \textsc{TFalse} respectively state that
+the boolean constants $\true$ and $\false$ have a boolean type. Both rules do
+not have any premises. Such rules are also called \emph{axioms}. The rule
+\textsc{TIf} handles the case of an \textbf{if}-expression. The three
+sub-expression position contain a meta-variables $e_c$, $e_t$ and $e_e$. The
+premises require that the condition $e_c$ has type boolean and the \textbf{then}
+and \textbf{else} branches have the same type $\tau$. The rule then concludes
+that the entire \textbf{if}-expression also has type $\tau$.
+
+The three remaining rules deal with $\lambda$-abstractions. The typing context
+$\Gamma$ is a list that associates term variables with types. In the case of a
+variable, rule \textsc{TVar} looks up the corresponding type in $\Gamma$. Rule
+\textsc{TAbs} checks the body of a $\lambda$-abstraction in a context that is
+extended with a pair for the $lambda$-bound variable. The type of the
+$\lambda$-abstraction is a function type between the argument type and the type
+of the body. Finally, rule \textsc{TApp} requires that the left expressions of
+an application is a function type that is compatible with the argument.
+
+%-------------------------------------------------------------------------------
+\paragraph{Semantics}
+
+Different ways to define semantics of programming language. A coarse
+classification
+
+\begin{enumerate}
+\item Operational Semantics
+\item Denotational Semantics
+\item Axiomatic Semantics
+\end{enumerate}
+
+We use denotational semantics in Part \ref{part:mod} and small-step operational
+semantics in Part \ref{part:gen}.
+
+
+For our \stlcbool example we will define semantics using a small-step
+operational semantics. Figure \ref{fig:intro:stlcbooleval} gives the complete
+definition by means of an evaluation relation \framebox{\mbox{$\eval{e_1}{e_2}$}}
+between two terms, which denotes that $e_1$ evaluates to $e_2$ in one step.
 
 
 \begin{figure}[t]
@@ -169,7 +256,7 @@ Both, the partiality and the
       \framebox{\mbox{$\eval{e}{e}$}}\\
       \vspace{-5mm}
       \[ \begin{array}{c}
-           \inferrule* [right=\textsc{EIfTrue}]
+           \inferrule* [right=\textsc{EIfTrue},]
              {
              }
              {\eval{\ite{\true}{e_t}{e_e}}{e_t}
@@ -276,6 +363,36 @@ Both, the partiality and the
 %% %%   boilerplate in the mechanization of realistic programming languages on a
 %% %%   list of example specifications and a solution of the PoplMark challenge
 %% %%   based on the generated code.
+
+\section{Overview}
+
+\begin{center}
+  \begin{minipage}{0.8\columnwidth}
+    Keuchel, S., \& Schrijvers, T. (2013).
+    \newblock Generic Datatypes à la Carte.
+    \newblock In {\em Proceedings of the 9th ACM SIGPLAN workshop on Generic
+      programming}, WGP ’13, pages 13-24. ACM.
+  \end{minipage}
+\end{center}
+
+\begin{center}
+  \begin{minipage}{0.8\columnwidth}
+    Delaware, B., Keuchel, S., Schrijvers, T., and Oliveira,
+    B. C. d.~S. (2013).
+    \newblock Modular Monadic Meta-Theory.
+    \newblock In {\em Proceedings of the 18th ACM SIGPLAN international
+      conference on Functional programming}, ICFP '13, pages 319-330. ACM.
+  \end{minipage}
+\end{center}
+
+\begin{center}
+  \begin{minipage}{0.8\columnwidth}
+    Keuchel, S. and Schrijvers, T. (2012).
+    \newblock Modular Monadic Reasoning, a (Co-)Routine.
+    \newblock Presented at \emph{the 24th Symposium on Implementation and
+      Application of Functional Languages}, IFL '12.
+  \end{minipage}
+\end{center}
 
 %%% Local Variables:
 %%% mode: latex

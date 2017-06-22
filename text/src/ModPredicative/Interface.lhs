@@ -271,7 +271,7 @@ similar solution as for |fold|: inline |amap| in the definition of the induction
 operator. Hence, because we have no use for |amap| other than in the induction,
 it is unnecessary to include it in the interface.
 
-We include however one property |All_fmap| that is underlying the generalization
+We include however one property |all_fmap| that is underlying the generalization
 of the fmap fusion law:
 
 \[
@@ -281,7 +281,7 @@ of the fmap fusion law:
     }
 \]
 
-|All_fmap| expresses the propositional equivalence of the types on the right
+|all_fmap| expresses the propositional equivalence of the types on the right
 side, albeit without a proof that these form an isomorphism. This property is
 used to derive another induction principle on pairs instead of single values
 which in turn is used to encode proof algebras of properties of equality

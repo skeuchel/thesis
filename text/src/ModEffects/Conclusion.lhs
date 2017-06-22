@@ -12,7 +12,7 @@ This chapter is based on the contents of the article
     Delaware, B., Keuchel, S., Schrijvers, T., and Oliveira,
     B. C. d.~S. (2013).
     \newblock Modular Monadic Meta-Theory.
-    \newblock In {\em Proceedings of the 18th ACM SIGPLAN international
+    \newblock In \emph{Proceedings of the 18th ACM SIGPLAN international
       conference on Functional programming}, ICFP '13, pages 319-330. ACM.
   \end{minipage}
 \end{center}
@@ -24,7 +24,8 @@ This chapter is based on the contents of the article
   \begin{minipage}{0.8\columnwidth}
     Keuchel, S. and Schrijvers, T. (2012).
     \newblock Modular Monadic Reasoning, a (Co-)Routine.
-    \newblock Unpublished.
+    \newblock Presented at \emph{the 24th Symposium on Implementation and
+      Application of Functional Languages}, IFL '12.
   \end{minipage}
 \end{center}
 

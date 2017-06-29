@@ -24,51 +24,29 @@ uninitialized or freed memory and dangling resources.
 \end{itemize}
 
 
-\begin{itemize}
-\item Type-checking Java programs is in general undecidable~\cite{grigore2017}.
-  Decidability of type-checking does not have an impact on properties that we
-  get for type-checked programs, but for example it opens up attack vectors on
-  (web) services that deal with Java code.
-\item
-
-  Improving the correctness of C compilers is a worthy goal: C code is part of
-  the trusted computing base for almost every modern computer system including
-  mission-critical financial servers and life- critical pacemaker firmware.
-\end{itemize}
-
-From \cite{yang2011bugs}:
-
-\blockquote{ The striking thing about our \textsc{CompCert} results is that the
-  middle-end bugs we found in all other compilers are absent. As of early 2011,
-  the under-development version of \textsc{CompCert} is the only compiler we
-  have tested for which \textsc{Csmith} cannot find wrong-code errors. This is
-  not for lack of trying: we have devoted about six CPU-years to the task. The
-  apparent unbreakability of \textsc{CompCert} supports a strong argument that
-  developing compiler optimizations within a proof framework, where safety
-  checks are explicit and machine-checked, has tangible benefits for compiler
-  users.}
 
 %-------------------------------------------------------------------------------
-\section{Metatheory}
+\section{Language Specifications}\label{sec:intro:specification}
 
 { % STLCBOOL SCOPE
 
 \newcommand{\stlcbool}{\ensuremath{\lambda_{\mathbb{B}}}\xspace}
 \newcommand{\bool}{\text{bool}}
-\newcommand{\true}{\textbf{true}}
-\newcommand{\false}{\textbf{false}}
+\newcommand{\true}{\textbf{true}\xspace}
+\newcommand{\false}{\textbf{false}\xspace}
 \newcommand{\ite}[3]{\textbf{if}~{#1}~\textbf{then}~{#2}~\textbf{else}~{#3}}
 \newcommand{\typing}[3]{{#1} \vdash {#2} : {#3}}
 \renewcommand{\eval}[2]{{#1} \longrightarrow {#2}}
+\newcommand{\evals}[2]{{#1} \longrightarrow^* {#2}}
 
 To formally talk and reason about programming languages and their semantics, we
 first need to define terminology and notational conventions and make their
 meaning precise. This section explains necessary fundamental concepts for the
-formal treatment of programming languages by example of a small language
-\stlcbool: a simply-typed lambda calculus with booleans. We formally define the
+formal specification of programming languages by example of a small language
+\stlcbool: a simply-typed lambda calculus with booleans. We specify the
 \emph{abstract syntax}, \emph{static type system} and \emph{evaluation} of
-\stlcbool using inductive definitions and show how to reason inductively about
-them.
+\stlcbool using inductive definitions.
+%The next section shows how to inductively reason about them.
 
 %-------------------------------------------------------------------------------
 \paragraph{Syntax}
@@ -89,6 +67,10 @@ them.
                       & $\mid$ & $x$                        & term variable    \\
                       & $\mid$ & $\lambda x:\tau.e$         & term abstraction \\
                       & $\mid$ & $e~e$                      & application      \\
+      $v$             & ::=    &                            & term             \\
+                      & $\mid$ & $\true$                    & true constant    \\
+                      & $\mid$ & $\false$                   & false constant   \\
+                      & $\mid$ & $\lambda x:\tau.e$         & term abstraction \\
       $\Gamma$        & ::=    &                            & type context     \\
                       & $\mid$ & $\epsilon$                 & empty context    \\
                       & $\mid$ & $\Gamma, x:\tau$           & term binding     \\
@@ -126,16 +108,167 @@ by the \textlambda-abstraction expects a value of type $\tau$ when it is
 applied. We discuss types and typing contexts $\Gamma$ in more detail in the
 next paragraph.
 
+
+%-------------------------------------------------------------------------------
+\paragraph{Semantics}
+
+We have defined the syntax of \stlcbool expressions and can now turn towards
+defining their meaning. There are multiple established ways to define semantics
+of programming language. We can coarsely classify the approaches into three
+different groups:
+
+\begin{enumerate}
+\item Operational Semantics
+
+  Operational semantics defines the meaning of programs by specifying their
+  execution on an \emph{abstract machine}. The terms of the programming language
+  themselves are used as the instructions of the abstract machine. A \emph{state
+    transition function} or a \emph{state transition relation} defines the
+  possible execution steps of the machine. The program is part of the state.
+  After taking a step we are left with a residual program.
+
+  %% We can then define the meaning of programs to be the execution process on
+  %% the abstract machine.
+
+
+\item Denotational Semantics
+
+  Denotational semantics defines the meaning of programs in terms of collection
+  of \emph{mathematical semantic domains} that can include numbers, sets or
+  functions. An \emph{interpretation function} maps program terms into these
+  domains.
+
+  Usually, the semantic domain has an established \emph{formal theory}. The
+  theorems of the domain give rise to reasoning laws for programs. Furthermore,
+  we can also derive properties of programming languages from properties of the
+  collection of semantic domains.
+
+\item Axiomatic Semantics
+
+  Instead of deriving laws for programs from their execution behaviour or
+  denotation we can also axiomatically assume these laws. This is known as an
+  axiomatic semantics.
+
+  This gives us immediately the means for reasoning about programs. Furthermore,
+  we can derive a denotational semantics for the language by constructing a
+  model that satisfies the chosen laws and derive properties for this model or
+  even all models.
+
+\end{enumerate}
+
+These approaches have different trade-offs. Denotational and axiomatic semantics
+immediately give us powerful mathematical tools to reason about programming
+languages and their programs, but for larger languages the required technicality
+and complexity makes it extremely difficult to even define a suitable semantics.
+
+Operational semantics do not give us the same powerful mathematical reasoning
+techniques and instead impose on us the laborious task to reason about programs
+by observing their behaviour during execution. However, operational semantics
+are simpler and easier to define than more abstract denotional or axiomatic
+semantics. Moreover, they are much closer to actual implementations. Due to the
+smaller gap, operational semantics make it easier to reason about the
+correctness of implementations.
+
+\begin{figure}[t]
+  \centering
+  \fbox{
+    \begin{minipage}{\columnwidth}
+      \framebox{\mbox{$\eval{e}{e}$}}\\
+      \vspace{-5mm}
+      \[ \begin{array}{c}
+           \inferrule* [right=\textsc{EIfTrue},]
+             {
+             }
+             {\eval{\ite{\true}{e_t}{e_e}}{e_t}
+             } \\\\
+           \inferrule* [right=\textsc{EIfFalse}]
+             {
+             }
+             {\eval{\ite{\false}{e_t}{e_e}}{e_e}
+             } \\\\
+           \inferrule* [right=\textsc{EIf}]
+             {\eval{e_c}{e_c'}
+             }
+             {\eval{\ite{e_c}{e_t}{e_e}}{\ite{e_c'}{e_t}{e_e}}
+           } \\\\
+           \inferrule* [right=\textsc{EAppAbs}]
+             {
+             }
+             {\eval{(\lambda x:\tau.e_1)~e_2}{[x \mapsto e_2]e_1}
+             } \\\\
+           \inferrule* [right=\textsc{EApp}]
+             {\eval{e_1}{e_2'}
+             }
+             {\eval{e_1~e_2}{e_1'~e_2}
+             } \\\\
+         \end{array}
+       \]
+    \end{minipage}
+  }
+  \caption{\stlcbool reduction rules}
+  \label{fig:intro:stlcbooleval}
+\end{figure}
+
+For our \stlcbool language we define semantics using a \emph{small-step
+  operational semantics}. This is also the approach used in Part \ref{part:gen}
+of this thesis. Part \ref{part:mod} uses denotational semantics.
+
+Figure \ref{fig:intro:stlcbooleval} gives the complete definition of the
+operational semantics by means of an evaluation relation. The box in the upper
+left corner \framebox{\mbox{$\eval{e_1}{e_2}$}} defines the shape and notation
+that we use for the relation. In this case it is a binary relation between two
+terms, which denotes that $e_1$ evaluates to $e_2$ in one step.
+
+The remainder of the figure defines the relation using Gentzen-style inference
+rules~\cite{gentzen1935}. In general rules take the form
+\[
+  \inferrule* [right=\textsc{Name}]
+    {J_1 \\ J_2 \\ \ldots \\ J_n
+    }
+    {J
+    }
+\]
+where \textsc{Name} is an optional name for the rule that allows us to refer to
+it. The meta-variable $J$ stands for judgements, which in our case are usually
+mathematical statements in propositional or first-order logic. The judgements
+$J_1, \ldots, J_n$ above the horizontal line are the premises of the rule, and
+the judgement $J$ below the line is the conclusion. Rule without any premises
+are also called \emph{axioms}. The conclusion will always involve the relation
+that is being defined.
+
+The single-step evaluation is defines using five rules. The two rules
+\textsc{EIfTrue} and \textsc{EIfFalse} show how to reduce an
+\textbf{if}-expression in case the condition is either a \true or a \false
+value. The case of condition that is not yet fully evaluated is handled by rule
+\textsc{EIf}. If the condition $e_c$ reduces to $e_c'$ in one step then we can
+conclude the one step reduction
+
+\[ \eval{\ite{e_c}{e_t}{e_e}}{\ite{e_c'}{e_t}{e_e}} \]
+
+The last two rules cover the evaluation of \textlambda-terms. The rule
+\textsc{EAppAbs} handles the case where the left-hand side of an application is
+a \textlambda-term $(\lambda x:\tau.e_1)$. The residual program is the the body
+$e_1$ of the function after substituting $e_2$ for $x$ which we write as $[x
+  \mapsto e_2]e_1$. The argument of the function does not have to be fully
+evaluated, i.e. the rules encode a \emph{call-by-name} evaluation strategy. If
+the left-hand side is not yet a \textlambda-term, we evaluate it first simlarly
+to \textsc{EIf}.
+
+Note that this definition does not cover all the cases. In particular
+the case of a \textlambda-term in the condition of an \textbf{if}-expression
+\[ \ite{(\lambda x:\tau.e)}{e_t}{e_e} \]
+\noindent and the cases of a boolean in the left-hand side of an application
+\[ \true~e_1 \qquad \text{or} \qquad \false~e_2 \]
+\noindent are not specified. Since no transition is defined and the execution
+stopped without any \emph{meaningful result}, we also say that the evaluation
+got stuck. In an implementation of the programming language, this corresponds to
+an error that can happen during execution of a program. It's therefore also
+called a \emph{(dynamic) type error}. Programmers want to detect potential
+problems like that early in the development cycle and, if possible, at compile
+time. This motivates the development of \emph{static type systems}.
+
 %-------------------------------------------------------------------------------
 \paragraph{Typing}
-
-A \emph{type system} is an assignment of types to expressions. This assignment
-takes only the syntax of expressions into account but not their denotation.
-\steven{But with a denotation in mind.}  Usually not all expressions are
-typeable and un-typeable expressions are rejected. In this sense, a type system
-can be seen as a \emph{syntactic restriction} on expressions. Also in some
-languages there are expressions that can be assigned multiple, potentially
-incomparable types.
 
 \begin{figure}[t]
   \centering
@@ -185,38 +318,23 @@ incomparable types.
   \label{fig:intro:stlcbooltyping}
 \end{figure}
 
-Both, the partiality and the ambiguity of types, suggests a \emph{relational}
-rather than a \emph{functional} assignment. Such a relation is defined in Figure
-\ref{fig:intro:stlcbooltyping}. The box in the upper left corner
-\framebox{\mbox{$\typing{\Gamma}{e}{\tau}$}} defines the shape and notation that
-we use for the relation. In this case it's a ternary relation between a typing
-context $\Gamma$, an expression $e$ and a type $\tau$.
+A \emph{type system} is an assignment of types to expressions. Usually not all
+expressions are typeable and un-typeable expressions are rejected. Also in some
+languages there are expressions that can be assigned multiple, potentially
+incomparable types. Both, the partiality and the ambiguity of types, suggests a
+\emph{relational} rather than a \emph{functional} assignment. Such a relation is
+defined in Figure \ref{fig:intro:stlcbooltyping}. It is a ternary relation
+\framebox{\mbox{$\typing{\Gamma}{e}{\tau}$}} between a typing context $\Gamma$,
+an expression $e$ and a type $\tau$.
 
-The remainder of the figure defines the relation using Gentzen-style inference
-rules~\cite{gentzen1935}. In general rules take the form
-\[
-  \inferrule* [right=\textsc{Name}]
-    {J_1 \\ J_2 \\ \ldots \\ J_n
-    }
-    {J
-    }
-\]
-where \textsc{Name} is an optional name for the rule that allows us to refer to
-it. The meta-variable $J$ stands for judgements, which in our case are usually
-mathematical statements in propositional or first-order logic. The judgements
-$J_1, \ldots, J_n$ above the horizontal line are the premises of the rule, and
-the judgement $J$ below the line is the conclusion. The conclusion will always
-involve the relation that is being defined.
-
-The typing relation in Figure \ref{fig:intro:stlcbooleval} is defined using six
-rules. The two rules \textsc{TTrue} and \textsc{TFalse} respectively state that
-the boolean constants $\true$ and $\false$ have a boolean type. Both rules do
-not have any premises. Such rules are also called \emph{axioms}. The rule
-\textsc{TIf} handles the case of an \textbf{if}-expression. The three
-sub-expression position contain a meta-variables $e_c$, $e_t$ and $e_e$. The
-premises require that the condition $e_c$ has type boolean and the \textbf{then}
-and \textbf{else} branches have the same type $\tau$. The rule then concludes
-that the entire \textbf{if}-expression also has type $\tau$.
+The typing relation is defined using six rules. The two rules \textsc{TTrue} and
+\textsc{TFalse} respectively state that the boolean constants $\true$ and
+$\false$ have a boolean type. The rule \textsc{TIf} handles the case of an
+\textbf{if}-expression. The three sub-expression position contain a
+meta-variables $e_c$, $e_t$ and $e_e$. The premises require that the condition
+$e_c$ has type boolean and the \textbf{then} and \textbf{else} branches have the
+same type $\tau$. The rule then concludes that the entire \textbf{if}-expression
+also has type $\tau$.
 
 The three remaining rules deal with $\lambda$-abstractions. The typing context
 $\Gamma$ is a list that associates term variables with types. In the case of a
@@ -227,69 +345,101 @@ $\lambda$-abstraction is a function type between the argument type and the type
 of the body. Finally, rule \textsc{TApp} requires that the left expressions of
 an application is a function type that is compatible with the argument.
 
-%-------------------------------------------------------------------------------
-\paragraph{Semantics}
-
-Different ways to define semantics of programming language. A coarse
-classification
-
-\begin{enumerate}
-\item Operational Semantics
-\item Denotational Semantics
-\item Axiomatic Semantics
-\end{enumerate}
-
-We use denotational semantics in Part \ref{part:mod} and small-step operational
-semantics in Part \ref{part:gen}.
 
 
-For our \stlcbool example we will define semantics using a small-step
-operational semantics. Figure \ref{fig:intro:stlcbooleval} gives the complete
-definition by means of an evaluation relation \framebox{\mbox{$\eval{e_1}{e_2}$}}
-between two terms, which denotes that $e_1$ evaluates to $e_2$ in one step.
+\section{Metatheory}\label{sec:intro:typesafety}
 
 
-\begin{figure}[t]
-  \centering
-  \fbox{
-    \begin{minipage}{\columnwidth}
-      \framebox{\mbox{$\eval{e}{e}$}}\\
-      \vspace{-5mm}
-      \[ \begin{array}{c}
-           \inferrule* [right=\textsc{EIfTrue},]
-             {
-             }
-             {\eval{\ite{\true}{e_t}{e_e}}{e_t}
-             } \\\\
-           \inferrule* [right=\textsc{EIfFalse}]
-             {
-             }
-             {\eval{\ite{\false}{e_t}{e_e}}{e_e}
-             } \\\\
-           \inferrule* [right=\textsc{EIf}]
-             {\eval{e_c}{e_c'}
-             }
-             {\eval{\ite{e_c}{e_t}{e_e}}{\ite{e_c'}{e_t}{e_e}}
-           } \\\\
-           \inferrule* [right=\textsc{EAppAbs}]
-             {
-             }
-             {\eval{(\lambda x:\tau.e_1)~e_2}{[x \mapsto e_2]e_1}
-             } \\\\
-           \inferrule* [right=\textsc{EApp}]
-             {\eval{e_1}{e_2'}
-             }
-             {\eval{e_1~e_2}{e_1'~e_2}
-             } \\\\
-         \end{array}
-       \]
-    \end{minipage}
-  }
-  \caption{\stlcbool reduction rules}
-  \label{fig:intro:stlcbooleval}
-\end{figure}
+\begin{thm}[Determinacy]
+  If  \[ \eval{e_1}{e_2} \quad \wedge \quad \eval{e_1}{e_3} \] then $e_2 = e_3$.
+\end{thm}
+
+\begin{lem}[Progress]
+  Let $\typing{\cdot}{e_1}{\tau}$. Either $e_1$ is a value or we can take another
+  step, i.e.
+  \[ \exists e_2. \eval{e_1}{e_2}. \]
+\end{lem}
+
+\begin{lem}[Canonical Boolean Form]
+  Let $e$ be a value and $\typing{\Gamma}{e}{\bool}$ then
+  \[ e = \true \quad \vee \quad e = \false \].
+\end{lem}
+
+\begin{lem}[Canonical Function Form]
+  Let $e$ be a value and $\typing{\Gamma}{e}{\tau \to \sigma}$ then
+  \[ \exists e_1. (e = (\lambda x:\tau.e_1) \wedge \typing{\Gamma, x:\tau}{e_1}{\sigma}). \]
+\end{lem}
+
+\begin{lem}[Preservation]
+  If $\typing{\Gamma}{e_1}{\tau}$ and $\eval{e_1}{e_2}$ then $\typing{\Gamma}{e_2}{\tau}$.
+\end{lem}
+
+\begin{thm}[Type-Safety]
+  Let $\typing{\cdot}{e_1}{\tau}$. If $e_1$ evaluates to a normal-form $e_2$,
+  i.e.
+  \[ \evals{e_1}{e_2} \quad \wedge \quad (\forall e_3. \neg (\eval{e_2}{e_3})) \]
+  then $e_2$ is a value.
+\end{thm}
 
 } % STLCBOOL SCOPE
+
+
+\section{Motivation}
+
+\paragraph{Formal Specifications}
+Formal specification and standardization of programming languages is essential.
+It serves as the baseline for correctness of implementations. Multiple
+implementations that are correct with respect to a common specification are
+interoperable. Furthermore, program analyses and program transformations can be
+developed independent of a particular implementation and adopted by multiple
+implementations.
+
+However, a specification on its own is not good enough. Half of the bugs in
+software development arise in the specifications. For instance, while testing
+car software, \cite{arts2015testing} found 227 bugs in the \textsc{Autosar}
+specification (and in implementations).
+
+Formal analysis is necessary to guarantee good definitions.
+
+
+
+
+\begin{itemize}
+\item 
+\end{itemize}
+
+
+
+\paragraph{Formal analysis}
+\begin{itemize}
+\item Type-checking Java programs is in general undecidable~\cite{grigore2017}.
+  Decidability of type-checking does not have an impact on properties that we
+  get for type-checked programs, but for example it opens up attack vectors on
+  (web) services that deal with Java code.
+\item \cite{amin2016java}.
+\end{itemize}
+
+
+
+\paragraph{Mechanization}
+\begin{itemize
+\item
+  Improving the correctness of C compilers is a worthy goal: C code is part of
+  the trusted computing base for almost every modern computer system including
+  mission-critical financial servers and life- critical pacemaker firmware.
+\end{itemize}
+From \cite{yang2011bugs}:
+
+\blockquote{ The striking thing about our \textsc{CompCert} results is that the
+  middle-end bugs we found in all other compilers are absent. As of early 2011,
+  the under-development version of \textsc{CompCert} is the only compiler we
+  have tested for which \textsc{Csmith} cannot find wrong-code errors. This is
+  not for lack of trying: we have devoted about six CPU-years to the task. The
+  apparent unbreakability of \textsc{CompCert} supports a strong argument that
+  developing compiler optimizations within a proof framework, where safety
+  checks are explicit and machine-checked, has tangible benefits for compiler
+  users.}
+
 
 %% The meta-theory of programming language semantics and type-systems is highly
 %% complex due to the management of many details. Formal proofs are long and prone

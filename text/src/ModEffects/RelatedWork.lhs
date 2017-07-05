@@ -85,8 +85,8 @@ proofs about interactions of effects.
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \paragraph{Other Effect Models}
 Other useful models have been proposed, such as \emph{applicative
-  functors}~\citep{mcbride08applicative} and
-\emph{arrows}~\citep{hughes98generalisingmonads}, each with their own axioms and
+  functors}~\cite{mcbride08applicative} and
+\emph{arrows}~\cite{hughes98generalisingmonads}, each with their own axioms and
 modularity properties.
 
 %-------------------------------------------------------------------------------
@@ -121,7 +121,7 @@ The main issue is that monads provide an abstraction over purely functional
 models of effects, allowing functional programmers to write programs in terms of
 abstract operations like |>>=|, |return|, or |get| and |put|. One way to reason
 about monadic programs is to remove the abstraction provided by such
-operations~\citep{hutton08reasoning}. However, this approach is fundamentally
+operations~\cite{hutton08reasoning}. However, this approach is fundamentally
 non-modular.
 
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -130,7 +130,7 @@ Several more modular approaches to modular monadic reasoning have been pursued
 in the past.
 
 One approach to modular monadic reasoning is to exploit
-\emph{parametricity}~\citep{reynolds83types,wadler89theorems}.
+\emph{parametricity}~\cite{reynolds83types,wadler89theorems}.
 Voigtl\"ander~\cite{voigt09free} has shown how to derive parametricity theorems
 for type constructor classes such as |Monad|. Unfortunately, the reasoning power
 of parametricity is limited, and parametricity is not supported by

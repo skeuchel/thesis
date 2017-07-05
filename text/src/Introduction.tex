@@ -11,61 +11,125 @@
 
 \chapter{Introduction}
 
-Meta-theory of programming language concerns itself with the study of properties
-of languages, their formal semantics and implementations.
+Programming is communicating tasks to a computer in a language designed for this
+purpose: a programming language. Almost every branch of computer science relies
+on programming languages and there is an ever increasing number of programmers
+from other fields. For a programmer it is essential that she can validate that
+a program implements exactly the intended task which is usually achieved by
+reasoning with the \emph{expected behaviour} of a program.
 
-One of the goals is to prove properties about all programs written in a
-language.  For example type-safety, memory-safety and resource-safety are
-properties that express absence of type errors during execution, usage of
-uninitialized or freed memory and dangling resources.
+But how is the behaviour of programming constructs defined, or more generally,
+how are programming languages defined? The majority of programming languages
+start with a reference implementation that defines the language in a normative
+way.
+% Examples of languages that are (still) defined this way include Perl -
+% Perl~5~\cite{perllanguage} and Python~\cite{pythonlanguage}.
+After widespread use, a language may go through a standardization process that
+defines the language in a language specification.
+% , e.g. PHP was standardized in 2014~\cite{phpspec}.
+Another approach is develop specifications together with a reference
+implementation, or revisions/extensions to a language specification together
+with an implementation.
 
+Such a language specification allows a programmer to resolve ambiguities when
+reasoning about her programs independent of a particular implementation. It also
+enables us to switch between implementations.
 
-\begin{itemize}
-\item
-  Derive properties for all programs written in a language, like memory-safety,
-  type-safety, resources-safety, termination, absence of deadlocks, race
-  conditions and starvation.
+Programming language theory is a branch of computer science that deals with
+language specifications, design, implementation, and in particular also
+meta-theoretical analysis of programming languages, their semantics and related
+systems like type-systems. When developing new languages or language features we
+want to make sure that the design is coherent and fulfills the expectations of
+users.
 
-\item
-  Prove correctness (preservation of semantics) of program analyses or compiler
-  transformations.
+The programmer is often given useful safety guarantees for this programs. For
+instance, many modern programming language provide garbage collection
+facilities. Yet we want our programs to be memory safe, i.e. they do not access
+memory that has been freed or that has not yet been initialized. Another safety
+property is type-safety, i.e. the absence of dynamic type errors during
+execution. These guarantees are usually provided for all programs written in a
+language or a specific subset of programs, e.g. all type-checked programs. In a
+meta-theoretical analysis we want to make sure that these are indeed valid
+guarantees.
 
-  by looking formally on the semantics, type systems and implementations like
-  compilers or interpreters.
-\end{itemize}
+The meta-theory of programming language semantics and type-systems is highly
+complex due and involves the management of many details and edge cases. As such,
+it is prone to subtle errors that can invalidate large amounts of work.
 
-\section{Motivation}
+For example, the Java programming language was long believed to be type-safe
+\footnote{Except for some deliberate defects like the co-variance of arrays.}
+but the addition of Generics made Java's type system in fact unsound
+\cite{amin2016java}. Another problem concerns the type-checking of Java
+programs. Generics made type-checking an undecidable property of
+programs~\cite{grigore2017}. Decidability of type-checking does not have an
+impact on properties that we get for type-checked programs, but for example it
+opens up attack vectors on (web) services that deal with Java code because the
+type-checker may run forever.
+
+To increase the confidence in the correctness of formal meta-theory, techniques
+for formalization in proof-assistants, also known as mechanization, have
+received much attention. These systems allow us to state mathematical statements
+and proofs for them and let the machine check that these are in fact valid
+proofs. However, the high development cost of mechanizations continues to
+prevent their widespread use.
+
+The remainder of this chapter will give a more detailed introduction to the
+relevant disciplines of specification, analysis and mechanization of programming
+languages similar to what can be found in introductory textbooks such as
+\cite{tapl}.
+
+%% %-------------------------------------------------------------------------------
+%% \section{Mechanization}
+%% Mechanizing formal meta-theory in proof-assistants is crucial, both for the
+%% increased confidence in complex designs and as a basis for technologies such as
+%% proof-carrying code.  Formal reasoning in proof-assistants, also known as
+%% mechanization, has high development costs.
+%%
+
+%% \begin{itemize}
+%% \item
+%%   Derive properties for all programs written in a language, like memory-safety,
+%%   type-safety, resources-safety, termination, absence of deadlocks, race
+%%   conditions and starvation.
+%%
+%% \item
+%%   Prove correctness (preservation of semantics) of program analyses or compiler
+%%   transformations.
+%%
+%%   by looking formally on the semantics, type systems and implementations like
+%%   compilers or interpreters.
+%% \end{itemize}
 
 %-------------------------------------------------------------------------------
-\subsection{Specifications}\label{sec:intro:specification}
+\section{Specifications}\label{sec:intro:specification}
 
-Standardization and functional or program specifications are an essential
-methodology in systems engineering and software development. It serves as the
-baseline for correctness of implementations. Furthermore, multiple
-implementations that are correct with respect to a common specification are
-inter-operable or compatible to a certain extent. The precise meaning depends on
-the context and the requirements.
-
-For programming languages for example, we want to guarantee that the same
-program is executable by different implementations and performs the same tasks.
-This does for example also ensures that program analyses and program
-transformations, e.g. for optimization, can be developed independent of a
-particular implementation and adopted by multiple implementations.
-
-In this thesis, we are interested in programming languages themselves and not so
-much interested in their implementations. Hence, a specification of a
-application binary interface, for example, to achieve binary compatibility of
-modules compiled by different compilers is beyond the scope of this thesis.
+%% Standardization and functional or program specifications are an essential
+%% methodology in systems engineering and software development. It serves as the
+%% baseline for correctness of implementations. Furthermore, multiple
+%% implementations that are correct with respect to a common specification are
+%% inter-operable or compatible to a certain extent. The precise meaning depends
+%% on the context and the requirements.
+%%
+%% For programming languages for example, we want to guarantee that the same
+%% program is executable by different implementations and performs the same
+%% tasks.  This does for example also ensures that program analyses and program
+%% transformations, e.g. for optimization, can be developed independent of a
+%% particular implementation and adopted by multiple implementations.
+%%
+%% In this thesis, we are interested in programming languages themselves and not
+%% so much interested in their implementations. Hence, a specification of a
+%% application binary interface, for example, to achieve binary compatibility of
+%% modules compiled by different compilers is beyond the scope of this thesis.
 
 Specifications differ in the detail and precision they describe systems.
-Industrial standards of major programming languages are usually written in
-natural language and are detailed to cover every aspect of the languages.
-However, the use of natural language can allow different incompatible
-interpretations. This leaves a programmer in a limbo on how exactly a program
-will behave when executed and a language implementor unsure of how a particular
-part of the language needs to be implemented.
+Industrial specifications of major programming languages are usually written in
+natural language and are detailed to cover every aspect of the languages. The
+use of natural language leaves opportunities for ambiguity, but disregarding
+this problem, elaborate industrial specifications provide a good reference point
+for language users and implementors. However, for meta-theoretical analyses more
+rigorous specifications are necessary.
 
-We will use \emph{formal specifications} using a mathematical language to
+We will use \emph{formal specifications} and a mathematical language to
 describe programming languages. This gives use the necessary precision and
 avoids the ambiguities of natural languages. This section explains necessary
 fundamental concepts for the formal specification of programming languages by
@@ -76,7 +140,7 @@ define the terminology and notational conventions and make their meaning
 precise.
 
 %-------------------------------------------------------------------------------
-\paragraph{Syntax}
+\subsection{Syntax}\label{ssec:intro:syntax}
 
 \begin{figure}[t]
   \centering
@@ -125,19 +189,19 @@ $(\lambda x:\tau.e)$ or the application of an expression $e_1$ to another
 expression $e_2$. Of course we only want to apply expressions $e_1$ that
 represent functions: either by being a \textlambda-abstraction or evaluating to
 one. Applying any \emph{value} other than a \textlambda-abstraction is a
-\emph{type error}. We make this more precise below in Section
-\ref{sec:intro:typesafety}.
+\emph{type error}. We make this more precise below and come back to it it
+Section \ref{sec:intro:typesafety} on analysis.
 
 The grammar also includes the meta-variable $\tau$ that describes the types of
 \stlcbool. Each \textlambda-abstraction contains a \emph{type annotation} $\tau$
 for the argument variable $x$. The denotation is that the function represented
 by the \textlambda-abstraction expects a value of type $\tau$ when it is
-applied. We discuss types and typing contexts $\Gamma$ in more detail in the
-next paragraph.
+applied. We discuss types and typing contexts $\Gamma$ in more detail in Section
+\ref{ssec:intro:typing} which deals with static typing.
 
 
 %-------------------------------------------------------------------------------
-\paragraph{Semantics}
+\subsection{Semantics}\label{ssec:intro:semantics}
 
 We have defined the syntax of \stlcbool expressions and can now turn towards
 defining their meaning. There are multiple established ways to define semantics
@@ -148,11 +212,12 @@ different groups:
 \item Operational Semantics
 
   Operational semantics defines the meaning of programs by specifying their
-  execution on an \emph{abstract machine}. The terms of the programming language
-  themselves are used as the instructions of the abstract machine. A \emph{state
-    transition function} or a \emph{state transition relation} defines the
-  possible execution steps of the machine. The program is part of the state.
-  After taking a step we are left with a residual program.
+  execution in a state transition system. A \emph{state transition function} or
+  a \emph{state transition relation} on the terms of the programming language
+  defines the possible execution steps. The program is part of the state. For
+  small languages the entire state might consist of only the program. After
+  taking a step we are left with an updated state that includes a residual
+  program.
 
   %% We can then define the meaning of programs to be the execution process on
   %% the abstract machine.
@@ -163,7 +228,8 @@ different groups:
   Denotational semantics defines the meaning of programs in terms of collection
   of \emph{mathematical semantic domains} that can include numbers, sets or
   functions. An \emph{interpretation function} maps program terms into these
-  domains.
+  domains. This function is generally compositional in the syntax which
+  is beneficial for modularity.
 
   Usually, the semantic domain has an established \emph{formal theory}. The
   theorems of the domain give rise to reasoning laws for programs. Furthermore,
@@ -247,7 +313,7 @@ that we use for the relation. In this case it is a binary relation between two
 terms, which denotes that $e_1$ evaluates to $e_2$ in one step.
 
 The remainder of the figure defines the relation using Gentzen-style inference
-rules~\cite{gentzen1935}. In general rules take the form
+rules~\cite{gentzen1935}. In general, rules take the form
 \[
   \inferrule* [right=\textsc{Name}]
     {J_1 \\ J_2 \\ \ldots \\ J_n
@@ -263,22 +329,21 @@ the judgement $J$ below the line is the conclusion. Rule without any premises
 are also called \emph{axioms}. The conclusion will always involve the relation
 that is being defined.
 
-The single-step evaluation is defines using five rules. The two rules
+The single-step evaluation is defines using five rules. The two axioms
 \textsc{EIfTrue} and \textsc{EIfFalse} show how to reduce an
 \textbf{if}-expression in case the condition is either a \true or a \false
-value. The case of condition that is not yet fully evaluated is handled by rule
-\textsc{EIf}. If the condition $e_c$ reduces to $e_c'$ in one step then we can
-conclude the one step reduction
-
+value. The case of a condition that is not yet fully evaluated is handled by
+rule \textsc{EIf}. If the condition $e_c$ reduces to $e_c'$ in one step then we
+can conclude the one step reduction
 \[ \eval{\ite{e_c}{e_t}{e_e}}{\ite{e_c'}{e_t}{e_e}} \]
 
 The last two rules cover the evaluation of \textlambda-terms. The rule
 \textsc{EAppAbs} handles the case where the left-hand side of an application is
 a \textlambda-term $(\lambda x:\tau.e_1)$. The residual program is the the body
-$e_1$ of the function after substituting $e_2$ for $x$ which we write as $[x
-  \mapsto e_2]e_1$. The argument of the function does not have to be fully
+$e_1$ of the function after substituting $e_2$ for $x$ which we write as
+$[x \mapsto e_2]e_1$. The argument of the function does not have to be fully
 evaluated, i.e. the rules encode a \emph{call-by-name} evaluation strategy. If
-the left-hand side is not yet a \textlambda-term, we evaluate it first simlarly
+the left-hand side is not yet a \textlambda-term, we evaluate it first similarly
 to \textsc{EIf}.
 
 Note that this definition does not cover all the cases. In particular
@@ -295,7 +360,7 @@ problems like that early in the development cycle and, if possible, at compile
 time. This motivates the development of \emph{static type systems}.
 
 %-------------------------------------------------------------------------------
-\paragraph{Typing}
+\subsection{Typing}\label{ssec:intro:typing}
 
 \begin{figure}[t]
   \centering
@@ -366,53 +431,78 @@ also has type $\tau$.
 The three remaining rules deal with $\lambda$-abstractions. The typing context
 $\Gamma$ is a list that associates term variables with types. In the case of a
 variable, rule \textsc{TVar} looks up the corresponding type in $\Gamma$. Rule
-\textsc{TAbs} checks the body of a $\lambda$-abstraction in a context that is
-extended with a pair for the $lambda$-bound variable. The type of the
-$\lambda$-abstraction is a function type between the argument type and the type
-of the body. Finally, rule \textsc{TApp} requires that the left expressions of
-an application is a function type that is compatible with the argument.
+\textsc{TAbs} checks the body of a $\lambda$-abstraction in the context
+$(\Gamma,y:\sigma)$ which is the outside context $\Gamma$ extended with a pair
+for the $lambda$-bound variable $y$. The type of the $\lambda$-abstraction is
+the function type $(\sigma \to \tau)$ between the argument type $\sigma$ and the
+type of the body $\tau$. Finally, rule \textsc{TApp} requires that the left
+expressions of an application has a function type that is compatible with the
+argument.
+
+\paragraph{Example}
+Consider the boolean negation function
+\[
+  \lambda y:\bool. \ite{y}{\false}{\true}
+\]
+
+This function sends booleans to booleans and should therefore have the type
+$\bool\to\bool$. Giving the above typing relations, we can repeatedly apply the
+rule to get a typing derivation for this. At each step only one possible rule
+applies. We can arrange the rule applications in a so called \emph{derivation
+  tree} that illustrates the whole derivation. Using the abbreviation
+$\Gamma' := \Gamma, y:\bool$, we have the following tree:
+
+\[
+  \inferrule*
+  { \inferrule*
+    {
+      \inferrule*{\;}{\typing{\Gamma'}{y}{\bool}} \\
+      \inferrule*{\;}{\typing{\Gamma'}{\false}{\bool}} \\
+      \inferrule*{\;}{\typing{\Gamma'}{\true}{\bool}} \\
+    }
+    {\typing{\Gamma'}{\ite{y}{\false}{\true}}{\bool}
+    }
+  }
+  { \typing{\Gamma}{\lambda y:\bool. \ite{y}{\false}{\true}}{\bool \to \bool}
+  }
+\]
 
 
 %-------------------------------------------------------------------------------
-\subsection{Analysis}\label{sec:intro:typesafety}
+\section{Meta-Theoretical Analysis}\label{sec:intro:typesafety}
 
+It is folklore in software development that bugs arise in both implementations
+and in specifications. For instance, \cite{arts2015testing} describes a war
+story on testing car software in which they found 227 bugs in the
+\textsc{Autosar} specification (and in implementations).
 
-However, a specification on its own is not good enough. It is folklore in
-software development that half of the bugs in arise in the specifications.  For
-instance, while testing car software, \cite{arts2015testing} found 227 bugs in
-the \textsc{Autosar} specification (and in implementations).
+To ensure that our languages are well-designed we want to establish
+meta-theoretical properties that ensures that all the guarantees a user expects
+are indeed valid. This needs a rigorous and formal analysis of the defined
+semantics of a programming language. In this section we will look at the method
+for reasoning about semantics, give precise definition of some language
+properties and outline how these can be proven for our example calculus
+\stlcbool.
 
-%% The common practice today is to specify and implement programming languages
-%% in tandem.
+\paragraph{Inductive Reasoning}
+Figures \ref{fig:intro:stlcbooleval} and \ref{fig:intro:stlcbooltyping} define
+evaluation and typing for \stlcbool. More precisely, our intention is to define
+the \emph{smallest relation} that includes the presented rules. This gives rise
+to a \emph{structural induction principle} for the relations. Put differently,
+we can induct over the shape of derivation trees (or their size or height).
 
-%% Specification of programming languages are written after a
-
-%% A language may be implemented and then specified, or specified and then
-%% implemented, or these may develop together, which is usual practice today.
-
-%% in tandem with implementations. Either by importing tested and practically
-%% proven extensions from implementations (i.e. GHC) or by developing the
-%% specification of
-
-
-%% Formal analysis is necessary to guarantee good definitions.
-
-
-
-
-Type-checking Java programs is in general undecidable~\cite{grigore2017}.
-Decidability of type-checking does not have an impact on properties that we get
-for type-checked programs, but for example it opens up attack vectors on (web)
-services that deal with Java code.
-
-
-
-
-
-
+As an example consider the following determinacy theorem which states that
+at each point there at most one possible successor state.
 \begin{thm}[Determinacy]
-  If  \[ \eval{e_1}{e_2} \quad \wedge \quad \eval{e_1}{e_3} \] then $e_2 = e_3$.
+  If $\eval{e_1}{e_2} \wedge \eval{e_1}{e_3}$ then $e_2 = e_3$.
 \end{thm}
+
+
+$ \forall e_3. \eval{e_1}{e_3} \Rightarrow e_2 = e_3$.
+
+
+
+
 
 \begin{lem}[Progress]
   Let $\typing{\cdot}{e_1}{\tau}$. Either $e_1$ is a value or we can take another
@@ -443,12 +533,35 @@ services that deal with Java code.
 
 
 
-\section{Motivation}
+
+\section{Mechanization}
+
+that he expects we need to
+
+of languages on their own are not good enough to ensure a
+good design.
 
 
 
 
-\paragraph{Mechanization}
+The undecidability of type-checking Java~\cite{grigore2017} and the unsoundness
+of its type system \cite{amin2016java} might be seen as bugs of the language
+specification (but no formal specification of the complete Java language
+exists).
+
+
+A good approach is to develop software (and programming languages) in tandem
+with an implementation and refine both. However, problems usually arise in
+subtle edge cases that do not appear in normal program code that we write every
+day and are easy to overlook in an
+
+
+
+
+
+and such properties have only been established for subsets of the language such
+as Featherweight Java \cite{igarashi2001featherweight}.
+
 \begin{itemize}
 \item
   Improving the correctness of C compilers is a worthy goal: C code is part of

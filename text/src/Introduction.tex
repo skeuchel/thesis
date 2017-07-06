@@ -465,16 +465,17 @@ $\Gamma$ is a list that associates term variables with types. In the case of a
 variable, rule \textsc{TVar} looks up the corresponding type in $\Gamma$. Rule
 \textsc{TAbs} checks the body of a $\lambda$-abstraction in the context
 $(\Gamma,y:\sigma)$ which is the outside context $\Gamma$ extended with a pair
-for the $lambda$-bound variable $y$. The type of the $\lambda$-abstraction is
+for the $\lambda$-bound variable $y$. The type of the $\lambda$-abstraction is
 the function type $(\sigma \to \tau)$ between the argument type $\sigma$ and the
 type of the body $\tau$. Finally, rule \textsc{TApp} requires that the left
 expressions of an application has a function type that is compatible with the
 argument.
 
+
 \paragraph{Example}
 Consider the boolean negation function
 \[
-  \lambda y:\bool. \ite{y}{\false}{\true}
+  \lambda (y:\bool). \ite{y}{\false}{\true}
 \]
 
 This function sends booleans to booleans and should therefore have the type
@@ -503,18 +504,26 @@ $\Gamma' := \Gamma, y:\bool$, we have the following tree:
 %-------------------------------------------------------------------------------
 \section{Meta-Theoretical Analysis}\label{sec:intro:typesafety}
 
-It is folklore in software development that bugs arise in both implementations
-and in specifications. For instance, \cite{arts2015testing} describes a war
-story on testing car software in which they found 227 bugs in the
-\textsc{Autosar} specification (and in implementations).
+%% It is folklore in software development that bugs arise in both
+%% implementations and in specifications. For instance, \cite{arts2015testing}
+%% describes a war story on testing car software in which they found 227 bugs in
+%% the \textsc{Autosar} specification (and in implementations).
 
-To ensure that our languages are well-designed we want to establish
-meta-theoretical properties that ensures that all the guarantees a user expects
-are indeed valid. This needs a rigorous and formal analysis of the defined
-semantics of a programming language. In this section we will look at the precise
-definition of the type safety language property, present methods for reasoning
-about semantics and outline how these can be used to prove the type safety
-property for for our example calculus \stlcbool.
+As discussed before, we want to establish meta-theoretical properties that
+provide us with evidence for coherence of different parts of our language and to
+increase our confidence that a language is well-designed. This needs a rigorous
+and formal analysis of the defined semantics of a programming language.
+
+In this section we showcase meta-theoretical analyses with the help of our
+example calculus \stlcbool. In order to prove these properties we first need to
+understand how to reason about languages and their semantics. We therefore look
+at standard reasoning principles for relations like our typing and evaluation
+relations. We show how language properties can be expressed precisely and define
+two properties for our language: determinacy and type safety. We will show how
+determinacy can be proven using the reasoning principles and outline one
+established way of proving type safety, namely through progress and preservation
+lemmas.
+
 
 \paragraph{Inductive Reasoning}
 We first need to establish methods for reasoning about the evaluation and typing
@@ -570,7 +579,14 @@ at each point there at most one possible successor state.
 % More precisely we have to proof
 % $\forall e_3. \eval{e_1}{e_3} \Rightarrow e_2 = e_3$.
 
+
 \paragraph{Type Safety}
+
+One of the essential properties of statically-typed languages is type safety.
+When working in such a language a programmer expects type guarantees when her
+program is executed, e.g. all arguments passed to a function have exactly
+the types indicated by the function's type signature.
+
 We previously characterized type safety as the absence of type errors during
 execution. A type error represents a state for which no further evaluation step
 is defined and hence evaluation stopped.

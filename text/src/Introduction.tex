@@ -535,21 +535,26 @@ values.
   grammar:
   \begin{center}
     \begin{tabular}{lcll}
-      $v$             & ::=    &                            & term             \\
-                      & $\mid$ & $\true$                    & true constant    \\
-                      & $\mid$ & $\false$                   & false constant   \\
-                      & $\mid$ & $\lambda x:\tau.e$         & term abstraction \\
+      $v$ & ::=    &                    & term             \\
+          & $\mid$ & $\true$            & true constant    \\
+          & $\mid$ & $\false$           & false constant   \\
+          & $\mid$ & $\lambda x:\tau.e$ & term abstraction \\
     \end{tabular}
   \end{center}
 \end{defn}
 
+Expressions with type-errors are hence normal forms that are not values. We can
+hence make \emph{the absence of type error} more precise by requiring that all
+normal forms are already values.
 
 \begin{thm}[Type-Safety]
-  Let $\typing{\cdot}{e_1}{\tau}$. If $e_1$ evaluates to a normal-form $e_2$,
-  i.e.
-  \[ \evals{e_1}{e_2} \quad \wedge \quad (\forall e_3. \neg (\eval{e_2}{e_3})) \]
+  Let $\typing{\cdot}{e_1}{\tau}$. If $e_1$ evaluates to a normal form $e_2$
   then $e_2$ is a value.
 \end{thm}
+
+Note that this definition does not require the evaluation to terminate.  A
+program that runs forever without a type-error is also considered type-safe.
+
 
 \paragraph{Inductive Reasoning}
 Figures \ref{fig:intro:stlcbooleval} and \ref{fig:intro:stlcbooltyping} define
@@ -575,13 +580,6 @@ we can induct over the shape of derivation trees (or their size or height).
 \begin{lem}[Preservation]
   If $\typing{\Gamma}{e_1}{\tau}$ and $\eval{e_1}{e_2}$ then $\typing{\Gamma}{e_2}{\tau}$.
 \end{lem}
-
-\begin{thm}[Type-Safety]
-  Let $\typing{\cdot}{e_1}{\tau}$. If $e_1$ evaluates to a normal-form $e_2$,
-  i.e.
-  \[ \evals{e_1}{e_2} \quad \wedge \quad (\forall e_3. \neg (\eval{e_2}{e_3})) \]
-  then $e_2$ is a value.
-\end{thm}
 
 
 

@@ -11,25 +11,37 @@
 
 \chapter{Introduction}
 
-Programming is communicating tasks to a computer in a language designed for this
-purpose: a programming language. Almost every branch of computer science relies
-on programming languages and there is an ever increasing number of programmers
-from other fields. For a programmer it is essential that she can validate that
-a program implements exactly the intended task which is usually achieved by
-reasoning with the \emph{expected behaviour} of a program.
+The concept of programming can be defined as communicating how to perform tasks
+to a computer. An increasing number of fields such as biology, engineering,
+physics, psychology and sociology rely on programming. Programming is not
+limited to sciences. The ubiquity of computers and the pervasive use of software
+in our society indirectly depend on programming and programmers.  However,
+software is notoriously unreliable. Given the extent of our dependence on
+software this is all the more detrimental and costly.
+
+In order to improve upon this situation we need to meliorate the process of
+programming itself.
+\begin{itemize}
+\item 'Programming languages' are the tools/methods for programming
+\item The minimum requirement is that a program does what it's intended to do.
+\end{itemize}
+
+For a programmer it is essential that she can validate that a program implements
+exactly the intended task which is usually achieved by reasoning with the
+\emph{expected behaviour} of a program.
 
 But how is the behaviour of programming constructs defined, or more generally,
 how are programming languages defined? The majority of programming languages
-start with a reference implementation that defines the language in a normative
-way.
+start with a reference implementation that effectively defines the language.
 % Examples of languages that are (still) defined this way include Perl -
 % Perl~5~\cite{perllanguage} and Python~\cite{pythonlanguage}.
-After widespread use, a language may go through a standardization process that
-defines the language in a language specification.
+
+After widespread use, a language may go through a standardization process:
+multiple stakeholders develop a common language specification.
 % , e.g. PHP was standardized in 2014~\cite{phpspec}.
 Another approach is develop specifications together with a reference
-implementation, or revisions/extensions to a language specification together
-with an implementation.
+implementation. These two approaches are not mutually exclusive: languages with
+an existing specification are extended in tandem with implementations.
 
 Such a language specification allows a programmer to resolve ambiguities when
 reasoning about her programs independent of a particular implementation. It also
@@ -53,8 +65,8 @@ meta-theoretical analysis we want to make sure that these are indeed valid
 guarantees.
 
 The meta-theory of programming language semantics and type-systems is highly
-complex due and involves the management of many details and edge cases. As such,
-it is prone to subtle errors that can invalidate large amounts of work.
+complex due to the management of many details and edge cases. As such, it is
+prone to subtle errors that can invalidate large amounts of work.
 
 For example, the Java programming language was long believed to be type-safe
 \footnote{Except for some deliberate defects like the co-variance of arrays.}
@@ -71,7 +83,27 @@ for formalization in proof-assistants, also known as mechanization, have
 received much attention. These systems allow us to state mathematical statements
 and proofs for them and let the machine check that these are in fact valid
 proofs. However, the high development cost of mechanizations continues to
-prevent their widespread use.
+prevent their widespread use. This leads us to the research question that this
+thesis tries to answer:
+
+\begin{center}
+  \begin{minipage}{0.8\columnwidth}
+    How can we reduce the costs of mechanizing formal meta-theory of programming
+    languages?
+  \end{minipage}
+\end{center}
+
+\begin{itemize}
+\item Current methodology.
+\item Why is the current methodology costly?
+\item Give an idea of the relative effort.
+\item What is the approach answer of this thesis?
+
+  Increase reusability of code. Two strands: Modularity / Genericity.
+\end{itemize}
+
+
+
 
 The remainder of this chapter will give a more detailed introduction to the
 relevant disciplines of specification, analysis and mechanization of programming
@@ -479,10 +511,45 @@ story on testing car software in which they found 227 bugs in the
 To ensure that our languages are well-designed we want to establish
 meta-theoretical properties that ensures that all the guarantees a user expects
 are indeed valid. This needs a rigorous and formal analysis of the defined
-semantics of a programming language. In this section we will look at the method
-for reasoning about semantics, give precise definition of some language
-properties and outline how these can be proven for our example calculus
-\stlcbool.
+semantics of a programming language. In this section we will look at the precise
+definition of the type-safety language property, present methods for reasoning
+about semantics and outline how these can be used to prove the type-safety
+property for for our example calculus \stlcbool.
+
+We previously characterized type-safety as the absence of type-errors during
+execution. A type-error represents a state for which no further evaluation step
+is defined and hence evaluation stopped.
+
+\begin{defn}[Normal Form]
+  An expression $e_1$ is a \emph{normal form} if no further execution step can be
+  taken, i.e.
+  \[ \forall e_2. \neg (\eval{e_1}{e_2}) \]
+\end{defn}
+
+A type-error however did not produce any \emph{meaningful result}. Let us define
+what a meaningful result is. These are special expressions which are also called
+values.
+
+\begin{defn}[Value]
+  Values are the subset of expressions that are defined by the following
+  grammar:
+  \begin{center}
+    \begin{tabular}{lcll}
+      $v$             & ::=    &                            & term             \\
+                      & $\mid$ & $\true$                    & true constant    \\
+                      & $\mid$ & $\false$                   & false constant   \\
+                      & $\mid$ & $\lambda x:\tau.e$         & term abstraction \\
+    \end{tabular}
+  \end{center}
+\end{defn}
+
+
+\begin{thm}[Type-Safety]
+  Let $\typing{\cdot}{e_1}{\tau}$. If $e_1$ evaluates to a normal-form $e_2$,
+  i.e.
+  \[ \evals{e_1}{e_2} \quad \wedge \quad (\forall e_3. \neg (\eval{e_2}{e_3})) \]
+  then $e_2$ is a value.
+\end{thm}
 
 \paragraph{Inductive Reasoning}
 Figures \ref{fig:intro:stlcbooleval} and \ref{fig:intro:stlcbooltyping} define
@@ -491,17 +558,11 @@ the \emph{smallest relation} that includes the presented rules. This gives rise
 to a \emph{structural induction principle} for the relations. Put differently,
 we can induct over the shape of derivation trees (or their size or height).
 
-As an example consider the following determinacy theorem which states that
-at each point there at most one possible successor state.
-\begin{thm}[Determinacy]
-  If $\eval{e_1}{e_2} \wedge \eval{e_1}{e_3}$ then $e_2 = e_3$.
-\end{thm}
-
-
-$ \forall e_3. \eval{e_1}{e_3} \Rightarrow e_2 = e_3$.
-
-
-
+%% As an example consider the following determinacy theorem which states that
+%% at each point there at most one possible successor state.
+%% \begin{thm}[Determinacy]
+%%   If $\eval{e_1}{e_2} \wedge \eval{e_1}{e_3}$ then $e_2 = e_3$.
+%% \end{thm}
 
 
 \begin{lem}[Progress]
@@ -510,15 +571,6 @@ $ \forall e_3. \eval{e_1}{e_3} \Rightarrow e_2 = e_3$.
   \[ \exists e_2. \eval{e_1}{e_2}. \]
 \end{lem}
 
-\begin{lem}[Canonical Boolean Form]
-  Let $e$ be a value and $\typing{\Gamma}{e}{\bool}$ then
-  \[ e = \true \quad \vee \quad e = \false \].
-\end{lem}
-
-\begin{lem}[Canonical Function Form]
-  Let $e$ be a value and $\typing{\Gamma}{e}{\tau \to \sigma}$ then
-  \[ \exists e_1. (e = (\lambda x:\tau.e_1) \wedge \typing{\Gamma, x:\tau}{e_1}{\sigma}). \]
-\end{lem}
 
 \begin{lem}[Preservation]
   If $\typing{\Gamma}{e_1}{\tau}$ and $\eval{e_1}{e_2}$ then $\typing{\Gamma}{e_2}{\tau}$.

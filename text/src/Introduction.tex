@@ -77,7 +77,7 @@ order to make the process more manageable, the field of programming language
 theory has adopted several methodological measures.
 
 Firstly, because full programming languages are too large to handle,
-meta-theoretical usually restricts itself to a subset of the language, known as
+meta-theoretical analysis usually restricts itself to a subset of the language, known as
 a \emph{calculus}, that contains the main features of interest for the property
 at hand. Because calculi are much smaller so are the proofs of their 
 meta-theory. The downside is that results for a calculus do not always
@@ -89,56 +89,47 @@ For example, the Java programming language was long believed to be type-safe
 but the addition of generics made Java's type system
 unsound~\cite{amin2016java}. This fact was not apparent for many years, and
 contradicts the type-safety results for several generic Java calculi~\cite{}.
-
-
-
-Another problem concerns the type-checking of Java
-programs. Generics made type-checking an undecidable property of
-programs~\cite{grigore2017}. Decidability of type-checking does not have an
-impact on properties that we get for type-checked programs, but for example it
-opens up attack vectors on (web) services that deal with Java code because the
-type checker may run forever.
-
+% Another problem concerns the type-checking of Java
+% programs. Generics made type-checking an undecidable property of
+% programs~\cite{grigore2017}. Decidability of type-checking does not have an
+% impact on properties that we get for type-checked programs, but for example it
+% opens up attack vectors on (web) services that deal with Java code because the
+% type checker may run forever.
 
 Secondly, because pen-and-paper proofs are very error-prone and human reviewers
 are not perfect at vetting them, meta-theoretical proofs are often written in
 formal languages that can be automatically checked by software tools known as
 \emph{proof assistants}. This process, known as ``mechanisation'', greatly
-increases the confidence in the validity of meta-theory proofs.
+increases the confidence in the validity of meta-theory proofs. Unfortunately,
+mechanisation does not address the large effort of proving properties, but rather
+aggravates it as every little detail has to be spelled out.
 
-To increase the confidence in the correctness of formal meta-theory, techniques
-for formalization in proof-assistants, also known as mechanization, have
-received much attention. These systems allow us to state mathematical statements
-and proofs for them and let the machine check that these are in fact valid
-proofs. However, the high development cost of mechanizations continues to
-prevent their widespread use. This leads us to the research question that this
-thesis tries to answer:
-
-
-
+\paragraph{Research Question}
+Despite the mitigating efforts of the current state of the art, neither the
+formal specification of programming languages nor their rigorously mechanised
+meta-theoretical analysis are a widespread practice. The development costs
+are still too steep to make this possible for realistic programming languages.
+This leads us to the research question of this thesis:
 \begin{center}
-  \begin{minipage}{0.8\columnwidth}
-    How can we reduce the costs of mechanizing formal meta-theory of programming
+  \begin{minipage}{0.8\columnwidth}\bf
+    How can we reduce the cost of mechanizing the formal meta-theory of programming
     languages?
   \end{minipage}
 \end{center}
 
-\begin{itemize}
-\item Current methodology.
-\item Why is the current methodology costly?
-\item Give an idea of the relative effort.
-\item What is the approach answer of this thesis?
+% \begin{itemize}
+% \item Current methodology.
+% \item Why is the current methodology costly?
+% \item Give an idea of the relative effort.
+% \item What is the approach answer of this thesis?
+% 
+%   Increase reusability of code. Two strands: Modularity / Genericity.
+% \end{itemize}
 
-  Increase reusability of code. Two strands: Modularity / Genericity.
-\end{itemize}
-
-
-
-
-The remainder of this chapter will give a more detailed introduction to the
-relevant disciplines of specification, analysis and mechanization of programming
-languages similar to what can be found in introductory textbooks such as
-\cite{tapl}.
+The remainder of this chapter provides a more detailed introduction to the
+established methodology for formalising programming languages and mechanising their
+meta-theory. We refer the interested reader to introductory textbooks on the matter (e.g., \cite{tapl})
+for more detail.
 
 %% %-------------------------------------------------------------------------------
 %% \section{Mechanization}

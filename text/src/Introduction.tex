@@ -11,72 +11,100 @@
 
 \chapter{Introduction}
 
-The concept of programming can be defined as communicating how to perform tasks
-to a computer. An increasing number of fields such as biology, engineering,
-physics, psychology and sociology rely on programming. Programming is not
-limited to sciences. The ubiquity of computers and the pervasive use of software
-in our society indirectly depend on programming and programmers.  However,
-software is notoriously unreliable. Given the extent of our dependence on
-software this is all the more detrimental and costly.
+The concept of \emph{programming} can be defined as explaining to a computer how
+to perform a particular task. The language of communication is known as a
+\emph{programming language} and the explanation expressed in a programming
+language is called a \emph{program}; collectively programs are known as
+\emph{software}. Unfortunately, programming is notoriously error-prone and
+software often unreliable. Given the ubiquity of computers and the pervasive
+use of software in present-day society, this unreliability is a very costly and
+sometimes critical issue.
 
-In order to improve upon this situation we need to meliorate the process of
-programming itself.
-\begin{itemize}
-\item 'Programming languages' are the tools/methods for programming
-\item The minimum requirement is that a program does what it's intended to do.
-\end{itemize}
+A prominent way to address this situation is to improve the programming
+process. In particular, it is important that the programmer can verify whether
+the program she has written implements the intended tasks. This is usually
+achieved by reasoning with the \emph{expected behaviour} of a program, which of
+course requires a solid understanding of the programming language in which the
+program is expressed.
 
-For a programmer it is essential that she can validate that a program implements
-exactly the intended task which is usually achieved by reasoning with the
-\emph{expected behaviour} of a program.
-
-But how is the behaviour of programming constructs defined, or more generally,
-how are programming languages defined? The majority of programming languages
-start with a reference implementation that effectively defines the language.
-% Examples of languages that are (still) defined this way include Perl -
-% Perl~5~\cite{perllanguage} and Python~\cite{pythonlanguage}.
-
-After widespread use, a language may go through a standardization process:
-multiple stakeholders develop a common language specification.
+\paragraph{Programming Language Specifications}
+In practice most programming languages do not start out as well-defined entities
+with an explicit meaning. Instead they are usually indirectly defined in terms
+of a software artifact like a compiler or interpreter, written in an existing
+language, that processes the programs of the new language according to some
+implicit intended meaning.
+Only after widespread use and when the implicit definition becomes untenable, a
+language may go through a standardization process where multiple stakeholders
+develop a common specification of the language.
 % , e.g. PHP was standardized in 2014~\cite{phpspec}.
-Another approach is develop specifications together with a reference
-implementation. These two approaches are not mutually exclusive: languages with
-an existing specification are extended in tandem with implementations.
 
-Such a language specification allows a programmer to resolve ambiguities when
-reasoning about her programs independent of a particular implementation. It also
-enables us to switch between implementations.
+% Another approach is develop specifications together with a reference
+% implementation. These two approaches are not mutually exclusive: languages with
+% an existing specification are extended in tandem with implementations.
 
-Programming language theory is a branch of computer science that deals with
-language specifications, design, implementation, and in particular also
-meta-theoretical analysis of programming languages, their semantics and related
-systems like type systems. When developing new languages or language features we
-want to make sure that the design is coherent and fulfills the expectations of
-users.
+Such a language specification has many advantages. For instance, it allows
+different parties to develop software tools that process programs consistently,
+and programmers to switch between tool vendors without a hitch.
+Also, it allows programmers to resolve ambiguities when reasoning about her
+programs independent of a particular implementation. 
 
-The programmer is often given useful safety guarantees for this programs. For
-instance, many modern programming language provide garbage collection
-facilities. Yet we want our programs to be memory safe, i.e. they do not access
-memory that has been freed or that has not yet been initialized. Another safety
-property is type safety, i.e. the absence of dynamic type errors during
-execution. These guarantees are usually provided for all programs written in a
-language or a specific subset of programs, e.g. all type-checked programs. In a
-meta-theoretical analysis we want to make sure that these are indeed valid
-guarantees.
 
-The meta-theory of programming language semantics and type systems is highly
-complex due to the management of many details and edge cases. As such, it is
-prone to subtle errors that can invalidate large amounts of work.
+\paragraph{Programming Language Theory}
+The specification of programming languages is subject to scientific study in
+the field of \emph{programming language theory}. This field deals with all
+aspects of language specifications: the design and implementation of their
+syntax, semantics and that of auxiliary systems such as type systems. In addition
+the field also studies the \emph{meta-theoretical properties} (or meta-theory for short)
+of languages. These meta-theoretical properties capture expectations and coherence
+aspects of newly developed languages or language features, such as 
+useful safety guarantees that 
+hold for all programs expressed in the language. 
 
+A prominent meta-theoretical property is \emph{type-safe}, i.e., the absence of
+dynamic type errors during execution. These guarantees are usually provided for
+all programs written in the language, or at least for the specific subset of
+programs that have been type-checked. Because meta-theoretical properties like
+type safety do not automatically hold for all programming languages, we need to
+verify whether they actually hold for given languages. If they do not, this
+often points to a flaw in the language's design or a misunderstanding of the
+language's workings.
+
+\paragraph{Mechanised Meta-Theory of Calculi}
+Verifying meta-theoretical properties of programming languages is not a trivial
+activity. Due to many subtle details and edge cases, proofs can easily become
+unwieldy and getting the proof structure right requires a lot of effort. In
+order to make the process more manageable, the field of programming language
+theory has adopted several methodological measures.
+
+Firstly, because full programming languages are too large to handle,
+meta-theoretical usually restricts itself to a subset of the language, known as
+a \emph{calculus}, that contains the main features of interest for the property
+at hand. Because calculi are much smaller so are the proofs of their 
+meta-theory. The downside is that results for a calculus do not always
+carry over to the full language. Problems in the calculus often reveal
+problems in the full language, but the absence of problems in the calculus
+does not guarantee the same for the full language.
 For example, the Java programming language was long believed to be type-safe
 \footnote{Except for some deliberate defects like the co-variance of arrays.}
-but the addition of Generics made Java's type system in fact unsound
-\cite{amin2016java}. Another problem concerns the type-checking of Java
+but the addition of generics made Java's type system
+unsound~\cite{amin2016java}. This fact was not apparent for many years, and
+contradicts the type-safety results for several generic Java calculi~\cite{}.
+
+
+
+Another problem concerns the type-checking of Java
 programs. Generics made type-checking an undecidable property of
 programs~\cite{grigore2017}. Decidability of type-checking does not have an
 impact on properties that we get for type-checked programs, but for example it
 opens up attack vectors on (web) services that deal with Java code because the
 type checker may run forever.
+
+
+Secondly, because pen-and-paper proofs are very error-prone and human reviewers
+are not perfect at vetting them, meta-theoretical proofs are often written in
+formal languages that can be automatically checked by software tools known as
+\emph{proof assistants}. This process, known as ``mechanisation'', greatly
+increases the confidence in the validity of meta-theory proofs.
 
 To increase the confidence in the correctness of formal meta-theory, techniques
 for formalization in proof-assistants, also known as mechanization, have
@@ -85,6 +113,8 @@ and proofs for them and let the machine check that these are in fact valid
 proofs. However, the high development cost of mechanizations continues to
 prevent their widespread use. This leads us to the research question that this
 thesis tries to answer:
+
+
 
 \begin{center}
   \begin{minipage}{0.8\columnwidth}

@@ -50,7 +50,7 @@ enables us to switch between implementations.
 Programming language theory is a branch of computer science that deals with
 language specifications, design, implementation, and in particular also
 meta-theoretical analysis of programming languages, their semantics and related
-systems like type-systems. When developing new languages or language features we
+systems like type systems. When developing new languages or language features we
 want to make sure that the design is coherent and fulfills the expectations of
 users.
 
@@ -58,13 +58,13 @@ The programmer is often given useful safety guarantees for this programs. For
 instance, many modern programming language provide garbage collection
 facilities. Yet we want our programs to be memory safe, i.e. they do not access
 memory that has been freed or that has not yet been initialized. Another safety
-property is type-safety, i.e. the absence of dynamic type errors during
+property is type safety, i.e. the absence of dynamic type errors during
 execution. These guarantees are usually provided for all programs written in a
 language or a specific subset of programs, e.g. all type-checked programs. In a
 meta-theoretical analysis we want to make sure that these are indeed valid
 guarantees.
 
-The meta-theory of programming language semantics and type-systems is highly
+The meta-theory of programming language semantics and type systems is highly
 complex due to the management of many details and edge cases. As such, it is
 prone to subtle errors that can invalidate large amounts of work.
 
@@ -76,7 +76,7 @@ programs. Generics made type-checking an undecidable property of
 programs~\cite{grigore2017}. Decidability of type-checking does not have an
 impact on properties that we get for type-checked programs, but for example it
 opens up attack vectors on (web) services that deal with Java code because the
-type-checker may run forever.
+type checker may run forever.
 
 To increase the confidence in the correctness of formal meta-theory, techniques
 for formalization in proof-assistants, also known as mechanization, have
@@ -121,7 +121,7 @@ languages similar to what can be found in introductory textbooks such as
 %% \begin{itemize}
 %% \item
 %%   Derive properties for all programs written in a language, like memory-safety,
-%%   type-safety, resources-safety, termination, absence of deadlocks, race
+%%   type safety, resources-safety, termination, absence of deadlocks, race
 %%   conditions and starvation.
 %%
 %% \item
@@ -512,12 +512,13 @@ To ensure that our languages are well-designed we want to establish
 meta-theoretical properties that ensures that all the guarantees a user expects
 are indeed valid. This needs a rigorous and formal analysis of the defined
 semantics of a programming language. In this section we will look at the precise
-definition of the type-safety language property, present methods for reasoning
-about semantics and outline how these can be used to prove the type-safety
+definition of the type safety language property, present methods for reasoning
+about semantics and outline how these can be used to prove the type safety
 property for for our example calculus \stlcbool.
 
-We previously characterized type-safety as the absence of type-errors during
-execution. A type-error represents a state for which no further evaluation step
+\paragraph{Type Safety}
+We previously characterized type safety as the absence of type errors during
+execution. A type error represents a state for which no further evaluation step
 is defined and hence evaluation stopped.
 
 \begin{defn}[Normal Form]
@@ -526,7 +527,7 @@ is defined and hence evaluation stopped.
   \[ \forall e_2. \neg (\eval{e_1}{e_2}) \]
 \end{defn}
 
-A type-error however did not produce any \emph{meaningful result}. Let us define
+A type error however did not produce any \emph{meaningful result}. Let us define
 what a meaningful result is. These are special expressions which are also called
 values.
 
@@ -543,25 +544,28 @@ values.
   \end{center}
 \end{defn}
 
-Expressions with type-errors are hence normal forms that are not values. We can
+Expressions with type errors are hence normal forms that are not values. We can
 hence make \emph{the absence of type error} more precise by requiring that all
 normal forms are already values.
 
-\begin{thm}[Type-Safety]
+\begin{thm}[Type Safety]
   Let $\typing{\cdot}{e_1}{\tau}$. If $e_1$ evaluates to a normal form $e_2$
   then $e_2$ is a value.
 \end{thm}
 
 Note that this definition does not require the evaluation to terminate.  A
-program that runs forever without a type-error is also considered type-safe.
+program that runs forever without a type error is also considered type-safe.
 
 
 \paragraph{Inductive Reasoning}
-Figures \ref{fig:intro:stlcbooleval} and \ref{fig:intro:stlcbooltyping} define
-evaluation and typing for \stlcbool. More precisely, our intention is to define
-the \emph{smallest relation} that includes the presented rules. This gives rise
-to a \emph{structural induction principle} for the relations. Put differently,
-we can induct over the shape of derivation trees (or their size or height).
+For the proof of the type safety property we first need to establish methods for
+reasoning about the evaluation and typing of \stlcbool. Figures
+\ref{fig:intro:stlcbooleval} and \ref{fig:intro:stlcbooltyping} define
+evaluation and typing for \stlcbool. More precisely, our intention in both
+figures is to define the \emph{smallest relation} that includes the presented
+rules. This gives rise to a \emph{structural induction principle} for the
+relations. Put differently, we can induct over the shape of derivation trees (or
+their size or height).
 
 %% As an example consider the following determinacy theorem which states that
 %% at each point there at most one possible successor state.
@@ -631,7 +635,7 @@ From \cite{yang2011bugs}:
   users.}
 
 
-%% The meta-theory of programming language semantics and type-systems is highly
+%% The meta-theory of programming language semantics and type systems is highly
 %% complex due to the management of many details. Formal proofs are long and prone
 %% to subtle errors that can invalidate large amounts of work. In order to
 %% guarantee the correctness of formal meta-theory, techniques for mechanical
@@ -661,7 +665,7 @@ From \cite{yang2011bugs}:
 %% lookups. \Knot also comes with a code generator, \Needle, that specializes the
 %% generic boilerplate for convenient embedding in \Coq and provides a tactic
 %% library for automatically discharging proof obligations that frequently come up
-%% in proofs of weakening and substitution lemmas of type-systems.
+%% in proofs of weakening and substitution lemmas of type systems.
 %%
 %% Our evaluation shows, that Needle \& Knot significantly reduce the size of
 %% language mechanizations (by 40\% in our case study). Moreover, as far as we

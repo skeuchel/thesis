@@ -516,6 +516,45 @@ definition of the type safety language property, present methods for reasoning
 about semantics and outline how these can be used to prove the type safety
 property for for our example calculus \stlcbool.
 
+\paragraph{Inductive Reasoning}
+We first need to establish methods for reasoning about the evaluation and typing
+of \stlcbool. Figures \ref{fig:intro:stlcbooleval} and
+\ref{fig:intro:stlcbooltyping} define evaluation and typing for \stlcbool. More
+precisely, our intention in both figures is to define the \emph{smallest
+  relation} that includes the presented rules. This gives rise to a
+\emph{structural induction principle} for the relations. Put differently, we can
+induct over the shape of derivation trees (or their size or height).
+
+As an example consider the following determinacy theorem which states that
+at each point there at most one possible successor state.
+\begin{thm}[Determinacy]
+  If $\eval{e_1}{e_2} \wedge \eval{e_1}{e_3}$ then $e_2 = e_3$.
+\end{thm}
+
+\begin{proof}
+  The proof proceeds by induction over the derivation of $\eval{e_1}{e_2}$ for
+  each possible case we have to inspect the last rule that was used to
+  derive $\eval{e_1}{e_3}$ which will in fact be the same one that was used to
+  derive $\eval{e_1}{e_2}$ and hence the property follows.
+
+  We make this more precise for one of the inductive steps. Consider the case
+  $e_1 = \ite{\true}{e_{11}}{e_{12}}$ and $\eval{e_1}{e_2}$ was derived using
+  rule \textsc{EIfTrue}. Now look at the last rule that was used to derive
+  $\eval{e_1}{e_3}$. There are two possibilities: rule \textsc{EIfTrue} and
+  \textsc{EIf}.
+
+  \begin{enumerate}
+  \item If rule \textsc{EIfTrue} was used, then we have the chain of equalities
+    $e_2 = e_{11} = e_3$ which is what we intended to prove.
+  \item If rule \textsc{EIf} was used, then we get the derivation
+    $\eval{\true}{e'}$ for some $e'$ from the premise of the rule. However this
+    is impossible because no rule evaluates $\true$ further.
+  \end{enumerate}
+\end{proof}
+
+% More precisely we have to proof
+% $\forall e_3. \eval{e_1}{e_3} \Rightarrow e_2 = e_3$.
+
 \paragraph{Type Safety}
 We previously characterized type safety as the absence of type errors during
 execution. A type error represents a state for which no further evaluation step
@@ -555,23 +594,6 @@ normal forms are already values.
 
 Note that this definition does not require the evaluation to terminate.  A
 program that runs forever without a type error is also considered type-safe.
-
-
-\paragraph{Inductive Reasoning}
-For the proof of the type safety property we first need to establish methods for
-reasoning about the evaluation and typing of \stlcbool. Figures
-\ref{fig:intro:stlcbooleval} and \ref{fig:intro:stlcbooltyping} define
-evaluation and typing for \stlcbool. More precisely, our intention in both
-figures is to define the \emph{smallest relation} that includes the presented
-rules. This gives rise to a \emph{structural induction principle} for the
-relations. Put differently, we can induct over the shape of derivation trees (or
-their size or height).
-
-%% As an example consider the following determinacy theorem which states that
-%% at each point there at most one possible successor state.
-%% \begin{thm}[Determinacy]
-%%   If $\eval{e_1}{e_2} \wedge \eval{e_1}{e_3}$ then $e_2 = e_3$.
-%% \end{thm}
 
 
 \begin{lem}[Progress]

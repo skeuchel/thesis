@@ -532,23 +532,38 @@ at each point there at most one possible successor state.
 \end{thm}
 
 \begin{proof}
-  The proof proceeds by induction over the derivation of $\eval{e_1}{e_2}$ for
-  each possible case we have to inspect the last rule that was used to
-  derive $\eval{e_1}{e_3}$ which will in fact be the same one that was used to
-  derive $\eval{e_1}{e_2}$ and hence the property follows.
+  The proof proceeds by induction over the derivation of $\eval{e_1}{e_2}$. For
+  each possible case in the derivation of $\eval{e_1}{e_2}$ we also have to
+  inspect the last rule that was used to derive $\eval{e_1}{e_3}$. If the same
+  rule was used we can derive the equations. All other combinations lead to a
+  contradiction and hence the property follows.
 
-  We make this more precise for one of the inductive steps. Consider the case
-  $e_1 = \ite{\true}{e_{11}}{e_{12}}$ and $\eval{e_1}{e_2}$ was derived using
-  rule \textsc{EIfTrue}. Now look at the last rule that was used to derive
-  $\eval{e_1}{e_3}$. There are two possibilities: rule \textsc{EIfTrue} and
-  \textsc{EIf}.
+  We go through one of the inductive steps in detail and omit the
+  others. Consider the case where $\eval{e_1}{e_2}$ was derived using
+  \textsc{EIf}. So there exist expressions $e_{11}, e'_{11}, e_{12}, e_{13}$
+  such that
+  \begin{gather*}
+    e_1 = \ite{e_{11}}{e_{12}}{e_{13}}, \\
+    e_2 = \ite{e'_{11}}{e_{12}}{e_{13}} \\
+    \text{and}~\eval{e_{11}}{e'_{11}}.
+  \end{gather*}
+
+  Now look at the last rule that was used to derive $\eval{e_1}{e_3}$. There are
+  two possibilities: rule \textsc{EIfTrue} and rule \textsc{EIf}.
 
   \begin{enumerate}
-  \item If rule \textsc{EIfTrue} was used, then we have the chain of equalities
-    $e_2 = e_{11} = e_3$ which is what we intended to prove.
-  \item If rule \textsc{EIf} was used, then we get the derivation
-    $\eval{\true}{e'}$ for some $e'$ from the premise of the rule. However this
-    is impossible because no rule evaluates $\true$ further.
+  \item If rule \textsc{EIfTrue} was used, then we learn that $e_{11} = \true$
+    and therefore $\eval{\true}{e'_{11}}$. However this is impossible because no
+    rule evaluates $\true$ further.
+
+  \item If rule \textsc{EIf} was used, then there exists $e''_{11}$ such that
+    \begin{gather*}
+      \text{and}~\eval{e_{11}}{e''_{11}}.
+    \end{gather*}
+
+    Applying the inductive hypothesis of $\eval{e_{11}}{e'_{11}}$ to the
+    derivation $\eval{e_{11}}{e''_{11}}$ gives us the equality
+    $e'_{11} = e''_{11}$ from which we can derive $e_2 = e_3$.
   \end{enumerate}
 \end{proof}
 

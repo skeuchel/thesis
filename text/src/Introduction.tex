@@ -117,6 +117,15 @@ This leads us to the research question of this thesis:
   \end{minipage}
 \end{center}
 
+The main approach put forward in this thesis is \emph{reuse}. Reuse is a common
+approach in software engineering to reduce development cost and increase both
+quality and reliability. The idea is to identify functionality or patterns that
+are in common between different software systems, and to implement them only once
+in a manner that can be shared by the different software systems. We apply the
+same idea to programming language meta-theory, identifying repeated
+functionality and patterns, and implementing them only once in a way that can
+be used across proofs for different languages.
+
 % \begin{itemize}
 % \item Current methodology.
 % \item Why is the current methodology costly?
@@ -127,9 +136,10 @@ This leads us to the research question of this thesis:
 % \end{itemize}
 
 The remainder of this chapter provides a more detailed introduction to the
-established methodology for formalising programming languages and mechanising their
-meta-theory. We refer the interested reader to introductory textbooks on the matter (e.g., \cite{tapl})
-for more detail.
+established methodology for mechanising the meta-theory of programming
+languages\footnote{We refer the interested
+reader to introductory textbooks on the matter (e.g., \cite{tapl}) for more
+detail.} and points out opportunities for reuse. 
 
 %% %-------------------------------------------------------------------------------
 %% \section{Mechanization}
@@ -154,7 +164,7 @@ for more detail.
 %% \end{itemize}
 
 %-------------------------------------------------------------------------------
-\section{Specifications}\label{sec:intro:specification}
+\section{Programming Language Specifications}\label{sec:intro:specification}
 
 %% Standardization and functional or program specifications are an essential
 %% methodology in systems engineering and software development. It serves as the
@@ -174,17 +184,18 @@ for more detail.
 %% application binary interface, for example, to achieve binary compatibility of
 %% modules compiled by different compilers is beyond the scope of this thesis.
 
-Specifications differ in the detail and precision they describe systems.
+Specifications of programming languages differ in detail and precision.
 Industrial specifications of major programming languages are usually written in
-natural language and are detailed to cover every aspect of the languages. The
-use of natural language leaves opportunities for ambiguity, but disregarding
-this problem, elaborate industrial specifications provide a good reference point
-for language users and implementors. However, for meta-theoretical analyses more
-rigorous specifications are necessary.
+natural language and cover every aspect of the language in detail. Despite
+the fact that natural language leaves opportunities for ambiguity, elaborate
+industrial specifications provide a good reference point for language users and
+implementors. However, for meta-theoretical analyses more rigorous
+specifications are necessary.
+For this purpose we use \emph{formal specifications} and a mathematical language to
+describe programming languages. This provides the necessary precision and
+avoids the ambiguities of natural languages. 
 
-We will use \emph{formal specifications} and a mathematical language to
-describe programming languages. This gives use the necessary precision and
-avoids the ambiguities of natural languages. This section explains necessary
+This section explains necessary
 fundamental concepts for the formal specification of programming languages by
 example of a small language \stlcbool: a simply-typed lambda calculus with
 booleans. We specify the \emph{abstract syntax}, \emph{static type system} and
@@ -226,8 +237,8 @@ precise.
 \end{figure}
 
 The syntax of \stlcbool is given in Figure \ref{fig:intro:stlcboolsyntax}. We
-use a convention that is close to standard \textsc{EBnf} grammars. Elided in the
-grammar are syntactic constructs like parentheses. We use parentheses freely to
+use a convention that is close to standard (extended Backus-Naur form) grammars. Elided in the
+grammar are syntactic constructs like parentheses. Yet we use parentheses freely to
 resolve ambiguities in terms even if the grammar does not define them. Any
 implementation that deals with the concrete syntax of a programming language has
 of course to be more rigorous.
@@ -242,7 +253,7 @@ $(\lambda x:\tau.e)$ or the application of an expression $e_1$ to another
 expression $e_2$. Of course we only want to apply expressions $e_1$ that
 represent functions: either by being a \textlambda-abstraction or evaluating to
 one. Applying any \emph{value} other than a \textlambda-abstraction is a
-\emph{type error}. We make this more precise below and come back to it it
+\emph{type error}. We make this more precise below and come back to it in
 Section \ref{sec:intro:typesafety} on analysis.
 
 The grammar also includes the meta-variable $\tau$ that describes the types of
@@ -302,7 +313,7 @@ different groups:
 
 \end{enumerate}
 
-These approaches have different trade-offs. Denotational and axiomatic semantics
+These three approaches have different trade-offs. Denotational and axiomatic semantics
 immediately give us powerful mathematical tools to reason about programming
 languages and their programs, but for larger languages the required technicality
 and complexity makes it extremely difficult to even define a suitable semantics.
@@ -382,7 +393,7 @@ the judgement $J$ below the line is the conclusion. Rule without any premises
 are also called \emph{axioms}. The conclusion will always involve the relation
 that is being defined.
 
-The single-step evaluation is defines using five rules. The two axioms
+The single-step evaluation is defined using five rules. The two axioms
 \textsc{EIfTrue} and \textsc{EIfFalse} show how to reduce an
 \textbf{if}-expression in case the condition is either a \true or a \false
 value. The case of a condition that is not yet fully evaluated is handled by
@@ -395,19 +406,19 @@ The last two rules cover the evaluation of \textlambda-terms. The rule
 a \textlambda-term $(\lambda x:\tau.e_1)$. The residual program is the the body
 $e_1$ of the function after substituting $e_2$ for $x$ which we write as
 $[x \mapsto e_2]e_1$. The argument of the function does not have to be fully
-evaluated, i.e. the rules encode a \emph{call-by-name} evaluation strategy. If
+evaluated, i.e., the rules encode a \emph{call-by-name} evaluation strategy. If
 the left-hand side is not yet a \textlambda-term, we evaluate it first similarly
 to \textsc{EIf}.
 
-Note that this definition does not cover all the cases. In particular
+Note that this definition does not cover all possible cases. In particular
 the case of a \textlambda-term in the condition of an \textbf{if}-expression
 \[ \ite{(\lambda x:\tau.e)}{e_t}{e_e} \]
 \noindent and the cases of a boolean in the left-hand side of an application
 \[ \true~e_1 \qquad \text{or} \qquad \false~e_2 \]
 \noindent are not specified. Since no transition is defined and the execution
-stopped without any \emph{meaningful result}, we also say that the evaluation
+is stopped without any \emph{meaningful result}, we also say that the evaluation
 got stuck. In an implementation of the programming language, this corresponds to
-an error that can happen during execution of a program. It's therefore also
+an error that can happen during the execution of a program. It's therefore also
 called a \emph{(dynamic) type error}. Programmers want to detect potential
 problems like that early in the development cycle and, if possible, at compile
 time. This motivates the development of \emph{static type systems}.
@@ -466,7 +477,7 @@ time. This motivates the development of \emph{static type systems}.
 A \emph{type system} is an assignment of types to expressions. Usually not all
 expressions are typeable and un-typeable expressions are rejected. Also in some
 languages there are expressions that can be assigned multiple, potentially
-incomparable types. Both, the partiality and the ambiguity of types, suggests a
+incomparable types. Both the partiality and the ambiguity of types suggest a
 \emph{relational} rather than a \emph{functional} assignment. Such a relation is
 defined in Figure \ref{fig:intro:stlcbooltyping}. It is a ternary relation
 \framebox{\mbox{$\typing{\Gamma}{e}{\tau}$}} between a typing context $\Gamma$,
@@ -556,14 +567,14 @@ precisely, our intention in both figures is to define the \emph{smallest
 induct over the shape of derivation trees (or their size or height).
 
 As an example consider the following determinacy theorem which states that
-at each point there at most one possible successor state.
+at each point there is at most one possible successor state.
 \begin{thm}[Determinacy]
   If $\eval{e_1}{e_2} \wedge \eval{e_1}{e_3}$ then $e_2 = e_3$.
 \end{thm}
 
 \begin{proof}
   The proof proceeds by induction over the derivation of $\eval{e_1}{e_2}$. For
-  each possible case in the derivation of $\eval{e_1}{e_2}$ we also have to
+  each possible case in the derivation of $\eval{e_1}{e_2}$ we 
   inspect the last rule that was used to derive $\eval{e_1}{e_3}$. If the same
   rule was used we can derive the equations. All other combinations lead to a
   contradiction and hence the property follows.
@@ -605,7 +616,7 @@ at each point there at most one possible successor state.
 
 One of the essential properties of statically-typed languages is type safety.
 When working in such a language a programmer expects type guarantees when her
-program is executed, e.g. all arguments passed to a function have exactly
+program is executed, e.g., all arguments passed to a function have exactly
 the types indicated by the function's type signature.
 
 We previously characterized type safety as the absence of type errors during
@@ -614,7 +625,7 @@ is defined and hence evaluation stopped.
 
 \begin{defn}[Normal Form]
   An expression $e_1$ is a \emph{normal form} if no further execution step can be
-  taken, i.e.
+  taken, i.e.,
   \[ \forall e_2. \neg (\eval{e_1}{e_2}) \]
 \end{defn}
 
@@ -636,7 +647,7 @@ values.
 \end{defn}
 
 Expressions with type errors are hence normal forms that are not values. We can
-hence make \emph{the absence of type error} more precise by requiring that all
+make \emph{``the absence of type errors''} more precise by requiring that all
 normal forms are already values.
 
 \begin{thm}[Type Safety]

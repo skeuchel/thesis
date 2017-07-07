@@ -293,42 +293,59 @@
 }
 
 @Article{hybrid,
-  title		= "{T}wo-{L}evel {H}ybrid: {A} {S}ystem for {R}easoning Using
-		  {H}igher-{O}rder {A}bstract {S}yntax ",
-  journal	= "ENTCS",
-  year		= "2008",
-  author	= "Alberto Momigliano and Alan J. Martin and Amy P. Felty"
+  title =        "{T}wo-{L}evel {H}ybrid: {A} {S}ystem for {R}easoning Using
+                  {H}igher-{O}rder {A}bstract {S}yntax ",
+  journal =      "ENTCS",
+  year =         "2008",
+  author =       "Alberto Momigliano and Alan J. Martin and Amy P. Felty"
 }
 
 @InProceedings{indexedcontainers,
-  title		= {Indexed Containers},
-  author	= {Altenkirch, T. and Morris, P.},
-  booktitle	= {LICS '09},
-  year		= {2009},
-  pages		= {277-285},
-  issn		= {1043-6871}
+  title =        {Indexed Containers},
+  author =       {Altenkirch, T. and Morris, P.},
+  booktitle =    {LICS '09},
+  year =         {2009},
+  pages =        {277-285},
+  issn =         {1043-6871}
 }
 
 @Article{jazayeri:circularity,
-  author	= {Jazayeri, Mehdi and Ogden, William F. and Rounds, William
-		  C.},
-  title		= {The {I}ntrinsically {E}xponential {C}omplexity of the
-		  {C}ircularity {P}roblem for {A}ttribute {G}rammars},
-  journal	= {Commun. ACM},
-  year		= {1975},
-  publisher	= {ACM},
-  keywords	= {attribute grammars, circularity problem, computational
-		  complexity, context-free grammars, exponential time,
-		  semantics}
+  author =       {Jazayeri, Mehdi and Ogden, William F. and Rounds, William C.},
+  title =        {The {I}ntrinsically {E}xponential {C}omplexity of the
+                  {C}ircularity {P}roblem for {A}ttribute {G}rammars},
+  journal =      {Commun. ACM},
+  year =         {1975},
+  publisher =    {ACM},
+  keywords =     {attribute grammars, circularity problem, computational
+                  complexity, context-free grammars, exponential time,
+                  semantics}
 }
 
-@InCollection{knotneedle,
-  author	= "Keuchel, Steven and Weirich, Stephanie and Schrijvers,
-		  Tom",
-  title		= "Needle {\&} {K}not: {B}inder {B}oilerplate {T}ied {U}p",
-  booktitle	= "ESOP",
-  year		= "2016",
-  publisher	= "Springer"
+@Inbook{knotneedle,
+  author =       "Keuchel, Steven and Weirich, Stephanie and Schrijvers, Tom",
+  editor =       "Thiemann, Peter",
+  title =        "Needle {\&} Knot: Binder Boilerplate Tied Up",
+  bookTitle =    "Programming Languages and Systems: 25th European Symposium on
+                  Programming, ESOP 2016, Held as Part of the European Joint
+                  Conferences on Theory and Practice of Software, ETAPS 2016,
+                  Eindhoven, The Netherlands, April 2--8, 2016, Proceedings",
+  year =         "2016",
+  publisher =    "Springer Berlin Heidelberg",
+  address =      "Berlin, Heidelberg",
+  pages =        "419--445",
+  abstract =     "To lighten the burden of programming language mechanization,
+                  many approaches have been developed that tackle the
+                  substantial boilerplate which arises from variable
+                  binders. Unfortunately, the existing approaches are limited in
+                  scope. They typically do not support complex binding forms
+                  (such as multi-binders) that arise in more advanced languages,
+                  or they do not tackle the boilerplate due to mentioning
+                  variables and binders in relations. As a consequence, the
+                  human mechanizer is still unnecessarily burdened with binder
+                  boilerplate and discouraged from taking on richer languages.",
+  isbn =         "978-3-662-49498-1",
+  doi =          "10.1007/978-3-662-49498-1_17",
+  url =          "http://dx.doi.org/10.1007/978-3-662-49498-1_17"
 }
 
 @Article{knuth:ag,
@@ -1583,6 +1600,7 @@ pages={233-248}
   title =        {{T}he {E}xpression {P}roblem},
   author =       {Philip Wadler},
   howpublished = {\url{http://homepages.inf.ed.ac.uk/wadler/papers/expression/expression.txt}},
+  year =         {1998},
   note =         {Accessed: 2017-05-10}
 }
 
@@ -1823,4 +1841,66 @@ pages={233-248}
   isbn =         "978-3-540-70592-5",
   doi =          "10.1007/978-3-540-70592-5_2",
   url =          "http://dx.doi.org/10.1007/978-3-540-70592-5_2"
+}
+
+
+@Article{Leroy2009,
+  author =       "Leroy, Xavier",
+  title =        "A Formally Verified Compiler Back-end",
+  journal =      "Journal of Automated Reasoning",
+  year =         "2009",
+  month =        "Nov",
+  day =          "04",
+  volume =       "43",
+  number =       "4",
+  pages =        "363",
+  abstract =     "This article describes the development and formal verification
+                  (proof of semantic preservation) of a compiler back-end from
+                  Cminor (a simple imperative intermediate language) to PowerPC
+                  assembly code, using the Coq proof assistant both for
+                  programming the compiler and for proving its soundness. Such a
+                  verified compiler is useful in the context of formal methods
+                  applied to the certification of critical software: the
+                  verification of the compiler guarantees that the safety
+                  properties proved on the source code hold for the executable
+                  compiled code as well.",
+  issn =         "1573-0670",
+  doi =          "10.1007/s10817-009-9155-4",
+  url =          "http://dx.doi.org/10.1007/s10817-009-9155-4"
+}
+
+@Inbook{Zhao2010,
+  author =       "Zhao, Jianzhou and Zhang, Qi and Zdancewic, Steve",
+  editor =       "Ueda, Kazunori",
+  title =        "Relational Parametricity for a Polymorphic Linear Lambda
+                  Calculus",
+  bookTitle =    "Programming Languages and Systems: 8th Asian Symposium, APLAS
+                  2010, Shanghai, China, November 28 - December 1,
+                  2010. Proceedings",
+  year =         "2010",
+  publisher =    "Springer Berlin Heidelberg",
+  address =      "Berlin, Heidelberg",
+  pages =        "344--359",
+  abstract =     "This paper presents a novel syntactic logical relation for a
+                  polymorphic linear $\lambda$-calculus that treats all types as
+                  linear and introduces the constructor ! to account for
+                  intuitionistic terms, and System F{\textdegree}---an extension
+                  of System F that uses kinds to distinguish linear from
+                  intuitionistic types. We define a logical relation for open
+                  values under both open linear and intuitionistic contexts,
+                  then extend it for open terms with evaluation and open
+                  relation substitutions. Relations that instantiate type
+                  quantifiers are for open terms and types. We demonstrate the
+                  applicability of this logical relation through its soundness
+                  with respect to contextual equivalence, along with free
+                  theorems for linearity that are difficult to achieve by closed
+                  logical relations. When interpreting types on only closed
+                  terms, the model defaults to a closed logical relation that is
+                  both sound and complete with respect to contextual equivalence
+                  and is sufficient to reason about isomorphisms of type
+                  encodings. All of our results have been mechanically verified
+                  in Coq.",
+  isbn =         "978-3-642-17164-2",
+  doi =          "10.1007/978-3-642-17164-2_24",
+  url =          "http://dx.doi.org/10.1007/978-3-642-17164-2_24"
 }

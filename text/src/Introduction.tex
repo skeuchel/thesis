@@ -16,8 +16,8 @@ to perform a particular task. The language of communication is known as a
 \emph{programming language} and the explanation expressed in a programming
 language is called a \emph{program}; collectively programs are known as
 \emph{software}. Unfortunately, programming is notoriously error-prone and
-software often unreliable. Given the ubiquity of computers and the pervasive
-use of software in present-day society, this unreliability is a very costly and
+software often unreliable. Given the ubiquity of computers and the pervasive use
+of software in present-day society, this unreliability is a very costly and
 sometimes critical issue.
 
 A prominent way to address this situation is to improve the programming
@@ -32,10 +32,10 @@ In practice most programming languages do not start out as well-defined entities
 with an explicit meaning. Instead they are usually indirectly defined in terms
 of a software artifact like a compiler or interpreter, written in an existing
 language, that processes the programs of the new language according to some
-implicit intended meaning.
-Only after widespread use and when the implicit definition becomes untenable, a
-language may go through a standardization process where multiple stakeholders
-develop a common specification of the language.
+implicit intended meaning.  Only after widespread use and when the implicit
+definition becomes untenable, a language may go through a standardization
+process where multiple stakeholders develop a common specification of the
+language.
 % , e.g. PHP was standardized in 2014~\cite{phpspec}.
 
 % Another approach is develop specifications together with a reference
@@ -44,30 +44,27 @@ develop a common specification of the language.
 
 Such a language specification has many advantages. For instance, it allows
 different parties to develop software tools that process programs consistently,
-and programmers to switch between tool vendors without a hitch.
-Also, it allows programmers to resolve ambiguities when reasoning about her
-programs independent of a particular implementation. 
+and programmers to switch between tool vendors without a hitch.  Also, it allows
+programmers to resolve ambiguities when reasoning about programs independent of
+a particular implementation.
 
 
 \paragraph{Programming Language Theory}
-The specification of programming languages is subject to scientific study in
-the field of \emph{programming language theory}. This field deals with all
-aspects of language specifications: the design and implementation of their
-syntax, semantics and that of auxiliary systems such as type systems. In addition
-the field also studies the \emph{meta-theoretical properties} (or meta-theory for short)
-of languages. These meta-theoretical properties capture expectations and coherence
-aspects of newly developed languages or language features, such as 
-useful safety guarantees that 
-hold for all programs expressed in the language. 
+The specification of programming languages is subject to scientific study in the
+field of \emph{programming language theory}. This field deals with all aspects
+of language specifications: the design and implementation of their syntax,
+semantics and that of auxiliary systems such as type systems. In addition the
+field also studies the \emph{meta-theoretical properties} (or meta-theory for
+short) of languages. These meta-theoretical properties capture expectations and
+coherence aspects of newly developed languages or language features, such as
+useful safety guarantees that hold for all programs expressed in the language.
 
-A prominent meta-theoretical property is \emph{type safety}, i.e., the absence of
-dynamic type errors during execution. These guarantees are usually provided for
-all programs written in the language, or at least for the specific subset of
-programs that have been type-checked. Because meta-theoretical properties like
-type safety do not automatically hold for all programming languages, we need to
-verify whether they actually hold for given languages. If they do not, this
-often points to a flaw in the language's design or a misunderstanding of the
-language's workings.
+A prominent meta-theoretical property is \emph{type safety}, i.e., the absence
+of dynamic type errors during execution. Because meta-theoretical properties
+like type safety do not automatically hold for all programming languages, we
+need to verify whether they actually hold for given languages. If they do not,
+this often points to a flaw in the language's design or a misunderstanding of
+the language's workings.
 
 \paragraph{Mechanised Meta-Theory of Calculi}
 Verifying meta-theoretical properties of programming languages is not a trivial
@@ -84,10 +81,10 @@ meta-theory. The downside is that results for a calculus do not always carry
 over to the full language. Problems in the calculus often reveal problems in the
 full language, but the absence of problems in the calculus does not guarantee
 the same for the full language.  For example, the Java programming language was
-long believed to be type-safe \footnote{Except for some deliberate defects like
+long believed to be type-safe\footnote{Except for some deliberate defects like
   the co-variance of arrays.}  but the addition of generics made Java's type
 system unsound~\cite{amin2016java}. This fact was not apparent for many years,
-and contradicts the type-safety results for several generic Java
+and contradicts the type safety results for several generic Java
 calculi~\cite{igarashi2001featherweight,Cameron2008}.
 % Another problem concerns the type-checking of Java
 % programs. Generics made type-checking an undecidable property of
@@ -101,30 +98,31 @@ are not perfect at vetting them, meta-theoretical proofs are often written in
 formal languages that can be automatically checked by software tools known as
 \emph{proof assistants}. This process, known as ``mechanisation'', greatly
 increases the confidence in the validity of meta-theory proofs. Unfortunately,
-mechanisation does not address the large effort of proving properties, but rather
-aggravates it as every little detail has to be spelled out.
+mechanisation does not address the large effort of proving properties, but
+rather aggravates it as every little detail has to be spelled out.
 
 \paragraph{Research Question}
 Despite the mitigating efforts of the current state of the art, neither the
 formal specification of programming languages nor their rigorously mechanised
-meta-theoretical analysis are a widespread practice. The development costs
-are still too steep to make this possible for realistic programming languages.
-This leads us to the research question of this thesis:
+meta-theoretical analysis are a widespread practice. The development costs are
+still too steep to make this possible for realistic programming languages. This
+leads us to the research question of this thesis:
 \begin{center}
   \begin{minipage}{0.8\columnwidth}\bf
-    How can we reduce the cost of mechanizing the formal meta-theory of programming
-    languages?
+    How can we reduce the cost of mechanising the formal meta-theory of
+    programming languages?
   \end{minipage}
 \end{center}
 
 The main approach put forward in this thesis is \emph{reuse}. Reuse is a common
 approach in software engineering to reduce development cost and increase both
 quality and reliability. The idea is to identify functionality or patterns that
-are in common between different software systems, and to implement them only once
-in a manner that can be shared by the different software systems. We apply the
-same idea to programming language meta-theory, identifying repeated
-functionality and patterns, and implementing them only once in a way that can
-be used across proofs for different languages.
+are in common between different software systems, and to implement them only
+once in a manner that can be shared by the different software systems and reused
+in the development of new systems. We apply the same idea to programming
+language meta-theory, identifying repeated functionality and patterns, and
+implementing them only once in a way that can be used across proofs for
+different languages.
 
 % \begin{itemize}
 % \item Current methodology.
@@ -137,16 +135,16 @@ be used across proofs for different languages.
 
 The remainder of this chapter provides a more detailed introduction to the
 established methodology for mechanising the meta-theory of programming
-languages\footnote{We refer the interested
-reader to introductory textbooks on the matter (e.g., \cite{tapl}) for more
-detail.} and points out opportunities for reuse. 
+languages\footnote{We refer the interested reader to introductory textbooks on
+  the matter (e.g., \cite{tapl}) for more detail.} and points out opportunities
+for reuse.
 
 %% %-------------------------------------------------------------------------------
-%% \section{Mechanization}
-%% Mechanizing formal meta-theory in proof-assistants is crucial, both for the
+%% \section{Mechanisation}
+%% Mechanising formal meta-theory in proof-assistants is crucial, both for the
 %% increased confidence in complex designs and as a basis for technologies such as
 %% proof-carrying code.  Formal reasoning in proof-assistants, also known as
-%% mechanization, has high development costs.
+%% mechanisation, has high development costs.
 %%
 
 %% \begin{itemize}
@@ -186,22 +184,21 @@ detail.} and points out opportunities for reuse.
 
 Specifications of programming languages differ in detail and precision.
 Industrial specifications of major programming languages are usually written in
-natural language and cover every aspect of the language in detail. Despite
-the fact that natural language leaves opportunities for ambiguity, elaborate
+natural language and cover every aspect of the language in detail. Despite the
+fact that natural language leaves opportunities for ambiguity, elaborate
 industrial specifications provide a good reference point for language users and
 implementors. However, for meta-theoretical analyses more rigorous
-specifications are necessary.
-For this purpose we use \emph{formal specifications} and a mathematical language to
-describe programming languages. This provides the necessary precision and
-avoids the ambiguities of natural languages. 
+specifications are necessary. For this purpose we use \emph{formal
+  specifications} and a mathematical language to describe programming
+languages. This provides the necessary precision and avoids the ambiguities of
+natural languages.
 
-This section explains necessary
-fundamental concepts for the formal specification of programming languages by
-example of a small language \stlcbool: a simply-typed lambda calculus with
-booleans. We specify the \emph{abstract syntax}, \emph{static type system} and
-\emph{evaluation} of \stlcbool using inductive definitions. Along the way, we
-define the terminology and notational conventions and make their meaning
-precise.
+This section explains necessary fundamental concepts for the formal
+specification of programming languages by example of a small language \stlcbool:
+a simply-typed lambda calculus with booleans. We specify the \emph{abstract
+  syntax}, \emph{static type system} and \emph{evaluation} of \stlcbool using
+inductive definitions. Along the way, we define the terminology and notational
+conventions and make their meaning precise.
 
 %-------------------------------------------------------------------------------
 \subsection{Syntax}\label{ssec:intro:syntax}
@@ -237,11 +234,11 @@ precise.
 \end{figure}
 
 The syntax of \stlcbool is given in Figure \ref{fig:intro:stlcboolsyntax}. We
-use a convention that is close to standard (extended Backus-Naur form) grammars. Elided in the
-grammar are syntactic constructs like parentheses. Yet we use parentheses freely to
-resolve ambiguities in terms even if the grammar does not define them. Any
-implementation that deals with the concrete syntax of a programming language has
-of course to be more rigorous.
+use a convention that is close to standard (extended Backus-Naur form)
+grammars. Elided in the grammar are syntactic constructs like parentheses. Yet
+we use parentheses freely to resolve ambiguities in terms even if the grammar
+does not define them. Any implementation that deals with the concrete syntax of
+a programming language has of course to be more rigorous.
 
 The grammar in Figure \ref{fig:intro:stlcboolsyntax} defines several
 \emph{syntactic sorts} for \stlcbool. The \emph{meta-variable} $e$ stands for
@@ -286,14 +283,13 @@ different groups:
   %% We can then define the meaning of programs to be the execution process on
   %% the abstract machine.
 
-
 \item Denotational Semantics
 
   Denotational semantics defines the meaning of programs in terms of collection
   of \emph{mathematical semantic domains} that can include numbers, sets or
   functions. An \emph{interpretation function} maps program terms into these
-  domains. This function is generally compositional in the syntax which
-  is beneficial for modularity.
+  domains. This function is generally compositional in the syntax which is
+  beneficial for modularity.
 
   Usually, the semantic domain has an established \emph{formal theory}. The
   theorems of the domain give rise to reasoning laws for programs. Furthermore,
@@ -313,10 +309,11 @@ different groups:
 
 \end{enumerate}
 
-These three approaches have different trade-offs. Denotational and axiomatic semantics
-immediately give us powerful mathematical tools to reason about programming
-languages and their programs, but for larger languages the required technicality
-and complexity makes it extremely difficult to even define a suitable semantics.
+These three approaches have different trade-offs. Denotational and axiomatic
+semantics immediately give us powerful mathematical tools to reason about
+programming languages and their programs, but for larger languages the required
+technicality and complexity makes it extremely difficult to even define a
+suitable semantics.
 
 Operational semantics do not give us the same powerful mathematical reasoning
 techniques and instead impose on us the laborious task to reason about programs
@@ -331,9 +328,8 @@ correctness of implementations.
   \fbox{
     \begin{minipage}{\columnwidth}
       \framebox{\mbox{$\eval{e}{e}$}}\\
-      \vspace{-5mm}
       \[ \begin{array}{c}
-           \inferrule* [right=\textsc{EIfTrue},]
+           \inferrule* [right=\textsc{EIfTrue}]
              {
              }
              {\eval{\ite{\true}{e_t}{e_e}}{e_t}
@@ -410,13 +406,13 @@ evaluated, i.e., the rules encode a \emph{call-by-name} evaluation strategy. If
 the left-hand side is not yet a \textlambda-term, we evaluate it first similarly
 to \textsc{EIf}.
 
-Note that this definition does not cover all possible cases. In particular
-the case of a \textlambda-term in the condition of an \textbf{if}-expression
+Note that this definition does not cover all possible cases. In particular the
+case of a \textlambda-term in the condition of an \textbf{if}-expression
 \[ \ite{(\lambda x:\tau.e)}{e_t}{e_e} \]
 \noindent and the cases of a boolean in the left-hand side of an application
 \[ \true~e_1 \qquad \text{or} \qquad \false~e_2 \]
-\noindent are not specified. Since no transition is defined and the execution
-is stopped without any \emph{meaningful result}, we also say that the evaluation
+\noindent are not specified. Since no transition is defined and the execution is
+stopped without any \emph{meaningful result}, we also say that the evaluation
 got stuck. In an implementation of the programming language, this corresponds to
 an error that can happen during the execution of a program. It's therefore also
 called a \emph{(dynamic) type error}. Programmers want to detect potential
@@ -552,11 +548,11 @@ understand how to reason about languages and their semantics. We therefore look
 at standard reasoning principles for relations like our typing and evaluation
 relations. We show how language properties can be expressed precisely and define
 two properties for our language: determinacy of evaluation and type safety. We
-give a complete proof of determinacy for our language to
-in order to demonstrate the reasoning principles. In the remainder of the thesis the
-type safety property plays a prominent role. Below we present an established
-way of proving type safety, namely through progress and preservation lemmas, and
-sketch the proofs.
+give a complete proof of determinacy for our language to in order to demonstrate
+the reasoning principles. In the remainder of the thesis the type safety
+property plays a prominent role. Below we present an established way of proving
+type safety, namely through progress and preservation lemmas, and sketch the
+proofs.
 
 
 \paragraph{Inductive Reasoning}
@@ -569,8 +565,8 @@ rules. This gives rise to a \emph{structural induction principle} for the
 relations. Put differently, we can induct over the shape of derivation trees (or
 their size or height).
 
-As an example consider the following determinacy theorem which states that
-at each point there is at most one possible successor state.
+As an example consider the following determinacy theorem which states that at
+each point there is at most one possible successor state.
 \begin{thm}[Determinacy]
   If $\eval{e_1}{e_2} \wedge \eval{e_1}{e_3}$ then $e_2 = e_3$.
 \end{thm}
@@ -578,7 +574,7 @@ at each point there is at most one possible successor state.
 \begin{proof}
   The proof proceeds by induction over the derivation of $\eval{e_1}{e_2}$. For
   each possible case in the derivation of $\eval{e_1}{e_2}$ we inspect the last
-  rule that was used to derive $\eval{e_1}{e_3}$. If the same rule was used we
+  rule that was used to derive $\eval{e_1}{e_3}$. If the same rule was used, we
   can derive the equation. All other combinations lead to a contradiction and
   hence the property follows.
 
@@ -618,21 +614,21 @@ at each point there is at most one possible successor state.
 \paragraph{Type Safety}
 
 A programmer using a statically-typed language will expect certain safety
-guarantees from the type system when her program is
-executed. Intuitively, an expression of a given type will eventually evaluate to
-a value of that type. Usually side-conditions are implicitly assumed like for
-example the assumption that the computation will not diverge. In practice, there
-are statically-typed languages that allow non type-safe programs to be written,
-e.g. C and C++. The overall convention is still that programmers write type-safe
-code and assume that code written by others is type-safe. In these situations
-type-safety is a property of programs, but in this section we want to make it a
-property of languages, or put differently, we want that all programs of a
-language are type-safe.
+guarantees from the type system when her program is executed. Intuitively, an
+expression of a given type will eventually evaluate to a value of that
+type. Usually side-conditions are implicitly assumed like for example the
+assumption that the computation will not diverge. In practice, there are
+statically-typed languages that allow non type-safe programs to be written,
+e.g. C and C++ are inherently unsafe. The overall convention is still that
+programmers write type-safe code and assume that code written by others is
+type-safe. In these situations type safety is a property of programs, but in
+this section we want to make it a property of languages, or put differently, we
+want that all programs of a language are type-safe.
 
-Below we look at a precise formal definition of a type-safety property that
+Below we look at a precise formal definition of a type safety property that
 guarantees that the expectations of the programmer are met. Our definition will
 be slightly stronger than what a programmer might anticipate. The intuition is
-that we disallow dynamic type-errors during evaluation instead of focusing on
+that we disallow dynamic type errors during evaluation instead of focusing on
 the result of evaluation.
 
 We first make vague concepts like \emph{value}, or \emph{type error} precise.
@@ -650,7 +646,7 @@ Values are expressions that are canonical for the types of the language.
     \end{tabular}
   \end{center}
 \end{defn}
-
+f
 By inspecting all the rules of the evaluation relation, we can see that there
 are no further transitions from a value. Values are thus fully
 evaluated\footnote{Fully evaluated with respect to the given semantics. Redexes
@@ -671,8 +667,6 @@ evaluated\footnote{Fully evaluated with respect to the given semantics. Redexes
     By inspecting the evaluation rules for each value form.
   \end{proof}
 \end{lem}
-
-
 
 We can thus translate our intuitive understanding of type safety into a theorem:
 
@@ -703,7 +697,7 @@ With this understanding we can reformulate our type safety theorem. Type safe
 languages rule out type errors; consequently, normal forms should already be
 values.
 
-\begin{thm}[Type Safety]
+\begin{thm}[Type Safety]\label{thm:stlcbool:typesafety}
   Let $\typing{\cdot}{e_1}{\tau}$. If $e_1$ evaluates to a normal form $e_2$
   then $e_2$ is a value of type $\tau$:
   \[ (\evals{e_1}{e_2} \wedge e_2~\text{is normal}) \Rightarrow
@@ -711,7 +705,7 @@ values.
    \]
 \end{thm}
 
-Note that this definition does not require the evaluation to terminate.  A
+Note that this definition does not require the evaluation to terminate. A
 program that runs forever without getting stuck is also considered type-safe.
 
 Proving this property directly is difficult as well. One established and popular
@@ -733,57 +727,59 @@ as we do not reach a value.
 \end{lem}
 
 \begin{lem}[Preservation]
-  If $\typing{\Gamma}{e_1}{\tau}$ and $\eval{e_1}{e_2}$ then $\typing{\Gamma}{e_2}{\tau}$.
+  If $\typing{\Gamma}{e_1}{\tau}$ and $\eval{e_1}{e_2}$ then
+  $\typing{\Gamma}{e_2}{\tau}$.
   \begin{proof}[Proof (Sketch)]
     By induction over the typing derivation $\typing{\Gamma}{e_1}{\tau}$ and
     inspection of the last rule to derive $\eval{e_1}{e_2}$. The only
     interesting case is \textsc{EAppAbs} which follows from an additional lemma
     that states that typing is preserved by well-typed substitutions. In all
     other cases the property follows immediately from an induction hypothesis or
-    by application of a single rule and induction hypotheses.
+    by application of a single rule and the induction hypotheses.
   \end{proof}
 \end{lem}
 
+\begin{proof}[Proof of Theorem \ref{thm:stlcbool:typesafety}]
+  By induction over the number of evaluation steps in $\evals{e_1}{e_2}$ and
+  using the progress and preservation lemmas.
+\end{proof}
 
 
+%-------------------------------------------------------------------------------
+\section{Mechanisation}
 
-\section{Mechanization}
+Meta-theoretical proofs are long and require the management of many
+details. Consequently, these proofs are prone to error and it is easy for human
+verifiers and reviewers to overlook mistakes. This is aggravated by the fact,
+that properties tend to fail in subtle edge cases. For instance, the unsoundness
+example of \cite{amin2016java} for Java involves the interplay between
+constrained wildcards of generics and null references. Hence there is a real
+danger that an overlooked detail or an falsely assumed assumption lead to both
+invalid proofs and invalid results.
 
-that he expects we need to
+In order to gain more confidence in the correctness of meta-theory proofs, the
+field of programming language theory has started to adopt \emph{mechanization}
+as a new methodology: writing proofs in a formal language and check them
+mechanically by software tools known as \emph{proof assistants}.  In such
+systems, every reasoning step is verified to be valid in the underlying
+logic. This has the benefit that gaps in the proof are ruled out and unproven
+assumptions need to be explicitly documented. This greatly increases the
+confidence in the validity of (meta-theory) proofs.
 
-of languages on their own are not good enough to ensure a
-good design.
+To illustrate the benefits, consider the elaborate bug hunting study of
+\cite{yang2011bugs} using their randomized test-case generator \textsc{Csmith}.
+During their study they found and reported over 325 bugs in 11 open source and
+commercial C compilers. One of the compilers is
+\textsc{CompCert}~\cite{Leroy2009}, a C compiler implemented in the Coq proof
+assistant and proven to be correct with respect to a formal specification of the
+C programming language. \cite{yang2011bugs} write the following about
+\textsc{CompCert}:
 
+%% Improving the correctness of C compilers is a worthy goal: C code is part of
+%% the trusted computing base for almost every modern computer system including
+%% mission-critical financial servers and life-critical pacemaker firmware.
 
-
-
-The undecidability of type-checking Java~\cite{grigore2017} and the unsoundness
-of its type system \cite{amin2016java} might be seen as bugs of the language
-specification (but no formal specification of the complete Java language
-exists).
-
-
-A good approach is to develop software (and programming languages) in tandem
-with an implementation and refine both. However, problems usually arise in
-subtle edge cases that do not appear in normal program code that we write every
-day and are easy to overlook in an
-
-
-
-
-
-and such properties have only been established for subsets of the language such
-as Featherweight Java \cite{igarashi2001featherweight}.
-
-\begin{itemize}
-\item
-  Improving the correctness of C compilers is a worthy goal: C code is part of
-  the trusted computing base for almost every modern computer system including
-  mission-critical financial servers and life- critical pacemaker firmware.
-\end{itemize}
-From \cite{yang2011bugs}:
-
-\blockquote{ The striking thing about our \textsc{CompCert} results is that the
+\blockquote{The striking thing about our \textsc{CompCert} results is that the
   middle-end bugs we found in all other compilers are absent. As of early 2011,
   the under-development version of \textsc{CompCert} is the only compiler we
   have tested for which \textsc{Csmith} cannot find wrong-code errors. This is
@@ -793,6 +789,32 @@ From \cite{yang2011bugs}:
   checks are explicit and machine-checked, has tangible benefits for compiler
   users.}
 
+%% % SPEC
+%% %%  43        0        3 BoilerplateFunctions.v
+%% %%  35        0        2 SpecSemantics.v
+%% %%  16        0        3 SpecSyntax.v
+%% %%  94
+%%
+%% % THEORY
+%% %%  10       12        2 BoilerplateSemantics.v
+%% %%  20        3        3 BoilerplateSyntax.v
+%% %%  25       20        3 MetaTheory.v
+%% %%  55
+%%
+%% % TOTAL
+%% %% 149       35       16 total
+
+Unfortunately, mechanisation does not address the large effort of proving
+properties, but rather aggravates it as every little detail has to be spelled
+out. The size depends largely on the the language and the properties that are
+proved. Our example language \stlcbool can be specified in about 94
+lines\footnote{Including definitions of capture-avoiding substitutions that we
+  omitted for brevity.} of Coq code and type safety including all necessary
+lemmas can be proven in 55 lines of code. However, this is not representative
+since \stlcbool is a bare bone calculus. It is not uncommon to see developments
+with few hundreds to thousands of lines of language specifications and tens of
+thousands of lines of meta-theory proofs \cite{Leroy2009, Zhao2010}.
+
 
 %% The meta-theory of programming language semantics and type systems is highly
 %% complex due to the management of many details. Formal proofs are long and prone
@@ -801,19 +823,19 @@ From \cite{yang2011bugs}:
 %% formalization in proof-assistants have received much attention in recent years.
 %%
 %% %-------------------------------------------------------------------------------
-%% \section{Mechanization}
-%% Mechanizing formal meta-theory in proof-assistants is crucial, both for the
+%% \section{Mechanisation}
+%% Mechanising formal meta-theory in proof-assistants is crucial, both for the
 %% increased confidence in complex designs and as a basis for technologies such as
 %% proof-carrying code.  Formal reasoning in proof-assistants, also known as
-%% mechanization, has high development costs.
+%% mechanisation, has high development costs.
 %%
-%% To lighten the burden of programming language mechanization, many
+%% To lighten the burden of programming language mechanisation, many
 %% approaches have been developed that tackle the substantial boilerplate which
 %% arises from variable binders. Unfortunately, the existing approaches are limited
 %% in scope.
 %% %% STEVEN: This is still valid, but I hope it's not misleading the reader into
 %% %% thinking we deal with typing relations directly.
-%% As a consequence, the human mechanizer is still unnecessarily burdened with
+%% As a consequence, the human mechaniser is still unnecessarily burdened with
 %% binder boilerplate and discouraged from taking on richer languages.
 %%
 %% This paper presents \Knot, a new approach that substantially extends the support
@@ -827,53 +849,120 @@ From \cite{yang2011bugs}:
 %% in proofs of weakening and substitution lemmas of type systems.
 %%
 %% Our evaluation shows, that Needle \& Knot significantly reduce the size of
-%% language mechanizations (by 40\% in our case study). Moreover, as far as we
-%% know, \Knot enables the most concise mechanization of the \POPLmark Challenge
+%% language mechanisations (by 40\% in our case study). Moreover, as far as we
+%% know, \Knot enables the most concise mechanisation of the \POPLmark Challenge
 %% (1a + 2a) and is two-thirds the size of the next smallest. Finally, \Knot allows
-%% us to mechanize for instance dependently-typed languages, which is notoriously
+%% us to mechanise for instance dependently-typed languages, which is notoriously
 %% challenging because of dependent contexts and mutually-recursive sorts with
 %% variables.
 %%
 %% %-------------------------------------------------------------------------------
 %% \section{Binding}
 %%
-%% To lighten the burden of programming language mechanization, many approaches
+%% To lighten the burden of programming language mechanisation, many approaches
 %% have been developed that tackle the substantial boilerplate which arises from
 %% variable binders. Unfortunately, existing approaches for first-order
 %% representations are limited to the boilerplate that concerns the syntax of
 %% languages and do not tackle common boilerplate lemmas that arise for semantic
-%% relations such as typing. Consequently, the human mechanizer is still burdened
+%% relations such as typing. Consequently, the human mechaniser is still burdened
 %% with proving these substantial boilerplate lemmas manually.
 %%
 %% %% POPL 2014 Submission
 %% %%
-%% %%   A key concern in the mechanization of programming language metatheory is
+%% %%   A key concern in the mechanisation of programming language metatheory is
 %% %%   the representation of terms with variable binding. The properties of
 %% %%   operations manipulating terms are notoriously burdensome to prove and the
 %% %%   amount of work required to scale formalizations to realistic programming
 %% %%   languages with rich binding forms is deemed infeasible. This is a pity,
-%% %%   because we lose the practical benefits of mechanizing real programming
+%% %%   because we lose the practical benefits of mechanising real programming
 %% %%   languages.
 %% %%
 %% %%   We present a new solution to generically handle the boilerplate involved in
-%% %%   mechanizations that scales to rich binding forms and advanced rules of
+%% %%   mechanisations that scales to rich binding forms and advanced rules of
 %% %%   scoping. We define a new specification language for abstract syntax with
 %% %%   binding and implement a code generator that produces \Coq code for the
 %% %%   representation of the abstract syntax, syntactic operations and proofs of
 %% %%   their properties.
 %% %%
 %% %%   We illustrate how our approach removes the burden of variable binding
-%% %%   boilerplate in the mechanization of realistic programming languages on a
+%% %%   boilerplate in the mechanisation of realistic programming languages on a
 %% %%   list of example specifications and a solution of the PoplMark challenge
 %% %%   based on the generated code.
 
-} % STLCBOOL SCOPE
 
-\section{Overview}
+%-------------------------------------------------------------------------------
+\section{Reusability}
+
+Due to the large development costs and despite the benefits, neither formal
+specification of programming languages nor rigorously mechanised meta-theory
+proofs are widespread practice. To stimulate further adoption of formal
+mechanised meta-theory it is paramount to reduce its cost. This thesis promotes
+\emph{reuse} as a method to lower the mechanisation effort.
+
+Reuse is a common approach in software engineering to reduce development cost
+and increase both quality and reliability. The idea is to identify functionality
+or patterns that are in common between different software systems, and to
+implement them only once in a manner that can be shared by the different
+software systems and reused in the development of new systems. We apply the same
+idea to programming language meta-theory, identifying repeated functionality and
+patterns, and implementing them only once in a way that can be used across
+proofs for different languages.
+
+Unfortunately the current practice to achieve reuse is to copy an existing
+formalization, \emph{change the existing definitions} manually, integrate new
+features and to subsequently \emph{patch up the proofs} to cater for the
+changes. This unprincipled approach to reuse leaves much to be desired. First,
+editing and patching the existing definitions breaks \emph{abstraction}, a core
+principle of computer science. Ideally we would like to reuse existing code via
+an interface that provides functionality (for programming) and properties (for
+reasoning). Second, this approach does not encourage \emph{isolation} of new
+features from existing ones, which hinders backporting improvements to the
+existing formalization.
+
+Our goal is to replace the current practice with principled ways to achieve
+reusability. More specifically, through two different means: 1. Through
+\emph{modularity} and 2. through \emph{genericity}.
+
+
+\paragraph{Modularity}
+
+Programming languages, just like regular software systems, can be described by
+the functionality or features that they provide. Our example language \stlcbool
+has two easily distinguishable features: \textlambda-terms and boolean
+expressions. Many programming languages and their calculi feature either or both
+of these language constructs.
+
+This commonality hints at an opportunity for reuse: develop reusable feature
+implementations that can be shared among languages that have the corresponding
+feature in common. Ideally components for each feature in could be developed in
+complete isolation and modularly combined for a full language consisting of a
+specific set of features.
+
+%% However, not all combinations of features are
+%% meaningful: features may have dependencies or interact.
+%%
+%% This would for example allow researchers to freely pick a subset of interesting
+%% features when developing a new metatheoretic proof
+%%
+%% Not all compositions of features are meaningful: some features require the
+%% presence or absence of other features. A car’s stereo system, for example,
+%% requires an antenna. F
+%%
+%% Reuse through modularity. Languages that include common features like
+%%   booleans and if expressions are found in many languages.
 
 \begin{center}
-  \begin{minipage}{0.8\columnwidth}
-    Keuchel, S., \& Schrijvers, T. (2013).
+  \begin{minipage}{0.85\columnwidth}
+    Keuchel, S. and Schrijvers, T. (2012).
+    \newblock Modular Monadic Reasoning, a (Co-)Routine.
+    \newblock Presented at \emph{the 24th Symposium on Implementation and
+      Application of Functional Languages}, IFL '12.
+  \end{minipage}
+\end{center}
+
+\begin{center}
+  \begin{minipage}{0.85\columnwidth}
+    Keuchel, S. and Schrijvers, T. (2013).
     \newblock Generic Datatypes à la Carte.
     \newblock In {\em Proceedings of the 9th ACM SIGPLAN workshop on Generic
       programming}, WGP ’13, pages 13-24. ACM.
@@ -881,7 +970,7 @@ From \cite{yang2011bugs}:
 \end{center}
 
 \begin{center}
-  \begin{minipage}{0.8\columnwidth}
+  \begin{minipage}{0.85\columnwidth}
     Delaware, B., Keuchel, S., Schrijvers, T., and Oliveira,
     B. C. d.~S. (2013).
     \newblock Modular Monadic Meta-Theory.
@@ -890,14 +979,68 @@ From \cite{yang2011bugs}:
   \end{minipage}
 \end{center}
 
+
+
+\paragraph{Genericity}
+
 \begin{center}
-  \begin{minipage}{0.8\columnwidth}
-    Keuchel, S. and Schrijvers, T. (2012).
-    \newblock Modular Monadic Reasoning, a (Co-)Routine.
-    \newblock Presented at \emph{the 24th Symposium on Implementation and
-      Application of Functional Languages}, IFL '12.
+  \begin{minipage}{0.85\columnwidth}
+    Keuchel, S., Weirich, S., and Schrijvers, T. (2016).
+    \newblock Needle {\&} {K}not: {B}inder {B}oilerplate {T}ied {U}p.
+    \newblock In {\em Programming Languages and Systems: 25th European Symposium
+      on Programming}, ESOP '16, pages 419--445. Springer.
   \end{minipage}
 \end{center}
+
+\begin{center}
+  \begin{minipage}{0.85\columnwidth}
+    Keuchel, S.,  Schrijvers, T., and Weirich, S. (2016).
+    \newblock Needle {\&} {K}not: {B}oilerplate {B}ound {T}ighter.
+    \newblock Unpublished draft.
+  \end{minipage}
+\end{center}
+
+\begin{center}
+  \begin{minipage}{0.85\columnwidth}
+    Keuchel, S. and Schrijvers, T. (2015).
+    \newblock {I}n{B}ound: {S}imple yet powerful {S}pecification of {S}yntax
+      with {B}inders.
+    \newblock Unpublished draft.
+  \end{minipage}
+\end{center}
+
+\begin{center}
+  \begin{minipage}{0.85\columnwidth}
+    Devriese, D., Patrignani, M., Piessens, F., and Keuchel, S. (2017).
+    \newblock Modular, {F}ully-{A}bstract {C}ompilation by {A}pproximate
+      {B}ack-{T}ranslation.
+    \newblock Submitted to {\em Logical Methods in Computer Science}.
+  \end{minipage}
+\end{center}
+
+
+
+
+
+} % STLCBOOL SCOPE
+
+
+% \item Firstly, because full programming languages are too large to handle,
+%   meta-theoretical analysis usually restricts itself to a subset of the
+%   language, known as a \emph{calculus}, that contains the main features of
+%   interest for the property at hand.
+
+% \item The downside is that results for a calculus do not always carry over to
+%   the full language. Problems in the calculus often reveal problems in the full
+%   language, but the absence of problems in the calculus does not guarantee the
+%   same for the full language.  For example, the proof of type-safety
+%   of~\cite{Cameron2008} for a Java calculus with generics and wildcards does not
+%   carry over to Java~\cite{amin2016java}.
+
+%     Would like to scale further from calculi to full realistic languages.
+
+
+
 
 
 %%% Local Variables:

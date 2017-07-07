@@ -175,12 +175,12 @@ extensions.
 
 Performing such extensions in both dimensions simultaneously and modularly, i.e.
 without changing or recompiling the existing code, and keeping the code
-type-safe was coined as \emph{the expression problem} by Wadler
+type-safe was coined as \emph{the expression problem} by
 \cite{expression-problem}. Solutions to the expression problem exist in multiple
-languages: Wadler \cite{expression-problem} presents a solution in Java using
-Generics and the \emph{Datatypes \`a la Carte} (DTC) approach \cite{dtc} is a
-well-known solution in the Haskell programming language. In both of these
-solutions, modularity has to be anticipated and catered for from the beginning
+languages: \cite{expression-problem} presents a solution in Java using Generics
+and the \emph{Datatypes \`a la Carte} (DTC) approach \cite{dtc} is a well-known
+solution in the Haskell programming language. In both of these solutions,
+modularity has to be anticipated and catered for from the beginning
 however. Indeed, we cannot reuse the datatype declaration and interface
 declarations from this section, but have to use ones that account for modular
 extensions. We will call a Haskell datatype that can be modularly extended a

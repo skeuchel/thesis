@@ -141,21 +141,23 @@ reused in any language which supports that unique combination, e.g. both
 \begin{figure}[t]
   \centering
   \fbox{
-    \begin{minipage}{.95\columnwidth}
-       \hspace{-1.5cm}\begin{minipage}{1.15\columnwidth}
-          \infrule[WFM-Illtyped]{}{
-            \Sigma \vdash_M |v_m| ~:~ |fail|
-          }
-          \vspace{.25cm}
-          \hspace{-1cm} \infrule[WFM-Return] {
-             \Sigma \vdash v ~:~ t
-          }
-          {
-           \Sigma \vdash_M |return v| ~:~ |return t|
-          }
-      \end{minipage}
+    \begin{minipage}{\columnwidth}
+      \[ \begin{array}{c}
+           \inferrule* [right=\textsc{Wfm-Illtyped}]
+           {
+           }
+           { \Sigma \vdash_M |v_m| ~:~ |fail|
+           } \\\\
+
+           \inferrule* [right=\textsc{Wfm-Return}]
+           { \Sigma \vdash v ~:~ t
+           }
+           { \Sigma \vdash_M |return v| ~:~ |return t|
+           } \\
+         \end{array}
+      \]
     \end{minipage}
-   }
+  }
   \caption{Typing rules for pure monadic values.}
   \label{fig:WFM+Pure}
 \end{figure}
@@ -399,22 +401,24 @@ this for any possible well-typed combination of |v| and |t|.
 \begin{figure}[t]
   \centering
   \fbox{
-    \begin{minipage}{.95\columnwidth}
-      \hspace{-1cm} \infrule[WFM-Bind] {
-        \Sigma\vdash_M v_m : t_m \\
-        (\forall v~t~\Sigma'. (\Sigma'\supseteq\Sigma) \rightarrow
-        (\Sigma'\vdash v : t) \rightarrow
-        (\Sigma'\vdash_M k_v~v : k_t~t))
-      }
-      {
-       \Sigma\vdash_M (v_m |>>=| k_v) : (t_m |>>=| k_t)
-      }
-    \end{minipage}
-  }
-  \caption{Reusable sublemma for monadic binds.}
-  %% \tag{\textsc{WFM-Bind}}
-  \label{rule:WFM-Bind}
-\end{figure}
+    \begin{minipage}{\columnwidth}
+      \[ \begin{array}{c}
+           \inferrule*[right=\textsc{WFM-Bind}]
+           { \Sigma\vdash_M v_m : t_m \\
+           (\forall v~t~\Sigma'. (\Sigma'\supseteq\Sigma) \rightarrow
+           (\Sigma'\vdash v : t) \rightarrow
+           (\Sigma'\vdash_M k_v~v : k_t~t))
+           }
+           { \Sigma\vdash_M (v_m |>>=| k_v) : (t_m |>>=| k_t)
+           } \\
+         \end{array}
+       \]
+     \end{minipage}
+   }
+   \caption{Reusable sublemma for monadic binds.}
+   %% \tag{\textsc{WFM-Bind}}
+   \label{rule:WFM-Bind}
+ \end{figure}
 
 A proof of \ref{thm:WFM+If+Vc} follows from two applications of this stronger
 property. The advantage of \textsc{WFM-Bind} is clear: it can be reused to deal

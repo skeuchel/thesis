@@ -125,28 +125,29 @@ assumptions of
 
 %-------------------------------------------------------------------------------
 
-\begin{figure}
+\begin{figure}[t]
+  \centering
   \fbox{
-  \begin{minipage}{.95\columnwidth}
-      \infrule[WFM-Throw]{
-      }
-      {
-        \Sigma \vdash_M |throw x| ~:~ |t_m|
-      }
-      \vspace{.25cm}
-      \infrule[WFM-Catch]
-      {
-        \Sigma \vdash_M |m >>= k|  ~:~ |t_m| \\
-        \forall~\Sigma' \supseteq \Sigma~|x|~.~\Sigma' \vdash_M |h x >>= k| ~:~ |t_m|
-      }
-      {
-         \Sigma \vdash_M |catch m h >>= k| ~:~ |t_m|
-      }
-  \end{minipage}
- }
-\caption{Typing rules for exceptional monadic values.}
-\label{fig:WFM+Except}
-\vspace{-.4cm}
+    \begin{minipage}{\columnwidth}
+      \[ \begin{array}{c}
+           \inferrule* [right=\textsc{Wfm-Throw}]
+           {
+           }
+           { \Sigma \vdash_M |throw x| ~:~ |t_m|
+           } \\\\
+           \inferrule* [right=\textsc{Wfm-Catch}]
+           { \Sigma \vdash_M |m >>= k|  ~:~ |t_m| \\
+           \forall~\Sigma' \supseteq \Sigma~|x|~.~\Sigma' \vdash_M |h x >>= k| ~:~ |t_m|
+           }
+           {
+           \Sigma \vdash_M |catch m h >>= k| ~:~ |t_m|
+           } \\
+         \end{array}
+      \]
+    \end{minipage}
+  }
+  \caption{Typing rules for exceptional monadic values.}
+  \label{fig:WFM+Except}
 \end{figure}
 
 %-------------------------------------------------------------------------------
@@ -278,30 +279,29 @@ assumptions of \textsc{WFM-Catch}.  The proof of the language theorem \LSoundE
 is similar to \ref{thm:LSoundP} and is easily built from \ref{thm:ESoundE} and
 \ref{thm:FSound}.
 
-\begin{figure}
+\begin{figure}[t]
+  \centering
   \fbox{
-  \begin{minipage}{.95\columnwidth}
-      \infrule[WFM-Get]
-      {
-        \forall \sigma, \Sigma\vdash\sigma~\rightarrow~\Sigma \vdash_M k~\sigma:t_m
-      }
-      {
-        \Sigma \vdash_M ~ |get >>= k| ~:~ t_m
-      }
-      \infrule[WFM-Put]
-      {
-         \Sigma' \vdash \sigma \andalso
-         \Sigma' \supseteq \Sigma \andalso
-         \Sigma' \vdash_M k : t_m
-      }
-      {
-       \Sigma \vdash_M ~ |put s_ >> k| ~:~ t_m
-      }
-  \end{minipage}
- }
-\caption{Typing rules for stateful monadic values.}
-\label{fig:WFM+State}
-\vspace{-.4cm}
+    \begin{minipage}{\columnwidth}
+      \[ \begin{array}{c}
+           \inferrule* [right=\textsc{Wfm-Get}]
+           { \forall \sigma, \Sigma\vdash\sigma~\rightarrow~\Sigma \vdash_M k~\sigma:t_m
+           }
+           { \Sigma \vdash_M ~ |get >>= k| ~:~ t_m
+           } \\\\
+           \inferrule* [right=\textsc{Wfm-Put}]
+           { \Sigma' \vdash \sigma \\
+             \Sigma' \supseteq \Sigma \\
+             \Sigma' \vdash_M k : t_m
+           }
+           { \Sigma \vdash_M ~ |put s_ >> k| ~:~ t_m
+           } \\
+         \end{array}
+      \]
+    \end{minipage}
+  }
+  \caption{Typing rules for stateful monadic values.}
+  \label{fig:WFM+State}
 \end{figure}
 
 %-------------------------------------------------------------------------------
@@ -406,37 +406,35 @@ well-formed when applied to any value of type |T|. The intuition behind binding
 the |local| expression in some |k| is the same as with |put|.
 
 
-\begin{figure}
+\begin{figure}[t]
+  \centering
   \fbox{
-  \begin{minipage}{.95\columnwidth}
-      \infrule[WFM-Ask]
-      {
-        \forall \gamma.~\Gamma\vdash\gamma~ \rightarrow
-        ~\Gamma \vdash_M k~\gamma:t_m
-      }
-      {
-        \Gamma \vdash_M ~ |ask >>= k| ~:~ t_m
-      }
-      \vspace{.25cm}
-      \infrule[WFM-Local]
-      {
-          \forall~\gamma.~\Gamma\vdash\gamma \rightarrow
-          \Gamma'\vdash f~\gamma \andalso
-          \Gamma' \vdash_M m~:~\mathit{return}~~t'_m \\
-          \forall v.~\vdash v~:~t'_m \rightarrow \Gamma \vdash_M (k~v) : t_m \andalso
-      }
-      {
-        \Gamma \vdash_M ~ |local f m >>= k| ~:~ t_m
-      }
-      \vspace{.25cm}
-      \infrule[WFM-Bot]{}{
-        \Gamma \vdash_M \bot ~:~ |t_m|
-      }
-  \end{minipage}
-}
-\caption{Typing rules for environment and failure monads.}
-\label{fig:WFM+Environment}
-\vspace{-.4cm}
+    \begin{minipage}{\columnwidth}
+      \[ \begin{array}{c}
+           \inferrule* [right=\textsc{Wfm-Ask}]
+           { \forall \gamma.~\Gamma\vdash\gamma~ \rightarrow
+             ~\Gamma \vdash_M k~\gamma:t_m
+           }
+           { \Gamma \vdash_M ~ |ask >>= k| ~:~ t_m
+           } \\\\
+           \inferrule* [right=\textsc{Wfm-Local}]
+           { \forall~\gamma.~\Gamma\vdash\gamma \rightarrow
+             \Gamma'\vdash f~\gamma \\
+             \Gamma' \vdash_M m~:~\mathit{return}~~t'_m \\
+             \forall v.~\vdash v~:~t'_m \rightarrow \Gamma \vdash_M (k~v) : t_m \\
+           }
+           { \Gamma \vdash_M ~ |local f m >>= k| ~:~ t_m
+           } \\\\
+           \inferrule* [right=\textsc{Wfm-Bot}]
+           { \; }
+           { \Gamma \vdash_M \bot ~:~ |t_m|
+           } \\
+         \end{array}
+      \]
+    \end{minipage}
+  }
+  \caption{Typing rules for environment and failure monads.}
+  \label{fig:WFM+Environment}
 \end{figure}
 
 % \begin{figure}
@@ -454,7 +452,7 @@ the |local| expression in some |k| is the same as with |put|.
 \paragraph{The Partiality Effect}
 The lambda feature also introduces the possibility of non-termination to the
 evaluation function, which is disallowed by Coq. MTC solves this problem by
-combining \textit{mixin algebras} with a bounded fixpoint function. This
+combining \textit{mixin algebras} with a bounded fixed-point function. This
 function applies an algebra a bounded number of times, returning a $\bot$ value
 when the bound is exceeded.  Because MTC represented $\bot$ as a value, all
 evaluation algebras needed to account for it explicitly. In the monadic setting,

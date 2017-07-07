@@ -30,7 +30,7 @@ This correspondence is not limited to propositional logic and simple types, but
 has been observed for a variety of logics: propositional, predicate,
 second-order, intuitionistic, classical, modal, and linear logics.
 It is also known as the Curry-Howard correspondence
-or the propositions-as-types interpretation. Wadler \cite{propositionsastypes}
+or the propositions-as-types interpretation. \cite{propositionsastypes}
 gives a nice write-up and a historic account.
 
 \begin{figure}[t]

@@ -60,7 +60,7 @@ aspects of newly developed languages or language features, such as
 useful safety guarantees that 
 hold for all programs expressed in the language. 
 
-A prominent meta-theoretical property is \emph{type-safe}, i.e., the absence of
+A prominent meta-theoretical property is \emph{type safety}, i.e., the absence of
 dynamic type errors during execution. These guarantees are usually provided for
 all programs written in the language, or at least for the specific subset of
 programs that have been type-checked. Because meta-theoretical properties like
@@ -77,18 +77,18 @@ order to make the process more manageable, the field of programming language
 theory has adopted several methodological measures.
 
 Firstly, because full programming languages are too large to handle,
-meta-theoretical analysis usually restricts itself to a subset of the language, known as
-a \emph{calculus}, that contains the main features of interest for the property
-at hand. Because calculi are much smaller so are the proofs of their 
-meta-theory. The downside is that results for a calculus do not always
-carry over to the full language. Problems in the calculus often reveal
-problems in the full language, but the absence of problems in the calculus
-does not guarantee the same for the full language.
-For example, the Java programming language was long believed to be type-safe
-\footnote{Except for some deliberate defects like the co-variance of arrays.}
-but the addition of generics made Java's type system
-unsound~\cite{amin2016java}. This fact was not apparent for many years, and
-contradicts the type-safety results for several generic Java calculi~\cite{}.
+meta-theoretical analysis usually restricts itself to a subset of the language,
+known as a \emph{calculus}, that contains the main features of interest for the
+property at hand. Because calculi are much smaller so are the proofs of their
+meta-theory. The downside is that results for a calculus do not always carry
+over to the full language. Problems in the calculus often reveal problems in the
+full language, but the absence of problems in the calculus does not guarantee
+the same for the full language.  For example, the Java programming language was
+long believed to be type-safe \footnote{Except for some deliberate defects like
+  the co-variance of arrays.}  but the addition of generics made Java's type
+system unsound~\cite{amin2016java}. This fact was not apparent for many years,
+and contradicts the type-safety results for several generic Java
+calculi~\cite{igarashi2001featherweight,Cameron2008}.
 % Another problem concerns the type-checking of Java
 % programs. Generics made type-checking an undecidable property of
 % programs~\cite{grigore2017}. Decidability of type-checking does not have an
@@ -551,20 +551,23 @@ example calculus \stlcbool. In order to prove these properties we first need to
 understand how to reason about languages and their semantics. We therefore look
 at standard reasoning principles for relations like our typing and evaluation
 relations. We show how language properties can be expressed precisely and define
-two properties for our language: determinacy and type safety. We will show how
-determinacy can be proven using the reasoning principles and outline one
-established way of proving type safety, namely through progress and preservation
-lemmas.
+two properties for our language: determinacy of evaluation and type safety. We
+give a complete proof of determinacy for our language to
+in order to demonstrate the reasoning principles. In the remainder of the thesis the
+type safety property plays a prominent role. Below we present an established
+way of proving type safety, namely through progress and preservation lemmas, and
+sketch the proofs.
 
 
 \paragraph{Inductive Reasoning}
-We first need to establish methods for reasoning about the evaluation and typing
-of \stlcbool. Figures \ref{fig:intro:stlcbooleval} and
-\ref{fig:intro:stlcbooltyping} define evaluation and typing for \stlcbool. More
-precisely, our intention in both figures is to define the \emph{smallest
-  relation} that includes the presented rules. This gives rise to a
-\emph{structural induction principle} for the relations. Put differently, we can
-induct over the shape of derivation trees (or their size or height).
+For our meta-theoretical analyses, we first need to establish methods for
+reasoning about the evaluation and typing of \stlcbool. Figures
+\ref{fig:intro:stlcbooleval} and \ref{fig:intro:stlcbooltyping} define
+evaluation and typing for \stlcbool. More precisely, our intention in both
+figures is to define the \emph{smallest relation} that includes the presented
+rules. This gives rise to a \emph{structural induction principle} for the
+relations. Put differently, we can induct over the shape of derivation trees (or
+their size or height).
 
 As an example consider the following determinacy theorem which states that
 at each point there is at most one possible successor state.
@@ -574,13 +577,13 @@ at each point there is at most one possible successor state.
 
 \begin{proof}
   The proof proceeds by induction over the derivation of $\eval{e_1}{e_2}$. For
-  each possible case in the derivation of $\eval{e_1}{e_2}$ we 
-  inspect the last rule that was used to derive $\eval{e_1}{e_3}$. If the same
-  rule was used we can derive the equations. All other combinations lead to a
-  contradiction and hence the property follows.
+  each possible case in the derivation of $\eval{e_1}{e_2}$ we inspect the last
+  rule that was used to derive $\eval{e_1}{e_3}$. If the same rule was used we
+  can derive the equation. All other combinations lead to a contradiction and
+  hence the property follows.
 
-  We go through one of the inductive steps in detail and omit the
-  others. Consider the case where $\eval{e_1}{e_2}$ was derived using
+  We go through one of the inductive steps in detail and omit the others for
+  brevity. Consider the case where $\eval{e_1}{e_2}$ was derived using
   \textsc{EIf}. So there exist expressions $e_{11}, e'_{11}, e_{12}, e_{13}$
   such that
   \begin{gather*}
@@ -590,7 +593,7 @@ at each point there is at most one possible successor state.
   \end{gather*}
 
   Now look at the last rule that was used to derive $\eval{e_1}{e_3}$. There are
-  two possibilities: rule \textsc{EIfTrue} and rule \textsc{EIf}.
+  two possibilities: rule \textsc{EIfTrue} or rule \textsc{EIf}.
 
   \begin{enumerate}
   \item If rule \textsc{EIfTrue} was used, then we learn that $e_{11} = \true$
@@ -614,24 +617,26 @@ at each point there is at most one possible successor state.
 
 \paragraph{Type Safety}
 
-One of the essential properties of statically-typed languages is type safety.
-When working in such a language a programmer expects type guarantees when her
-program is executed, e.g., all arguments passed to a function have exactly
-the types indicated by the function's type signature.
+A programmer using a statically-typed language will expect certain safety
+guarantees from the type system when her program is
+executed. Intuitively, an expression of a given type will eventually evaluate to
+a value of that type. Usually side-conditions are implicitly assumed like for
+example the assumption that the computation will not diverge. In practice, there
+are statically-typed languages that allow non type-safe programs to be written,
+e.g. C and C++. The overall convention is still that programmers write type-safe
+code and assume that code written by others is type-safe. In these situations
+type-safety is a property of programs, but in this section we want to make it a
+property of languages, or put differently, we want that all programs of a
+language are type-safe.
 
-We previously characterized type safety as the absence of type errors during
-execution. A type error represents a state for which no further evaluation step
-is defined and hence evaluation stopped.
+Below we look at a precise formal definition of a type-safety property that
+guarantees that the expectations of the programmer are met. Our definition will
+be slightly stronger than what a programmer might anticipate. The intuition is
+that we disallow dynamic type-errors during evaluation instead of focusing on
+the result of evaluation.
 
-\begin{defn}[Normal Form]
-  An expression $e_1$ is a \emph{normal form} if no further execution step can be
-  taken, i.e.,
-  \[ \forall e_2. \neg (\eval{e_1}{e_2}) \]
-\end{defn}
-
-A type error however did not produce any \emph{meaningful result}. Let us define
-what a meaningful result is. These are special expressions which are also called
-values.
+We first make vague concepts like \emph{value}, or \emph{type error} precise.
+Values are expressions that are canonical for the types of the language.
 
 \begin{defn}[Value]
   Values are the subset of expressions that are defined by the following
@@ -646,28 +651,97 @@ values.
   \end{center}
 \end{defn}
 
-Expressions with type errors are hence normal forms that are not values. We can
-make \emph{``the absence of type errors''} more precise by requiring that all
-normal forms are already values.
+By inspecting all the rules of the evaluation relation, we can see that there
+are no further transitions from a value. Values are thus fully
+evaluated\footnote{Fully evaluated with respect to the given semantics. Redexes
+  may still appear under $\lambda$-abstractions which are
+  \emph{suspended}. There are also semantics that allow evaluation under
+  $\lambda$-abstractions.} expressions. Such expressions are also called
+\emph{normal forms}. More formally we have the following definition and lemmas.
 
-\begin{thm}[Type Safety]
-  Let $\typing{\cdot}{e_1}{\tau}$. If $e_1$ evaluates to a normal form $e_2$
-  then $e_2$ is a value.
-\end{thm}
+\begin{defn}[Normal Form]
+  An expression $e_1$ is a \emph{normal form} if no further execution step can be
+  taken, i.e.,
+  \[ \forall e_2. \neg (\eval{e_1}{e_2}) \]
+\end{defn}
 
-Note that this definition does not require the evaluation to terminate.  A
-program that runs forever without a type error is also considered type-safe.
-
-
-\begin{lem}[Progress]
-  Let $\typing{\cdot}{e_1}{\tau}$. Either $e_1$ is a value or we can take another
-  step, i.e.
-  \[ \exists e_2. \eval{e_1}{e_2}. \]
+\begin{lem}[Value are Normal]
+  If an expression $e$ is a value, then it's also a normal form.
+  \begin{proof}
+    By inspecting the evaluation rules for each value form.
+  \end{proof}
 \end{lem}
 
 
+
+We can thus translate our intuitive understanding of type safety into a theorem:
+
+\begin{thm}[Type Safety (First Attempt)]
+  Let $e_1$ be an expression of type $\tau$,
+  i.e. $\typing{\cdot}{e_1}{\tau}$. If $e_1$ evaluates in one or more steps to a
+  value $e_2$, then $e_2$ also has type $\tau$:
+  \[ \forall e_2. (\evals{e_1}{e_2} \wedge e_2~\text{is a value}) \Rightarrow
+     \typing{\cdot}{e_2}{\tau}.
+  \]
+\end{thm}
+
+This definition however is problematic to work with directly. First, we cannot
+prove it directly by induction over $e_1$ or over the typing derivation
+$\typing{\cdot}{e_1}{\tau}$, because in the case of an evaluation step with rule
+\textsc{EAppAbs} we are given a reduced term that is not a sub-term and hence we
+have no induction hypothesis available. Second, it does not express strong
+coherence between typing and evaluation. Consider for instance the language that
+we get, if we remove the evaluation rule \textsc{EIfTrue}. Then the expression
+\[ \ite{\true}{e_t}{e_e} \]
+\noindent is a normal form but not a value. However, it is different than for
+example the expression
+\[ \ite{(\lambda x:\tau.e)}{e_t}{e_e} \]
+\noindent which is also a normal from but not a value. But intuitively,
+evaluations that stopped should either be values or type errors.
+
+With this understanding we can reformulate our type safety theorem. Type safe
+languages rule out type errors; consequently, normal forms should already be
+values.
+
+\begin{thm}[Type Safety]
+  Let $\typing{\cdot}{e_1}{\tau}$. If $e_1$ evaluates to a normal form $e_2$
+  then $e_2$ is a value of type $\tau$:
+  \[ (\evals{e_1}{e_2} \wedge e_2~\text{is normal}) \Rightarrow
+     (e_2~\text{is a value} \wedge \typing{\cdot}{e_1}{\tau}).
+   \]
+\end{thm}
+
+Note that this definition does not require the evaluation to terminate.  A
+program that runs forever without getting stuck is also considered type-safe.
+
+Proving this property directly is difficult as well. One established and popular
+way is to reduce it to two simpler properties, namely \emph{progress} and
+\emph{preservation}. Progress expresses that we can always take a step as long
+as we do not reach a value.
+\begin{lem}[Progress]
+  Let $\typing{\cdot}{e_1}{\tau}$. Either $e_1$ is a value or we can take
+  another step, i.e.
+  \[ \exists e_2. \eval{e_1}{e_2}. \]
+  \begin{proof}[Proof (Sketch)]
+    By induction over the typing derivation $\typing{\cdot}{e_1}{\tau}$. If we
+    can take an evaluation step in a sub-term we can use rule \textsc{EIf} rule
+    \textsc{EApp}. Otherwise, we learn that we have a value in an evaluation
+    position. By inspecting the possible values for a given type we can take a
+    step with one of the rules \textsc{EIfTrue}, \textsc{EIfFalse} or
+    \textsc{EAppAbs}.
+  \end{proof}
+\end{lem}
+
 \begin{lem}[Preservation]
   If $\typing{\Gamma}{e_1}{\tau}$ and $\eval{e_1}{e_2}$ then $\typing{\Gamma}{e_2}{\tau}$.
+  \begin{proof}[Proof (Sketch)]
+    By induction over the typing derivation $\typing{\Gamma}{e_1}{\tau}$ and
+    inspection of the last rule to derive $\eval{e_1}{e_2}$. The only
+    interesting case is \textsc{EAppAbs} which follows from an additional lemma
+    that states that typing is preserved by well-typed substitutions. In all
+    other cases the property follows immediately from an induction hypothesis or
+    by application of a single rule and induction hypotheses.
+  \end{proof}
 \end{lem}
 
 

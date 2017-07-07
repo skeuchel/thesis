@@ -61,10 +61,10 @@ Agda.
 
 A notable difference is that Schwaab and Siek do not define a dependent recursor
 for induction but instead completely rely on non-dependent recursion over
-relations. Therefore our work on a generic strong induction principle for
-modular definitions does not any benefits to Schwaab and Siek's approach and
-MTC's generic folds would be sufficient. However, MTC's Church encodings are
-rejected by Agda's type-checker because Agda is a fully predicative system.
+relations. Therefore the needs for a strong generic induction principle does not
+arise in their work and MTC's generic folds for relations is sufficient for
+their approach. However, MTC's Church encodings are rejected by Agda's
+type-checker because Agda is a fully predicative system.
 
 
 \paragraph{Combining different DGP approaches}

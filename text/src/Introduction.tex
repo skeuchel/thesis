@@ -759,21 +759,39 @@ invalid proofs and invalid results.
 
 In order to gain more confidence in the correctness of meta-theory proofs, the
 field of programming language theory has started to adopt \emph{mechanization}
-as a new methodology: writing proofs in a formal language and check them
-mechanically by software tools known as \emph{proof assistants}.  In such
-systems, every reasoning step is verified to be valid in the underlying
-logic. This has the benefit that gaps in the proof are ruled out and unproven
-assumptions need to be explicitly documented. This greatly increases the
-confidence in the validity of (meta-theory) proofs.
+as a new methodology: writing mathematical theorems in a formal language and
+verify correctness of their proofs mechanically by \emph{automated theorem
+  provers} (ATP). ATPs have also seen successful use in other fields of computer
+science such as formal verification of programs and hardware. Theorem provers
+may find proofs for theorems fully automatically or require a human user to
+input the proof or proof hints in which case the system is also commonly called
+a \emph{proof assistant}. In both cases, every reasoning step of the proof is
+verified to be valid in the underlying logic. This has the benefit that gaps in
+the proof are ruled out and unproven assumptions need to be explicitly
+documented. This greatly increases the confidence in the validity of
+(meta-theory) proofs.
 
-To illustrate the benefits, consider the elaborate bug hunting study of
-\cite{yang2011bugs} using their randomized test-case generator \textsc{Csmith}.
-During their study they found and reported over 325 bugs in 11 open source and
-commercial C compilers. One of the compilers is
+Automation for first-order logics has seen the most development and
+fully-automatic theorem provers for various such logics exist
+\cite{robinson2001handbook}. Richer logics such as higher-order logics and type
+theories generally require the use of a proof assistant.
+
+Among programming language researchers proof assistants are more popular.
+Systems like Abella~\cite{abella}, Agda~\cite{norellthesis},
+Beluga~\cite{beluga}, Coq~\cite{coq}, Isabelle/HOL~\cite{isabelle} and
+Twelf~\cite{twelf} have been used to check various meta-theoretic proofs. The
+development of this thesis have been done in the context of the Coq proof
+assistant which offers a competitive degree of automation among proof
+assistants.
+
+To illustrate the benefits of mechanisations, consider the elaborate bug hunting
+study of \cite{yang2011bugs} using their randomized test-case generator
+\textsc{Csmith}.  During their study they found and reported over 325 bugs in 11
+open source and commercial C compilers. One of the compilers is
 \textsc{CompCert}~\cite{Leroy2009}, a C compiler implemented in the Coq proof
-assistant and proven to be correct with respect to a formal specification of the
-C programming language. \cite{yang2011bugs} write the following about
-\textsc{CompCert}:
+assistant~\cite{coq} and proven to be correct with respect to a formal
+specification of the x3C programming language. \cite{yang2011bugs} write the
+following about \textsc{CompCert}:
 
 %% Improving the correctness of C compilers is a worthy goal: C code is part of
 %% the trusted computing base for almost every modern computer system including
@@ -811,7 +829,7 @@ proved. Our example language \stlcbool can be specified in about 94
 lines\footnote{Including definitions of capture-avoiding substitutions that we
   omitted for brevity.} of Coq code and type safety including all necessary
 lemmas can be proven in 55 lines of code. However, this is not representative
-since \stlcbool is a bare bone calculus. It is not uncommon to see developments
+since \stlcbool is a bare-bones calculus. It is not uncommon to see developments
 with few hundreds to thousands of lines of language specifications and tens of
 thousands of lines of meta-theory proofs \cite{Leroy2009, Zhao2010}.
 
@@ -893,20 +911,20 @@ thousands of lines of meta-theory proofs \cite{Leroy2009, Zhao2010}.
 %-------------------------------------------------------------------------------
 \section{Reusability}
 
-Due to the large development costs and despite the benefits, neither formal
-specification of programming languages nor rigorously mechanised meta-theory
-proofs are widespread practice. To stimulate further adoption of formal
-mechanised meta-theory it is paramount to reduce its cost. This thesis promotes
-\emph{reuse} as a method to lower the mechanisation effort.
+Despite the benefits, neither formal specification of programming languages nor
+rigorously mechanised meta-theory proofs are widespread practice. One of the
+main obstacles are the large development costs. This thesis aims to help spur
+further adoption of formal mechanised meta-theory by promoting \emph{reuse} as a
+method to lower the mechanisation effort.
 
 Reuse is a common approach in software engineering to reduce development cost
 and increase both quality and reliability. The idea is to identify functionality
-or patterns that are in common between different software systems, and to
-implement them only once in a manner that can be shared by the different
-software systems and reused in the development of new systems. We apply the same
-idea to programming language meta-theory, identifying repeated functionality and
-patterns, and implementing them only once in a way that can be used across
-proofs for different languages.
+or patterns that different software systems have in common and implement them
+only once in a manner that can be shared by the different software systems and
+reused in the development of new systems. We apply the same idea to programming
+language meta-theory, identifying repeated functionality and patterns, and
+implementing them only once in a way that can be used across proofs for
+different languages.
 
 Unfortunately the current practice to achieve reuse is to copy an existing
 formalization, \emph{change the existing definitions} manually, integrate new
@@ -938,36 +956,58 @@ feature in common. Ideally components for each feature in could be developed in
 complete isolation and modularly combined for a full language consisting of a
 specific set of features.
 
-%% However, not all combinations of features are
-%% meaningful: features may have dependencies or interact.
-%%
-%% This would for example allow researchers to freely pick a subset of interesting
-%% features when developing a new metatheoretic proof
-%%
-%% Not all compositions of features are meaningful: some features require the
-%% presence or absence of other features. A car’s stereo system, for example,
-%% requires an antenna. F
-%%
-%% Reuse through modularity. Languages that include common features like
-%%   booleans and if expressions are found in many languages.
+This ideal view is unrealistic. Features may have dependencies between them or
+may interact with each other even through they seem to be orthogonal. This is
+more pronounced when features have side effects.
 
-\begin{center}
-  \begin{minipage}{0.85\columnwidth}
-    Keuchel, S. and Schrijvers, T. (2012).
-    \newblock Modular Monadic Reasoning, a (Co-)Routine.
-    \newblock Presented at \emph{the 24th Symposium on Implementation and
-      Application of Functional Languages}, IFL '12.
-  \end{minipage}
-\end{center}
+\paragraph{Genericity}
+
+Names are found in almost every high-level programming language to refer to
+classes, methods, types, functions, function parameters etc.. In case a name is
+substitutable we call it a \emph{variable}. The operational semantics of such
+languages often implement reduction of language construction with \emph{variable
+  binding} by means of substitution.
+
+Variable substitution is an operation that is not specific to a particular
+language or language feature but is common to any language that uses variable
+binding. The implementation of substitution follows a standard recipe that can
+be applied for any specific language. This hints at a different way of achieving
+reuse: by implementing substitution \emph{once} generically and specializing
+this generic implementation to any given concrete language.
+
+Other kinds of \emph{generic functionality} that can be reused in this ways are,
+for example, term equality and (first-order) unification.
+
+\section{Overview}
+
+This thesis is split into two parts corresponding to the two discussed means of
+achieving reuse.
+
+\paragraph{Modularity}
+Part \ref{part:mod} deals with the modular composition of
+language features. Chapter \ref{ch:modbackground} presents the necessary
+background for this part. While modular development of software is a
+well-studied topic in computer science, modular composition of proofs is not as
+well-studied. Section \ref{sec:mod:reasoningalacarte} of the background chapter
+introduces induction on extensible Church encodings as one way of achieving
+proof modularity. Chapter \ref{ch:modpreduniv} develops an alternative way using
+encodings based on modular predicative universes. This chapter contains the
+material from
 
 \begin{center}
   \begin{minipage}{0.85\columnwidth}
     Keuchel, S. and Schrijvers, T. (2013).
-    \newblock Generic Datatypes à la Carte.
+    \newblock Generic Datatypes \`a la Carte.
     \newblock In {\em Proceedings of the 9th ACM SIGPLAN workshop on Generic
       programming}, WGP ’13, pages 13-24. ACM.
   \end{minipage}
 \end{center}
+
+Side-effecting language features have a lot of interaction between them which
+hinders modularization. This is a problem that is tackled in Chapter
+\ref{ch:modmoneff} by developing a monadic denotational semantics
+for features with side-effects that can be modularized. This chapter is based
+on the publication
 
 \begin{center}
   \begin{minipage}{0.85\columnwidth}
@@ -979,9 +1019,30 @@ specific set of features.
   \end{minipage}
 \end{center}
 
+\noindent and also draws ideas from
+
+\begin{center}
+  \begin{minipage}{0.85\columnwidth}
+    Keuchel, S. and Schrijvers, T. (2012).
+    \newblock Modular Monadic Reasoning, a (Co-)Routine.
+    \newblock Presented at \emph{the 24th Symposium on Implementation and
+      Application of Functional Languages}, IFL '12.
+  \end{minipage}
+\end{center}
 
 
 \paragraph{Genericity}
+
+Part \ref{part:gen} deals with the development of a generic substitution
+operation and associated theorems. The solution put forward in this thesis is a
+framework consisting of a specification language \Knot for abstract syntax with
+variable binding and the tool \Needle that compiles \Knot-specifications to Coq
+code. Chapters \label{ch:knotsyntax} and \label{ch:knotsemantics} present the
+syntax and semantics of \Knot respectively while Chapters \ref{ch:elaboration}
+and \ref{ch:codegen} discuss the elaboration and code generation underlying
+\Needle.
+
+Part \ref{part:gen} is based on
 
 \begin{center}
   \begin{minipage}{0.85\columnwidth}
@@ -991,7 +1052,7 @@ specific set of features.
       on Programming}, ESOP '16, pages 419--445. Springer.
   \end{minipage}
 \end{center}
-
+\noindent which deals with substitutions at the term level and
 \begin{center}
   \begin{minipage}{0.85\columnwidth}
     Keuchel, S.,  Schrijvers, T., and Weirich, S. (2016).
@@ -999,6 +1060,11 @@ specific set of features.
     \newblock Unpublished draft.
   \end{minipage}
 \end{center}
+\noindent which extends the framework further to include predicates on terms
+expressed as relations.
+
+
+Related to the content of this part is the article
 
 \begin{center}
   \begin{minipage}{0.85\columnwidth}
@@ -1008,6 +1074,14 @@ specific set of features.
     \newblock Unpublished draft.
   \end{minipage}
 \end{center}
+
+\noindent which aims to develop a richer specification language that includes
+variable binding constructs of realistic programming languages that \Knot does
+not support.
+
+Furthermore, the experiences gained from the work on \Needle \& \Knot
+
+
 
 \begin{center}
   \begin{minipage}{0.85\columnwidth}

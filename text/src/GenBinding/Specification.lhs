@@ -20,14 +20,16 @@
 
 %-------------------------------------------------------------------------------
 
+This section presents the \Knot~specification language for syntax with binders.
+
 \subsection{\Knot~Syntax}
 
 \begin{figure}[t]
 \begin{center}
 \fbox{
   \begin{minipage}{0.98\columnwidth}
-\textbf{Labels}
-\[\begin{array}{l@@{\hspace{4mm}}r@@{\hspace{9mm}}l@@{\hspace{4mm}}r}
+\textbf{Labels}\vspace{-5mm}
+\[\begin{array}{l@@{\hspace{3mm}}r@@{\hspace{15mm}}l@@{\hspace{3mm}}r}
   \alpha, \beta, \gamma & \textit{Namespace label}       & s, t                  & \textit{Sort meta-variable}\\
   b                     & \textit{Binding meta-variable} & f                     & \textit{Function label}    \\
   g                     & \textit{Global meta-variable}  & E                     & \textit{Env label} 	     \\
@@ -36,21 +38,18 @@
   \end{array}
 \]
 \textbf{Declarations and definitions}
-\[\begin{array}{@@{}l@@{\hspace{1mm}}c@@{\hspace{1mm}}lr}
+\[\begin{array}{@@{}l@@{\hspace{2mm}}c@@{\hspace{3mm}}l@@{\hspace{5mm}}r}
   \spec      & ::=  & \ov{\decl}                                                                       & \textit{Specification}    \\
-  \decl      & ::=  & \namedecl \mid \sortdecl                                                         & \textit{Declaration}      \\
-             & \mid & \fundecl \mid \envdecl \mid \reldecl                                             &                           \\
+  \decl      & ::=  & \namedecl \mid \sortdecl \mid \fundecl \mid \envdecl \mid \reldecl               & \textit{Declaration}      \\
   \namedecl  & ::=  & \namespace \,\alpha\,\ccol\,S                                                    & \textit{Namespace}        \\
   \sortdecl  & ::=  & \sort\,S\,\cass\,\ov{\condecl}                                                   & \textit{Sort}             \\
-  \condecl   & ::=  & \texttt{+}  K\,\fieldref{g}{\alpha}                                              & \textit{Constr. decl.}    \\
-%             & \mid & \texttt{||} K\,\ov{\fieldbind{b}{\alpha}}\,\ov{\cpar{\cbrk{\bindspec}s \ccol S}} &                           \\
+  \condecl   & ::=  & \texttt{+}  K\,\fieldref{g}{\alpha}  \mid \texttt{||} K\,\ov{\fieldbind{b}{\alpha}}\,\ov{\cpar{\cbrk{\bindspec}s \ccol S}} & \textit{Constr. decl.}    \\
   \bindspec  & ::=  & \ov{\bsi}                                                                        & \textit{Binding spec.}    \\
   \bsi       & ::=  & b \mid f s                                                                       & \textit{Bind. spec. item} \\
   \fundecl   & ::=  & \function\, f \ccol S \cto [\ov{\alpha}]\,\cass\,\ov{\funclause}                 & \textit{Function}         \\
   \funclause & ::=  & K\,\ov{b}\,\ov{s} \cto \bindspec                                                 & \textit{Function clause}  \\
   \envdecl   & ::=  & \env\,E\,\cass\,\ov{\envclause}                                                  & \textit{Environment}      \\
-  \envclause & ::=  & \texttt{+}  K                                                                    & \textit{Empty env.}       \\
-             & \mid & \texttt{||} K : \alpha \cto \ov{S} : R                                           & \textit{Env. clause}      \\
+  \envclause & ::=  & \texttt{+}  K \mid \texttt{||} K : \alpha \cto \ov{S} : R                        & \textit{Env. clause}      \\
 %             & ::=  & \alpha \cto \ov{S}                                                               &                           \\
   \end{array}
 \]
@@ -65,11 +64,11 @@ Figure \ref{fig:SpecificationLanguage} shows the grammar of \Knot.  A
 \Knot language specification $\spec$ consists of variable namespace
 declarations $\namedecl$, syntactic sort declarations $\sortdecl$, function
 declarations $\fundecl$, environment declarations $\envdecl$ and relation
-declarations $\reldecl$. We defer explaining relation declarations until Section
+declarations $\reldecl$. We defer relation declarations to Section
 \ref{ssec:inductiverelations}.
 
 A namespace declaration $\namespace~\alpha : S$ introduces the namespace
-$\alpha$ and associates it with the sort $S$. This expresses that variables of
+$\alpha$ and associates it with the syntactic sort $S$. This expresses that variables of
 namespace $\alpha$ can be substituted for terms of sort $S$. While most
 languages feature at most one namespace per sort, it is nevertheless possible to
 associate multiple namespaces with a single sort. This can be used, e.g.,
@@ -78,19 +77,19 @@ in languages with linear type systems to distinguish linearly bound from unrestr
 A declaration of sort $S$ comes with two kinds of constructor declarations
 $\condecl$. Variable constructors $\texttt{+} K\,\fieldref{|g|}{\alpha}$ hold a
 variable reference $g$ in the namespace $\alpha$. These are the only
-constructors where variables are used as references.  We use a global variables
-here only to signify that the reference is free when considering a variable
-constructor in isolation. In larger symbolic expressions, also binding variables
-may appear in variable constructors.
+constructors where variables are used as references. The global variable
+reference $g$ signifies that the reference is free when considering a variable
+constructor in isolation. In larger symbolic expressions, also binding
+variables may appear in variable constructors.
 
-Regular constructors $\texttt{||} K\,\ov{(b : \alpha)}\,\ov{(s : S)}$ contain
+Regular constructors $K\,\ov{(b : \alpha)}\,\ov{(s : S)}$ contain
 named variable bindings $\ov{(b : \alpha)}$ and named subterms $\ov{(s :
   S)}$. For the sake of presentation we assume that the variable bindings
 precede subterms. The distinction between variable and regular constructors
-follows straightforwardly from \Knot's free relative monad view on syntax.  This
-rules out languages for normal forms, but as they require custom behavior
-(renormalization) during substitution \cite{anormalform,clf} their
-substitution boilerplate cannot be defined generically anyway.
+follows straightforwardly from \Knot's free-monad-like view on syntax.  This rules
+out languages for normal forms, but as they require custom behavior
+(renormalization) during substitution \cite{anormalform,clf} their substitution
+boilerplate cannot be defined generically anyway.
 
 Every subterm $s$ is preceded by a binding specification $\bindspec$ that
 stipulates which variable bindings are brought in scope of $s$. The binding
@@ -109,9 +108,9 @@ requirement is that functions cannot be defined for sorts that have variables.
 Otherwise it would be possible to change the set of variables that a pattern
 binds with a substitution. The specification of the output type $\ov{\alpha}$ is
 used in \cite{knotneedle} to derive subordination-based strengthening lemmas.
-However, these lemmas are not necessary to derive the semantics
-boilerplate. Hence, for simplicity we ignore the output type of functions
-and any other subordination related information in the remainder of this paper.
+However, these lemmas are not necessary to derive the semantics boilerplate.
+% Hence, for simplicity we ignore the output type of functions and any other
+% subordination related information in the remainder of this paper.
 
 Environments $E$ represent a mapping from variables in scope to additional data
 such as typing information. To this end, an environment declaration $\envdecl$
@@ -124,55 +123,56 @@ inductive relations, in Section \ref{ssec:inductiverelations}.
 
 %format namespace = "{\namespace}"
 %format sort = "{\sort}"
+%format fun = "{\function}"
 %format @ = "{\texttt{@}}"
+%format case = "\Varid{case}"
+%format env = "{\env}"
 \begin{figure}[t]
 \fbox{
 \begin{minipage}{0.98\columnwidth}
-\begin{tabular}{l@@{\hspace{2mm}}c@@{\hspace{1mm}}l}
-\multicolumn{3}{l}{|namespace Tyv : Ty|} \\
-\multicolumn{3}{l}{|namespace Tmv : Tm|} \\
-\multicolumn{3}{l}{\sort~|Ty|~\cass} \\
- & \texttt{+}  & |tvar (X@Tyv)|                      \\
- & \texttt{||} & |tarr (T1: Ty) (T2: Ty)|            \\
- & \texttt{||} & |tall (X:Tyv) (bindspec X T: Ty)|   \\
- & \texttt{||} & |texist (X:Tyv) (bindspec X T: Ty)| \\
-\multicolumn{3}{l}{|sort Tm|~\cass} \\
- & \texttt{+}  & |var (x@Tmv)|                                               \\
- & \texttt{||} & |abs (x:Tmv) (T: Ty) (bindspec x t: Tm)|                    \\
- & \texttt{||} & |app (t1: Tm) (t2: Tm)|                                     \\
- & \texttt{||} & |tabs (X:Tyv) (bindspec X t: Tm)|                           \\
- & \texttt{||} & |tapp (t: Tm) (T: Ty)|                                      \\
- & \texttt{||} & |pack (T1: Ty) (t: Tm) (T2: Ty)|                            \\
- & \texttt{||} & |unpack (t1: Tm) (X: Tyv) (x: Tmv) (bindspec (X,x) t2: Tm)| \\
-\multicolumn{3}{l}{|env Env|~\cass} \\
- & \texttt{+}  & |empty| \\
- & \texttt{||} & |evar  : Tmv| \cto |Ty : Typing| \\
- & \texttt{||} & |etvar : Tyv| \cto \\
+\begin{tabular}{l@@{\hspace{3mm}}c@@{\hspace{1mm}}l@@{\hspace{5mm}}l@@{\hspace{3mm}}c@@{\hspace{1mm}}l}
+\multicolumn{3}{l}{|namespace Tyv : Ty|}                                     & \multicolumn{3}{l}{\sort~|Ty|~\cass}                  \\
+\multicolumn{3}{l}{|namespace Tmv : Tm|}                                     &  & \texttt{+}  & |tvar (X@Tyv)|                       \\
+\multicolumn{3}{l}{|sort Pat|~\cass}                                         &  & \texttt{||} & |tarr (T1: Ty) (T2: Ty)|             \\
+ & \texttt{||} & |pvar (x:Tmv) (T:Ty)|                                       &  & \texttt{||} & |tall (X:Tyv) (bindspec X T: Ty)|    \\
+ & \texttt{||} & |ppair (p1: Pat) (bindspec (bind p1) p2:Pat)|               &  & \texttt{||} & |tprod (T1: Ty) (T2: Ty)|            \\
+\multicolumn{3}{l}{|sort Tm|~\cass}                                          &  & \texttt{||} & |texist (X:Tyv) (bindspec X T: Ty)|  \\
+ & \texttt{+}  & |var (x@Tmv)|                                               & \multicolumn{3}{l}{|fun bind : Pat -> [Tmv]|~\cass}   \\
+ & \texttt{||} & |abs (x:Tmv) (T: Ty) (bindspec x t: Tm)|                    &  & \texttt{||} & |pvar x T    -> x|                   \\
+ & \texttt{||} & |app (t1: Tm) (t2: Tm)|                                     &  & \texttt{||} & |pprod p1 p2 -> bind p1 , bind p2|   \\
+ & \texttt{||} & |tabs (X:Tyv) (bindspec X t: Tm)|                           & \multicolumn{3}{l}{|env Env|~\cass}                   \\
+ & \texttt{||} & |tapp (t: Tm) (T: Ty)|                                      &  & \texttt{+}  & |empty|                              \\
+ & \texttt{||} & |pair (t1:Tm) (t2:Tm)|                                      &  & \texttt{||} & |evar  : Tmv| \cto |Ty : Typing|     \\
+ & \texttt{||} & |case (t1:Tm) (p:Pat) (bindspec (bind p) t2:Tm)|            &  & \texttt{||} & |etvar : Tyv| \cto                   \\
+ & \texttt{||} & |pack (T1: Ty) (t: Tm) (T2: Ty)|                            &  & & \\
+ & \texttt{||} & \multicolumn{4}{@@{}l}{|unpack (t1: Tm) (X: Tyv) (x: Tmv) (bindspec (X,x) t2: Tm)|} \\
 \end{tabular}
 \end{minipage}
 }
-\caption{Example specifications of $\fexists$}
+\caption{Example specification of $\fexistsprod$}
 \label{fig:systemfexists}
 \end{figure}
 
 \paragraph{Example} Figure \ref{fig:systemfexists} shows the \Knot~specification
-of $\fexists$. We start with the declaration of two namespaces: |Tyv| for type
-variables and |Tmv| for term variables, which is followed by the declarations of
-two sorts: types and terms.
+of $\fexistsprod$. We start with the declaration of two namespaces: |Tyv| for
+type variables and |Tmv| for term variables, which is followed by the
+declarations of three sorts: types, terms and patterns and a function
+declaration for |bind| that specifies the variables bound by patterns.
 
-%As announced, we have omitted the empty binding specifications $\cbrk{\,}$ for
-readability. The \Knot~specification contains only five non-empty binding
+As announced, we have omitted the empty binding specifications $\cbrk{}$ for
+readability. There are only seven non-empty binding
 specifications: universal and existential quantification for types and type
-abstraction for terms bind exactly one type variable, the lambda abstraction
-for terms binds exactly one term variable and the unpacking of an existential
-binds a type and a term variable.
+abstraction for terms bind exactly one type variable, the lambda abstraction for
+terms binds exactly one term variable, the unpacking of an existential binds a
+type and a term variable, the pattern matching binds the variables bound by the
+pattern in the body and in the product of a pattern the variables of the first
+component are bound in the second.
 
-The last declaration is an environment declaration for typing environments that
-maps term variables to types. Additionally, we specify that the term variable
-clause is substitutable for |Typing| judgements. The relation |Typing| is shown
-in Section \ref{ssec:inductiverelations}. Type variables are not mapped to any
-data, but a clause still needs to be declared to require well-scopedness of
-types.
+The last declaration defines typing environments that map term variables to
+types. It also states that the term variable clause is substitutable for
+|Typing| judgements, defined in Section
+\ref{ssec:inductiverelations}. Type variables are not mapped to any data, but a
+clause still needs to be declared to require well-scopedness of types.
 
 
 %-------------------------------------------------------------------------------
@@ -186,34 +186,44 @@ types.
 \begin{figure}[t]
 \begin{center}
 \fbox{
+  \small
   \begin{minipage}{0.98\columnwidth}
-    \[\begin{array}{ll}
-        \VENV & ::= \ov{\alpha : S}  \hspace{2.7cm}                                                                                         %% & \text{Var. assoc.}   \\
-        \Phi \quad  ::=  \ov{f : S \rightarrow [\ov{\alpha}]}                                                                    \\ %% & \text{Function env.} \\
-        \LENV & ::= \ov{(g @@ \alpha)},\ov{([bs]b : \alpha)},\ov{([bs]s : S)}, \ov{([\bindspec]~\jmv:R~\ov{\symbolicterm})} \\ %% & \text{Local env.}    \\
-      \end{array}
+%if showFun
+    \[ \begin{array}{ll}
+         \VENV & ::= \ov{\alpha : S}  \hspace{2.7cm}                                                                          %% & \text{Var. assoc.}   \\
+         \Phi \quad  ::=  \ov{f : S \rightarrow [\ov{\alpha}]}                                                               \\ %% & \text{Function env.} \\
+         \LENV & ::= \ov{([bs]b : \alpha)},\ov{([bs]s : S)},\ov{(g @@ \alpha)},\ov{([\bindspec]~\jmv:R~\ov{\symbolicterm})} \\ %% & \text{Local env.}    \\
+       \end{array}
     \]
-    \vspace{-5mm}
-    \framebox{\mbox{$\vdash \spec$}} \\
-    \[ \inferrule* [right=\textsc{WfSpec}]
-         {\VENV = \ov{\alpha : T} \\
-           \ov{\ov{\vdash_S \condecl}}
-         }
-         {\vdash
-           \ov{\namespace~\alpha : T}\;
-           \ov{\sort~S \cass \ov{\condecl}}
-         }
+%else
+    \[ \VENV ::= \ov{\alpha : S} \hspace{1cm}
+       \LENV ::= \ov{([bs]b : \alpha)}, \ov{(g @@ \alpha)}
     \]
+%endif
+  \hrule \vspace{2mm}
+  \framebox{\mbox{$\vdash \spec$}} \\
+  \vspace{-7mm}
+  \[ \inferrule* [right=\textsc{WfSpec}]
+       {\VENV = \ov{\alpha : T} \\
+         \ov{\ov{\vdash_S \condecl}}
+       }
+       {\vdash
+         \ov{\namespace~\alpha : T}\;
+         \ov{\sort~S \cass \ov{\condecl}}
+       }
+  \]
 
-    \framebox{\mbox{$\vdash_S \condecl$}} \\
-    \vspace{-5mm}
-    \[ \begin{array}{c}
+  \framebox{\mbox{$\vdash_S \condecl$}} \\
+  \vspace{-7mm}
+  \[ \qquad
+     \begin{array}{c}
        \inferrule* [right=\textsc{WfVar}]
          {\alpha : S \in \VENV
          }
-         {\vdash_S K\,(g@@\alpha)}  \\\\
-          \inferrule*[right=\textsc{WfReg}]
-         {\LENV = \ov{([\bindspec_b]b:\alpha)},\ov{([\bindspec_t]t : T}) \\
+         {\vdash_S K\,(g@@\alpha)} \quad\quad
+%if showFun
+       \inferrule*[right=\textsc{WfReg}]
+         {\LENV = \ov{([\bindspec_b]b:\alpha)},\ov{([\bindspec_t]t : T)} \\
           \ov{\wfbindspec{\epsilon}{\bindspec_b}{|depsOf S|}} \\
           \ov{\wfbindspec{\epsilon}{\bindspec_t}{|depsOf S|}} \\\\
           \forall f. f~(K~\ov{b'}~\ov{t'}) = \bindspec' \Rightarrow
@@ -221,16 +231,26 @@ types.
          }
          {\vdash_S K~\ov{(b : \alpha)}~\ov{([\bindspec_t]t : T)}
          }
-       \end{array}
-    \]
+%else
+       \inferrule*[right=\textsc{WfReg}]
+         {\LENV = \ov{([\bindspec_b]b:\alpha)} \\\\
+          \ov{\wfbindspec{\epsilon}{\bindspec_b}{|depsOf S|}} \\
+          \ov{\wfbindspec{\epsilon}{\bindspec_t}{|depsOf S|}}
+         }
+         {\vdash_S K~\ov{(b : \alpha)}~\ov{([\bindspec_t]t : T)}
+         }
+%endif
+     \end{array}
+  \]
 
-    \framebox{\mbox{$\wfbindspec{\bindspec}{\bindspec}{\ov{\alpha}}$}} \\
-    \vspace{-5mm}
-    \[ \begin{array}{c}
+  \framebox{\mbox{$\wfbindspec{\bindspec}{\bindspec}{\ov{\alpha}}$}} \\
+  \vspace{-7mm}
+  \[ \qquad
+     \begin{array}{c}
        \inferrule* [right=\textsc{WfNil}]
          {\,}
          {\wfbindspec{\bindspec}{\epsilon}{\ov{\alpha}}
-         } \\\\
+         } \quad
        \inferrule* [right=\textsc{WfSng}]
          {([\bindspec]b : \beta) \in \LENV \\
           %% \beta \in \ov{\alpha} \\
@@ -238,6 +258,7 @@ types.
          }
          {\wfbindspec{\bindspec}{b, \bindspec'}{\ov{\alpha}}
          } \\\\
+%if showFun
        \inferrule* [right=\textsc{WfCall}]
          {([\bindspec]t : T) \in \LENV \\
           %% \ov{\beta} \subseteq \ov{\alpha} \\
@@ -246,8 +267,10 @@ types.
          }
          {\wfbindspec{\bindspec}{f~t, \bindspec'}{\ov{\alpha}}
          }
-       \end{array}
-    \]
+%endif
+     \end{array}
+  \]
+  \vspace{-4mm}
   \end{minipage}
 }
 \end{center}
@@ -255,51 +278,39 @@ types.
 \label{fig:wellformedspec}
 \end{figure}
 
-Figure \ref{fig:wellformedspec} defines the well-formedness relation
-$\vdash \spec$ for \Knot\ specifications. We use a global function |depsOf| that
-map a sort |S| to the set of namespaces |overline α| that |S| depends on. For
-example, in \fprod~terms depend on both type and term variables, but types only
-depend on type variables. |depsOf| is the least function that fulfill two
-conditions:
-\begin{enumerate}
-\item For each variable constructor $(K : \alpha \to S)$:
-  $|α ∈ depsOf S|$,
-\item and for each regular constructor
-  $(K : \overline{\alpha}~\overline{T} \to S)$:
-  $|depsOf|~T_i \subseteq |depsOf|~S \quad (\forall i)$.
-\end{enumerate}
-The function |depsOf| induces a subordination relation on sorts similar to subordination in
-Twelf \cite{twelf,virga:higherorderrewriting}. We will use |depsOf| in the
-definition of syntactic operations to avoid recursing into subterms in which no
-variables of interest are to be found and for subordination-based strengthening
-lemmas.
+This section defines which \Knot specifications are well-formed.  To simplify
+the explanation of well-formedness and of the semantics of \Knot\
+specifications, we disregard both function declarations and only consider
+single-variable binding for the rest of this section and the following. See the
+technical appendix for the extended formalisation.
 
-The single rule \textsc{WfSpec} expresses that a specification is well-formed if
-each of the constructor declarations inside the sort declarations is and the
-meta-environment $\VENV$ contains exactly the declared namespaces.
+Figure \ref{fig:wellformedspec} defines the well-formedness relation
+$\vdash \spec$ for \Knot\ specifications. The single rule \textsc{WfSpec}
+expresses that a specification is well-formed if each of the constructor
+declarations inside the sort declarations is and the meta-environment $\VENV$
+contains exactly the declared namespaces.
 
 The auxiliary well-sorting relation $\vdash_S \condecl$ denotes that constructor
-declaration $\condecl$ has sort $S$.  There are one rule for each constructor
+declaration $\condecl$ has sort $S$.  There is one rule for each constructor
 form. Rule \textsc{WfVar} requires that the associated sort of the variable
 namespace matches the sort of the constructor.  Rule \textsc{WfReg} handles
 regular constructors. It builds a constructor-local meta-environment $\LENV$ for
-binding fields $([\bindspec_b]b:\alpha)$ and sort fields
-$([\bindspec_S]s:S)$. The binding specification $\bindspec_b$ of a binding $b$
-denotes the \emph{local scope} into which the corresponding object-variable is
-introduced.  The local scope is left implicit in the syntax; hence, it needs to
-be inferred in this rule. The binding specifications of fields and the
-definitions of all functions on $S$ are checked against $\LENV$. Also, we
-check clauses of function declarations as part of this rule. We use the notation
-$f~(K~\ov{b'}~\ov{t'}) = \bindspec'$ to look up the clause of $f$ for
-constructor $K$. After proper renaming, the right-hand side of each functional
-clause has to be consistent with $\LENV$.
+binding fields $([\bindspec_b]b:\alpha)$. The binding specification
+$\bindspec_b$ of a binding $b$ denotes the \emph{local scope} into which the
+corresponding object-variable is introduced.  The local scope is left implicit
+in the syntax; hence, it needs to be inferred in this rule. The binding
+specifications of fields are checked against $\LENV$.
+%Also, we check clauses of function declarations as part of this rule. We use the
+%notation $f~(K~\ov{b'}~\ov{t'}) = \bindspec'$ to look up the clause of $f$ for
+%constructor $K$. After proper renaming, the right-hand side of each functional
+%clause has to be consistent with $\LENV$.
 
 The relation $\wfbindspec{\bindspec_1}{\bindspec_2}{\ov{\alpha}}$ in Figure
 \ref{fig:wellformedspec} denotes that binding specification $\bindspec_2$ is
 well-formed with respect to the scope $\bindspec_1$.
 % and is typed heterogeneously with elements from namespaces $\ov{\alpha}$.
-The relation ensures that the order of different binding items has to be
-consistent across all binding specifications and there can be no gaps. For
+The relation ensures that the order of different binding items has is
+consistent across all binding specifications and there are no gaps. For
 instance, if one of the binding specifications is $[b_0,b_1,b_2]$ then another
 field of the same constructor cannot have the binding specification
 $[b_0,b_2,b_1]$ or $[b_0,b_2]$. This restriction prevents the user
@@ -309,23 +320,22 @@ well-scopedness generically in the derivation of judgement well-scopedness
 lemmas.
 
 Rule \textsc{WfNil} regulates the base case of an empty binding specification
-that is always well-typed. By rule \textsc{WfSng} a singleton binding is
+that is always well-scoped. By rule \textsc{WfSng} a singleton binding is
 well-scoped if the local scope $\bindspec$ is consistent with the information in
 the local environment $\LENV$ and it checks the tail $\bindspec'$ in the
-extended scope $\bindspec,b$. Correspondingly, the rule $\textsc{WfCall}$ states
-that a function call $f~s$ is well-scoped if the local scope $\bindspec$ is the
-binding specification of $s$.
+extended scope $\bindspec,b$.
 
-We assume that for every sort there is a single context describing the scopes of
-its variables. This allows and restricts us to write all operations over sort
-terms in a single traversal. However, rule \textsc{WfCall} also forbids cyclic
-binding specifications. Because of these two choices, it is impossible to define
-scoping constructs such as recursive scoping. This is a trade-off between
-expressivity and simplicity. We plan to address multiple traversals in future
-work, so that recursive constructs can be checked in two traversals: one for
-declaration heads and one for declaration bodies.
-
-
+Including function calls in the binding specification requires checking them for
+well-scopedness too which can be found in Appendix
+\ref{app:sec:wellformedspec}. In short: For calling a function
+$(f : T \to \ov{\alpha})$ on a field $([\bindspec]t : T)$ we require
+$\wfbindspec{\bindspec}{f~t}{\ov{\alpha}}$, i.e. the local scope of the function
+call is the binding specification of $s$. However, this forbids cyclic binding
+specifications. As a consequence it is impossible to define scoping constructs
+such as recursive scoping. This is a trade-off between expressivity and
+simplicity. We plan to add multiple (potentially circular) input scopes in
+future work, so that recursive constructs can be checked with two scopes: one
+for declaration heads and one for declaration bodies.
 
 %if False
 \begin{figure}[t]
@@ -359,59 +369,90 @@ declaration heads and one for declaration bodies.
 
 \subsection{Symbolic Expressions}
 
-% \begin{figure}[t]
-% \begin{center}
-% \fbox{
-%   \begin{minipage}{0.95\columnwidth}
-%     \[\begin{array}{@@{}l@@{\hspace{1mm}}c@@{\hspace{1mm}}lr}
-%         \symbolicterm & ::=  & s \mid K~\ov{b}~\ov{\symbolicterm} \mid \symbolicweaken~\symbolicterm~\bindspec & \textit{Symbolic exp.} \\
-%                       & \mid & K~g \mid K~b \mid  \symbolicsubst~b~\symbolicterm~\symbolicterm                 &                        \\
-%         \symbolicenv  & ::=  & \ov{b_0 \mapsto b_1}, \ov{s \mapsto \symbolicterm}                              & \textit{Symbolic env.} \\
-%       \end{array}
-%     \]
-%   \end{minipage}
-% }
-% \end{center}
-% \caption{Syntax for symbolic expressions}
-% \label{fig:grammarsymbolicexpressions}
-% \end{figure}
-
-\begin{figure}[t]
+\begin{figure}[t!]
 \begin{center}
 \fbox{
   \begin{minipage}{0.98\columnwidth}
-    \[\begin{array}{@@{}l@@{\hspace{1mm}}c@@{\hspace{1mm}}lr}
-        \symbolicterm & ::=  & s \mid K~\ov{b}~\ov{\symbolicterm} \mid \symbolicweaken~\symbolicterm~\bindspec & \textit{Symbolic exp.} \\
-                      & \mid & K~g \mid K~b \mid  \symbolicsubst~b~\symbolicterm~\symbolicterm                 &                        \\
-        \symbolicenv  & ::=  & \ov{b_0 \mapsto b_1}, \ov{s \mapsto \symbolicterm}                              & \textit{Symbolic env.} \\
-      \end{array}
+    \small
+    \[ \begin{array}{@@{}l@@{\hspace{2mm}}c@@{\hspace{2mm}}l@@{\hspace{10mm}}r}
+         \symbolicterm & ::=  & s \mid K~\ov{b}~\ov{\symbolicterm} \mid \symbolicweaken~\symbolicterm~\bindspec & \textit{Symbolic exp.} \\
+                       & \mid & K~g \mid K~b \mid  \symbolicsubst~b~\symbolicterm~\symbolicterm                 &                        \\
+       \end{array}
     \]
+
+  %---------------------------------------------------------------------------
+  \hrule \vspace{2mm}
+  \framebox{\mbox{$\wfsym{\bindspec}{\symbolicterm}{S}$}} \\
+  \vspace{-5mm}
+  \[ \qquad
+     \begin{array}{c}
+       \inferrule* [right=\textsc{SymReg}]
+         {K : (\ov{[\bindspec_b]b:\alpha}) \to
+              (\ov{[\bindspec_t]t:T}) \to S \\\\
+          \ov{([\{b \mapsto b'\}\bindspec_b]b':\alpha) \in \LENV} \\
+          \ov{\LENV; \bindspec,\{b \mapsto b'\}\bindspec_t \vdash \symbolicterm : T}
+         }
+         {\wfsym{\bindspec}{K~\ov{b'}~\ov{\symbolicterm}}{S}
+         } \\\\
+       \hspace{-5mm}
+       \inferrule* [right=\textsc{SymVar}]
+         {[\bindspec]s:S \in \LENV}
+         {\wfsym{\bindspec}{s}{S}
+         } \quad
+       \inferrule* [right=\textsc{SymGbl}]
+         {K : \alpha \to S \\\\
+          (g@@\alpha) \in \LENV
+         }
+         {\wfsym{\bindspec}{K~g}{S}
+         } \quad
+       \inferrule* [right=\textsc{SymLcl}]
+         {K : \alpha \to S \\\\
+          ([\bindspec]b:\alpha) \in \LENV
+         }
+         {\wfsym{\bindspec,b,\bindspec'}{K~b}{S}
+         } \\\\
+       \inferrule* [right=\textsc{SymWeaken}]
+         {\wfsym{\bindspec}{\symbolicterm}{S}
+         }
+         {\wfsym{\bindspec, \bindspec'}{\symbolicweaken~\symbolicterm~\bindspec'}{S}
+         } \\\\
+       \inferrule* [right=\textsc{SymSubst}]
+         {([\bindspec]x:\alpha) \in \LENV \\
+          (\alpha:T) \in \VENV \\
+          \wfsym{\bindspec}{\symbolicterm_1}{T} \\
+          \wfsym{\bindspec, x}{\symbolicterm_2}{S}
+         }
+         {\wfsym{\bindspec}{\symbolicsubst~x~\symbolicterm_1~\symbolicterm_2}{S}
+         } \\
+     \end{array}
+  \]
+
   \end{minipage}
 }
 \end{center}
-\caption{Symbolic expressions}
-\label{fig:symbolicexpression:definition}
+\caption{Symbolic expressions and their well-formedness}
+\label{fig:symbolicevaluation}
 \end{figure}
 
-In this section we define \emph{symbolic expressions} on top of specification
+This section defines \emph{symbolic expressions} on top of specification
 declarations. These are needed for the declaration of inductive relations on
 sorts. The general idea is that we extend sort terms with meta-variables and
 with symbolic constructs for meta-operations such as substitution. These
 meta-variables are distinct from the object-language variables. We can for
-example have a meta-variable for a term of a sort that has no namespaces. Figure
-\ref{fig:symbolicexpression:definition} contains the definition of symbolic
-expressions.
+example have a meta-variable for a term of a sort that has no namespaces.
 
-An expression is a meta-variable $s$ or a regular constructor applied to
-variable bindings and other symbolic expressions $K~\ov{b}~\ov{\symbolicterm}$.
-For variable constructors we need to make a distinction between global $K~g$ and
-local references $K~b$. Furthermore, a symbolic expression can also be a reified
-substitution $\symbolicsubst~b~\symbolicterm_1~\symbolicterm_2$, that denotes a
+Figure \ref{fig:symbolicevaluation} (top) contains the grammar for symbolic
+expressions. An expression is a meta-variable $s$ or a regular constructor
+applied to variable bindings and other symbolic expressions
+$(K~\ov{b}~\ov{\symbolicterm})$.  For variable constructors we need to make a
+distinction between global $(K~g)$ and local references $(K~b)$. Furthermore, a
+symbolic expression can also be a reified substitution
+$(\symbolicsubst~b~\symbolicterm_1~\symbolicterm_2)$, that denotes a
 substitution of $\symbolicterm_1$ for $b$ in $\symbolicterm_2$. We only allow
 substitution of locally bound variables to ensure context parametricity. The
-last expression former are refied weakenings
-$\symbolicweaken~\symbolicterm~\bindspec$ that make context changes
-explicit. For example consider $\eta$-reduction for $\fexists$:
+last expression former is a refied weakening
+$(\symbolicweaken~\symbolicterm~\bindspec)$ that makes context changes
+explicit. For example consider $\eta$-reduction for $\fexistsprod$:
 $$|abs x T (app (weaken t x) (var x))| \longrightarrow_\eta |t|.$$
 Here the term $t$ is assumed to be in the outer context of the whole expression
 and is explicitly weakened under the abstraction. The symbolic weakening implies
@@ -420,73 +461,7 @@ expressions after introducing inductive relations in Section
 \ref{ssec:inductiverelations}.
 
 
-%-------------------------------------------------------------------------------
-
-\subsection{Expression Well-formedness}
-
-\begin{figure}[t]
-\begin{center}
-\fbox{
-  \begin{minipage}{0.98\columnwidth}
-    \framebox{\mbox{$\evalbig{\symbolicenv}{\bindspec}{\bindspec}$}} \\
-    \vspace{-9mm}
-    \[ \begin{array}{c}
-       \inferrule* [right=\textsc{EvalNil}]
-         { \,
-         }
-         {\evalbig{\symbolicenv}{\epsilon}{\epsilon}
-         } \\\\
-       \inferrule* [right=\textsc{EvalSng}]
-         { \evalbig{\symbolicenv}{\bindspec_1}{\bindspec'_1} \\
-           (b \mapsto b') \in \symbolicenv
-         }
-         { \evalbig{\symbolicenv}{\bindspec_1,b}{\bindspec'_1,b'}
-         } \\\\
-       \inferrule* [right=\textsc{EvalCall}]
-         { \evalbig{\symbolicenv}{\bindspec_1}{\bindspec_1'} \\
-           (s \mapsto \symbolicterm_s) \in \symbolicenv \\\\
-           \evalbigf{f}{\symbolicterm_s}{\bindspec_2'} \\
-         }
-         { \evalbig{\symbolicenv}{\bindspec_1,f~s}{\bindspec'_1,\bindspec'_2}
-         } \\\\
-       \end{array}
-    \]
-    \vspace{-9mm}
-    \framebox{\mbox{$\evalbigf{f}{\symbolicterm}{\bindspec}$}} \\
-    \[ \begin{array}{c}
-       \inferrule* [right=\textsc{EvalCallVar}]
-         { \,
-         }
-         { \evalbigf{f}{s}{f~s}
-         } \\\\
-       \inferrule* [right=\textsc{EvalCallCon}]
-         { \symbolicenv = \ov{b \mapsto b'}, \ov{s \mapsto \symbolicterm_s} \\
-           f (K~\ov{b}~\ov{s}) = \bindspec \\
-           \evalbig{\symbolicenv}{\bindspec}{\bindspec'}
-         }
-         { \evalbigf{f}{K~\ov{b'}~\ov{\symbolicterm_s}}{\bindspec'}
-         }
-       %% \color{red}
-       %% \inferrule* [right=\textsc{EvalCallWeaken}]
-       %%   { \evalbigf{f}{\symbolicterm}{\bindspec'}
-       %%   }
-       %%   { \evalbigf{f}{\symbolicweaken~\symbolicterm~\bindspec}{\bindspec'}
-       %%   } \\\\
-       %% \color{red}
-       %% \inferrule* [right=\textsc{EvalCallSubst}]
-       %%   { \evalbigf{f}{\symbolicterm_2}{\bindspec'}
-       %%   }
-       %%   { \evalbigf{f}{\symbolicsubst~x~\symbolicterm_1~\symbolicterm_2}{\bindspec'}
-       %% } \\\\
-      \end{array}
-    \]
-  \end{minipage}
-}
-\end{center}
-\caption{Symbolic expression evaluation}
-\label{fig:symbolicexpression:evaluation}
-\end{figure}
-
+\paragraph{Well-formedness}
 
 When using symbolic expressions we also want to ensure that these are
 well-sorted and well-scoped with respect to the specification and scoping rules
@@ -496,199 +471,88 @@ be checked to be locally bound. Therefore, we need to keep track of all local
 bindings that are in scope. We reuse the representation of binding
 specifications $\bindspec$ to also represent \emph{local scopes}.
 
-The checking is complicated by the fact that arbitrary expressions may appear in
-a term constructor that contains a binding specification with function calls. So
-to define well-scopedness of expressions, we first have to define symbolic
-evaluation of functions on expressions. This evaluation normalizes function
-calls $f~\symbolicterm$ down to ordinary binding specifications that only
-contain function calls on meta-variables $f~s$. During evaluation we need to
-pattern match regular term constructions against function clauses. This pattern
-matching yields a symbolic environment $\symbolicenv$ that maps binding
-meta-variables to new names and sort meta-variables to expressions. Symbolic
-environments $\symbolicenv$ are defined in Figure
-\ref{fig:symbolicexpression:definition}.
+%if False
+{\color{red} The checking is complicated by the fact that arbitrary expressions
+  may appear in a term constructor that contains a binding specification with
+  function calls. So to define well-scopedness of expressions, we first have to
+  define symbolic evaluation of functions on expressions. This evaluation
+  normalizes function calls $f~\symbolicterm$ down to ordinary binding
+  specifications that only contain function calls on meta-variables
+  $f~s$. During evaluation we need to pattern match regular term constructions
+  against function clauses. This pattern matching yields a symbolic environment
+  $\symbolicenv$ that maps binding meta-variables to new names and sort
+  meta-variables to expressions. Symbolic environments $\symbolicenv$ are
+  defined in Figure \ref{fig:symbolicevaluation} (top).
 
+  \paragraph{Symbolic Evaluation} Figure \ref{fig:symbolicevaluation} (middle)
+  contains definitions for the symbolic evaluation as a big-step operational
+  semantics. The relation $\evalbig{\symbolicenv}{\bindspec_1}{\bindspec_2}$
+  defines the evaluation of the binding specification $\bindspec_1$ with respect
+  to environment $\symbolicenv$.
 
-\paragraph{Symbolic Evaluation} Figure \ref{fig:symbolicexpression:evaluation}
-contains definitions for the symbolic evaluation as a big-step operational
-semantics. The relation $\evalbig{\symbolicenv}{\bindspec_1}{\bindspec_2}$
-defines the evaluation of the binding specification $\bindspec_1$ with respect
-to environment $\symbolicenv$.
+  Rule \textsc{EvalNil} handles the empty case and rule \textsc{EvalSng} the
+  singleton case in which we simply use the new name of the binding variable and
+  evaluate recursively. The case of a function call is delegated to the relation
+  $\evalbigf{f}{\symbolicterm}{\bindspec}$ that explains the evaluation of the
+  function $f$ on the expression $\symbolicterm$. The straightforward case of a
+  meta-variable is handled by \textsc{EvalCallVar}. Rule \textsc{EvalCallCon}
+  handles expressions built by a regular constructor. It builds up an
+  environment $\symbolicenv$ that maps the left-hand side |(overline x)
+  (overline s)| of the function clause to the fields of the symbolic
+  construction and evaluates the right-hand side of the clause.
 
-Rule \textsc{EvalNil} handles the empty case and rule \textsc{EvalSng} the
-singleton case in which we simply use the new name of the binding variable and
-evaluate recursively. The case of a function call is delegated to the relation
-$\evalbigf{f}{\symbolicterm}{\bindspec}$ that explains the evaluation of the
-function $f$ on the expression $\symbolicterm$. The straightforward case of a
-meta-variable is handled by \textsc{EvalCallVar}. Rule \textsc{EvalCallCon}
-handles expressions built by a regular constructor. It builds up an environment
-$\symbolicenv$ that maps the left-hand side |(overline x) (overline s)| of the
-function clause to the fields of the symbolic construction and evaluates the
-right-hand side of the clause.
+  Notably absent from the symbolic evaluation are rules for reified
+  substitutions and reified weakenings. The de Bruijn representation admits for
+  example the rule
+  $$
+    \inferrule* []
+     { \evalbigf{f}{\symbolicterm_2}{\bindspec'}
+     }
+     { \evalbigf{f}{\symbolicsubst~x~\symbolicterm_1~\symbolicterm_2}{\bindspec'}
+     }.
+   $$
 
-Notably absent from the symbolic evaluation are rules for reified
-substitutions and reified weakenings. The de Bruijn representation admits for
-example the rule
-$$
-\inferrule* []
- { \evalbigf{f}{\symbolicterm_2}{\bindspec'}
- }
- { \evalbigf{f}{\symbolicsubst~x~\symbolicterm_1~\symbolicterm_2}{\bindspec'}
- }.
-$$
-Yet, adding this rule would break subject reduction of symbolic
-evaluation. The reason is that the typing of $\bindspec$ in Figure
-\ref{fig:symbolicevaluation} (bottom) is not strong enough to keep track of the scope when
-performing substitutions or weakenings. In essence, the result cannot be
-$\bindspec'$ but has to be ``$\bindspec'$ without $x$''. Tracking
-scopes during substitutions or other user-defined functions is the focus of
-research on \emph{binding safe programming}~\cite{freshlook,romeo}. In the
-framework of \cite{freshlook}, $\bindspec'$ in the premise and conclusion of
-the above rule are two distinct (chains of) weak links with distinct types
-which are in a commutative relationship with the world inclusion induced by
-the substitution.
+   Yet, adding this rule would break subject reduction of symbolic
+   evaluation. The reason is that the typing of $\bindspec$ in Figure
+   \ref{fig:symbolicevaluation} (bottom) is not strong enough to keep track of
+   the scope when performing substitutions or weakenings. In essence, the result
+   cannot be $\bindspec'$ but has to be ``$\bindspec'$ without $x$''. Tracking
+   scopes during substitutions or other user-defined functions is the focus of
+   research on \emph{binding safe programming}~\cite{freshlook,romeo}. In the
+   framework of \cite{freshlook}, $\bindspec'$ in the premise and conclusion of
+   the above rule are two distinct (chains of) weak links with distinct types
+   which are in a commutative relationship with the world inclusion induced by
+   the substitution.
 
-We side-step the issue by sticking to the simple scope checking of Figure
-\ref{fig:symbolicevaluation} (bottom) and effectively disallow symbolic
-substitutions and weakenings to appear in positions that are accessed by
-functions. Another consequence is that substitution and weakening are only
-allowed ``at the end of the context''. These restrictions are usually met by
-relations for typing and operational semantics, and thus do not get in the way
-of type-safety proofs. However, it may be too restrictive for other
-kinds of meta-theoretical formalizations.
+   We side-step the issue by sticking to the simple scope checking of Figure
+   \ref{fig:symbolicevaluation} (bottom) and effectively disallow symbolic
+   substitutions and weakenings to appear in positions that are accessed by
+   functions. Another consequence is that substitution and weakening are only
+   allowed ``at the end of the context''. These restrictions are usually met by
+   relations for typing and operational semantics, and thus do not get in the
+   way of type-safety proofs. However, it may be too restrictive for other kinds
+   of meta-theoretical formalizations.}
+%endif
 
-
-%% The two remaining rules \textsc{EvalCallWeaken} and \textsc{EvalCallSubst}
-%% explain evaluation in case of symbolic weakening or substitution. These
-%% operations only affect free variables in a term and do not change its binding
-%% structure.  Hence the rules ignore the operation and directly evaluate the
-%% function on the original symbolic term.
-
-
-% \begin{figure}[t]
-% \begin{center}
-% \fbox{
-%   \begin{minipage}{0.95\columnwidth}
-%   \framebox{\mbox{$\wfsym{\bindspec}{\symbolicterm}{S}$}} \\
-%   \vspace{-7mm}
-%   \[ \begin{array}{c}
-%      \inferrule* [right=\textsc{SymVar}]
-%        {[\bindspec]s:S \in \LENV}
-%        {\wfsym{\bindspec}{s}{S}
-%        } \\\\
-%      \inferrule* [right=\textsc{SymGlobal}]
-%        {K : \alpha \to S \\ (g@@\alpha) \in \LENV
-%        }
-%        {\wfsym{\bindspec}{K~g}{S}
-%        } \\\\
-%      \inferrule* [right=\textsc{SymLocal}]
-%        {K : \alpha \to S \\ ([\bindspec]b:\alpha) \in \LENV
-%        }
-%        {\wfsym{\bindspec,b,\bindspec'}{K~b}{S}
-%        } \\\\
-%      \inferrule* [right=\textsc{SymReg}]
-%        {K : (\ov{[\bindspec_b]b:\alpha}) \to
-%             (\ov{[\bindspec_t]t:T}) \to S \\
-%         \ov{\evalbig{\ov{b \mapsto b'}, \ov{t \mapsto \symbolicterm}}{\bindspec_b}{\bindspec_{b'}}} \\
-%         \ov{([\bindspec_{b'}]b':\alpha) \in \LENV} \\
-%         \ov{\evalbig{\ov{b \mapsto b'}, \ov{t \mapsto \symbolicterm}}{\bindspec_t}{\bindspec_{\symbolicterm}}} \\
-%         \ov{\LENV; \bindspec,\bindspec_{\symbolicterm} \vdash \symbolicterm : T}
-%        }
-%        {\wfsym{\bindspec}{K~\ov{b'}~\ov{\symbolicterm}}{S}
-%        } \\\\
-%      \inferrule* [right=\textsc{SymWeaken}]
-%        {\wfsym{\bindspec}{\symbolicterm}{S}
-%        }
-%        {\wfsym{\bindspec, \bindspec'}{\symbolicweaken~\symbolicterm~\bindspec'}{S}
-%        } \\\\
-%      \inferrule* [right=\textsc{SymSubst}]
-%        {([\bindspec]x:\alpha) \in \LENV \\ (\alpha:T) \in \VENV \\
-%         \wfsym{\bindspec}{\symbolicterm_1}{T} \\
-%         \wfsym{\bindspec, x}{\symbolicterm_2}{S}
-%        }
-%        {\wfsym{\bindspec}{\symbolicsubst~x~\symbolicterm_1~\symbolicterm_2}{S}
-%        } \\
-%      \end{array}
-%   \]
-%
-%   \end{minipage}
-% }
-% \end{center}
-% \caption{Well-formed symbolic expression}
-% \label{fig:wellformedsymbolicexpressions}
-% \end{figure}
-
-\paragraph{Well-formedness}
-
-\begin{figure}[t]
-\begin{center}
-\fbox{
-  \begin{minipage}{0.98\columnwidth}
-    \framebox{\mbox{$\wfsym{\bindspec}{\symbolicterm}{S}$}} \\
-    \vspace{-7mm}
-    \[ \begin{array}{c}
-       \inferrule* [right=\textsc{SymVar}]
-         {[\bindspec]s:S \in \LENV}
-         {\wfsym{\bindspec}{s}{S}
-         } \\\\
-       \inferrule* [right=\textsc{SymGlobal}]
-         {K : \alpha \to S \\ (g@@\alpha) \in \LENV
-         }
-         {\wfsym{\bindspec}{K~g}{S}
-         } \\\\
-       \inferrule* [right=\textsc{SymLocal}]
-         {K : \alpha \to S \\ ([\bindspec]b:\alpha) \in \LENV
-         }
-         {\wfsym{\bindspec,b,\bindspec'}{K~b}{S}
-         } \\\\
-       \inferrule* [right=\textsc{SymReg}]
-         {K : (\ov{[\bindspec_b]b:\alpha}) \to
-              (\ov{[\bindspec_t]t:T}) \to S \\
-          \ov{\evalbig{\ov{b \mapsto b'}, \ov{t \mapsto \symbolicterm}}{\bindspec_b}{\bindspec_{b'}}} \\
-          \ov{([\bindspec_{b'}]b':\alpha) \in \LENV} \\
-          \ov{\evalbig{\ov{b \mapsto b'}, \ov{t \mapsto \symbolicterm}}{\bindspec_t}{\bindspec_{\symbolicterm}}} \\
-          \ov{\LENV; \bindspec,\bindspec_{\symbolicterm} \vdash \symbolicterm : T}
-         }
-         {\wfsym{\bindspec}{K~\ov{b'}~\ov{\symbolicterm}}{S}
-         } \\\\
-       \inferrule* [right=\textsc{SymWeaken}]
-         {\wfsym{\bindspec}{\symbolicterm}{S}
-         }
-         {\wfsym{\bindspec, \bindspec'}{\symbolicweaken~\symbolicterm~\bindspec'}{S}
-         } \\\\
-       \inferrule* [right=\textsc{SymSubst}]
-         {([\bindspec]x:\alpha) \in \LENV \\ (\alpha:T) \in \VENV \\
-          \wfsym{\bindspec}{\symbolicterm_1}{T} \\
-          \wfsym{\bindspec, x}{\symbolicterm_2}{S}
-         }
-         {\wfsym{\bindspec}{\symbolicsubst~x~\symbolicterm_1~\symbolicterm_2}{S}
-         } \\
-       \end{array}
-    \]
-  \end{minipage}
-}
-\end{center}
-\caption{Symbolic expression well-formedness}
-\label{fig:symbolicexpression:wellformedness}
-\end{figure}
-
-Finally, Figure \ref{fig:symbolicexpression:wellformedness} shows the definition
-of well-formedness of symbolic expressions. The relation
+% \paragraph{Well-formedness}
+% Finally,
+Figure \ref{fig:symbolicevaluation} (bottom) shows the definition of
+well-formedness of symbolic expressions. The relation
 $\wfsym{\bindspec}{\symbolicterm}{S}$ denotes that the symbolic expression
 $\symbolicterm$ has sort $S$ and is well-formed in scope $\bindspec$ under the
 local environment $\LENV$.
 
 The rule \textsc{SymVar} looks up the sort and scope of a meta-variable for a
 sort term in $\LENV$. Variable constructors are handled by two rules.  Rule
-\textsc{SymLocal} is used in case the variable is bound locally and
-$\bindspec'$ represents the difference to the scope of the binding. Global
-variables are handled by rule \textsc{SymGlobal}. The case of a regular
-constructor is handled by rule \textsc{SymReg}. For each of the fields
-$[\bindspec_t]t:T$ the binding specification $\bindspec_t$ is symbolically
-evaluated to $bs_{\symbolicterm}$ and the corresponding symbolic expression
+\textsc{SymLcl} is used in case the variable is bound locally and $\bindspec'$
+represents the difference to the scope of the binding. Global variables are
+handled by rule \textsc{SymGbl}. The case of a regular constructor is handled by
+rule \textsc{SymReg}. For each of the fields $[\bindspec_t]t:T$ the binding
+specification $\bindspec_t$ the corresponding symbolic expression
 $\symbolicterm$ is checked in the extended scope
-$\bindspec,\bindspec_{\symbolicterm}$. Rule $\textsc{SymWeaken}$ strengthens the
-scope $\bindspec,\bindspec'$ of a symbolic weakening
+$(\bindspec,\{b \mapsto b'\}\bindspec_t)$ where $\{b \mapsto b'\}$ denotes
+simultaneous renaming of the bindings $b$ to $b'$. Rule $\textsc{SymWeaken}$
+strengthens the scope $\bindspec,\bindspec'$ of a symbolic weakening
 $(\symbolicweaken~\symbolicterm~\bindspec')$. The symbolic expression
 $\symbolicterm$ is checked in the stronger scope $\bindspec$. Finally, rule
 $\textsc{SymSubst}$ takes care of single variable substitutions.  The expression
@@ -705,13 +569,15 @@ the substitute $\symbolicterm_1$ have to agree with that of $b$.
 \begin{center}
 \fbox{
   \begin{minipage}{0.98\columnwidth}
+    \vspace{-3mm}
     \[\begin{array}{@@{}l@@{\hspace{1mm}}c@@{\hspace{1mm}}l@@{\hspace{-6mm}}r}
         \jmv          & ::=  &                                                                      & \textit{Judgement var.}        \\
-%        \reldecl      & ::=  & \relation\, \cbrk{E} \,R\,\ov{S}\,:=\,\ov{\ruledecl}                 & \textit{Relation decl.}        \\
+        \reldecl      & ::=  & \relation\, \cbrk{E} \,R\,\ov{S}\,:=\,\ov{\ruledecl}                 & \textit{Relation decl.}        \\
                       & \mid & \relation\, R\,\ov{S}\,:=\,\ov{\ruledecl}                            &                                \\
-        \ruledecl     & ::=  & \texttt{+} r : \lookup\cto\judgement                                 & \textit{Rule decl.}            \\
-                      & \mid & \texttt{||} r : \ov{\formula}\cto\judgement ; \ov{f = \rulebindspec} &                                \\
-%        \formula      & ::=  & \lookup \mid \cbrk{\rulebindspec}~\jmv:\judgement                    & \textit{Formula}               \\
+        \ruledecl     & ::=  & \texttt{+} r : \lookup\cto\judgement \quad\mid\quad \texttt{||} r : \ov{\formula}\cto\judgement ; \ov{f = \rulebindspec}                                & \textit{Rule decl.}            \\
+%         \ruledecl     & ::=  & \texttt{+} r : \lookup\cto\judgement                                 & \textit{Rule decl.}            \\
+%                       & \mid & \texttt{||} r : \ov{\formula}\cto\judgement ; \ov{f = \rulebindspec} &                                \\
+        \formula      & ::=  & \lookup \mid \cbrk{\rulebindspec}~\jmv:\judgement                    & \textit{Formula}               \\
         \lookup       & ::=  & \cbrc{x \cto \ov{\symbolicterm}}                                     & \textit{Lookup}                \\
         \judgement    & ::=  & R~\ov{\symbolicterm}                                                 & \textit{Judgement}             \\
         \rulebindspec & ::=  & \ov{\rbsi}                                                           & \textit{Rule binding spec.}    \\
@@ -725,10 +591,10 @@ the substitute $\symbolicterm_1$ have to agree with that of $b$.
 \label{fig:grammarrelations}
 \end{figure}
 
-Figure \ref{fig:grammarrelations} shows the grammar for specifications of
+Figure \ref{fig:grammarrelations} shows the grammar for specification of
 relations. A relation declaration $\reldecl$ introduces a new relation $R$ with
-an optional environment $E$ and indices $\ov{S}$. For the purpose of variable
-binding, we regard the first index to be classified by the remaining ones. The
+an optional environment index $E$ and indices $\ov{S}$. For the purpose of variable
+binding, we regard the first sort index to be classified by the remaining ones. The
 environment $E$ itself is left implicit in the rules; only environment changes
 are explicitly stated. Each $\reldecl$ contains a list of named rules $r$ of
 which there are two kinds. Regular rules
@@ -738,13 +604,13 @@ relation between symbolic expressions. We also allow the definition of function
 counterparts at the level of relations, but instead of having a separate
 declaration form, we declare them inline with relations.
 
-A formula is either the lookup of a variable in the environment, that gives
+A formula is either a variable lookup in the environment, that gives
 access to the associated data, or a judgement that can be named with judgement
 variables. Similar to binding specification of sort fields, judgements are
 prefixed with rule binding specifications $\rulebindspec$ that alter the
-implicit environment. These consist of a list of items which are either
+implicit environment. These consist of a list of items: either
 singleton binding variables mapped to associated data $\ov{\symbolicterm}$ or
-function calls $f~\jmv$ on judgements. The second kind of rules are variable
+function calls $(f~\jmv)$ on judgements. The second kind of rules are variable
 rules $\texttt{+} r : \lookup\cto\judgement$ that only contain a single lookup
 as a premise.
 
@@ -762,32 +628,36 @@ the corresponding derived rule needs to be proven.
 
 \begin{figure}[t]
 \fbox{
-\begin{minipage}{0.95\columnwidth}
+\begin{minipage}{0.99\columnwidth}
+\hspace{-2mm}
 \begin{tabular}{l@@{\hspace{2mm}}c@@{\hspace{1mm}}l}
-\multicolumn{3}{l}{|relation [Env] Typing Tm Ty|~\cass}             \\
- & \texttt{+}  & |Tvar :  {x -> T} -> Typing (var x) T|             \\
- & \texttt{||} & |Tabs :  [x -> T1] Typing t (weaken T2 x) ->|      \\
- &             & |Typing (abs x T1 t) (tarr T1 T2)|                 \\
- & \texttt{||} & |Tapp :  Typing t1 (tarr T11 T12) ->|              \\
- &             & |Typing t2 T11 -> Typing (app t1 t2) T12|          \\
- & \texttt{||} & |[X -> ] Typing t T ->|                            \\
- &             & |Typing (tabs X t) (tall X T)|                     \\
- & \texttt{||} & |Ttapp : Typing t1 (tall X T12) ->|                \\
- &             & |Typing (tapp t1 T2) (subst X T2 T12)|             \\
- & \texttt{||} & |Tpack : Typing t2 (subst X U T2) ->|              \\
- &             & |Typing (pack U t2 (texist X T2)) (texist X T2)|   \\
- & \texttt{||} & |Tunpack : Typing t1 (texist X T12) ->|            \\
- &             & |[X -> , x -> T12] Typing t2 (weaken T2 [X,x]) ->| \\
- &             & |Typing (unpack t1 X x t2) T2|                     \\
+\multicolumn{3}{l}{|relation [Env] Typing Tm Ty|~\cass}                                                        \\
+ & \texttt{+}  & |Tvar :  {x -> T} -> Typing (var x) T|                                                        \\
+ & \texttt{||} & |Tabs :  [x -> T1] Typing t (weaken T2 x) -> Typing (abs x T1 t) (tarr T1 T2)|                \\
+ & \texttt{||} & |Tapp :  Typing t1 (tarr T11 T12) -> Typing t2 T11 -> Typing (app t1 t2) T12|                 \\
+ & \texttt{||} & |Ttabs : [X -> ] Typing t T -> Typing (tabs X t) (tall X T)|                                  \\
+ & \texttt{||} & |Ttapp : Typing t1 (tall X T12) -> Typing (tapp t1 T2) (subst X T2 T12)|                      \\
+ & \texttt{||} & |Tpack : Typing t2 (subst X U T2) -> Typing (pack U t2 (texist X T2)) (texist X T2)|          \\
+ & \texttt{||} & |Tunpack : Typing t1 (texist X T12) ->|                                                       \\
+ &             & \quad |[X -> , x -> T12] Typing t2 (weaken T2 [X,x]) -> Typing (unpack t1 X x t2) T2|         \\
+ & \texttt{||} & |Tpair : Typing t1 T1 -> Typing t2 T2 -> Typing (prod t1 t2) (tprod T1 T2)|                   \\
+ & \texttt{||} & |Tcase : Typing t1 T1 -> (wtp: PTyping p T1) ->|                                              \\
+ &             & \quad |[bind wtp] Typing t2 (weaken T2 (bind p)) -> Typing (case t1 p t2) T2|                 \\
+\multicolumn{3}{l}{|relation [Env] PTyping Pat Ty|~\cass}                                                      \\
+ & \texttt{||} & |Pvar : PTyping (pvar x T) T ; bind = x -> T|                                                 \\
+ & \texttt{||} & |Pprod : (wtp1: PTyping (pvar x T1) T1) ->|                                                   \\
+ &             & \quad  |(wtp2: [bind wtp1] PTyping p2 (weaken T2 (bind p1))) ->|                              \\
+ &             & \quad |PTyping (ppair p1 p2) (tprod T1 T2) ;|                                                 \\
+ &             & \qquad |bind = bind wtp1, bind wtp2|                                                          \\
 \end{tabular}
 \end{minipage}
 }
-\caption{Typing relation for $\fexists$}
+\caption{Typing relation for $\fexistsprod$}
 \label{fig:systemfexiststyping}
 \end{figure}
 
 \paragraph{Example} Figure \ref{fig:systemfexiststyping} contains the definition
-of the typing relation |Typing| for $\fexists$ terms that extends the
+of the typing relation |Typing| for $\fexistsprod$ terms that extends the
 specification of Figure \ref{fig:systemfexists}. The relation makes use of the
 typing environment |Env| and has two indices: terms |Tm| and types |Ty|.  The
 variable rule |Tvar| gets the type of a term variable from the environment. The
@@ -832,7 +702,7 @@ relation Eval Tm Tm :=
 \end{code}
 \end{minipage}
 }
-\caption{Evaluation relation for $\fexists$}
+\caption{Evaluation relation for $\fexistsprod$}
 \label{fig:systemfexiststyping}
 \end{figure}
 %endif
@@ -842,13 +712,15 @@ relation Eval Tm Tm :=
 
 \subsection{Relation Well-formedness}\label{ssec:relationwf}
 
-\begin{figure}[t!]
-\begin{center}
+\begin{figure}[t]
+  \begin{center}
+\small
 \fbox{
-  \begin{minipage}{0.98\columnwidth}
-  \[\begin{array}{ll@@{\hspace{1cm}}l}
-    E_{?}    & ::= E \mid \bullet & \text{Optional Env.} \\
-    \RENV & ::= \ov{R : E_{?} \times \ov{S}} & \text{Relation meta-env.} \\
+  \begin{minipage}{0.99\columnwidth}
+  \vspace{-3mm}
+  \[\begin{array}{l@@{\hspace{.4cm}}l@@{\hspace{1.2cm}}l@@{\hspace{.4cm}}l}
+      E_{?}  ::= E \mid \bullet & \text{Optional Env.} &
+      \RENV ::= \ov{R : E_{?} \times \ov{S}} & \text{Relation meta-env.} \\
     \end{array}
   \]
   \vspace{-7mm}
@@ -868,41 +740,47 @@ relation Eval Tm Tm :=
   \]
 
   \framebox{\mbox{$\wfruledecl{E_{?}}{R}{\ov{S}}{\ruledecl}$}} \\
-  \[ \begin{array}{c}
-     \inferrule* [right=\textsc{RuleVar}]
-        {%% \LENV = (x@@\alpha), \ov{[\epsilon]t : T} \\
-          K : \alpha \to S \\
-         (K' : \alpha \cto \ov{T} : R) \in E
-        }
-        { \wfruledecl{E}{R}{(S,\ov{T})}{\texttt{+} r : \{g \mapsto \ov{t}\} \to R~(K~g)~\ov{t}}
-        } \\ \\
-     \inferrule* [right=\textsc{RuleReg}]
-        { \ov{\wfformula{E_{?}}{\formula}} \\
-          \ov{\wfsym{\epsilon}{\symbolicterm}{S}} \\
-          \ov{\LENV \vdash_{E_{?}} \rulebindspec \Downarrow \bindspec}
-        }
-        { \wfruledecl{E_{?}}{R}{\ov{S}}{\texttt{||} r : \ov{\formula} \to R~\ov{\symbolicterm}} ; \ov{f = \rulebindspec}
-        }
-    \end{array}
+  \vspace{-7mm}
+  \[ \quad
+     \begin{array}{c}
+       \inferrule* [right=\textsc{RuleVar}]
+         {%% \LENV = (x@@\alpha), \ov{[\epsilon]t : T} \\
+           K : \alpha \to S \and
+          (K' : \alpha \cto \ov{T} : R) \in E
+         }
+         { \wfruledecl{E}{R}{(S,\ov{T})}{\texttt{+} r : \{g \mapsto \ov{t}\} \to R~(K~g)~\ov{t}}
+         } \\ \\
+       \inferrule* [right=\textsc{RuleReg}]
+         { \ov{\wfformula{E_{?}}{\formula}} \and
+           \ov{\wfsym{\epsilon}{\symbolicterm}{S}}
+%if showFun
+           \\
+           \ov{\LENV \vdash_{E_{?}} \rulebindspec \Downarrow \bindspec}
+%endif
+         }
+         { \wfruledecl{E_{?}}{R}{\ov{S}}{\texttt{||} r : \ov{\formula} \to R~\ov{\symbolicterm}} %% ; \ov{f = \rulebindspec}
+         }
+     \end{array}
   \]
 
   \framebox{\mbox{$\wfformula{E_{?}}{\formula}$}} \\
-  \vspace{-5mm}
+  \vspace{-7mm}
   \[ \begin{array}{c}
-     \inferrule* [right=\textsc{FmlLookup}]
-        { \quad\quad (K' : \alpha \cto \ov{T}) \in E  \\\\
-          (g@@\alpha) \in \LENV \\
-          \ov{\wfsym{\epsilon}{\symbolicterm}{T}}
-        }
-        { \wfformula{E}{\{g \mapsto \ov{\symbolicterm}\}}
-        } \\ \\
+     \hspace{1cm}
      \inferrule* [right=\textsc{FmlJmt}]
-        { (R : E_{?} \times \ov{T}) \in \RENV \vee (R : \bullet \times \ov{T}) \in \RENV \\
-          \LENV \vdash_{E_{?}} \rulebindspec \Downarrow \bindspec \\
-          ([\bindspec]\jmv:R~\ov{\symbolicterm}) \in \LENV \\
+        { (R : E_{?} \times \ov{T}) \in \RENV \vee (R : \bullet \times \ov{T}) \in \RENV \and
+          \LENV \vdash_{E_{?}} \rulebindspec \Downarrow \bindspec \\\\
+          ([\bindspec]\jmv:R~\ov{\symbolicterm}) \in \LENV \and
           \ov{\wfsym{\bindspec}{\symbolicterm}{T}}
         }
         { \wfformula{E_{?}}{[\rulebindspec] \jmv: R~\ov{\symbolicterm}}
+        } \\\\
+     \inferrule* [right=\textsc{FmlLookup}]
+        { (K' : \alpha \cto \ov{T}) \in E  \and
+          (g@@\alpha) \in \LENV \and
+          \ov{\wfsym{\epsilon}{\symbolicterm}{T}}
+        }
+        { \wfformula{E}{\{g \mapsto \ov{\symbolicterm}\}}
         }
     \end{array}
   \]
@@ -921,7 +799,9 @@ relation Eval Tm Tm :=
         \ov{\wfsym{\bindspec}{\symbolicterm}{T}}
        }
        {\LENV \vdash_{E} \rulebindspec, b \cto \ov{\symbolicterm} \Downarrow \bindspec,b
-       } \\\\
+       }
+%if showFun
+       \\\\
      \inferrule* [right=\textsc{RbsCall}]
        {\LENV \vdash_{E} \rulebindspec \Downarrow \bindspec \\
         R : E \times (S,\ov{T}) \in \RENV \\
@@ -931,6 +811,7 @@ relation Eval Tm Tm :=
        }
        {\LENV \vdash_{E} \rulebindspec, f~\jmv \Downarrow \bindspec,\bindspec'
        }
+%endif
      \end{array}
   \]
 
@@ -964,9 +845,9 @@ encodes the assumption that all indices are in the same scope and there is no
 binding between them. The definitions of the functions are checked by the
 ``flattening'' relation
 $\LENV \vdash_{E_{?}} \rulebindspec \Downarrow \bindspec$. The output
-$\bindspec$ is ignored. An additional requirement, omitted from
-\textsc{RuleReg}, is that $r$ has a function definition for each function that
-is declared on the sort of the first index of $R$.
+$\bindspec$ is ignored. An additional (implicit) requirement is that $r$ has a
+function definition for each function that is declared on the $R$'s first index
+sort.
 
 The well-formedness of the formulas of the premise is delegated to the relation
 $\wfformula{E_{?}}{\formula}$. For lookups, the rule \textsc{FmlLookup} checks
@@ -984,13 +865,15 @@ $\LENV \vdash_{E_{?}} \rulebindspec \Downarrow \bindspec$ calculates the local
 scope $\bindspec$ that is induced by a rule binding specification
 $\rulebindspec$. The nil case is straightforward. In cases of a non-empty
 $\rulebindspec$ we need to have an implicit environment $E$. Rule
-\textsc{RbsSng} simply flattens a singleton rule binding
-$b \cto \ov{\symbolicterm}$ to $b$ but also checks the symbolic expressions
+\textsc{RbsSng} flattens a singleton rule binding
+$b \cto \ov{\symbolicterm}$ to $b$ and checks the symbolic expressions
 against the prefix $\bindspec$ and the sort types $\ov{T}$ of the environment
-clause. A function call $f~j$ is handled by rule $\textsc{RbsCall}$. Its
-flattening is symbolic evaluation of $f$ on the first index $\symbolicterm$.
-Also, the local scope $\bindspec$ of $j$ is checked to be identical to the
-flattening of the prefix $\rulebindspec$.
+clause.
+
+% A function call $f~j$ is handled by rule $\textsc{RbsCall}$. Its flattening is
+% symbolic evaluation of $f$ on the first index $\symbolicterm$.  Also, the local
+% scope $\bindspec$ of $j$ is checked to be identical to the flattening of the
+% prefix $\rulebindspec$.
 
 
 %%% Local Variables:

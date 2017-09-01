@@ -52,8 +52,8 @@ a particular implementation.
 \paragraph{Programming Language Theory}
 The specification of programming languages is subject to scientific study in the
 field of \emph{programming language theory}. This field deals with all aspects
-of language specifications: the design and implementation of their syntax,
-semantics and that of auxiliary systems such as type systems. In addition the
+of language specifications: the design and implementation of their syntax and
+semantics, and that of auxiliary systems such as type systems. In addition the
 field also studies the \emph{meta-theoretical properties} (or meta-theory for
 short) of languages. These meta-theoretical properties capture expectations and
 coherence aspects of newly developed languages or language features, such as
@@ -952,13 +952,13 @@ reuse: 1. Through \emph{modularity} and 2. through \emph{genericity}.
 Programming languages, just like regular software systems, can be described by
 the functionality or features that they provide. The meta-theoretic development
 of our example language \stlcbool consists of different functionality: the
-syntax, semantics and its type-safety proof. It easy to reuse the syntax and
+syntax, semantics and its type safety proof. It easy to reuse the syntax and
 semantics and prove other kinds of properties, e.g. termination. Or reuse the
-syntax and switch out the semantics and proof type-safety for the new semantics.
+syntax and switch out the semantics and prove type safety for the new semantics.
 
 Furthermore, \stlcbool has two easily distinguishable features:
 \textlambda-terms and boolean expressions. Many programming languages and their
-calculi feature either or both of these language constructs among many other.
+calculi feature either or both of these language constructs among many others.
 This commonality hints at another opportunity for reuse. However, achieving this
 kind of reuse in is challenging (cf. Section \ref{sec:mod:expressionproblem}).
 
@@ -974,10 +974,10 @@ side-effecting language features.
 
 \paragraph{Genericity}
 Names are found in almost every high-level programming language to refer to
-classes, methods, types, functions, function parameters etc.. In case a name is
+classes, methods, types, functions, function parameters, etc. In case a name is
 \emph{substitutable} we call it a \emph{variable}. A language may have multiple
 kinds of variables, for example, term and type variables. The operational
-semantics of language with variables often implement reduction of language
+semantics of languages with variables often implement reduction of language
 constructs by means of \emph{substitution}.
 
 Variable substitution is an operation that is not specific to a particular
@@ -990,7 +990,11 @@ this generic implementation to any given concrete language.
 While other kinds of \emph{generic functionality} are commonly found in
 programming language meta-theory, e.g. term equality or (first-order)
 unification, the generic functionality considered in this thesis is
-substitution.
+substitution. Substitution is interesting functionality for reuse because the
+need for substitutions arise in nearly all meta-theory proofs for languages with
+variable binding. Furthermore, many theorems need a large amount of lemmas about
+substitutions. Discharging them automatically, e.g. through reusable generic
+implementations, can save a lot of development effort.
 
 \section{Overview}
 
@@ -1117,7 +1121,7 @@ to tackle the substitution boilerplate of
 % \item The downside is that results for a calculus do not always carry over to
 %   the full language. Problems in the calculus often reveal problems in the full
 %   language, but the absence of problems in the calculus does not guarantee the
-%   same for the full language.  For example, the proof of type-safety
+%   same for the full language.  For example, the proof of type safety
 %   of~\cite{Cameron2008} for a Java calculus with generics and wildcards does not
 %   carry over to Java~\cite{amin2016java}.
 

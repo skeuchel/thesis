@@ -176,11 +176,11 @@ extensions.
 Performing such extensions in both dimensions simultaneously and modularly, i.e.
 without changing or recompiling the existing code, and keeping the code
 type-safe was coined as \emph{the expression problem} by
-\cite{expression-problem}. Solutions to the expression problem exist in multiple
-languages: \cite{expression-problem} presents a solution in Java using Generics
-and the \emph{Datatypes \`a la Carte} (DTC) approach \cite{dtc} is a well-known
-solution in the Haskell programming language. In both of these solutions,
-modularity has to be anticipated and catered for from the beginning
+\citet{expression-problem}. Solutions to the expression problem exist in
+multiple languages: \citet{expression-problem} presents a solution in Java using
+Generics and the \emph{Datatypes \`a la Carte} (DTC) approach \cite{dtc} is a
+well-known solution in the Haskell programming language. In both of these
+solutions, modularity has to be anticipated and catered for from the beginning
 however. Indeed, we cannot reuse the datatype declaration and interface
 declarations from this section, but have to use ones that account for modular
 extensions. We will call a Haskell datatype that can be modularly extended a
@@ -188,11 +188,11 @@ extensions. We will call a Haskell datatype that can be modularly extended a
 extensible functions that are defined on modular datatypes.
 
 Our goal to modularly engineer programming language meta-theory adds a third
-dimension to the expression problem: \emph{modular proofs} of statements about modular
-functions on modular datatypes. In the remainder of this chapter we first
-present the DTC approach (Section \ref{sec:mod:datatypesalacarte}) and then
-discuss stumbling and building blocks to extend the approach to support modular
-reasoning (Sections \ref{sec:mod:reasoningalacarte},
+dimension to the expression problem: \emph{modular proofs} of statements about
+modular functions on modular datatypes. In the remainder of this chapter we
+first present the DTC approach (Section \ref{sec:mod:datatypesalacarte}) and
+then discuss stumbling and building blocks to extend the approach to support
+modular reasoning (Sections \ref{sec:mod:reasoningalacarte},
 \ref{sec:mod:churchencodings} and \ref{sec:mod:mendler}).
 
 %%% Local Variables:

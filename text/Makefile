@@ -30,6 +30,7 @@ open: all
 
 clean:
 	latexmk -C
+	rm -f main.bbl main.brf main.ptb
 
 old:
 	rm -f src/ModPredicative/ModularInduction.tex

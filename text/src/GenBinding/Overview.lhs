@@ -221,9 +221,6 @@ down to two substitution lemmas:
 % \end{align}
 
 
-\newcommand{\gray}[1]{\text{\colorbox{light-gray}{${#1}$}}}
-\newcommand{\highlight}[1]{\colorbox{light-gray}{$\displaystyle #1$}}
-
 For the proofs by induction of these lemmas to go through, we need to prove
 them for all suffixes $\Delta$, but only use the special case where
 $\Delta = \epsilon$ in the preservation proof. For the inductive step for rule

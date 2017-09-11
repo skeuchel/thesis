@@ -40,7 +40,6 @@ given well-formed specification $\spec$ in the rest of this section.
 
 \begin{figure}[t]
 \begin{center}
-  \small
 \fbox{
   \begin{minipage}{0.98\columnwidth}
     \vspace{-2mm}
@@ -191,17 +190,15 @@ assume well-sortedness of the terms in $\vartheta$. The result of the evaluation
 is a heterogeneous number $h$. Like in Section~\ref{sec:overview}, we use |Iα|
 as abbreviation for $S_\alpha~0$ and make use of addition. In case the binding
 specification item is a single-variable binding, the result is a one with the
-correct tag.
-
-% In the interesting case of a function call $|f ti|$, the evaluation
-% pattern matches on the corresponding subterm |ϑ ti| and interprets the
-% right-hand side of the appropriate function clause with respect to the new
-% subterms. Note that we have ruled out function definitions for variable
-% constructors. Thus, we do not need to handle that case here.
+correct tag. In the interesting case of a function call $|f ti|$, the evaluation
+pattern matches on the corresponding subterm |ϑ ti| and interprets the
+right-hand side of the appropriate function clause with respect to the new
+subterms. Note that we have ruled out function definitions for variable
+constructors. Thus, we do not need to handle that case here.
 
 Using the interpretation of binding specification we can generically define
 \cite{knotneedle} shifting and substitution on terms:
-$$\small
+$$
 \begin{array}{c@@{\hspace{5mm}}c}
   $\knotbox{\text{sh}_{\alpha,S} : h \to u \to u}$ &
   $\knotbox{\text{su}_{\alpha,S} : h \to u \to u \to u}$ \\
@@ -217,6 +214,11 @@ subscript in cases where these can be inferred from the type of the arguments.
 
 Furthermore, we can generically define well-scopedness predicates on de Bruijn terms
 which can be found in Appendix \ref{appendix:semantics}
+$$
+\begin{array}{c@@{\hspace{5mm}}c@@{\hspace{5mm}}c}
+  \knotbox{h \vdash_\alpha n} & \knotbox{h \vdash_S u} & \knotbox{h \vdash_E u} \\
+\end{array}
+$$
 and associated generic shifting and substitution lemmas
 \cite{knotneedle}.
 

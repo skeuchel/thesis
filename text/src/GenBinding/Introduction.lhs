@@ -22,7 +22,7 @@ To alleviate researchers from this burden, multiple approaches have been
 developed to capture the structure of variable binding and generically take care
 of the associated boilerplate. These include specification languages of syntax
 with binding and scoping rules \cite{ottjfp}, tools or reflection libraries that
-generate code for proof-assistants from specifications
+generate code for proof assistants from specifications
 \cite{lngen,dbgen,autosubst}, generic programming libraries that implement
 boilerplate using datatype generic functions and proofs \cite{gmeta} and
 meta-languages that have built-in support for syntax with binding

@@ -3,6 +3,14 @@
 %include polycode.fmt
 %include Formatting.fmt
 
+\newcommand{\pack}[3]{\{{#1},{#2}\}~\text{as}~{#3}}
+\newcommand{\unpack}[4]{\text{let}~\{{#1},{#2}\}={#3}~\text{in}~{#4}}
+\newcommand{\casep}[3]{\text{case}~{#1}~\text{of}~{#2}\to{#3}}
+\newcommand{\typing}[3]{{#1} \vdash_\text{tm} {#2} : {#3}}
+\newcommand{\kinding}[2]{{#1} \vdash_\text{ty} {#2}}
+\newcommand{\ptyping}[4]{{#1} \vdash_\text{p} {#2} : {#3} ; {#4}}
+\newcommand{\pmatch}[4]{\text{Match}~{#1}~{#2}~{#3}~{#4}}
+
 \section{Overview}\label{sec:overview}
 
 This section illustrates the boilerplate that arises when mechanizing
@@ -12,129 +20,103 @@ and existential quantification and products. Figure
 \ref{fig:systemfexistssyntax} defines the syntax of \fexistsprod{}, in a
 textbook manner.
 
-\newcommand{\pack}[3]{\{{#1},{#2}\}~\text{as}~{#3}}
-\newcommand{\unpack}[4]{\text{let}~\{{#1},{#2}\}={#3}~\text{in}~{#4}}
-\newcommand{\casep}[3]{\text{case}~{#1}~\text{of}~{#2}\to{#3}}
-\newcommand{\typing}[3]{{#1} \vdash_\text{tm} {#2} : {#3}}
-\newcommand{\kinding}[2]{{#1} \vdash_\text{ty} {#2}}
-\newcommand{\ptyping}[4]{{#1} \vdash_\text{p} {#2} : {#3} ; {#4}}
-
 \begin{figure}[t]
-\begin{center}
-\fbox{
-\begin{minipage}{0.98\columnwidth}
-\begin{tabular}{lcll@@{\hspace{8mm}}lcll}
-  $\alpha,\beta$ & ::=    &                                & type variable    & $\Gamma,\Delta$ & ::=    &                        & type context     \\
-  $x,y$          & ::=    &                                & term variable    &                 & $\mid$ & $\epsilon$             & empty context    \\
-  $e$            & ::=    &                                & term             &                 & $\mid$ & $\Gamma, \alpha$       & type binding     \\
-                 & $\mid$ & $x$                            & term variable    &                 & $\mid$ & $\Gamma, x:\tau$       & term binding     \\
-                 & $\mid$ & $\lambda x:\tau.e$             & term abstraction & $\tau,\sigma$   & ::=    &                        & type             \\
-                 & $\mid$ & $e_1~e_2$                      & application      &                 & $\mid$ & $\alpha$               & type variable    \\
-                 & $\mid$ & $\Lambda\alpha.e$              & type abstraction &                 & $\mid$ & $\tau \to \tau$        & function type    \\
-                 & $\mid$ & $e~\tau$                       & type application &                 & $\mid$ & $\forall\alpha.\tau$   & universal type   \\
-                 & $\mid$ & $\pack{\tau}{e}{\tau}$         & packing          &                 & $\mid$ & $\exists\alpha.\tau$   & existential type \\
-                 & $\mid$ & $\unpack{\alpha}{x}{e_1}{e_2}$ & unpacking        &                 & $\mid$ & $\tau_1 \times \tau_2$ & product type     \\
-                 & $\mid$ & $e_1,e_2$                      & pair             & $p$             & ::=    &                        & pattern          \\
-                 & $\mid$ & $\casep{e_1}{p}{e_2}$          & pattern binding  &                 & $\mid$ & $x$                    & variable pattern \\
-                 &        &                                &                  &                 & $\mid$ & $p_1 , p_2$            & pair pattern     \\
-\end{tabular}
-\vspace{2mm}
-\hrule
-\vspace{2mm}
-  {\small
-  \framebox{\mbox{$\typing{\Gamma}{e}{\tau}$}} \\
-  \vspace{-7mm}
-  \[ \begin{array}{c}
-     \inferrule* [right=\textsc{TAbs}]
-       {\typing{\Gamma,y:\sigma}{e}{\tau}
-       }
-       {\typing{\Gamma}{(\lambda y:\sigma. e)}{\sigma\to\tau}} \quad\quad
-     \inferrule* [right=\textsc{TVar}]
-       {x : \tau \in \Gamma
-       }
-       {\typing{\Gamma}{x}{\tau}} \\\\
-     \inferrule* [right=\textsc{TTApp}]
-       {\typing{\Gamma}{e}{\forall\alpha.\tau}
-       }
-       {\typing{\Gamma}{e~\sigma}{[\alpha\mapsto\sigma]\tau}} \quad\quad
-     \inferrule* [right=\textsc{TPack}]
-       {\typing{\Gamma}{e}{[\alpha\mapsto\sigma]\tau}
-       }
-       {\typing{\Gamma}{\pack{\sigma}{e}{\exists\alpha.\tau}}{\exists\alpha.\tau}} \\\\
-     \inferrule* [right=\textsc{TPair}]
-       {\typing{\Gamma}{e_1}{\tau_1} \\\\
-        \typing{\Gamma}{e_2}{\tau_2}
-       }
-       {\typing{\Gamma}{e_1,e_2}{\tau_1 \times \tau_2}} \qquad
-     \inferrule* [right=\textsc{TCase}]
-       {\typing{\Gamma}{e_1}{\sigma} \\
-        \ptyping{\Gamma}{p}{\sigma}{\Delta} \\\\
-        \typing{\Gamma,\Delta}{e_2}{\tau} \\
-       }
-       {\typing{\Gamma}{\casep{e_1}{p}{e_2}}{\tau}} \\
-     \end{array}
-   \]
-  \framebox{\mbox{$\ptyping{\Gamma}{p}{\tau}{\Delta}$}} \\
-  \vspace{-7mm}
-  \[ \begin{array}{c}
-     \inferrule* [right=\textsc{PPair}]
-       {\ptyping{\Gamma}{p_1}{\tau_1}{\Delta_1} \\
-        \ptyping{\Gamma,\Delta_1}{p_2}{\tau_2}{\Delta_2} \\
-       }
-       {\ptyping{\Gamma}{p_1,p_2}{\tau_1 \times \tau_2}{\Delta_1,\Delta_2}} \qquad
-     \end{array}
-   \]
-   }
-\end{minipage}
-}
-\end{center}
-\caption{\fexistsprod syntax and selected typing rules}
-\label{fig:systemfexistssyntax}
+  \fbox{
+    \begin{minipage}{0.98\columnwidth}
+      \begin{tabular}{lcll@@{\hspace{8mm}}lcll}
+        $\alpha,\beta$  & ::=    &                                & type variable    \\
+        $x,y$           & ::=    &                                & term variable    \\
+        $e$             & ::=    &                                & term             \\
+                        & $\mid$ & $x$                            & term variable    \\
+                        & $\mid$ & $\lambda x:\tau.e$             & term abstraction \\
+                        & $\mid$ & $e_1~e_2$                      & application      \\
+                        & $\mid$ & $\Lambda\alpha.e$              & type abstraction \\
+                        & $\mid$ & $e~\tau$                       & type application \\
+                        & $\mid$ & $\pack{\tau}{e}{\tau}$         & packing          \\
+                        & $\mid$ & $\unpack{\alpha}{x}{e_1}{e_2}$ & unpacking        \\
+                        & $\mid$ & $e_1,e_2$                      & pair             \\
+                        & $\mid$ & $\casep{e_1}{p}{e_2}$          & pattern binding  \\
+        $\Gamma,\Delta$ & ::=    &                                & type context     \\
+                        & $\mid$ & $\epsilon$                     & empty context    \\
+                        & $\mid$ & $\Gamma, \alpha$               & type binding     \\
+                        & $\mid$ & $\Gamma, x:\tau$               & term binding     \\
+        $\tau,\sigma$   & ::=    &                                & type             \\
+                        & $\mid$ & $\alpha$                       & type variable    \\
+                        & $\mid$ & $\tau \to \tau$                & function type    \\
+                        & $\mid$ & $\forall\alpha.\tau$           & universal type   \\
+                        & $\mid$ & $\exists\alpha.\tau$           & existential type \\
+                        & $\mid$ & $\tau_1 \times \tau_2$         & product type     \\
+        $p$             & ::=    &                                & pattern          \\
+                        & $\mid$ & $x$                            & variable pattern \\
+                        & $\mid$ & $p_1 , p_2$                    & pair pattern     \\
+      \end{tabular}
+    \end{minipage}
+  }
+  \caption{\fexistsprod syntax}
+  \label{fig:systemfexistssyntax}
 \end{figure}
 
 
+%-------------------------------------------------------------------------------
 \subsection{Relational Semantics}
 
-% \begin{figure}[t]
-% \begin{center}
-% \fbox{
-%   \begin{minipage}{0.95\columnwidth}
-%   \framebox{\mbox{$\typing{\Gamma}{e}{\tau}$}} \\
-%   \vspace{-7mm}
-%   \[ \begin{array}{c}
-%      \inferrule* [right=\textsc{TVar}]
-%                  {x : \tau \in \Gamma
-%                  }
-%                  {\typing{\Gamma}{x}{\tau}} \\\\
-%      \inferrule* [right=\textsc{TAbs}]
-%                  {\typing{\Gamma,y:\sigma}{e}{\tau}
-%                  }
-%                  {\typing{\Gamma}{(\lambda y:\sigma. e)}{\sigma\to\tau}} \\\\
-%      \inferrule* [right=\textsc{TTApp}]
-%                  {\typing{\Gamma}{e}{\forall\alpha.\tau}
-%                  }
-%                  {\typing{\Gamma}{e~\sigma}{[\alpha\mapsto\sigma]\tau}} \\\\
-%      \inferrule* [right=\textsc{TPack}]
-%                  {\typing{\Gamma}{e}{[\alpha\mapsto\sigma]\tau}
-%                  }
-%                  {\typing{\Gamma}{\pack{\sigma}{e}{\exists\alpha.\tau}}{\exists\alpha.\tau}}
-%      \end{array}
-%   \]
-%
-%   \end{minipage}
-% }
-% \end{center}
-% \caption{\fexists typing - selected rules}
-% \label{fig:systemfexiststyping:textbook}
-% \end{figure}
+\begin{figure}[t]
+  \fbox{
+    \begin{minipage}{0.98\columnwidth}
+      \framebox{\mbox{$\typing{\Gamma}{e}{\tau}$}} \\
+      \[ \begin{array}{c}
+         \inferrule* [right=\textsc{TAbs}]
+           {\typing{\Gamma,y:\sigma}{e}{\tau}
+           }
+           {\typing{\Gamma}{(\lambda y:\sigma. e)}{\sigma\to\tau}} \quad\quad
+         \inferrule* [right=\textsc{TVar}]
+           {x : \tau \in \Gamma
+           }
+           {\typing{\Gamma}{x}{\tau}} \\\\
+         \inferrule* [right=\textsc{TTApp}]
+           {\typing{\Gamma}{e}{\forall\alpha.\tau}
+           }
+           {\typing{\Gamma}{e~\sigma}{[\alpha\mapsto\sigma]\tau}} \quad\quad
+         \inferrule* [right=\textsc{TPack}]
+           {\typing{\Gamma}{e}{[\alpha\mapsto\sigma]\tau}
+           }
+           {\typing{\Gamma}{\pack{\sigma}{e}{\exists\alpha.\tau}}{\exists\alpha.\tau}} \\\\
+         \inferrule* [right=\textsc{TPair}]
+           {\typing{\Gamma}{e_1}{\tau_1} \\\\
+            \typing{\Gamma}{e_2}{\tau_2}
+           }
+           {\typing{\Gamma}{e_1,e_2}{\tau_1 \times \tau_2}} \qquad
+         \inferrule* [right=\textsc{TCase}]
+           {\typing{\Gamma}{e_1}{\sigma} \\
+            \ptyping{\Gamma}{p}{\sigma}{\Delta} \\\\
+            \typing{\Gamma,\Delta}{e_2}{\tau} \\
+           }
+           {\typing{\Gamma}{\casep{e_1}{p}{e_2}}{\tau}} \\
+         \end{array}
+      \]
 
-Figure \ref{fig:systemfexistssyntax} also contains selected rules for the
-term and pattern typing relations. The variable rule \textsc{TVar} of the
-term typing looks up a term variable $x$ with its associated type $\tau$
-in the type context $\Gamma$. Because this rule inspects the context $\Gamma$ we
-call it \emph{not context parametric}. The other rules either pass the context
-through unchanged or pass an extended context to the premises. We call these
-rules \emph{context parametric}.
+      \framebox{\mbox{$\ptyping{\Gamma}{p}{\tau}{\Delta}$}} \\
+      \[ \begin{array}{c}
+         \inferrule* [right=\textsc{PPair}]
+           {\ptyping{\Gamma}{p_1}{\tau_1}{\Delta_1} \\
+            \ptyping{\Gamma,\Delta_1}{p_2}{\tau_2}{\Delta_2} \\
+           }
+           {\ptyping{\Gamma}{p_1,p_2}{\tau_1 \times \tau_2}{\Delta_1,\Delta_2}} \qquad
+         \end{array}
+      \]
+    \end{minipage}
+  }
+  \caption{\fexistsprod typing - selected rules}
+  \label{fig:systemfexiststyping:textbook}
+\end{figure}
+
+Figure \ref{fig:systemfexiststyping:textbook} contains selected rules for the
+term and pattern typing relations. The variable rule \textsc{TVar} of the term
+typing looks up a term variable $x$ with its associated type $\tau$ in the type
+context $\Gamma$. Because this rule inspects the context $\Gamma$ we call it
+\emph{not context parametric}. The other rules either pass the context through
+unchanged or pass an extended context to the premises. We call these rules
+\emph{context parametric}.
 
 Rule \textsc{TAbs} deals with abstractions over terms in terms. The
 meta-variable $y$ appears in a different mode in the conclusion than the
@@ -150,15 +132,16 @@ or more concisely a \emph{binding variable}, and $x$ a \emph{global} or
 $\typing{\Gamma}{(\lambda y. y)~x}{\tau}$. Here $y$ is again locally bound and
 $x$ has to be bound in $\Gamma$ for the judgement to be well-scoped. In this
 example, the meta-variable $y$ appears in both binding and referencing
-positions. The distinction between locally bound and free variables goes back to
-at least Frege \cite{begriffsschrift} and representations such as locally
-nameless and locally named have internalized this distinction. Frege
-characterizes free variables as variables that can possibly stand for anything
-while locally bound variables stand for something very specific. Indeed, in the
-above judgement, the use of $y$ can only denote a reference to the directly
-enclosing abstraction. These concepts do not commit us to a particular
-representation of variable binding. Rather, these notions arise naturally in
-meta-languages.
+positions.
+
+The distinction between locally bound and free variables goes back to at least
+Frege \cite{begriffsschrift} and representations such as locally nameless and
+locally named have internalized this distinction. Frege characterizes free
+variables as variables that can possibly stand for anything while locally bound
+variables stand for something very specific. Indeed, in the above judgement, the
+use of $y$ can only denote a reference to the directly enclosing
+abstraction. These concepts do not commit us to a particular representation of
+variable binding. Rather, these notions arise naturally in meta-languages.
 
 The rules \textsc{TTApp} for type-application and \textsc{TPack} for packing
 existential types use a type-substitution operation $[\alpha\mapsto\sigma]\tau$
@@ -177,10 +160,7 @@ variables bound by $p$. This information is concatenated in the rule
 
 
 %-------------------------------------------------------------------------------
-
 \subsection{Meta-Theory}
-
-\newcommand{\pmatch}[4]{\text{Match}~{#1}~{#2}~{#3}~{#4}}
 
 The operational semantics is defined with 4 reduction rules
 \[\begin{array}{c}
@@ -259,19 +239,6 @@ compatible with any changes to the context.
 %-------------------------------------------------------------------------------
 
 \subsection{Formalization}\label{sec:formalization}
-\paragraph{Syntax Representation} The first step in the formalization is to
-choose how to concretely represent variables.
-% Traditionally, one would represent
-% variables using identifiers, but this requires a massive amount of reasoning
-% modulo $\alpha$-equivalence which makes it inevitable to choose a different
-% representation.
-% Our goal here is not to develop a new approach to variable binding,
-% but to scale an existing one.
-We choose de Bruijn representations
-\cite{namelessdummies} because reasoning with de Bruijn representations is
-well-understood, representation of pattern binding and scoping rules are
-well-understood and the regular structure of proofs with respect to the abstract
-syntax is well-understood which helps us in treating boilerplate generically.
 
 \begin{figure}[t]
 \begin{center}
@@ -297,6 +264,18 @@ syntax is well-understood which helps us in treating boilerplate generically.
 \label{fig:systemfdebruijn}
 \end{figure}
 
+\paragraph{Syntax Representation} The first step in the formalization is to
+choose how to concretely represent variables. Traditionally, one would represent
+variables using identifiers, but this requires a massive amount of reasoning
+modulo $\alpha$-equivalence which makes it inevitable to choose a different
+representation.
+
+Our goal here is not to develop a new approach to variable binding, but to scale
+an existing one. We choose de Bruijn representations~\cite{namelessdummies}
+because reasoning with de Bruijn representations is well-understood,
+representation of pattern binding and scoping rules are well-understood and the
+regular structure of proofs with respect to the abstract syntax is
+well-understood which helps us in treating boilerplate generically.
 
 Figure \ref{fig:systemfdebruijn} shows a term grammar for a de Bruijn
 representation of \fexistsprod. We use different namespaces for term and type
@@ -390,13 +369,13 @@ $h \vdash E$.
   \framebox{\mbox{$h \vdash_{\text{tm}} n$}} \\
   \vspace{-7mm}
   \[ \begin{array}{c}
-     \inferrule* []
+     \inferrule* [right=\textsc{WsnTmZero}]
                  {\,}
-                 {S_{\text{tm}}~h \vdash_{\text{tm}} 0} \qquad
-     \inferrule* []
+                 {S_{\text{tm}}~h \vdash_{\text{tm}} 0} \\\\
+     \inferrule* [right=\textsc{WsnTmTm}]
                  {h \vdash_{\text{tm}} n}
-                 {S_{\text{tm}}~h \vdash_{\text{tm}} S~n} \qquad
-     \inferrule* []
+                 {S_{\text{tm}}~h \vdash_{\text{tm}} S~n} \\\\
+     \inferrule* [right=\textsc{WsnTmTy}]
                  {h \vdash_{\text{tm}} n
                  }
                  {S_{\text{ty}}~h \vdash_{\text{tm}} n}
@@ -405,11 +384,13 @@ $h \vdash E$.
   \framebox{\mbox{$h \vdash_{\text{tm}} t$}} \\
   \vspace{-7mm}
   \[\begin{array}{c}
-      \inferrule*[]
+      \inferrule*
+        [right=\textsc{WsVar}]
         {h \vdash_\text{tm} n
         }
-        {h \vdash_\text{tm} \text{tvar}~n} \qquad
-      \inferrule*[]
+        {h \vdash_\text{tm} \text{tvar}~n} \\\\
+      \inferrule*
+        [right=\textsc{WsUnpack}]
         {h \vdash_\text{tm}~t_1 \\
          h + 1_{\text{ty}} + 1_{\text{tm}} \vdash_\text{tm}~t_2
         }
@@ -419,12 +400,12 @@ $h \vdash E$.
   \framebox{\mbox{$h \vdash E$}} \\
   \vspace{-8mm}
   \[ \begin{array}{c}
-       \inferrule*
-         {h \vdash E \\
-          h + \text{dom}~E \vdash T
-         }
-         {h \vdash \text{evar}~E~T
-         }
+     \inferrule* [right=\textsc{WseTm}]
+                 {h \vdash E \\
+                  h + \text{dom}~E \vdash T
+                 }
+                 {h \vdash \text{evar}~E~T
+                 }
      \end{array}
   \]
   \end{minipage}
@@ -550,9 +531,10 @@ of well-scopedness under shifting and substitution are tackled in
 
 The semantic typing relation from Figure \ref{fig:systemfexistssyntax}
 translates almost directly to a relation on the de Bruijn representation. One
-important aspect that is ignored in Figure~\ref{fig:systemfexistssyntax} is
-to ensure that all rule components are well-scoped.  This requires including
-additional well-scopedness premises in the rules. For example, rule \textsc{TAbs} needs a well-scopedness premise for the argument
+important aspect that is ignored in Figure~\ref{fig:systemfexistssyntax} is to
+ensure that all rule components are well-scoped.  This requires including
+additional well-scopedness premises in the rules. For example, the lambda
+abstraction rule \textsc{TAbs} needs a well-scopedness premise for the argument
 type:
 $$
 \inferrule*
@@ -581,29 +563,53 @@ semantic relations.\footnote{ Term-related boilerplate has been addressed in
   our previous work~\cite{knotneedle}.}  The principal boilerplate lemmas are a
 well-scopedness lemma
 $$
-  0 \vdash E \wedge \typing{E}{t}{T} \;\Rightarrow\; \domain{E} \vdash t \wedge \domain{E} \vdash T
+\inferrule*
+  []
+  {0 \vdash E \\ \typing{E}{t}{T}
+  }
+  {\domain{E} \vdash t \wedge \domain{E} \vdash T
+  }
 $$
 
 \noindent two shifting lemmas
 $$
 \begin{array}{c}
-  \typing{E}{t}{T} \;\Rightarrow\; \typing{\text{evar}~E~T'}{\shtm~0~t}{T} \\
-  \typing{E}{t}{T} \;\Rightarrow\; \typing{\text{etvar}~E}{\shty~0~t}{\shty~0~T}
+\inferrule*
+  []
+  {\typing{E}{t}{T}
+  }
+  {\typing{\text{evar}~E~T'}{\shtm~0~t}{T}
+  }
+\quad\quad
+\inferrule*
+  []
+  {\typing{E}{t}{T}
+  }
+  {\typing{\text{etvar}~E}{\shty~0~t}{\shty~0~T}
+  }
 \end{array}
 $$
 
 \noindent and two substitution lemmas
 $$
 \begin{array}{c}
-  0 \vdash E \wedge
-    \typing{E}{t_1}{T_1} \wedge
-    \typing{\text{evar}~E~T_1}{t_2}{T_2} \;\Rightarrow\;
-    \typing{E}{\sutm~0~t_1~t_2}{T_2} \\
-
-  0 \vdash E \wedge
-    \domain{E} \vdash T_1 \wedge
-    \typing{\text{etvar}~E}{t_2}{T_2} \;\Rightarrow\;
-    \typing{E}{\suty~0~T_1~t_2}{\suty~0~T_1~T_2}
+\inferrule*
+  []
+  {0 \vdash E \\
+   \typing{E}{t_1}{T_1} \\
+   \typing{\text{evar}~E~T_1}{t_2}{T_2} \\
+  }
+  {\typing{E}{\sutm~0~t_1~t_2}{T_2} \\
+  }
+\\\\
+\inferrule*
+  []
+  {0 \vdash E \\
+   \domain{E} \vdash T_1 \\
+   \typing{\text{etvar}~E}{t_2}{T_2} \\
+  }
+  {\typing{E}{\suty~0~T_1~t_2}{\suty~0~T_1~T_2} \\
+  }
 \end{array}
 $$
 

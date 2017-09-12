@@ -6,7 +6,7 @@
 \newcommand{\false}{\textbf{false}\xspace}
 \newcommand{\ite}[3]{\textbf{if}~{#1}~\textbf{then}~{#2}~\textbf{else}~{#3}}
 \newcommand{\typing}[3]{{#1} \vdash {#2} : {#3}}
-\renewcommand{\eval}[2]{{#1} \longrightarrow {#2}}
+\newcommand{\eval}[2]{{#1} \longrightarrow {#2}}
 \newcommand{\evals}[2]{{#1} \longrightarrow^* {#2}}
 
 \chapter{Introduction}
@@ -960,7 +960,7 @@ Furthermore, \stlcbool has two easily distinguishable features:
 \textlambda-terms and boolean expressions. Many programming languages and their
 calculi feature either or both of these language constructs among many others.
 This commonality hints at another opportunity for reuse. However, achieving this
-kind of reuse in is challenging (cf. Section \ref{sec:mod:expressionproblem}).
+kind of reuse is challenging (cf. Section \ref{sec:mod:expressionproblem}).
 
 Ideally, each feature could be developed in complete isolation and modularly
 combined into a full language consisting of a specific set of features. The
@@ -1006,8 +1006,8 @@ reuse with the discussed focus.
 Chapter \ref{ch:modbackground} presents the necessary background for this
 part. While modular development of software is a well-studied topic in computer
 science, modular composition of proofs is not as well-studied. Chapter
-\ref{ch:modpreduniv} develops one approach to modularized algebraic dataypes
-modularize induction proofs for them. This chapter contains the material from
+\ref{ch:modpreduniv} develops one approach to modularized algebraic dataypes and
+modularized induction proofs for them. This chapter contains the material from
 
 \begin{center}
   \begin{minipage}{0.85\columnwidth}
@@ -1080,7 +1080,7 @@ Related to the content of this thesis, but not included, are the articles
     \newblock Presented at \emph{the 24th Symposium on Implementation and
       Application of Functional Languages}, IFL '12.
   \end{minipage}
-\end{center},
+\end{center}
 \noindent which develops initial ideas to modular reasoning about side-effecting
 components, and
 

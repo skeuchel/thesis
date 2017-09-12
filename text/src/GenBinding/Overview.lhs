@@ -3,52 +3,84 @@
 %include polycode.fmt
 %include Formatting.fmt
 
+{ % FEXISTSPROD SCOPE
+
 \newcommand{\pack}[3]{\{{#1},{#2}\}~\text{as}~{#3}}
 \newcommand{\unpack}[4]{\text{let}~\{{#1},{#2}\}={#3}~\text{in}~{#4}}
 \newcommand{\casep}[3]{\text{case}~{#1}~\text{of}~{#2}\to{#3}}
-\newcommand{\typing}[3]{{#1} \vdash_\text{tm} {#2} : {#3}}
+%\newcommand{\typing}[3]{{#1} \vdash_\text{tm} {#2} : {#3}}
 \newcommand{\kinding}[2]{{#1} \vdash_\text{ty} {#2}}
 \newcommand{\ptyping}[4]{{#1} \vdash_\text{p} {#2} : {#3} ; {#4}}
 \newcommand{\pmatch}[4]{\text{Match}~{#1}~{#2}~{#3}~{#4}}
+\newcommand{\step}[2]{{#1} \longrightarrow {#2}}
 
 \section{Overview}\label{sec:overview}
 
 This section illustrates the boilerplate that arises when mechanizing
 type-safety proofs, outlines our specific approach and defines necessary
 terminology. Our running example is \fexistsprod{}, i.e. \SystemF with universal
-and existential quantification and products. Figure
-\ref{fig:systemfexistssyntax} defines the syntax of \fexistsprod{}, in a
-textbook manner.
+and existential quantification, and products. In the following, we elaborate the
+different steps of the formalization and point out where variable binding
+boilerplate arises.
+
+%-------------------------------------------------------------------------------
+\subsection{Syntax}
+
+Figure \ref{fig:systemfexistssyntax} shows the first step in the formalization:
+the definition of the syntax of \fexistsprod, in a textbook-like manner.
+
+The three main syntactic sorts of \fexistsprod are types, terms and patterns,
+and there are auxiliary sorts for values, variables and typing
+contexts. Patterns describe \emph{pattern matching} for product types only and
+can be arbitrarily nested. A pattern can therefore bind an arbitrary number of
+variables at once. For simplicity we keep matching on existentials separate from
+products. One level of existentials can be packed via $(\pack{\tau}{e}{\tau})$
+and unpacked via $(\unpack{\alpha}{x}{e_1}{e_2})$.
+
+In this grammar the scoping rules are left implicit. The intended rules are that
+in a universal $(\forall\alpha.\tau)$ and existential quantification
+$(\exists\alpha.\tau)$ the type variables $\alpha$ scopes over the body $\tau$,
+in a type abstraction $(\Lambda\alpha.e)$ and term abstraction
+$(\lambda x:\tau.e)$ the variable $\alpha$ respectively $x$ scopes over the body
+$e$. In a pattern binding $(\casep{e_1}{p}{e_2})$ the variables bound by the
+pattern $p$ scope over $e_₂$ but not $e_₁$ and in the unpacking of an
+existential $(\unpack{\alpha}{x}{e_1}{e_2})$ the variables $\alpha$ and $x$
+scope over $e_2$.
 
 \begin{figure}[t]
   \fbox{
     \begin{minipage}{0.98\columnwidth}
       \begin{tabular}{lcll@@{\hspace{8mm}}lcll}
-        $\alpha,\beta$  & ::=    &                                & type variable    \\
-        $x,y$           & ::=    &                                & term variable    \\
-        $e$             & ::=    &                                & term             \\
-                        & $\mid$ & $x$                            & term variable    \\
-                        & $\mid$ & $\lambda x:\tau.e$             & term abstraction \\
-                        & $\mid$ & $e_1~e_2$                      & application      \\
-                        & $\mid$ & $\Lambda\alpha.e$              & type abstraction \\
-                        & $\mid$ & $e~\tau$                       & type application \\
-                        & $\mid$ & $\pack{\tau}{e}{\tau}$         & packing          \\
-                        & $\mid$ & $\unpack{\alpha}{x}{e_1}{e_2}$ & unpacking        \\
-                        & $\mid$ & $e_1,e_2$                      & pair             \\
-                        & $\mid$ & $\casep{e_1}{p}{e_2}$          & pattern binding  \\
-        $\Gamma,\Delta$ & ::=    &                                & type context     \\
-                        & $\mid$ & $\epsilon$                     & empty context    \\
-                        & $\mid$ & $\Gamma, \alpha$               & type binding     \\
-                        & $\mid$ & $\Gamma, x:\tau$               & term binding     \\
-        $\tau,\sigma$   & ::=    &                                & type             \\
-                        & $\mid$ & $\alpha$                       & type variable    \\
-                        & $\mid$ & $\tau \to \tau$                & function type    \\
-                        & $\mid$ & $\forall\alpha.\tau$           & universal type   \\
-                        & $\mid$ & $\exists\alpha.\tau$           & existential type \\
-                        & $\mid$ & $\tau_1 \times \tau_2$         & product type     \\
-        $p$             & ::=    &                                & pattern          \\
-                        & $\mid$ & $x$                            & variable pattern \\
-                        & $\mid$ & $p_1 , p_2$                    & pair pattern     \\
+        $\alpha,\beta$  & ::=    &                                & type variable     \\
+        $\tau,\sigma$   & ::=    &                                & type              \\
+                        & $\mid$ & $\alpha$                       & type variable     \\
+                        & $\mid$ & $\sigma \to \tau$              & function type     \\
+                        & $\mid$ & $\forall\alpha.\tau$           & universal type    \\
+                        & $\mid$ & $\exists\alpha.\tau$           & existential type  \\
+                        & $\mid$ & $\sigma \times \tau$           & product type      \\
+        $x,y$           & ::=    &                                & term variable     \\
+        $p$             & ::=    &                                & pattern           \\
+                        & $\mid$ & $x$                            & variable pattern  \\
+                        & $\mid$ & $p_1 , p_2$                    & pair pattern      \\
+        $e$             & ::=    &                                & term              \\
+                        & $\mid$ & $x$                            & term variable     \\
+                        & $\mid$ & $\lambda x:\tau.e$             & term abstraction  \\
+                        & $\mid$ & $e_1~e_2$                      & application       \\
+                        & $\mid$ & $\Lambda\alpha.e$              & type abstraction  \\
+                        & $\mid$ & $e~\tau$                       & type application  \\
+                        & $\mid$ & $\pack{\sigma}{e}{\tau}$       & packing           \\
+                        & $\mid$ & $\unpack{\alpha}{x}{e_1}{e_2}$ & unpacking         \\
+                        & $\mid$ & $e_1,e_2$                      & pair              \\
+                        & $\mid$ & $\casep{e_1}{p}{e_2}$          & pattern binding   \\
+        %% $v$             & ::=    &                                & value             \\
+        %%                 & $\mid$ & $\lambda x:\tau.e$             & term abstraction  \\
+        %%                 & $\mid$ & $\Lambda\alpha.e$              & type abstraction  \\
+        %%                 & $\mid$ & $\pack{\sigma}{v}{\tau}$       & existential value \\
+        %%                 & $\mid$ & $v_1,v_2$                      & pair value        \\
+        $\Gamma,\Delta$ & ::=    &                                & type context      \\
+                        & $\mid$ & $\epsilon$                     & empty context     \\
+                        & $\mid$ & $\Gamma, \alpha$               & type binding      \\
+                        & $\mid$ & $\Gamma, x:\tau$               & term binding      \\
       \end{tabular}
     \end{minipage}
   }
@@ -58,7 +90,71 @@ textbook manner.
 
 
 %-------------------------------------------------------------------------------
-\subsection{Relational Semantics}
+\subsection{Semantics}
+
+The next step in the formalization is to develop the typical semantic relations
+for the language of study. In the case of \fexistsprod, these comprise a
+well-scopedness relation for types, a typing relation for terms, a typing
+relation for patterns, and a small-step call-by-value operational semantics.
+
+\paragraph{Well-scopedness}
+
+\begin{figure}[t]
+  \fbox{
+    \begin{minipage}{0.98\columnwidth}
+      \framebox{\mbox{$\kinding{\Gamma}{\tau}$}} \\
+      \[ \begin{array}{c}
+           \inferrule* [right=\textsc{WsVar}]
+             {\alpha \in \Gamma
+             }
+             {\kinding{\Gamma}{\alpha}} \qquad
+           \inferrule* [right=\textsc{WsFun}]
+             {\kinding{\Gamma}{\sigma} \\
+              \kinding{\Gamma}{\tau}
+             }
+             {\kinding{\Gamma}{\sigma \to \tau}} \\\\
+           \inferrule* [right=\textsc{WsAll}]
+             {\kinding{\Gamma, \alpha}{\tau}
+             }
+             {\kinding{\Gamma}{\forall\alpha.\tau}} \qquad
+           \inferrule* [right=\textsc{WsEx}]
+             {\kinding{\Gamma, \alpha}{\tau}
+             }
+             {\kinding{\Gamma}{\forall\exists.\tau}} \qquad
+           \inferrule* [right=\textsc{WsProd}]
+             {\kinding{\Gamma}{\sigma} \\
+              \kinding{\Gamma}{\tau}
+             }
+             {\kinding{\Gamma}{\sigma \times \tau}}
+         \end{array}
+      \]
+    \end{minipage}
+  }
+  \caption{Well-scoping of types}
+  \label{fig:systemfexistsscoping}
+\end{figure}
+
+
+
+
+\paragraph{Typing}
+Figure \ref{fig:systemfexiststyping:textbook} contains selected rules for the
+term and pattern typing relations. The variable rule \textsc{TVar} of the term
+typing looks up a term variable $x$ with its associated type $\tau$ in the
+typing context $\Gamma$ and rule \textsc{TAbs} deals with abstractions over
+terms in terms which adds a binding to the typing context for the premise of the
+body $e$. The rules \textsc{TTApp} for type-application and \textsc{TPack} for
+packing existential types use a type-substitution operation
+$[\alpha\mapsto\sigma]\tau$ that substitutes $\sigma$ for $\alpha$ in
+$\tau$. \textsc{TTApp} performs the substitution in the conclusion while
+\textsc{TPack} does so in the premise. The remaining two rules, \textsc{TPair}
+and \textsc{TCase}, of the term typing relation deal with products. In a case
+expression the pattern $p$ needs to have the same type $\sigma$ as the scrutinee
+$e_1$ and the variables $\Delta$ bound by $p$ are brought into scope in the body
+$e_2$. This environment $\Delta$ is the output of the pattern typing relation
+$\ptyping{\Gamma}{p}{\tau}{\Delta}$, which contains the typing information for
+all variables bound by $p$. This information is concatenated in the rule
+\textsc{PPair} for pair patterns.
 
 \begin{figure}[t]
   \fbox{
@@ -110,71 +206,58 @@ textbook manner.
   \label{fig:systemfexiststyping:textbook}
 \end{figure}
 
-Figure \ref{fig:systemfexiststyping:textbook} contains selected rules for the
-term and pattern typing relations. The variable rule \textsc{TVar} of the term
-typing looks up a term variable $x$ with its associated type $\tau$ in the type
-context $\Gamma$. Because this rule inspects the context $\Gamma$ we call it
-\emph{not context parametric}. The other rules either pass the context through
-unchanged or pass an extended context to the premises. We call these rules
-\emph{context parametric}.
 
-Rule \textsc{TAbs} deals with abstractions over terms in terms. The
-meta-variable $y$ appears in a different mode in the conclusion than the
-meta-variable $x$ in the variable rule. The $\lambda$-abstraction binds the
-variable $y$ and we call it a \emph{binding occurrence} whereas the $x$ in the
-variable rule is a \emph{reference} or \emph{use occurrence}.
+\paragraph{Evaluation}
 
-Following the literature on \emph{locally nameless}~\cite{locallynameless} and
-\emph{locally named}~\cite{externalinternalsyntax} representations we call $y$ a
-\emph{locally bound} variable (aka locally scoped variables \cite{pitts2015}),
-or more concisely a \emph{binding variable}, and $x$ a \emph{global} or
-\emph{free variable}. Another example is the judgement
-$\typing{\Gamma}{(\lambda y. y)~x}{\tau}$. Here $y$ is again locally bound and
-$x$ has to be bound in $\Gamma$ for the judgement to be well-scoped. In this
-example, the meta-variable $y$ appears in both binding and referencing
-positions.
+\begin{figure}[t]
+  \fbox{
+    \begin{minipage}{0.98\columnwidth}
+      \framebox{\mbox{$\step{e}{e}$}} \\
+      \[ \begin{array}{c}
+           \inferrule*[]
+             {\,}
+             {(\lambda x.e_1)~e_2 \longrightarrow [x \mapsto e_2] e_1} \qquad
+           \inferrule*[]
+             {\,}
+             {(\Lambda \alpha.e) \tau \longrightarrow [\alpha \mapsto \tau] e} \\\\
+           \inferrule*[]
+             {\,}
+             {\unpack{\alpha}{x}{\pack{\sigma}{e_1}{\tau}}{e_2} \longrightarrow [\alpha\mapsto\sigma][x\mapsto e_1]e_2} \\\\
+           \inferrule*[]
+             {\pmatch{v}{p}{e_1}{e_2}}
+             {\step{(\casep{v}{p}{e_1})}{e_2}}
+         \end{array}
+       \]
 
-The distinction between locally bound and free variables goes back to at least
-Frege \cite{begriffsschrift} and representations such as locally nameless and
-locally named have internalized this distinction. Frege characterizes free
-variables as variables that can possibly stand for anything while locally bound
-variables stand for something very specific. Indeed, in the above judgement, the
-use of $y$ can only denote a reference to the directly enclosing
-abstraction. These concepts do not commit us to a particular representation of
-variable binding. Rather, these notions arise naturally in meta-languages.
+      \framebox{\mbox{$\pmatch{v}{p}{e_1}{e_2}$}} \\
+      \[ \begin{array}{c}
+           \inferrule*[]
+             {\,}
+             {\pmatch{v}{x}{e}{([x \mapsto v] e)}
+             } \\\\
+           \inferrule*[]
+             {\pmatch{v_1}{p_1}{e_1}{e_2} \\
+              \pmatch{v_2}{p_2}{e_2}{e_3}
+             }
+             {\pmatch{(v_1,v_2)}{(p_1,p_2)}{e_1}{e_3}
+             }
+         \end{array}
+      \]
+    \end{minipage}
+  }
+  \caption{\fexistsprod evaluation - selected rules}
+  \label{fig:systemfexistevaluation:textbook}
+\end{figure}
 
-The rules \textsc{TTApp} for type-application and \textsc{TPack} for packing
-existential types use a type-substitution operation $[\alpha\mapsto\sigma]\tau$
-that substitutes $\sigma$ for $\alpha$ in $\tau$. \textsc{TTApp} performs the
-substitution in the conclusion while \textsc{TPack} does so in the premise. The
-substituted type-variable $\alpha$ is locally bound in both rules.  The
-remaining two rules, \textsc{TPair} and \textsc{TCase}, of the term typing
-relation deal with products. In a case expression the pattern $p$ needs to have
-the same type $\sigma$ as the scrutinee $e_1$ and the variables $\Delta$
-bound by $p$ are brought into scope in the body $e_2$. This environment
-$\Delta$ is the output of the
-pattern typing relation $\ptyping{\Gamma}{p}{\tau}{\Delta}$, which contains the typing information for all
-variables bound by $p$. This information is concatenated in the rule
-\textsc{PPair} for pair patterns.
-
-
+The operational semantics is defined with 4 reduction rules shown in Figure
+\ref{fig:systemfexistevaluation:textbook} and further congruence rules that
+determine the evaluation order.
 
 %-------------------------------------------------------------------------------
 \subsection{Meta-Theory}
 
-The operational semantics is defined with 4 reduction rules
-\[\begin{array}{c}
-  (\lambda x.e_1)~e_2 \longrightarrow [x \mapsto e_2] e_1 \quad\quad\quad (\Lambda \alpha.e) \tau \longrightarrow [\alpha \mapsto \tau] e \\
-  \unpack{\alpha}{x}{\pack{\sigma}{e_1}{\tau}}{e_2} \longrightarrow [\alpha\mapsto\sigma][x\mapsto e_1]e_2 \\
-     \inferrule*[]
-       {\pmatch{v}{p}{e_1}{e_2}}
-       {\casep{v}{p}{e_1} \longrightarrow e_2}
-   \end{array}
-\]
-
-and further congruence rules that determine the evaluation order. A key step in the
-type preservation proof is the preservation under these reductions, which boils
-down to two substitution lemmas:
+A key step in the type preservation proof is the preservation under these
+reductions, which boils down to two substitution lemmas:
 %
 \begin{align}
     \label{lem:substtm}
@@ -232,13 +315,9 @@ with one of the common interaction lemmas
   [\alpha \mapsto [\beta\mapsto\sigma]\sigma'][\beta\mapsto\sigma] \label{lem:substcomm}
 \end{align}
 
-Intuitively this commutation is possible because $\beta$ is a free
-variable while $\alpha$ is locally bound and because context parametric rules are naturally
-compatible with any changes to the context.
 
 %-------------------------------------------------------------------------------
-
-\subsection{Formalization}\label{sec:formalization}
+\subsection{Mechanization}\label{sec:formalization}
 
 \begin{figure}[t]
 \begin{center}
@@ -260,22 +339,27 @@ compatible with any changes to the context.
   \end{minipage}
 }
 \end{center}
-\caption{\fexists syntax and de Bruijn representation}
+\caption{\fexistsprod de Bruijn representation}
 \label{fig:systemfdebruijn}
 \end{figure}
 
-\paragraph{Syntax Representation} The first step in the formalization is to
+\paragraph{Syntax Representation} The first step in the mechanization is to
 choose how to concretely represent variables. Traditionally, one would represent
 variables using identifiers, but this requires a massive amount of reasoning
-modulo $\alpha$-equivalence which makes it inevitable to choose a different
-representation.
+modulo $\alpha$-equivalence, i.e. consistent renaming, which makes it inevitable
+to choose a different representation.
 
-Our goal here is not to develop a new approach to variable binding, but to scale
-an existing one. We choose de Bruijn representations~\cite{namelessdummies}
-because reasoning with de Bruijn representations is well-understood,
-representation of pattern binding and scoping rules are well-understood and the
-regular structure of proofs with respect to the abstract syntax is
-well-understood which helps us in treating boilerplate generically.
+Our goal is not to develop a new approach to variable binding nor to compare
+existing ones, but rather to scale the generic treatment of a single
+approach. For this purpose, we choose de Bruijn representations
+\cite{namelessdummies}, motivated by two main reasons. First, reasoning with de
+Bruijn representations is well-understood and, in particular, the representation
+of pattern binding and scoping rules is also well-understood
+\cite{deBruijn,genconv}.  Second, the functions related to variable binding, the
+statements of properties of these functions and their proofs have highly regular
+structures with respect to the abstract syntax and the scoping rules of the
+language. This helps us in treating boilerplate generically and automating
+proofs.
 
 Figure \ref{fig:systemfdebruijn} shows a term grammar for a de Bruijn
 representation of \fexistsprod. We use different namespaces for term and type
@@ -669,21 +753,14 @@ Our approach consists of extending the \Knot specification language to cover
 specifications of relations and also extending \Knot's code generator \Needle to
 generate code for semantics-related boilerplate.
 
-A key principle is the distinction between \emph{locally bound} and \emph{free}
-variables at the meta-level. This allows us to recognize \emph{context
-parametric} rules which in turn enables us to extend the \emph{free-monadic
-view} on syntax \cite{monadic,knotneedle} of \Knot to relations. At the
+\emph{free-monadic view} on syntax \cite{monadic,knotneedle}. At the
 syntax-level this view requires one distinguished \emph{variable constructor}
 per namespace which has a \emph{reference occurrence} as its only argument and
 all other constructors only contain \emph{binding occurrences} and subterms.
-
 At the level of relations this translates to one distinguished \emph{variable
   rule} per namespace (or more specifically per environment clause). This
 variable rule has a single lookup as its only premise and the sorts of the
-environment data match the sorts of the indices of the relation. The variable
-rule uses exactly one \emph{free meta-variable}; all other rules only contain
-\emph{locally bound} meta-variables and do not feature lookup premises.  In
-other words, the variable rule is the only not context parametric rule.
+environment data match the sorts of the indices of the relation.
 
 These restrictions allow us to generically establish the substitution lemmas
 for relations. Consider the small proof tree on the left:
@@ -733,28 +810,32 @@ substituting the leaf that uses the variable rule to lookup $x$ in the
 environment with the proof tree $B$ for the judgement
 $\typing{\Gamma}{e}{\sigma}$. Note that $B$ and $e$ have to be weakened in the
 process (to $B'$ and $e'$) to account for $y$ and the variables in $\Delta$.
-The term abstraction node in the proof tree can still go through because
-it is not affected by changes to the free variables the context; it is context-parametric.
 
-% \[ \begin{array}{c}
-%      \inferrule*[]
-%        { \inferrule*[]
-%            {A'}
-%            {\typing{\Gamma,\Delta}{e'_1}{\sigma\to\tau}} \and
-%          \highlight{
-%          \inferrule*[]
-%            {B'}
-%            {\typing{\Gamma,\Delta}{e'_2}{\sigma}}
-%          }
-%        }
-%        {\typing{\Gamma,\Delta}{e'_1~e'_2}{\tau}} \\\\
-%    \end{array}
-% \]
+%% SK: MOVE
+%% The term abstraction node in the proof tree can still go through because it is
+%% not affected by changes to the free variables the context; it is
+%% context-parametric.
+%%
+%% % \[ \begin{array}{c}
+%% %      \inferrule*[]
+%% %        { \inferrule*[]
+%% %            {A'}
+%% %            {\typing{\Gamma,\Delta}{e'_1}{\sigma\to\tau}} \and
+%% %          \highlight{
+%% %          \inferrule*[]
+%% %            {B'}
+%% %            {\typing{\Gamma,\Delta}{e'_2}{\sigma}}
+%% %          }
+%% %        }
+%% %        {\typing{\Gamma,\Delta}{e'_1~e'_2}{\tau}} \\\\
+%% %    \end{array}
+%% % \]
+%%
+%% In practice, it is too restrictive to require that all non-variable rules are
+%% context parametric. Hence, we allow non-parametric regular rules, but rely on
+%% the user to fill in the gaps via proof obligations.
 
-In practice, it is too restrictive to require that all non-variable rules are
-context parametric. Hence, we allow non-parametric regular rules, but rely on
-the user to fill in the gaps via proof obligations.
-
+} % FEXISTSPROD SCOPE
 
 %%% Local Variables:
 %%% mode: latex

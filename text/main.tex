@@ -7,8 +7,6 @@
 \input{src/Preamble}
 \input{src/PreambleLhs}
 \input{src/Macros}
-\input{src/GDTCMacros}
-\input{src/NeedleMacros}
 
 \definecolor{purple}{RGB}{136,38,143}
 \newcommand\BD[1]{\textcolor{purple}{[BD: #1]}}
@@ -53,11 +51,15 @@
 %% Meta-theory, natural deduction, operational semantics, type systems,
 %% type-safety, mechanization, datatype generic programming
 \part{Modularity}\label{part:mod}
+{
+\input{src/ModMacros}
 \input{src/Modularity}
-
+}
 \part{Genericity}\label{part:gen}
+{
+\input{src/GenMacros}
 \input{src/Genericity}
-
+}
 
 \input{src/Conclusion}
 

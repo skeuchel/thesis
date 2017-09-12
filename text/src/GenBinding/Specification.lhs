@@ -367,6 +367,81 @@ for declaration heads and one for declaration bodies.
 
 \subsection{Symbolic Expressions}
 
+\stevennote{MOVED FROM OVERVIEW}{
+Because this rule inspects the context $\Gamma$ we call it \emph{not context
+  parametric}. The other rules either pass the context through unchanged or pass
+an extended context to the premises. We call these rules \emph{context
+  parametric}.
+%
+Rule \textsc{TAbs} deals with abstractions over terms in terms. The
+meta-variable $y$ appears in a different mode in the conclusion than the
+meta-variable $x$ in the variable rule. The $\lambda$-abstraction binds the
+variable $y$ and we call it a \emph{binding occurrence} whereas the $x$ in the
+variable rule is a \emph{reference} or \emph{use occurrence}.
+%
+Following the literature on \emph{locally nameless}~\cite{locallynameless} and
+\emph{locally named}~\cite{externalinternalsyntax} representations we call $y$ a
+\emph{locally bound} variable (aka locally scoped variables \cite{pitts2015}),
+or more concisely a \emph{binding variable}, and $x$ a \emph{global} or
+\emph{free variable}. Another example is the judgement
+$\typing{\Gamma}{(\lambda y. y)~x}{\tau}$. Here $y$ is again locally bound and
+$x$ has to be bound in $\Gamma$ for the judgement to be well-scoped. In this
+example, the meta-variable $y$ appears in both binding and referencing
+positions.
+%
+The distinction between locally bound and free variables goes back to at least
+Frege \cite{begriffsschrift} and representations such as locally nameless and
+locally named have internalized this distinction. Frege characterizes free
+variables as variables that can possibly stand for anything while locally bound
+variables stand for something very specific. Indeed, in the above judgement, the
+use of $y$ can only denote a reference to the directly enclosing
+abstraction. These concepts do not commit us to a particular representation of
+variable binding. Rather, these notions arise naturally in meta-languages.
+%
+The rules \textsc{TTApp} for type-application and \textsc{TPack} for packing
+existential types use a type-substitution operation $[\alpha\mapsto\sigma]\tau$
+that substitutes $\sigma$ for $\alpha$ in $\tau$. \textsc{TTApp} performs the
+substitution in the conclusion while \textsc{TPack} does so in the premise. The
+substituted type-variable $\alpha$ is locally bound in both rules.
+}
+
+\stevennote{MOVED FROM OVERVIEW}{
+As the term in the conclusion remains a type application, we want to apply rule
+\textsc{TTApp} again. However, the \colorbox{light-gray}{type} in the conclusion
+does not have the appropriate form. We first need to commute the two substitutions
+with one of the common interaction lemmas
+\begin{align}
+  [\beta\mapsto \sigma][\alpha \mapsto \sigma'] =
+  [\alpha \mapsto [\beta\mapsto\sigma]\sigma'][\beta\mapsto\sigma] \label{lem:substcomm}
+\end{align}
+%
+Intuitively this commutation is possible because $\beta$ is a free variable
+while $\alpha$ is locally bound and because context parametric rules are
+naturally compatible with any changes to the context.
+}
+
+\stevennote{MOVED FROM OVERVIEW}{
+A key principle is the distinction between \emph{locally bound} and \emph{free}
+variables at the meta-level. This allows us to recognize \emph{context
+parametric} rules which in turn enables us to extend the \emph{free-monadic
+view} on syntax \cite{monadic,knotneedle} of \Knot to relations. At the
+syntax-level this view requires one distinguished \emph{variable constructor}
+per namespace which has a \emph{reference occurrence} as its only argument and
+all other constructors only contain \emph{binding occurrences} and subterms.
+%
+At the level of relations this translates to one distinguished \emph{variable
+  rule} per namespace (or more specifically per environment clause). This
+variable rule has a single lookup as its only premise and the sorts of the
+environment data match the sorts of the indices of the relation. The variable
+rule uses exactly one \emph{free meta-variable}; all other rules only contain
+\emph{locally bound} meta-variables and do not feature lookup premises.  In
+other words, the variable rule is the only not context parametric rule.
+%
+These restrictions allow us to generically establish the substitution lemmas
+for relations. Consider the small proof tree on the left:
+% , where $A$ is the subtree for the typing judgement of $e_1$.
+}
+
 \begin{figure}[t!]
 \begin{center}
 \fbox{

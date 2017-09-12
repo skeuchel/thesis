@@ -1,28 +1,3 @@
-\newcommand{\gray}[1]{\text{\colorbox{light-gray}{${#1}$}}}
-\newcommand{\highlight}[1]{\colorbox{light-gray}{$\displaystyle #1$}}
-
-\newcommand{\todoc}[2]{{\textcolor{#1} {\textbf{[[#2]]}}}}
-\newcommand{\todo}[1]{{\todoc{red}{\textbf{[[#1]]}}}}
-
-\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
-
-\newcommand{\todored}[1]{\todoc{red}  {\textbf{[[#1]]}}}
-\newcommand{\todoblue}[1]{\todoc{blue}{\textbf{[[#1]]}}}
-\newcommand{\todogreen}[1]{\todoc{green}{\textbf{[[#1]]}}}
-
-\newcommand{\TODO}[1]{\todored{#1}}
-
-% \newcommand{\tom}[1]{\marginpar{\textcolor{brown}{TOM}}\textcolor{brown}{#1}}
-% \newcommand{\new}[1]{\marginpar{\textcolor{blue}{NEW}}\textcolor{blue}{#1}}
-% \newcommand{\steven}[1]{\marginpar{\textcolor{red}{STEVEN}}\textcolor{red}{#1}}
-% \newcommand{\stevennote}[2]{\marginpar{\textcolor{red}{#1}}\textcolor{red}{#2}}
-% \newcommand{\scw}[1]{\marginpar{\textcolor{green}{SCW}}\textcolor{green}{#1}}
-% \newcommand{\tom}[1]{}
-% \newcommand{\new}[1]{}
-% \newcommand{\steven}[1]{}
-% \newcommand{\stevennote}[2]{}
-% \newcommand{\scw}[1]{}
-
 \newcommand{\ov}[1]{\overline{#1}}
 \newcommand{\cpar}[1]{{\texttt{(}{#1}\texttt{)}}}
 \newcommand{\cbrc}[1]{{\texttt{\{}{#1}\texttt{\}}}}
@@ -41,12 +16,10 @@
 \newcommand{\evalrbs}[4]{{\llbracket\: {#1} \:\rrbracket_{{#3},{#4}}}}
 \newcommand{\symflatten}[3]{{{#1} \vdash_E {#2} \Downarrow {#3}}}
 
+\newcommand{\typing}[3]{{#1} \vdash_\text{tm} {#2} : {#3}}
 
 \newcommand{\fprod}{\ensuremath{F_\times}\xspace}
-\newcommand{\Coq}{\textsc{Coq}\xspace}
 \newcommand{\POPLmark}{\textsc{POPLmark}\xspace}
-\newcommand{\Knot}{\textsc{Knot}\xspace}
-\newcommand{\Needle}{\textsc{Needle}\xspace}
 \newcommand{\LNGen}{\textsc{LNGen}\xspace}
 \newcommand{\DbGen}{\textsc{DbGen}\xspace}
 \newcommand{\Ott}{\textsc{Ott}\xspace}

@@ -24,7 +24,7 @@ different steps of the formalization and point out where variable binding
 boilerplate arises.
 
 %-------------------------------------------------------------------------------
-\subsection{Syntax}
+\subsection{Syntax}\label{sec:gen:overview:syntax}
 
 Figure \ref{fig:systemfexistssyntax} shows the first step in the formalization:
 the definition of the syntax of \fexistsprod, in a textbook-like manner.
@@ -37,19 +37,19 @@ variables at once. For simplicity we keep matching on existentials separate from
 products. One level of existentials can be packed via $(\pack{\tau}{e}{\tau})$
 and unpacked via $(\unpack{\alpha}{x}{e_1}{e_2})$.
 
-In this grammar the scoping rules are left implicit. The intended rules are that
-in a universal $(\forall\alpha.\tau)$ and existential quantification
-$(\exists\alpha.\tau)$ the type variables $\alpha$ scopes over the body $\tau$,
-in a type abstraction $(\Lambda\alpha.e)$ and term abstraction
+In this grammar the scoping rules are left implicit as is common practive. The
+intended rules are that in a universal $(\forall\alpha.\tau)$ and existential
+quantification $(\exists\alpha.\tau)$ the type variable $\alpha$ scopes over the
+body $\tau$, in a type abstraction $(\Lambda\alpha.e)$ and term abstraction
 $(\lambda x:\tau.e)$ the variable $\alpha$ respectively $x$ scopes over the body
 $e$. In a pattern binding $(\casep{e_1}{p}{e_2})$ the variables bound by the
-pattern $p$ scope over $e_₂$ but not $e_₁$ and in the unpacking of an
+pattern $p$ scope over $e_2$ but not $e_1$, and in the unpacking of an
 existential $(\unpack{\alpha}{x}{e_1}{e_2})$ the variables $\alpha$ and $x$
 scope over $e_2$.
 
 \begin{figure}[t]
   \fbox{
-    \begin{minipage}{0.98\columnwidth}
+    \begin{minipage}{0.96\columnwidth}
       \begin{tabular}{lcll@@{\hspace{8mm}}lcll}
         $\alpha,\beta$  & ::=    &                                & type variable     \\
         $\tau,\sigma$   & ::=    &                                & type              \\
@@ -101,8 +101,9 @@ relation for patterns, and a small-step call-by-value operational semantics.
 
 \begin{figure}[t]
   \fbox{
-    \begin{minipage}{0.98\columnwidth}
+    \begin{minipage}{0.96\columnwidth}
       \framebox{\mbox{$\kinding{\Gamma}{\tau}$}} \\
+      \vspace{-6mm}
       \[ \begin{array}{c}
            \inferrule* [right=\textsc{WsVar}]
              {\alpha \in \Gamma
@@ -116,11 +117,11 @@ relation for patterns, and a small-step call-by-value operational semantics.
            \inferrule* [right=\textsc{WsAll}]
              {\kinding{\Gamma, \alpha}{\tau}
              }
-             {\kinding{\Gamma}{\forall\alpha.\tau}} \qquad
+             {\kinding{\Gamma}{\forall\alpha.\tau}} \quad
            \inferrule* [right=\textsc{WsEx}]
              {\kinding{\Gamma, \alpha}{\tau}
              }
-             {\kinding{\Gamma}{\forall\exists.\tau}} \qquad
+             {\kinding{\Gamma}{\exists\alpha.\tau}} \quad
            \inferrule* [right=\textsc{WsProd}]
              {\kinding{\Gamma}{\sigma} \\
               \kinding{\Gamma}{\tau}
@@ -134,10 +135,100 @@ relation for patterns, and a small-step call-by-value operational semantics.
   \label{fig:systemfexistsscoping}
 \end{figure}
 
+The Well-scopedness relation for types $\kinding{\Gamma}{\tau}$ is defined in
+Figure \ref{fig:systemfexistsscoping}.  This relation takes a typing context
+$\Gamma$ as an index to represent the set of variables that are in scope and an
+index $\tau$ for types. It denotes that all variables in $\tau$ are bound either
+in $\tau$ itself or appear in $\Gamma$. The definition is completely
+syntax-directed. The interesting rules are the ones for variables and for the
+quantifiers. In the variable case, rule \textsc{WsVar} checks that a type
+variable indeed appears in the typing context $\Gamma$. In the rules
+\textsc{WsAll} for universal and \textsc{WsEx} for existential quantification,
+the bound variable is added to the typing context in the premise for the bodies.
+Hence, the relation formally and explicitly defines the scoping rules that we
+defined in Section \ref{sec:gen:overview:syntax} in prose.
+
+The definition of the well-scoping relation follows a standard recipe and
+usually its definition is left out in pen and paper specifications. In
+mechanizations, however, such a relation usually needs to be defined (unless it
+is not used in the meta-theory) by the human prover. Therefore, this relation is
+an example of syntax related boilerplate that we want to derive generically. The
+structure of the relation only depends on the syntax of types and their scoping
+rules. The EBNF syntax of Figure \ref{fig:systemfexistssyntax} is insufficient
+since it does not contain information about scoping. One option is to make the
+scoping relation part of the specification and derive other boilerplate from it,
+but this relation already contains a lot of repetition that we want to avoid if
+possible. Hence it is necessary to develop a new and more concise specification
+for scoping. We come back to this in Section \ref{sec:specification} which
+presents our solution to the problem: we develop a language of (abstract) syntax
+specifications that includes
 
 
 
 \paragraph{Typing}
+
+\begin{figure}[t!]
+  \fbox{
+    \begin{minipage}{0.96\columnwidth}
+      \framebox{\mbox{$\typing{\Gamma}{e}{\tau}$}} \\
+      \vspace{-6mm}
+      \[ \begin{array}{c}
+         \inferrule* [right=\textsc{TVar}]
+           {x : \tau \in \Gamma}
+           {\typing{\Gamma}{x}{\tau}} \\\\
+         \inferrule* [right=\textsc{TAbs}]
+           {\typing{\Gamma,y:\sigma}{e}{\tau}}
+           {\typing{\Gamma}{(\lambda y:\sigma. e)}{(\sigma\to\tau)}} \qquad
+         \inferrule* [right=\textsc{TTAbs}]
+           {\typing{\Gamma,\alpha}{e}{\tau}}
+           {\typing{\Gamma}{(\Lambda \alpha. e)}{(\forall\alpha.\tau)}} \\\\
+         \inferrule* [right=\textsc{TApp}]
+           {\typing{\Gamma}{e_1}{(\sigma \to \tau)} \\\\
+            \typing{\Gamma}{e_2}{\sigma}}
+           {\typing{\Gamma}{(e_1~e_2)}{\tau}} \qquad
+         \inferrule* [right=\textsc{TTApp}]
+           {\typing{\Gamma}{e}{\forall\alpha.\tau} \\\\
+            \kinding{\Gamma}{\sigma}}
+           {\typing{\Gamma}{(e~\sigma)}{([\alpha\mapsto\sigma]\tau)}} \\\\
+         \inferrule* [right=\textsc{TPack}]
+           {\typing{\Gamma}{e}{([\alpha\mapsto\sigma]\tau)}}
+           {\typing{\Gamma}{(\pack{\sigma}{e}{\exists\alpha.\tau})}{(\exists\alpha.\tau)}} \\\\
+         \inferrule* [right=\textsc{TUnpack}]
+           {\typing{\Gamma}{e_1}{\exists\alpha.\tau} \\
+            \typing{\Gamma, \alpha, x:\tau}{e_2}{\sigma} \\
+            \alpha \notin \text{fv}(\sigma)
+           }
+           {\typing{\Gamma}{(\unpack{\alpha}{x}{e_1}{e_2})}{\sigma}} \\\\
+         \inferrule* [right=\textsc{TPair}]
+           {\typing{\Gamma}{e_1}{\tau_1} \\
+            \typing{\Gamma}{e_2}{\tau_2}}
+           {\typing{\Gamma}{(e_1,e_2)}{(\tau_1 \times \tau_2)}} \\\\
+         \inferrule* [right=\textsc{TCase}]
+           {\typing{\Gamma}{e_1}{\sigma} \\
+            \ptyping{\Gamma}{p}{\sigma}{\Delta} \\
+            \typing{\Gamma,\Delta}{e_2}{\tau}}
+           {\typing{\Gamma}{(\casep{e_1}{p}{e_2})}{\tau}} \\
+         \end{array}
+      \]
+
+      \framebox{\mbox{$\ptyping{\Gamma}{p}{\tau}{\Delta}$}} \\
+      \vspace{-6mm}
+      \[ \begin{array}{c}
+         \inferrule* [right=\textsc{PVar}]
+           {\kinding{\Gamma}{\tau}}
+           {\ptyping{\Gamma}{x}{\tau}{(\epsilon, x:\tau)}} \\\\
+         \inferrule* [right=\textsc{PPair}]
+           {\ptyping{\Gamma}{p_1}{\tau_1}{\Delta_1} \\
+            \ptyping{\Gamma,\Delta_1}{p_2}{\tau_2}{\Delta_2}}
+           {\ptyping{\Gamma}{(p_1,p_2)}{(\tau_1 \times \tau_2)}{(\Delta_1,\Delta_2)}}
+         \end{array}
+      \]
+    \end{minipage}
+  }
+  \caption{\fexistsprod typing rules}
+  \label{fig:systemfexiststyping:textbook}
+\end{figure}
+
 Figure \ref{fig:systemfexiststyping:textbook} contains selected rules for the
 term and pattern typing relations. The variable rule \textsc{TVar} of the term
 typing looks up a term variable $x$ with its associated type $\tau$ in the
@@ -156,63 +247,15 @@ $\ptyping{\Gamma}{p}{\tau}{\Delta}$, which contains the typing information for
 all variables bound by $p$. This information is concatenated in the rule
 \textsc{PPair} for pair patterns.
 
-\begin{figure}[t]
-  \fbox{
-    \begin{minipage}{0.98\columnwidth}
-      \framebox{\mbox{$\typing{\Gamma}{e}{\tau}$}} \\
-      \[ \begin{array}{c}
-         \inferrule* [right=\textsc{TAbs}]
-           {\typing{\Gamma,y:\sigma}{e}{\tau}
-           }
-           {\typing{\Gamma}{(\lambda y:\sigma. e)}{\sigma\to\tau}} \quad\quad
-         \inferrule* [right=\textsc{TVar}]
-           {x : \tau \in \Gamma
-           }
-           {\typing{\Gamma}{x}{\tau}} \\\\
-         \inferrule* [right=\textsc{TTApp}]
-           {\typing{\Gamma}{e}{\forall\alpha.\tau}
-           }
-           {\typing{\Gamma}{e~\sigma}{[\alpha\mapsto\sigma]\tau}} \quad\quad
-         \inferrule* [right=\textsc{TPack}]
-           {\typing{\Gamma}{e}{[\alpha\mapsto\sigma]\tau}
-           }
-           {\typing{\Gamma}{\pack{\sigma}{e}{\exists\alpha.\tau}}{\exists\alpha.\tau}} \\\\
-         \inferrule* [right=\textsc{TPair}]
-           {\typing{\Gamma}{e_1}{\tau_1} \\\\
-            \typing{\Gamma}{e_2}{\tau_2}
-           }
-           {\typing{\Gamma}{e_1,e_2}{\tau_1 \times \tau_2}} \qquad
-         \inferrule* [right=\textsc{TCase}]
-           {\typing{\Gamma}{e_1}{\sigma} \\
-            \ptyping{\Gamma}{p}{\sigma}{\Delta} \\\\
-            \typing{\Gamma,\Delta}{e_2}{\tau} \\
-           }
-           {\typing{\Gamma}{\casep{e_1}{p}{e_2}}{\tau}} \\
-         \end{array}
-      \]
-
-      \framebox{\mbox{$\ptyping{\Gamma}{p}{\tau}{\Delta}$}} \\
-      \[ \begin{array}{c}
-         \inferrule* [right=\textsc{PPair}]
-           {\ptyping{\Gamma}{p_1}{\tau_1}{\Delta_1} \\
-            \ptyping{\Gamma,\Delta_1}{p_2}{\tau_2}{\Delta_2} \\
-           }
-           {\ptyping{\Gamma}{p_1,p_2}{\tau_1 \times \tau_2}{\Delta_1,\Delta_2}} \qquad
-         \end{array}
-      \]
-    \end{minipage}
-  }
-  \caption{\fexistsprod typing - selected rules}
-  \label{fig:systemfexiststyping:textbook}
-\end{figure}
 
 
 \paragraph{Evaluation}
 
 \begin{figure}[t]
   \fbox{
-    \begin{minipage}{0.98\columnwidth}
+    \begin{minipage}{0.96\columnwidth}
       \framebox{\mbox{$\step{e}{e}$}} \\
+      \vspace{-6mm}
       \[ \begin{array}{c}
            \inferrule*[]
              {\,}
@@ -230,6 +273,7 @@ all variables bound by $p$. This information is concatenated in the rule
        \]
 
       \framebox{\mbox{$\pmatch{v}{p}{e_1}{e_2}$}} \\
+      \vspace{-6mm}
       \[ \begin{array}{c}
            \inferrule*[]
              {\,}

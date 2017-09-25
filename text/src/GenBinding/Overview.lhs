@@ -20,8 +20,16 @@ This section illustrates the boilerplate that arises when mechanizing
 type-safety proofs, outlines our specific approach and defines necessary
 terminology. Our running example is \fexistsprod{}, i.e. \SystemF with universal
 and existential quantification, and products. In the following, we elaborate the
-different steps of the formalization and point out where variable binding
-boilerplate arises.
+different steps of the development and point out where variable binding
+boilerplate arises. We proceed in three steps. First, we present a textbook-like
+definition of \fexistsprod{} which is informal and not suitable for
+mechanization. Using this informal definition we discuss arising boilerplate
+independent of later choice, e.g. syntax representations. Second, we formalize
+the previous informal definition by bringing it into a shape that is suitable
+for mechanization. Third, we discuss the mechanization itself.
+
+
+\section{Specification}\label{sec:gen:spec}
 
 %-------------------------------------------------------------------------------
 \subsection{Syntax}\label{sec:gen:overview:syntax}
@@ -97,6 +105,7 @@ for the language of study. In the case of \fexistsprod, these comprise a
 well-scopedness relation for types, a typing relation for terms, a typing
 relation for patterns, and a small-step call-by-value operational semantics.
 
+
 \paragraph{Well-scopedness}
 
 \begin{figure}[t]
@@ -115,11 +124,11 @@ relation for patterns, and a small-step call-by-value operational semantics.
              }
              {\kinding{\Gamma}{\sigma \to \tau}} \\\\
            \inferrule* [right=\textsc{WsAll}]
-             {\kinding{\Gamma, \alpha}{\tau}
+             {\kinding{\Gamma\gray{, \alpha}}{\tau}
              }
              {\kinding{\Gamma}{\forall\alpha.\tau}} \quad
            \inferrule* [right=\textsc{WsEx}]
-             {\kinding{\Gamma, \alpha}{\tau}
+             {\kinding{\Gamma\gray{, \alpha}}{\tau}
              }
              {\kinding{\Gamma}{\exists\alpha.\tau}} \quad
            \inferrule* [right=\textsc{WsProd}]
@@ -135,11 +144,11 @@ relation for patterns, and a small-step call-by-value operational semantics.
   \label{fig:systemfexistsscoping}
 \end{figure}
 
-The Well-scopedness relation for types $\kinding{\Gamma}{\tau}$ is defined in
+The well-scopedness relation for types $\kinding{\Gamma}{\tau}$ is defined in
 Figure \ref{fig:systemfexistsscoping}.  This relation takes a typing context
 $\Gamma$ as an index to represent the set of variables that are in scope and an
-index $\tau$ for types. It denotes that all variables in $\tau$ are bound either
-in $\tau$ itself or appear in $\Gamma$. The definition is completely
+index $\tau$ for types. It denotes that all type variables in $\tau$ are bound
+either in $\tau$ itself or appear in $\Gamma$. The definition is completely
 syntax-directed. The interesting rules are the ones for variables and for the
 quantifiers. In the variable case, rule \textsc{WsVar} checks that a type
 variable indeed appears in the typing context $\Gamma$. In the rules
@@ -152,17 +161,22 @@ The definition of the well-scoping relation follows a standard recipe and
 usually its definition is left out in pen and paper specifications. In
 mechanizations, however, such a relation usually needs to be defined (unless it
 is not used in the meta-theory) by the human prover. Therefore, this relation is
-an example of syntax related boilerplate that we want to derive generically. The
+an example of syntax-related boilerplate that we want to derive generically. The
 structure of the relation only depends on the syntax of types and their scoping
 rules. The EBNF syntax of Figure \ref{fig:systemfexistssyntax} is insufficient
 since it does not contain information about scoping. One option is to make the
 scoping relation part of the specification and derive other boilerplate from it,
-but this relation already contains a lot of repetition that we want to avoid if
-possible. Hence it is necessary to develop a new and more concise specification
-for scoping. We come back to this in Section \ref{sec:specification} which
-presents our solution to the problem: we develop a language of (abstract) syntax
-specifications that includes
+but this relation already repeats a lot of information that is already given in
+the EBNF grammar. If possible we want to avoid that repetition in our
+specifications. The only new detail that the well-scopedness relation adds
+explicitly, is that the type variables in the quantifications scope over the
+bodies, which is highlighted in \textgray{gray} in Figure
+\ref{fig:systemfexistsscoping}.
 
+These circumstances ask to develop a new formal and concise way to specify
+scoping rules. We come back to this in Section \ref{sec:specification} which
+presents our solution to the problem: we develop a language of (abstract) syntax
+specifications that include \emph{binding specifications} for scoping.
 
 
 \paragraph{Typing}
@@ -183,26 +197,27 @@ specifications that includes
            {\typing{\Gamma,\alpha}{e}{\tau}}
            {\typing{\Gamma}{(\Lambda \alpha. e)}{(\forall\alpha.\tau)}} \\\\
          \inferrule* [right=\textsc{TApp}]
-           {\typing{\Gamma}{e_1}{(\sigma \to \tau)} \\\\
+           {\typing{\Gamma}{e_1}{\sigma \to \tau} \\\\
             \typing{\Gamma}{e_2}{\sigma}}
            {\typing{\Gamma}{(e_1~e_2)}{\tau}} \qquad
          \inferrule* [right=\textsc{TTApp}]
            {\typing{\Gamma}{e}{\forall\alpha.\tau} \\\\
-            \kinding{\Gamma}{\sigma}}
+            \gray{\kinding{\Gamma}{\sigma}}}
            {\typing{\Gamma}{(e~\sigma)}{([\alpha\mapsto\sigma]\tau)}} \\\\
          \inferrule* [right=\textsc{TPack}]
            {\typing{\Gamma}{e}{([\alpha\mapsto\sigma]\tau)}}
            {\typing{\Gamma}{(\pack{\sigma}{e}{\exists\alpha.\tau})}{(\exists\alpha.\tau)}} \\\\
-         \inferrule* [right=\textsc{TUnpack}]
-           {\typing{\Gamma}{e_1}{\exists\alpha.\tau} \\
-            \typing{\Gamma, \alpha, x:\tau}{e_2}{\sigma} \\
-            \alpha \notin \text{fv}(\sigma)
-           }
-           {\typing{\Gamma}{(\unpack{\alpha}{x}{e_1}{e_2})}{\sigma}} \\\\
          \inferrule* [right=\textsc{TPair}]
            {\typing{\Gamma}{e_1}{\tau_1} \\
             \typing{\Gamma}{e_2}{\tau_2}}
            {\typing{\Gamma}{(e_1,e_2)}{(\tau_1 \times \tau_2)}} \\\\
+         \inferrule* [right=\textsc{TUnpack}]
+           {\typing{\Gamma}{e_1}{\exists\alpha.\tau} \\
+            \typing{\Gamma, \alpha, x:\tau}{e_2}{\sigma} \\
+            \gray{\kinding{\Gamma}{\sigma}}
+            %% \alpha \notin \text{fv}(\sigma)
+           }
+           {\typing{\Gamma}{(\unpack{\alpha}{x}{e_1}{e_2})}{\sigma}} \\\\
          \inferrule* [right=\textsc{TCase}]
            {\typing{\Gamma}{e_1}{\sigma} \\
             \ptyping{\Gamma}{p}{\sigma}{\Delta} \\
@@ -215,7 +230,7 @@ specifications that includes
       \vspace{-6mm}
       \[ \begin{array}{c}
          \inferrule* [right=\textsc{PVar}]
-           {\kinding{\Gamma}{\tau}}
+           {\gray{\kinding{\Gamma}{\tau}}}
            {\ptyping{\Gamma}{x}{\tau}{(\epsilon, x:\tau)}} \\\\
          \inferrule* [right=\textsc{PPair}]
            {\ptyping{\Gamma}{p_1}{\tau_1}{\Delta_1} \\
@@ -229,12 +244,12 @@ specifications that includes
   \label{fig:systemfexiststyping:textbook}
 \end{figure}
 
-Figure \ref{fig:systemfexiststyping:textbook} contains selected rules for the
-term and pattern typing relations. The variable rule \textsc{TVar} of the term
-typing looks up a term variable $x$ with its associated type $\tau$ in the
-typing context $\Gamma$ and rule \textsc{TAbs} deals with abstractions over
-terms in terms which adds a binding to the typing context for the premise of the
-body $e$. The rules \textsc{TTApp} for type-application and \textsc{TPack} for
+Figure \ref{fig:systemfexiststyping:textbook} contains the rules for the term
+and pattern typing relations. The variable rule \textsc{TVar} of the term typing
+looks up a term variable $x$ with its associated type $\tau$ in the typing
+context $\Gamma$ and rule \textsc{TAbs} deals with abstractions over terms in
+terms which adds a binding to the typing context for the premise of the body
+$e$. The rules \textsc{TTApp} for type-application and \textsc{TPack} for
 packing existential types use a type-substitution operation
 $[\alpha\mapsto\sigma]\tau$ that substitutes $\sigma$ for $\alpha$ in
 $\tau$. \textsc{TTApp} performs the substitution in the conclusion while
@@ -302,17 +317,24 @@ determine the evaluation order.
 
 A key step in the type preservation proof is the preservation under these
 reductions, which boils down to two substitution lemmas:
-%
-\begin{align}
-    \label{lem:substtm}
-      \typing{\Gamma}{e_1}{\sigma} \;\Rightarrow\;
-      \typing{\Gamma,x : \sigma,\Delta}{e_2}{\tau} \;\Rightarrow\;
-      \typing{\Gamma,\Delta}{[x\mapsto e_1]e_2}{\tau} \\
-    \label{lem:substty}
-      \kinding{\Gamma}{\sigma} \;\Rightarrow\;
-      \typing{\Gamma,\beta,\Delta}{e}{\tau} \;\Rightarrow\;
-      \typing{\Gamma,[\beta\mapsto\sigma]\Delta}{[\beta\mapsto\sigma]e}{[\beta\mapsto\sigma]\tau}
-\end{align}
+%% TODO: numbering and references
+\[ \begin{array}{c}
+     \inferrule*[right=\textsc{SubstTmTm}]
+       { \typing{\Gamma}{e_1}{\sigma} \\
+         \typing{\Gamma,x : \sigma,\Delta}{e_2}{\tau}
+       }
+       { \typing{\Gamma,\Delta}{[x\mapsto e_1]e_2}{\tau}
+       } \\\\
+     \inferrule*[right=\textsc{SubstTyTm}]
+       { \kinding{\Gamma}{\sigma} \\
+         \typing{\Gamma,\beta,\Delta}{e}{\tau}
+       }
+       { \typing{\Gamma,[\beta\mapsto\sigma]\Delta}{[\beta\mapsto\sigma]e}{[\beta\mapsto\sigma]\tau}
+       } \\\\
+
+   \end{array}
+\]
+
 
 % \begin{align}
 %     \label{lem:substtm}
@@ -361,30 +383,37 @@ with one of the common interaction lemmas
 
 
 %-------------------------------------------------------------------------------
-\subsection{Mechanization}\label{sec:formalization}
+\subsection{Formalization}\label{sec:formalization}
+
+The next step is to rework the textbook-like specification from Section
+\ref{sec:gen:spec} into a formal one, which can be mechanized in a proof
+assistant. In the following, we will replace the syntax representation and
+discuss changes to the semantics definitions.
+
 
 \begin{figure}[t]
-\begin{center}
-\fbox{
-  \begin{minipage}{0.98\columnwidth}
-    \setlength\tabcolsep{1.5mm}
-    \begin{tabular}{lcllclcllcl}
-      $E$ & ::=    & $\text{enil}$     & $T$ & ::=    & $\text{tvar}~n$        & $\mid$ & $\text{tforall}~T$     & $q$ & ::=    & $\text{pvar}$          \\
-          & $\mid$ & $\text{etvar}~E$  &     & $\mid$ & $\text{tarr}~T_1~T_2$  & $\mid$ & $\text{texist}~T$      &     & $\mid$ & $\text{ppair}~q_1~q_2$ \\
-          & $\mid$ & $\text{evar}~E~T$ &     & $\mid$ & $\text{tprod}~T_1~T_2$ & $\mid$ & $\text{tprod}~T_1~T_2$ &     &        &                        \\
-    \end{tabular}
-    \vspace{1mm}
-    \hrule
-    \vspace{1mm}
-    \begin{tabular}{lc@@{\hspace{2mm}}lc@@{\hspace{2mm}}lc@@{\hspace{2mm}}lc@@{\hspace{2mm}}lc@@{\hspace{2mm}}l}
-      $t$ & ::= & $\text{var}~n$ & $\mid$ & $\text{abs}~T~t$     & $\mid$ & $\text{tyabs}~t$   & $\mid$ & $\text{pack}~T_1~t~T_2$ & $\mid$ & $\text{pair}~t_1~t_2$ \\
-          &     &                & $\mid$ & $\text{app}~t_1~t_2$ & $\mid$ & $\text{tyapp}~t~T$ & $\mid$ & $\text{unpack}~t_1~t_2$ & $\mid$ & $\text{case}~t_1~q~t_2$ \\
-     \end{tabular}
-  \end{minipage}
-}
-\end{center}
-\caption{\fexistsprod de Bruijn representation}
-\label{fig:systemfdebruijn}
+  \centering
+  \fbox{
+    \begin{minipage}{0.96\columnwidth}
+      \setlength\tabcolsep{2.0mm}
+      \begin{tabular}{lcl lclcl}
+        $E$ & ::=    & $\text{enil}$     & $T$ & ::=    & $\text{tvar}~n$        & $\mid$ & $\text{tforall}~T$     \\
+            & $\mid$ & $\text{etvar}~E$  &     & $\mid$ & $\text{tarr}~T_1~T_2$  & $\mid$ & $\text{texist}~T$      \\
+            & $\mid$ & $\text{evar}~E~T$ &     & $\mid$ & $\text{tprod}~T_1~T_2$ & $\mid$ & $\text{tprod}~T_1~T_2$ \\
+      \end{tabular}
+      \vspace{1mm}
+      \hrule
+      \vspace{1mm}
+      \setlength\tabcolsep{1.5mm}
+      \begin{tabular}{lcl lclclcl}
+  $q$ & ::=    & $\text{pvar}$           &      $t$ & ::=    & $\text{var}~n$       & $\mid$ & $\text{tyabs}~t$        & $\mid$ & $\text{pair}~t_1~t_2$   \\
+      & $\mid$ & $\text{ppair}~q_1~q_2$  &          & $\mid$ & $\text{abs}~T~t$     & $\mid$ & $\text{tyapp}~t~T$      & $\mid$ & $\text{case}~t_1~q~t_2$ \\
+      &        &                         &          & $\mid$ & $\text{app}~t_1~t_2$ & $\mid$ & $\text{pack}~T_1~t~T_2$ & $\mid$ & $\text{unpack}~t_1~t_2$ \\
+       \end{tabular}
+    \end{minipage}
+  }
+  \caption{\fexistsprod de Bruijn representation}
+  \label{fig:systemfdebruijn}
 \end{figure}
 
 \paragraph{Syntax Representation} The first step in the mechanization is to
@@ -472,11 +501,10 @@ $h \vdash E$.
 \begin{center}
   \small
 \fbox{
-  \begin{minipage}{0.98\columnwidth}
+  \begin{minipage}{0.96\columnwidth}
   \begin{tabular}{lcl}
     $h$ & ::= & $0 \mid \Sty~h \mid \Stm~h$
   \end{tabular}
-
 
   \begin{tabular}{@@{}ll}
   \begin{minipage}[t]{0.3\columnwidth}

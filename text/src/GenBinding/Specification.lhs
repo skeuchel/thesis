@@ -40,7 +40,8 @@ This section presents the \Knot~specification language for syntax with binders.
 \textbf{Declarations and definitions}
 \[\begin{array}{@@{}l@@{\hspace{2mm}}c@@{\hspace{3mm}}l@@{\hspace{5mm}}r}
   \spec      & ::=  & \ov{\decl}                                                                       & \textit{Specification}    \\
-  \decl      & ::=  & \namedecl \mid \sortdecl \mid \fundecl \mid \envdecl \mid \reldecl               & \textit{Declaration}      \\
+    \decl    & ::=  & \namedecl \mid \sortdecl \mid \fundecl                                           & \textit{Declaration}      \\
+             & \mid & \envdecl \mid \reldecl                                                           &                           \\
   \namedecl  & ::=  & \namespace \,\alpha\,\ccol\,S                                                    & \textit{Namespace}        \\
   \sortdecl  & ::=  & \sort\,S\,\cass\,\ov{\condecl}                                                   & \textit{Sort}             \\
   \condecl   & ::=  & \texttt{+}  K\,\fieldref{g}{\alpha}                                              & \textit{Constr. decl.}    \\
@@ -130,29 +131,29 @@ inductive relations, in Section \ref{ssec:inductiverelations}.
 %format case = "\Varid{case}"
 %format env = "{\env}"
 \begin{figure}[t]
-\fbox{
-\begin{minipage}{0.98\columnwidth}
-\begin{tabular}{l@@{\hspace{3mm}}c@@{\hspace{1mm}}l@@{\hspace{5mm}}l@@{\hspace{3mm}}c@@{\hspace{1mm}}l}
-\multicolumn{3}{l}{|namespace Tyv : Ty|}                                     & \multicolumn{3}{l}{\sort~|Ty|~\cass}                  \\
-\multicolumn{3}{l}{|namespace Tmv : Tm|}                                     &  & \texttt{+}  & |tvar (X@Tyv)|                       \\
-\multicolumn{3}{l}{|sort Pat|~\cass}                                         &  & \texttt{||} & |tarr (T1: Ty) (T2: Ty)|             \\
- & \texttt{||} & |pvar (x:Tmv) (T:Ty)|                                       &  & \texttt{||} & |tall (X:Tyv) (bindspec X T: Ty)|    \\
- & \texttt{||} & |ppair (p1: Pat) (bindspec (bind p1) p2:Pat)|               &  & \texttt{||} & |tprod (T1: Ty) (T2: Ty)|            \\
-\multicolumn{3}{l}{|sort Tm|~\cass}                                          &  & \texttt{||} & |texist (X:Tyv) (bindspec X T: Ty)|  \\
- & \texttt{+}  & |var (x@Tmv)|                                               & \multicolumn{3}{l}{|fun bind : Pat -> [Tmv]|~\cass}   \\
- & \texttt{||} & |abs (x:Tmv) (T: Ty) (bindspec x t: Tm)|                    &  & \texttt{||} & |pvar x T    -> x|                   \\
- & \texttt{||} & |app (t1: Tm) (t2: Tm)|                                     &  & \texttt{||} & |pprod p1 p2 -> bind p1 , bind p2|   \\
- & \texttt{||} & |tabs (X:Tyv) (bindspec X t: Tm)|                           & \multicolumn{3}{l}{|env Env|~\cass}                   \\
- & \texttt{||} & |tapp (t: Tm) (T: Ty)|                                      &  & \texttt{+}  & |empty|                              \\
- & \texttt{||} & |pair (t1:Tm) (t2:Tm)|                                      &  & \texttt{||} & |evar  : Tmv| \cto |Ty : Typing|     \\
- & \texttt{||} & |case (t1:Tm) (p:Pat) (bindspec (bind p) t2:Tm)|            &  & \texttt{||} & |etvar : Tyv| \cto                   \\
- & \texttt{||} & |pack (T1: Ty) (t: Tm) (T2: Ty)|                            &  & & \\
- & \texttt{||} & \multicolumn{4}{@@{}l}{|unpack (t1: Tm) (X: Tyv) (x: Tmv) (bindspec (X,x) t2: Tm)|} \\
-\end{tabular}
-\end{minipage}
-}
-\caption{Example specification of $\fexistsprod$}
-\label{fig:systemfexists}
+  \fbox{
+    \begin{minipage}{0.96\columnwidth}
+      \begin{tabular}{l@@{\hspace{0.3mm}}c@@{\hspace{0.1mm}}l@@{\hspace{0.5mm}}l@@{\hspace{0.3mm}}c@@{\hspace{0.1mm}}l}
+        \multicolumn{3}{@@{}l}{|namespace Tyv : Ty|}                                 & \multicolumn{3}{@@{}l}{\sort~|Ty|~\cass}                \\
+        \multicolumn{3}{@@{}l}{|namespace Tmv : Tm|}                                 &  & \texttt{+}  & |tvar (X@Tyv)|                         \\
+        \multicolumn{3}{@@{}l}{|sort Pat|~\cass}                                     &  & \texttt{||} & |tarr (T1: Ty) (T2: Ty)|               \\
+         & \texttt{||} & |pvar (x:Tmv) (T:Ty)|                                       &  & \texttt{||} & |tall (X:Tyv) (bindspec X T: Ty)|      \\
+         & \texttt{||} & |ppair (p1: Pat) (bindspec (bind p1) p2:Pat)|               &  & \texttt{||} & |tprod (T1: Ty) (T2: Ty)|              \\
+        \multicolumn{3}{@@{}l}{|sort Tm|~\cass}                                      &  & \texttt{||} & |texist (X:Tyv) (bindspec X T: Ty)|    \\
+         & \texttt{+}  & |var (x@Tmv)|                                               & \multicolumn{3}{@@{}l}{|fun bind : Pat -> [Tmv]|~\cass} \\
+         & \texttt{||} & |abs (x:Tmv) (T: Ty) (bindspec x t: Tm)|                    &  & \texttt{||} & |pvar x T    -> x|                     \\
+         & \texttt{||} & |app (t1: Tm) (t2: Tm)|                                     &  & \texttt{||} & |pprod p1 p2 -> bind p1 , bind p2|     \\
+         & \texttt{||} & |tabs (X:Tyv) (bindspec X t: Tm)|                           & \multicolumn{3}{@@{}l}{|env Env|~\cass}                 \\
+         & \texttt{||} & |tapp (t: Tm) (T: Ty)|                                      &  & \texttt{+}  & |empty|                                \\
+         & \texttt{||} & |pair (t1:Tm) (t2:Tm)|                                      &  & \texttt{||} & |evar  : Tmv| \cto |Ty : Typing|       \\
+         & \texttt{||} & |case (t1:Tm) (p:Pat) (bindspec (bind p) t2:Tm)|            &  & \texttt{||} & |etvar : Tyv| \cto                     \\
+         & \texttt{||} & |pack (T1: Ty) (t: Tm) (T2: Ty)|                            &  & & \\
+         & \texttt{||} & \multicolumn{4}{@@{}l}{|unpack (t1: Tm) (X: Tyv) (x: Tmv) (bindspec (X,x) t2: Tm)|} \\
+      \end{tabular}
+    \end{minipage}
+  }
+  \caption{Example specification of $\fexistsprod$}
+  \label{fig:systemfexists}
 \end{figure}
 
 \paragraph{Example} Figure \ref{fig:systemfexists} shows the \Knot~specification

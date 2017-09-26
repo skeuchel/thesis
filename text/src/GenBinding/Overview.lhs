@@ -2,6 +2,8 @@
 %include forall.fmt
 %include polycode.fmt
 %include Formatting.fmt
+%include macros.fmt
+%include exists.fmt
 
 { % FEXISTSPROD SCOPE
 
@@ -9,52 +11,51 @@
 \newcommand{\unpack}[4]{\text{let}~\{{#1},{#2}\}={#3}~\text{in}~{#4}}
 \newcommand{\casep}[3]{\text{case}~{#1}~\text{of}~{#2}\to{#3}}
 %\newcommand{\typing}[3]{{#1} \vdash_\text{tm} {#2} : {#3}}
+\newcommand{\wellscoped}[2]{{#1} \vdash {#2}}
+\newcommand{\wellscopedterm}[2]{{#1} \vdash_\text{tm} {#2}}
 \newcommand{\kinding}[2]{{#1} \vdash_\text{ty} {#2}}
 \newcommand{\ptyping}[4]{{#1} \vdash_\text{p} {#2} : {#3} ; {#4}}
 \newcommand{\pmatch}[4]{\text{Match}~{#1}~{#2}~{#3}~{#4}}
 \newcommand{\step}[2]{{#1} \longrightarrow {#2}}
+\newcommand{\osubst}[3]{{[{#1}\mapsto{#2}]~{#3}}}
+\newcommand{\fv}[1]{{\text{fv}({#1})}}
 
-\section{Overview}\label{sec:overview}
+%% \section{Overview}\label{sec:overview}
 
-This section illustrates the boilerplate that arises when mechanizing
+This chapter illustrates the boilerplate that arises when mechanizing
 type-safety proofs, outlines our specific approach and defines necessary
 terminology. Our running example is \fexistsprod{}, i.e. \SystemF with universal
-and existential quantification, and products. In the following, we elaborate the
-different steps of the development and point out where variable binding
-boilerplate arises. We proceed in three steps. First, we present a textbook-like
-definition of \fexistsprod{} which is informal and not suitable for
-mechanization. Using this informal definition we discuss arising boilerplate
-independent of later choice, e.g. syntax representations. Second, we formalize
-the previous informal definition by bringing it into a shape that is suitable
-for mechanization. Third, we discuss the mechanization itself.
+and existential quantification, and products. In the following, we elaborate on
+the development and point out which definitions and proofs can be considered
+\emph{variable binding boilerplate} and which are \emph{essential}. The kind of
+boilerplate that arises, is coarsely determined by the semantics, the
+meta-theoretic property that is being proved and the approach to proving it. We
+use the syntactic approach of \citet{progresspreservation} to prove type-safety
+via progress and preservation of small-step operational semantics and
+specifically focus on the boilerplate of such proofs.
+
+For the illustration in this chapter, we proceed in three steps. First, we
+present a textbook-like definition of \fexistsprod{}. This definition is not
+completely formal, and hence cannot be used directly in mechanizations. It is,
+however, formal enough to be accepted in scientific publications. We call it
+\emph{semi-formal}. Using this semi-formal definition we discuss arising
+boilerplate independent of later choices, e.g. syntax representations. Second,
+we formalize the previous semi-formal definition by bringing it into a shape
+that is suitable for mechanization. Third, we discuss the mechanization itself.
 
 
-\section{Specification}\label{sec:gen:spec}
+
+\section{Semi-formal Development}\label{sec:gen:spec}
+
+\begin{itemize}
+\item We discuss the development in 3 parts, the syntax of \fexistsprod{}, its
+  semantics and its meta-theory.
+\end{itemize}
 
 %-------------------------------------------------------------------------------
 \subsection{Syntax}\label{sec:gen:overview:syntax}
-
-Figure \ref{fig:systemfexistssyntax} shows the first step in the formalization:
-the definition of the syntax of \fexistsprod, in a textbook-like manner.
-
-The three main syntactic sorts of \fexistsprod are types, terms and patterns,
-and there are auxiliary sorts for values, variables and typing
-contexts. Patterns describe \emph{pattern matching} for product types only and
-can be arbitrarily nested. A pattern can therefore bind an arbitrary number of
-variables at once. For simplicity we keep matching on existentials separate from
-products. One level of existentials can be packed via $(\pack{\tau}{e}{\tau})$
-and unpacked via $(\unpack{\alpha}{x}{e_1}{e_2})$.
-
-In this grammar the scoping rules are left implicit as is common practive. The
-intended rules are that in a universal $(\forall\alpha.\tau)$ and existential
-quantification $(\exists\alpha.\tau)$ the type variable $\alpha$ scopes over the
-body $\tau$, in a type abstraction $(\Lambda\alpha.e)$ and term abstraction
-$(\lambda x:\tau.e)$ the variable $\alpha$ respectively $x$ scopes over the body
-$e$. In a pattern binding $(\casep{e_1}{p}{e_2})$ the variables bound by the
-pattern $p$ scope over $e_2$ but not $e_1$, and in the unpacking of an
-existential $(\unpack{\alpha}{x}{e_1}{e_2})$ the variables $\alpha$ and $x$
-scope over $e_2$.
-
+%
+\paragraph{Terms}
 \begin{figure}[t]
   \fbox{
     \begin{minipage}{0.96\columnwidth}
@@ -95,19 +96,32 @@ scope over $e_2$.
   \caption{\fexistsprod syntax}
   \label{fig:systemfexistssyntax}
 \end{figure}
+%
+Figure \ref{fig:systemfexistssyntax} shows the first part of the language
+specification: the definition of the syntax of \fexistsprod, in a textbook-like
+manner.
+
+The three main syntactic sorts of \fexistsprod are types, terms and patterns,
+and there are auxiliary sorts for values, variables and typing
+contexts. Patterns describe \emph{pattern matching} for product types only and
+can be arbitrarily nested. A pattern can therefore bind an arbitrary number of
+variables at once. For simplicity we keep matching on existentials separate from
+products. One level of existentials can be packed via $(\pack{\tau}{e}{\tau})$
+and unpacked via $(\unpack{\alpha}{x}{e_1}{e_2})$.
+
+In this grammar the scoping rules are left implicit as is common practice. The
+intended rules are that in a universal $(\forall\alpha.\tau)$ and existential
+quantification $(\exists\alpha.\tau)$ the type variable $\alpha$ scopes over the
+body $\tau$, in a type abstraction $(\Lambda\alpha.e)$ and term abstraction
+$(\lambda x:\tau.e)$ the variable $\alpha$ respectively $x$ scopes over the body
+$e$. In a pattern binding $(\casep{e_1}{p}{e_2})$ the variables bound by the
+pattern $p$ scope over $e_2$ but not $e_1$, and in the unpacking of an
+existential $(\unpack{\alpha}{x}{e_1}{e_2})$ the variables $\alpha$ and $x$
+scope over $e_2$.
 
 
-%-------------------------------------------------------------------------------
-\subsection{Semantics}
-
-The next step in the formalization is to develop the typical semantic relations
-for the language of study. In the case of \fexistsprod, these comprise a
-well-scopedness relation for types, a typing relation for terms, a typing
-relation for patterns, and a small-step call-by-value operational semantics.
-
-
-\paragraph{Well-scopedness}
-
+\paragraph{Scoping}
+%
 \begin{figure}[t]
   \fbox{
     \begin{minipage}{0.96\columnwidth}
@@ -143,7 +157,7 @@ relation for patterns, and a small-step call-by-value operational semantics.
   \caption{Well-scoping of types}
   \label{fig:systemfexistsscoping}
 \end{figure}
-
+%
 The well-scopedness relation for types $\kinding{\Gamma}{\tau}$ is defined in
 Figure \ref{fig:systemfexistsscoping}.  This relation takes a typing context
 $\Gamma$ as an index to represent the set of variables that are in scope and an
@@ -158,7 +172,7 @@ Hence, the relation formally and explicitly defines the scoping rules that we
 defined in Section \ref{sec:gen:overview:syntax} in prose.
 
 The definition of the well-scoping relation follows a standard recipe and
-usually its definition is left out in pen and paper specifications. In
+usually its definition is left out in pen-and-paper specifications. In
 mechanizations, however, such a relation usually needs to be defined (unless it
 is not used in the meta-theory) by the human prover. Therefore, this relation is
 an example of syntax-related boilerplate that we want to derive generically. The
@@ -173,10 +187,83 @@ explicitly, is that the type variables in the quantifications scope over the
 bodies, which is highlighted in \textgray{gray} in Figure
 \ref{fig:systemfexistsscoping}.
 
-These circumstances ask to develop a new formal and concise way to specify
-scoping rules. We come back to this in Section \ref{sec:specification} which
-presents our solution to the problem: we develop a language of (abstract) syntax
+These issues ask to develop a new formal and concise way to specify scoping
+rules. We come back to this in Section \ref{sec:specification} which presents
+our solution to the problem: we develop a language of (abstract) syntax
 specifications that include \emph{binding specifications} for scoping.
+
+\paragraph{Free Variables}
+
+\begin{figure}[t]
+  \fbox{
+    \begin{minipage}{0.96\columnwidth}
+      \framebox{\mbox{$\fv{\tau}$}} \\
+      $\begin{array}{lcl}
+        \fv{\alpha}               & = & \{ \alpha \}                    \\
+        \fv{\tau_1 \to \tau_2}    & = & \fv{\tau_1} \cup \fv{\tau_2}    \\
+        \fv{\forall\beta.\tau}    & = & \fv{\tau} \setminus \{ \beta \} \\
+        \fv{\exists\beta.\tau}    & = & \fv{\tau} \setminus \{ \beta \} \\
+        \fv{\tau_1 \times \tau_2} & = & \fv{\tau_1} \cup \fv{\tau_2}    \\
+      \end{array}$
+    \end{minipage}
+  }
+  \caption{Free variables of types}
+  \label{fig:systemfexists:textbook:freevariables}
+\end{figure}
+
+\begin{itemize}
+\item Calculate set of variables that are not bound.
+\item This is boilerplate.
+\item Won't say much about it, only used for substitutions
+   in this chapter and not further considered later.
+\end{itemize}
+
+
+\paragraph{Substitution}
+
+\begin{figure}[t]
+  \fbox{
+    \begin{minipage}{0.96\columnwidth}
+      \framebox{\mbox{$\osubst{\alpha}{\sigma}{\tau}$}} \\
+      $\begin{array}{lcll}
+           \osubst{\alpha}{\sigma}{\alpha}                 & = & \sigma                                                                     &                                                            \\
+           \osubst{\alpha}{\sigma}{\beta}                  & = & \beta                                                                      & (\alpha \neq \beta)                                        \\
+           \osubst{\alpha}{\sigma}{(\tau_1 \to \tau_2)}    & = & (\osubst{\alpha}{\sigma}{\tau_1}) \to (\osubst{\alpha}{\sigma}{\tau_2})    &                                                            \\
+           \osubst{\alpha}{\sigma}{(\forall\beta.\tau)}    & = & \forall\beta.\osubst{\alpha}{\sigma}{\tau}                                 & (\alpha \neq \beta \wedge \beta \not\in \fv{\sigma}) \\
+           \osubst{\alpha}{\sigma}{(\exists\beta.\tau)}    & = & \exists\beta.\osubst{\alpha}{\sigma}{\tau}                                 & (\alpha \neq \beta \wedge \beta \not\in \fv{\sigma}) \\
+           \osubst{\alpha}{\sigma}{(\tau_1 \times \tau_2)} & = & (\osubst{\alpha}{\sigma}{\tau_1}) \times (\osubst{\alpha}{\sigma}{\tau_2}) &                                                            \\
+      \end{array}$
+    \end{minipage}
+  }
+  \caption{Type in type substitutions}
+  \label{fig:systemfexists:textbook:substitution}
+\end{figure}
+
+\begin{itemize}
+
+\item Correct capture-avoiding substitution needs side-conditions
+  on the bound variables. Makes the operation partial (i.e. not suitable)
+  for mechanization.
+
+\item Names of bound variables do not matter, i.e. consider terms up to
+  consistent renaming. When necessary rename terms with fresh variables, i.e.
+  variables that are not used elsewhere.
+
+\item An established convention is to always assume that bound variables
+  are sufficiently fresh.
+
+\item It is also called Barendregt's variable convention for its pervasive use
+  in Barendregt's monograph on the lambda calculus \cite{}.
+
+\end{itemize}
+
+%-------------------------------------------------------------------------------
+\subsection{Semantics}
+
+The next step in the formalization is to develop the typical semantic relations
+for the language of study. In the case of \fexistsprod, these comprise a typing
+relation for terms, a typing relation for patterns, and a small-step
+call-by-value operational semantics.
 
 
 \paragraph{Typing}
@@ -201,8 +288,9 @@ specifications that include \emph{binding specifications} for scoping.
             \typing{\Gamma}{e_2}{\sigma}}
            {\typing{\Gamma}{(e_1~e_2)}{\tau}} \qquad
          \inferrule* [right=\textsc{TTApp}]
-           {\typing{\Gamma}{e}{\forall\alpha.\tau} \\\\
-            \gray{\kinding{\Gamma}{\sigma}}}
+           {\typing{\Gamma}{e}{\forall\alpha.\tau}
+            %%\gray{\kinding{\Gamma}{\sigma}}
+           }
            {\typing{\Gamma}{(e~\sigma)}{([\alpha\mapsto\sigma]\tau)}} \\\\
          \inferrule* [right=\textsc{TPack}]
            {\typing{\Gamma}{e}{([\alpha\mapsto\sigma]\tau)}}
@@ -214,8 +302,8 @@ specifications that include \emph{binding specifications} for scoping.
          \inferrule* [right=\textsc{TUnpack}]
            {\typing{\Gamma}{e_1}{\exists\alpha.\tau} \\
             \typing{\Gamma, \alpha, x:\tau}{e_2}{\sigma} \\
-            \gray{\kinding{\Gamma}{\sigma}}
-            %% \alpha \notin \text{fv}(\sigma)
+            %% \gray{\kinding{\Gamma}{\sigma}}
+            \alpha \notin \fv{\sigma}
            }
            {\typing{\Gamma}{(\unpack{\alpha}{x}{e_1}{e_2})}{\sigma}} \\\\
          \inferrule* [right=\textsc{TCase}]
@@ -230,7 +318,8 @@ specifications that include \emph{binding specifications} for scoping.
       \vspace{-6mm}
       \[ \begin{array}{c}
          \inferrule* [right=\textsc{PVar}]
-           {\gray{\kinding{\Gamma}{\tau}}}
+           { \; %%\gray{\kinding{\Gamma}{\tau}}
+           }
            {\ptyping{\Gamma}{x}{\tau}{(\epsilon, x:\tau)}} \\\\
          \inferrule* [right=\textsc{PPair}]
            {\ptyping{\Gamma}{p_1}{\tau_1}{\Delta_1} \\
@@ -309,29 +398,52 @@ all variables bound by $p$. This information is concatenated in the rule
 \end{figure}
 
 The operational semantics is defined with 4 reduction rules shown in Figure
-\ref{fig:systemfexistevaluation:textbook} and further congruence rules that
+\ref{fig:systemfexistevaluation:textbook} (top) and further congruence rules that
 determine the evaluation order.
 
 %-------------------------------------------------------------------------------
 \subsection{Meta-Theory}
 
-A key step in the type preservation proof is the preservation under these
-reductions, which boils down to two substitution lemmas:
+\paragraph{Scoping}
+
+\[ \begin{array}{c}
+     \inferrule*[right=\textsc{TypingScopeTm}]
+       { \TODO{$\wellscoped{}{\Gamma}$} \\
+         \typing{\Gamma}{e}{\tau}
+       }
+       { \wellscopedterm{\Gamma}{e}
+       } \\\\
+     \inferrule*[right=\textsc{TypingScopeTy}]
+       { \TODO{$\wellscoped{}{\Gamma}$} \\
+         \typing{\Gamma}{e}{\tau}
+       }
+       { \kinding{\Gamma}{\tau}
+       } \\
+   \end{array}
+\]
+
+
+\paragraph{Substitution}
+The interesting steps type preservation proof are the preservations under the 4
+reduction rules of the operational semantics. These essentially boil down down
+to two substitution lemmas:
+
 %% TODO: numbering and references
 \[ \begin{array}{c}
      \inferrule*[right=\textsc{SubstTmTm}]
-       { \typing{\Gamma}{e_1}{\sigma} \\
+       { \TODO{$\wellscoped{}{\Gamma}$} \\
+         \typing{\Gamma}{e_1}{\sigma} \\
          \typing{\Gamma,x : \sigma,\Delta}{e_2}{\tau}
        }
        { \typing{\Gamma,\Delta}{[x\mapsto e_1]e_2}{\tau}
        } \\\\
      \inferrule*[right=\textsc{SubstTyTm}]
-       { \kinding{\Gamma}{\sigma} \\
+       { \TODO{$\wellscoped{}{\Gamma}$} \\
+         \kinding{\Gamma}{\sigma} \\
          \typing{\Gamma,\beta,\Delta}{e}{\tau}
        }
        { \typing{\Gamma,[\beta\mapsto\sigma]\Delta}{[\beta\mapsto\sigma]e}{[\beta\mapsto\sigma]\tau}
-       } \\\\
-
+       } \\
    \end{array}
 \]
 
@@ -381,9 +493,18 @@ with one of the common interaction lemmas
   [\alpha \mapsto [\beta\mapsto\sigma]\sigma'][\beta\mapsto\sigma] \label{lem:substcomm}
 \end{align}
 
+\paragraph{Type-safety}
+
+\begin{itemize}
+\item Proceeds similar to the proof in Section \ref{sec:intro:typesafety}.
+  Prove canonical form lemmas, progress and preservation.
+\item The preservation proof mostly consists of applying the substitution
+  lemmas.
+\end{itemize}
+
 
 %-------------------------------------------------------------------------------
-\subsection{Formalization}\label{sec:formalization}
+\section{Formalization}\label{sec:formalization}
 
 The next step is to rework the textbook-like specification from Section
 \ref{sec:gen:spec} into a formal one, which can be mechanized in a proof
@@ -435,11 +556,34 @@ language. This helps us in treating boilerplate generically and automating
 proofs.
 
 Figure \ref{fig:systemfdebruijn} shows a term grammar for a de Bruijn
-representation of \fexistsprod. We use different namespaces for term and type
-variables and treat indices for variables from distinct namespaces
-independently. For example the polymorphic const function
-$(\Lambda\alpha.\Lambda\beta.\lambda x\!\!:\!\!\alpha.\lambda y\!\!:\!\!\beta.x)$ is represented
-by the de Bruijn term
+representation of \fexistsprod.
+
+\begin{itemize}
+\item In this representation, variables do no refer to their binding site by
+  name but by using positional information. A variable is represented by a
+  natural number $n$ that denotes, that the variables is referencing the $n$th
+  enclosing binder. We use different namespaces for term and type variables and
+  treat indices for variables from distinct namespaces independently, i.e.  when
+  resolving a term variable index we do not take type variable binders into
+  account.
+
+\item A property of this representation is that variable binders do not carry
+  any information anymore and can be deleted. For example, for the unpack
+  language construct $\unpack{\alpha}{x}{e_1}{e_2}$ we can drop both the type
+  variable binding $\alpha$ and the term variable binding $x$ in the de Bruijn
+  representation.
+
+\item For the de Bruijn representation we follow the convention of algebraic
+  datatypes in functional programming and use prefix constructors.
+
+\item We therefore arrive at the de Bruijn representation
+  $(\text{unpack}~t_1~t_2)$
+\end{itemize}
+
+
+For example the polymorphic const function
+$(\Lambda\alpha.\Lambda\beta.\lambda x\!\!:\!\!\alpha.\lambda
+y\!\!:\!\!\beta.x)$ is represented by the de Bruijn term
 $(\text{tyabs}~ (\text{tyabs}~ (\text{abs}~ (\text{tvar}~ 1)~ (\text{abs}~
 (\text{tvar}~ 0)~ (\text{var}~ 1))))$. The index for the type variable $\beta$
 that is used in the inner $\text{abs}$ is $0$ and not $1$, because we only count
@@ -452,18 +596,23 @@ is well-scoped iff all its free variables are bound in the context. The
 context is extended when going under binders. For example, when going under
 the binder of a type-annotated lambda abstraction the conventional rule
 is:
-$$
-\begin{array}{c}
-\inferrule[]{|Γ, x : τ ⊢ e|}{\hsforall |Γ ⊢ λ(x:τ).e|} \\
-\end{array}
-$$
+\[
+  \begin{array}{c}
+    \inferrule[]
+      {|Γ, x : τ ⊢ e|
+      }
+      {\hsforall |Γ ⊢ λ(x:τ).e|
+      } \\
+  \end{array}
+\]
 The rule follows the intention that the term variable should be of the given
 type. In this style, well-scopedness comprises a lightweight type system.
-However, it is problematic for \Knot to come up with the intended typing or, in general,
-establish what the associated data in the extended context should be. Furthermore, we
-allow the user to define different contexts with potentially incompatible
-associated data. Hence, instead we define well-scopedness by using \emph{domains} of
-contexts. In fact, this is all we need to establish well-scopedness.
+However, in general it is impossible to come up with the intended typing or,
+more generally, establish what the associated data in the extended context
+should be. Furthermore, we allow the user to define different contexts with
+potentially incompatible associated data. Hence, instead we define
+well-scopedness by using \emph{domains} of contexts. In fact, this is all we
+need to establish well-scopedness.
 
 \newcommand{\onetm}{1_{\text{tm}}}
 \newcommand{\onety}{1_{\text{ty}}}
@@ -567,7 +716,7 @@ $h \vdash E$.
   \end{minipage}
 }
 \end{center}
-\caption{Well-scopedness of terms}
+\caption{Well-scopedness of terms (selected rules)}
 \label{fig:wellscopedness:overview}
 \end{figure}
 
@@ -626,9 +775,9 @@ $$
 We use substitution functions which keep the substitute in its original context
 and perform (multi-place) shifting when reaching the variable positions. This
 behaviour corresponds to the structure of the substitution lemmas
-(\ref{lem:substtm}) and (\ref{lem:substty}). Hence, the index to be substituted
-is represented by the domain of the suffix $\Delta$ to have enough information
-for the shifting.
+\textsc{SubstTmTm} and \textsc{SubstTyTm}. Hence, the index to be substituted is
+represented by the domain of the suffix $\Delta$ to have enough information for
+the shifting.
 $$
 \begin{array}{c@@{\hspace{5mm}}c}
   |box (sutm : h → t → t → t)| &
@@ -638,9 +787,9 @@ $$
 \end{array}
 $$
 
-The generic derivation of shifting and substitution and lemmas for the closure
-of well-scopedness under shifting and substitution are tackled in
-\cite{knotneedle}.
+%% The generic derivation of shifting and substitution and lemmas for the closure
+%% of well-scopedness under shifting and substitution are tackled in
+%% \cite{knotneedle}.
 
 
 %if False
@@ -711,13 +860,11 @@ $$
 
 \paragraph{Meta-Theory}
 
-We use Wright and Felleisen's \cite{progresspreservation} syntactic approach of
-proving type-safety via progress and preservation. The type-safety proof of
-\fexistsprod requires additional canonical forms, typing inversion and
-boilerplate lemmas.  This paper focuses on the boilerplate lemmas related to
-semantic relations.\footnote{ Term-related boilerplate has been addressed in
-  our previous work~\cite{knotneedle}.}  The principal boilerplate lemmas are a
+The type-safety proof of \fexistsprod requires additional canonical forms,
+typing inversion and boilerplate lemmas.  This paper focuses on the boilerplate
+lemmas related to semantic relations. The principal boilerplate lemmas are a
 well-scopedness lemma
+
 $$
 \inferrule*
   []
@@ -770,7 +917,7 @@ $$
 $$
 
 
-\subsection{Mechanization}
+\section{Mechanization}
 
 \begin{table}[t]\centering
 \ra{1.3}

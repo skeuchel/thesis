@@ -19,6 +19,7 @@
 \newcommand{\step}[2]{{#1} \longrightarrow {#2}}
 \newcommand{\osubst}[3]{{[{#1}\mapsto{#2}]~{#3}}}
 \newcommand{\fv}[1]{{\text{fv}({#1})}}
+\newcommand{\bindp}[1]{{\text{bnd}({#1})}}
 
 %% \section{Overview}\label{sec:overview}
 
@@ -47,15 +48,20 @@ that is suitable for mechanization. Third, we discuss the mechanization itself.
 
 \section{Semi-formal Development}\label{sec:gen:spec}
 
-\begin{itemize}
-\item We discuss the development in 3 parts, the syntax of \fexistsprod{}, its
-  semantics and its meta-theory.
-\end{itemize}
+In the semi-formal development in this section, we put the emphasis on variable
+binding related concerns rather than the language \fexistsprod{} itself. Section
+\ref{sec:gen:semiformal:syntax} presents the syntax of \fexistsprod{} and
+elaborates on needed variable binding boilerplate for a type-safety proof that
+is determined only by the syntax itself. Subsequently, Section
+\ref{sec:gen:semiformal:semantics} presents the typing and evaluation relations
+and illustrates the boilerplate lemmas that are determined by these
+relations. Finally, Section \ref{sec:gen:semiformal:metatheory} where the
+boilerplate is used in the type-safety proof of \fexistsprod{}.
 
 %-------------------------------------------------------------------------------
-\subsection{Syntax}\label{sec:gen:overview:syntax}
+\subsection{Syntax}\label{sec:gen:semiformal:syntax}
 %
-\paragraph{Terms}
+\paragraph{Grammar}
 \begin{figure}[t]
   \fbox{
     \begin{minipage}{0.96\columnwidth}
@@ -205,17 +211,46 @@ specifications that include \emph{binding specifications} for scoping.
         \fv{\exists\beta.\tau}    & = & \fv{\tau} \setminus \{ \beta \} \\
         \fv{\tau_1 \times \tau_2} & = & \fv{\tau_1} \cup \fv{\tau_2}    \\
       \end{array}$
+
+      \framebox{\mbox{$\bindp{p}$}} \\
+      $\begin{array}{lcl}
+        \bindp{x}         & = & \{ x \}                      \\
+        \bindp{p_1 , p_2} & = & \bindp{p_1} \cup \bindp{p_2} \\
+      \end{array}$
+
+      \framebox{\mbox{$\fv{e}$}} \\
+      $\begin{array}{lcl}
+         \fv{x}                            & = & \{ x \}                                             \\
+         \fv{\lambda x:\tau.e}             & = & \fv{e} \setminus \{ x \}                            \\
+         \fv{e_1~e_2}                      & = & \fv{e_1} \cup \fv{e_2}                              \\
+         \fv{\Lambda\alpha.e}              & = & \fv{e} \setminus \{ \alpha \}                       \\
+         \fv{e~\tau}                       & = & \fv{e} \cup \fv{\tau}                               \\
+         \fv{\pack{\sigma}{e}{\tau}}       & = & \fv{\sigma} \cup \fv{e} \cup \fv{\tau}              \\
+         \fv{\unpack{\alpha}{x}{e_1}{e_2}} & = & \fv{e_1} \cup (\fv{e_2} \setminus  \{ \alpha, x \}) \\
+         \fv{e_1,e_2}                      & = & \fv{e_1} \cup \fv{e_2}                              \\
+         \fv{\casep{e_1}{p}{e_2}}          & = & \fv{e_1} \cup (\fv{e_2} \setminus \bindp{p})        \\
+      \end{array}$
     \end{minipage}
   }
-  \caption{Free variables of types}
+  \caption{Free variables}
   \label{fig:systemfexists:textbook:freevariables}
 \end{figure}
 
 \begin{itemize}
-\item Calculate set of variables that are not bound.
-\item This is boilerplate.
-\item Won't say much about it, only used for substitutions
-   in this chapter and not further considered later.
+\item Figure \ref{fig:systemfexists:textbook:freevariables} shows the definition
+  of the calculations of free variables of type and terms, i.e. reference
+  occurrences of variables that are not bound in the type or term itself.
+\item This operation is specific to a nameful syntax representation.
+\item It is only used for the definition of capture-avoiding substitution below
+  and will not be used in the remainder of this thesis.
+\item The implementation is a recursive traversal that accumulates free
+  variables from variable reference occurrences upward and removes binding
+  occurrences of variables.
+\item For sorts like patterns that represent binders we define an auxiliary
+  function $\bindp{\cdot}$ that calculate the set of bound variables.
+\item The definition of the free variable function again follows a standard
+  recipe, which only depends on the grammar and the scoping rules of the
+  syntactic sorts, and is therefore boilerplate.
 \end{itemize}
 
 
@@ -240,25 +275,53 @@ specifications that include \emph{binding specifications} for scoping.
 \end{figure}
 
 \begin{itemize}
+\item A correct definition of substitution is subtle when it comes to specific
+  names of variables. A mere textual replacement is not sufficient. The
+  following two examples illustrate when we expect a different result than a
+  textual replacement:
 
-\item Correct capture-avoiding substitution needs side-conditions
-  on the bound variables. Makes the operation partial (i.e. not suitable)
-  for mechanization.
+  \[ \begin{array}{lcl}
+       \osubst{\alpha}{\sigma}{(\Lambda\alpha.\alpha)}          & \neq & \Lambda\alpha.\sigma          \\
+       \osubst{\alpha}{(\sigma\to\beta)}{(\Lambda\beta.\alpha)} & \neq & \Lambda\beta.(\sigma\to\beta) \\
+     \end{array}
+   \]
 
-\item Names of bound variables do not matter, i.e. consider terms up to
-  consistent renaming. When necessary rename terms with fresh variables, i.e.
-  variables that are not used elsewhere.
+   In the first case, the type variable $\alpha$ is bound in the type we operate
+   on and is wrongly substituted. In the second case, the type variable $\beta$
+   that appears free in the substitute $\sigma \to \beta$ now wrongly points to
+   the $\beta$ binder after replacement. This is commonly called a
+   \emph{variable capture}.
 
-\item An established convention is to always assume that bound variables
-  are sufficiently fresh.
+\item Figure \ref{fig:systemfexists:textbook:substitution} contains a
+  definition of a (capture-avoiding) substitution operator that uses
+  side-conditions to rule out the two problematic cases above. However, this
+  rules out certain inputs and therefore makes the operations partial. This is
+  again widely accepted in semi-formal pen-and-paper proofs, but a stumbling
+  block for mechanization.
 
-\item It is also called Barendregt's variable convention for its pervasive use
-  in Barendregt's monograph on the lambda calculus \cite{}.
+\item Intuitively, the names of bound variables do not matter. For example, for
+  our intended semantics the terms $\lambda (x:\tau). x$ and
+  $\lambda (y:\tau). y$ are essentially equivalent, i.e. we consider terms that
+  are \emph{equal up to consistent renaming of bound variables}. We can apply
+  this in the definition of the substitution operators and during substitution
+  replace bound variables with \emph{fresh} ones, i.e. variables that are not
+  used elsewhere.
+
+\item Terms that are equal up to consistent renaming form a equivalence relation
+  which is called $\alpha$-equivalence. Put differently, we really want to
+  define terms as being the quotient set of $\alpha$-equivalent (raw) terms.
+
+  This step is easy in a semi-formal setting, but in the proof assistant setting
+  this results in a abundance of proof obligations of preservation of
+  $\alpha$-equivalence.
+
+\item \sout{It is also called Barendregt's variable convention for its pervasive use
+  in Barendregt's monograph on the lambda calculus \cite{}.}
 
 \end{itemize}
 
 %-------------------------------------------------------------------------------
-\subsection{Semantics}
+\subsection{Semantics}\label{sec:gen:semiformal:semantics}
 
 The next step in the formalization is to develop the typical semantic relations
 for the language of study. In the case of \fexistsprod, these comprise a typing
@@ -398,29 +461,47 @@ all variables bound by $p$. This information is concatenated in the rule
 \end{figure}
 
 The operational semantics is defined with 4 reduction rules shown in Figure
-\ref{fig:systemfexistevaluation:textbook} (top) and further congruence rules that
-determine the evaluation order.
+\ref{fig:systemfexistevaluation:textbook}. We omitted Further congruence rules
+that determine the evaluation order. The reduction of the case construct uses an
+auxiliary pattern-matching relation $\pmatch{v}{p}{e_1}{e_2}$ which denotes that
+when matching the value $v$ against the pattern $p$ and applying the resulting
+variable substitution to $e_1$ we get $e_2$ as a result. All of the reduction
+rules directly or indirectly use substitutions.
+
+
 
 %-------------------------------------------------------------------------------
-\subsection{Meta-Theory}
+\subsection{Meta-Theory}\label{sec:gen:semiformal:metatheory}
 
 \paragraph{Scoping}
 
-\[ \begin{array}{c}
-     \inferrule*[right=\textsc{TypingScopeTm}]
-       { \TODO{$\wellscoped{}{\Gamma}$} \\
-         \typing{\Gamma}{e}{\tau}
-       }
-       { \wellscopedterm{\Gamma}{e}
-       } \\\\
-     \inferrule*[right=\textsc{TypingScopeTy}]
-       { \TODO{$\wellscoped{}{\Gamma}$} \\
-         \typing{\Gamma}{e}{\tau}
-       }
-       { \kinding{\Gamma}{\tau}
-       } \\
-   \end{array}
-\]
+\begin{itemize}
+\item A concern in the formalization is that all occurring expressions are
+  well-scoped at all times. Moreover, this involves lemmas that syntactic
+  operations like substitution produce well-scoped outputs when run on
+  well-scoped inputs. This is syntactic boilerplate.
+
+\item Furthermore, each of the semantic relations itself implies well-scoping,
+  e.g. well-typed terms are also well-scoped:
+
+  \[ \begin{array}{c}
+       \inferrule*[right=\textsc{TypingScopeTm}]
+         { %\TODO{$\wellscoped{}{\Gamma}$} \\
+           \typing{\Gamma}{e}{\tau}
+         }
+         { \wellscopedterm{\Gamma}{e}
+         } \\\\
+       \inferrule*[right=\textsc{TypingScopeTy}]
+         { %\TODO{$\wellscoped{}{\Gamma}$} \\
+           \typing{\Gamma}{e}{\tau}
+         }
+         { \kinding{\Gamma}{\tau}
+         } \\
+     \end{array}
+   \]
+
+   This is semantic boilerplate.
+\end{itemize}
 
 
 \paragraph{Substitution}
@@ -431,14 +512,14 @@ to two substitution lemmas:
 %% TODO: numbering and references
 \[ \begin{array}{c}
      \inferrule*[right=\textsc{SubstTmTm}]
-       { \TODO{$\wellscoped{}{\Gamma}$} \\
+       { %\TODO{$\wellscoped{}{\Gamma}$} \\
          \typing{\Gamma}{e_1}{\sigma} \\
          \typing{\Gamma,x : \sigma,\Delta}{e_2}{\tau}
        }
        { \typing{\Gamma,\Delta}{[x\mapsto e_1]e_2}{\tau}
        } \\\\
      \inferrule*[right=\textsc{SubstTyTm}]
-       { \TODO{$\wellscoped{}{\Gamma}$} \\
+       { %\TODO{$\wellscoped{}{\Gamma}$} \\
          \kinding{\Gamma}{\sigma} \\
          \typing{\Gamma,\beta,\Delta}{e}{\tau}
        }
@@ -498,9 +579,13 @@ with one of the common interaction lemmas
 \begin{itemize}
 \item Proceeds similar to the proof in Section \ref{sec:intro:typesafety}.
   Prove canonical form lemmas, progress and preservation.
-\item The preservation proof mostly consists of applying the substitution
-  lemmas.
+\item The canonical form lemmas and the progress lemma are determined by the
+  value relation and do not involve a lot of variable binding boilerplate.
+\item All reduction rules use substitutions. As a consequence, the preservation
+  proof for these cases mainly consists of applying the substitution lemmas that
+  we discuss below.
 \end{itemize}
+
 
 
 %-------------------------------------------------------------------------------
@@ -517,19 +602,19 @@ discuss changes to the semantics definitions.
   \fbox{
     \begin{minipage}{0.96\columnwidth}
       \setlength\tabcolsep{2.0mm}
-      \begin{tabular}{lcl lclcl}
-        $E$ & ::=    & $\text{enil}$     & $T$ & ::=    & $\text{tvar}~n$        & $\mid$ & $\text{tforall}~T$     \\
-            & $\mid$ & $\text{etvar}~E$  &     & $\mid$ & $\text{tarr}~T_1~T_2$  & $\mid$ & $\text{texist}~T$      \\
-            & $\mid$ & $\text{evar}~E~T$ &     & $\mid$ & $\text{tprod}~T_1~T_2$ & $\mid$ & $\text{tprod}~T_1~T_2$ \\
+      \begin{tabular}{lclcl lcl}
+        $T$ & ::=    & $n$              & $\mid$ & $\forall\bullet.T$ & $E$ & ::=    & $\epsilon$          \\
+            & $\mid$ & $T_1 \to T_2$    & $\mid$ & $\exists\bullet.T$ &     & $\mid$ & $\Gamma, \bullet$   \\
+            & $\mid$ & $T_1 \times T_2$ & $\mid$ &                    &     & $\mid$ & $\Gamma, \bullet:T$ \\
       \end{tabular}
       \vspace{1mm}
       \hrule
       \vspace{1mm}
       \setlength\tabcolsep{1.5mm}
       \begin{tabular}{lcl lclclcl}
-  $q$ & ::=    & $\text{pvar}$           &      $t$ & ::=    & $\text{var}~n$       & $\mid$ & $\text{tyabs}~t$        & $\mid$ & $\text{pair}~t_1~t_2$   \\
-      & $\mid$ & $\text{ppair}~q_1~q_2$  &          & $\mid$ & $\text{abs}~T~t$     & $\mid$ & $\text{tyapp}~t~T$      & $\mid$ & $\text{case}~t_1~q~t_2$ \\
-      &        &                         &          & $\mid$ & $\text{app}~t_1~t_2$ & $\mid$ & $\text{pack}~T_1~t~T_2$ & $\mid$ & $\text{unpack}~t_1~t_2$ \\
+  $q$ & ::=    & $\bullet$ & $t$ & ::=    & $n$                   & $\mid$ & $\Lambda\bullet.t$   & $\mid$ & $t_1,t_2$                             \\
+      & $\mid$ & $q_1,q_2$ &     & $\mid$ & $\lambda \bullet:T.t$ & $\mid$ & $t~T$                & $\mid$ & $\casep{t_1}{q}{t_2}$                  \\
+      &        &           &     & $\mid$ & $t_1~t_2$             & $\mid$ & $\pack{T_1}{t}{T_2}$ & $\mid$ & $\unpack{\bullet}{\bullet}{t_1}{t_2}$ \\
        \end{tabular}
     \end{minipage}
   }
@@ -559,35 +644,44 @@ Figure \ref{fig:systemfdebruijn} shows a term grammar for a de Bruijn
 representation of \fexistsprod.
 
 \begin{itemize}
+\item A property of this representation is that binding occurrences of variables
+  do not contain any information anymore. In the grammar we replace them
+  uniformly with a bullet $\bullet$.
+
 \item In this representation, variables do no refer to their binding site by
-  name but by using positional information. A variable is represented by a
+  name but by using positional information: A variable is represented by a
   natural number $n$ that denotes, that the variables is referencing the $n$th
-  enclosing binder. We use different namespaces for term and type variables and
-  treat indices for variables from distinct namespaces independently, i.e.  when
-  resolving a term variable index we do not take type variable binders into
-  account.
+  enclosing binder starting from 0.
 
-\item A property of this representation is that variable binders do not carry
-  any information anymore and can be deleted. For example, for the unpack
-  language construct $\unpack{\alpha}{x}{e_1}{e_2}$ we can drop both the type
-  variable binding $\alpha$ and the term variable binding $x$ in the de Bruijn
-  representation.
+  \[ \begin{array}{lcl}
+       \lambda(x:\tau). x                                                          & \Rightarrow & (\lambda(\bullet:T). 0)                                                              \\
+       \lambda(x:\tau). \lambda(y:\sigma). x                                       & \Rightarrow & (\lambda(\bullet:T). \lambda(\bullet:S). 1)                                          \\
+       \lambda(x:\tau_1). \lambda(y:\tau_1 \to \tau_2). (\lambda(z:\tau_1). y~x)~x & \Rightarrow \\
+         \multicolumn{3}{c}{\lambda(\bullet:T_1). \lambda(\bullet:T_1 \to T_2). (\lambda(\bullet:T_1). 2~0)~1} \\
+     \end{array}
+  \]
 
-\item For the de Bruijn representation we follow the convention of algebraic
-  datatypes in functional programming and use prefix constructors.
+  In $\lambda x. x$ the variable $x$ refers to the immediately enclosing binding
+  and can therefore be represented with the index $0$. In
+  $\lambda x. \lambda y. x$ we need to skip the $y$ binding and therefore
+  represent the occurrence of $x$ with 1. The index is not constant but depends
+  on the context a variable appears in. In the third example, the variable $x$
+  is once represented using the index $1$ and once using the index $2$.
 
-\item We therefore arrive at the de Bruijn representation
-  $(\text{unpack}~t_1~t_2)$
+\item We use different namespaces for term and type variables and treat indices
+  for variables from distinct namespaces independently:
+
+  \[ \begin{array}{lcl}
+       \lambda(x:\tau). \Lambda\alpha.  x~\alpha                          & \Rightarrow & \lambda(\bullet:\tau).\Lambda\bullet. 0~0                             \\
+       \Lambda\alpha.   \lambda(x:\tau). x~\alpha                         & \Rightarrow & \Lambda\bullet.\lambda(\bullet:\tau). 0~0                             \\
+       \Lambda\alpha. \Lambda\beta. \lambda(x:\alpha). \lambda(y:\beta).x & \Rightarrow & \Lambda\bullet.\Lambda\bullet.\lambda(\bullet:1).\lambda(\bullet:0).1 \\
+     \end{array}
+  \]
+
+  That means, when resolving a term variable index we do not take type variable
+  binders into account and vice versa.
 \end{itemize}
 
-
-For example the polymorphic const function
-$(\Lambda\alpha.\Lambda\beta.\lambda x\!\!:\!\!\alpha.\lambda
-y\!\!:\!\!\beta.x)$ is represented by the de Bruijn term
-$(\text{tyabs}~ (\text{tyabs}~ (\text{abs}~ (\text{tvar}~ 1)~ (\text{abs}~
-(\text{tvar}~ 0)~ (\text{var}~ 1))))$. The index for the type variable $\beta$
-that is used in the inner $\text{abs}$ is $0$ and not $1$, because we only count
-the number of bindings of type variables.
 
 \paragraph{Well-scopedness}
 The well-scopedness of de Bruijn terms is a syntactic concern. It is common
@@ -645,6 +739,8 @@ $h \vdash_{\text{tm}} t$ and well-scopedness of typing environments
 $h \vdash E$.
 
 
+%format epsilon = "\epsilon"
+%format bullet = "\bullet"
 
 \begin{figure}[t]
 \begin{center}
@@ -664,9 +760,9 @@ $h \vdash E$.
   &
   \begin{minipage}[t]{0.3\columnwidth}
   \begin{code}
-  dom enil        =  0
-  dom (etvar E)   =  dom E + Ity
-  dom (evar E T)  =  dom E + Itm
+  dom epsilon         =  0
+  dom (E, bullet)     =  dom E + Ity
+  dom (E, bullet :T)  =  dom E + Itm
   \end{code}
   \end{minipage}
   \end{tabular}
@@ -693,13 +789,13 @@ $h \vdash E$.
         [right=\textsc{WsVar}]
         {h \vdash_\text{tm} n
         }
-        {h \vdash_\text{tm} \text{tvar}~n} \\\\
+        {h \vdash_\text{tm} n} \\\\
       \inferrule*
         [right=\textsc{WsUnpack}]
         {h \vdash_\text{tm}~t_1 \\
          h + 1_{\text{ty}} + 1_{\text{tm}} \vdash_\text{tm}~t_2
         }
-        {h \vdash_\text{tm} \text{unpack}~t_1~t_2} \\
+        {h \vdash_\text{tm} (\unpack{\bullet}{\bullet}{t_1}{t_2})} \\
      \end{array}
   \]
   \framebox{\mbox{$h \vdash E$}} \\
@@ -709,7 +805,7 @@ $h \vdash E$.
                  {h \vdash E \\
                   h + \text{dom}~E \vdash T
                  }
-                 {h \vdash \text{evar}~E~T
+                 {h \vdash E,\bullet:T
                  }
      \end{array}
   \]
@@ -845,15 +941,15 @@ $$
 \inferrule*
   [right=\textsc{TAbs}]
   {\typing
-    {\text{evar}~E~T_1}
+    {(E, \bullet:T_1)}
     {t}
     {T_2} \\
    \dom~E \vdash T_1
   }
   {\typing
     {E}
-    {(\text{abs}~T_1~t)}
-    {\text{tarr}~T_1~T_2}
+    {(\lambda\bullet:T_1.t)}
+    {(T_1 \to T_2)}
   }
 $$
 
@@ -881,14 +977,14 @@ $$
   []
   {\typing{E}{t}{T}
   }
-  {\typing{\text{evar}~E~T'}{\shtm~0~t}{T}
+  {\typing{E,\bullet:T'}{(\shtm~0~t)}{T}
   }
 \quad\quad
 \inferrule*
   []
   {\typing{E}{t}{T}
   }
-  {\typing{\text{etvar}~E}{\shty~0~t}{\shty~0~T}
+  {\typing{E, \bullet}{(\shty~0~t)}{(\shty~0~T)}
   }
 \end{array}
 $$
@@ -900,18 +996,18 @@ $$
   []
   {0 \vdash E \\
    \typing{E}{t_1}{T_1} \\
-   \typing{\text{evar}~E~T_1}{t_2}{T_2} \\
+   \typing{E,\bullet:T_1}{t_2}{T_2} \\
   }
-  {\typing{E}{\sutm~0~t_1~t_2}{T_2} \\
+  {\typing{E}{(\sutm~0~t_1~t_2)}{T_2} \\
   }
 \\\\
 \inferrule*
   []
   {0 \vdash E \\
    \domain{E} \vdash T_1 \\
-   \typing{\text{etvar}~E}{t_2}{T_2} \\
+   \typing{E, \bullet}{t_2}{T_2} \\
   }
-  {\typing{E}{\suty~0~T_1~t_2}{\suty~0~T_1~T_2} \\
+  {\typing{E}{(\suty~0~T_1~t_2)}{(\suty~0~T_1~T_2)} \\
   }
 \end{array}
 $$

@@ -48,15 +48,14 @@ that is suitable for mechanization. Third, we discuss the mechanization itself.
 
 \section{Semi-formal Development}\label{sec:gen:spec}
 
-In the semi-formal development in this section, we put the emphasis on variable
-binding related concerns rather than the language \fexistsprod{} itself. Section
+This section presents the semi-formal development of the language \fexistsprod{},
+with an emphasis on variable
+binding related concerns. Section
 \ref{sec:gen:semiformal:syntax} presents the syntax of \fexistsprod{} and
-elaborates on needed variable binding boilerplate for a type-safety proof that
-is determined only by the syntax itself. Subsequently, Section
+elaborates on needed variable binding boilerplate. Subsequently, Section
 \ref{sec:gen:semiformal:semantics} presents the typing and evaluation relations
-and illustrates the boilerplate lemmas that are determined by these
-relations. Finally, Section \ref{sec:gen:semiformal:metatheory} where the
-boilerplate is used in the type-safety proof of \fexistsprod{}.
+and illustrates the boilerplate lemmas they determine. Finally, Section \ref{sec:gen:semiformal:metatheory} shows
+where boilerplate is used in the type-safety proof of \fexistsprod{}.
 
 %-------------------------------------------------------------------------------
 \subsection{Syntax}\label{sec:gen:semiformal:syntax}
@@ -236,22 +235,20 @@ specifications that include \emph{binding specifications} for scoping.
   \label{fig:systemfexists:textbook:freevariables}
 \end{figure}
 
-\begin{itemize}
-\item Figure \ref{fig:systemfexists:textbook:freevariables} shows the definition
-  of the calculations of free variables of type and terms, i.e. reference
+Figure \ref{fig:systemfexists:textbook:freevariables} shows the definition
+  of the calculations of free variables of types and terms, i.e., reference
   occurrences of variables that are not bound in the type or term itself.
-\item This operation is specific to a nameful syntax representation.
-\item It is only used for the definition of capture-avoiding substitution below
-  and will not be used in the remainder of this thesis.
-\item The implementation is a recursive traversal that accumulates free
-  variables from variable reference occurrences upward and removes binding
+% \item This operation is specific to a nameful syntax representation.
+The implementation is a recursive traversal that accumulates free
+  variables from variable references upward and removes binding
   occurrences of variables.
-\item For sorts like patterns that represent binders we define an auxiliary
-  function $\bindp{\cdot}$ that calculate the set of bound variables.
-\item The definition of the free variable function again follows a standard
+For sorts like patterns that represent binders we define an auxiliary
+  function $\bindp{\cdot}$ that calculates the set of bound variables.
+The definition of the free variable function follows a standard
   recipe, which only depends on the grammar and the scoping rules of the
   syntactic sorts, and is therefore boilerplate.
-\end{itemize}
+Free variables are used for the definition of capture-avoiding substitution below.
+% and will not be used in the remainder of this thesis.
 
 
 \paragraph{Substitution}
@@ -274,10 +271,9 @@ specifications that include \emph{binding specifications} for scoping.
   \label{fig:systemfexists:textbook:substitution}
 \end{figure}
 
-\begin{itemize}
-\item A correct definition of substitution is subtle when it comes to specific
+A correct definition of substitution is subtle when it comes to specific
   names of variables. A mere textual replacement is not sufficient. The
-  following two examples illustrate when we expect a different result than a
+  following two examples illustrate situations where we expect a different result than a
   textual replacement:
 
   \[ \begin{array}{lcl}
@@ -287,38 +283,37 @@ specifications that include \emph{binding specifications} for scoping.
    \]
 
    In the first case, the type variable $\alpha$ is bound in the type we operate
-   on and is wrongly substituted. In the second case, the type variable $\beta$
-   that appears free in the substitute $\sigma \to \beta$ now wrongly points to
+   on and should not have been substituted. In the second case, the type variable $\beta$
+   that appears free in the substitute $\sigma \to \beta$ wrongly points to
    the $\beta$ binder after replacement. This is commonly called a
    \emph{variable capture}.
 
-\item Figure \ref{fig:systemfexists:textbook:substitution} contains a
+Figure \ref{fig:systemfexists:textbook:substitution} contains a
   definition of a (capture-avoiding) substitution operator that uses
-  side-conditions to rule out the two problematic cases above. However, this
+  side-conditions to rule out the two problematic cases above. However, it
   rules out certain inputs and therefore makes the operations partial. This is
-  again widely accepted in semi-formal pen-and-paper proofs, but a stumbling
+  widely accepted in semi-formal pen-and-paper proofs, but a stumbling
   block for mechanization.
 
-\item Intuitively, the names of bound variables do not matter. For example, for
-  our intended semantics the terms $\lambda (x:\tau). x$ and
+The partiality can be addressed by taking into account the intuition that
+  the names of bound variables do not matter. For example, for our intended
+  semantics the terms $\lambda (x:\tau). x$ and
   $\lambda (y:\tau). y$ are essentially equivalent, i.e. we consider terms that
   are \emph{equal up to consistent renaming of bound variables}. We can apply
-  this in the definition of the substitution operators and during substitution
+  this in the definition of the substitution operators to
   replace bound variables with \emph{fresh} ones, i.e. variables that are not
   used elsewhere.
 
-\item Terms that are equal up to consistent renaming form a equivalence relation
-  which is called $\alpha$-equivalence. Put differently, we really want to
-  define terms as being the quotient set of $\alpha$-equivalent (raw) terms.
+% \item Terms that are equal up to consistent renaming form an equivalence relation
+%   which is called $\alpha$-equivalence. Put differently, we really want to
+%   define terms as being the quotient set of $\alpha$-equivalent (raw) terms.
+% 
+%   This step is easy in a semi-formal setting, but in the proof assistant setting
+%   this results in a abundance of proof obligations of preservation of
+%   $\alpha$-equivalence.
 
-  This step is easy in a semi-formal setting, but in the proof assistant setting
-  this results in a abundance of proof obligations of preservation of
-  $\alpha$-equivalence.
-
-\item \sout{It is also called Barendregt's variable convention for its pervasive use
-  in Barendregt's monograph on the lambda calculus \cite{}.}
-
-\end{itemize}
+% \item \sout{It is also called Barendregt's variable convention for its pervasive use
+%   in Barendregt's monograph on the lambda calculus \cite{}.}
 
 %-------------------------------------------------------------------------------
 \subsection{Semantics}\label{sec:gen:semiformal:semantics}
@@ -474,16 +469,11 @@ rules directly or indirectly use substitutions.
 \subsection{Meta-Theory}\label{sec:gen:semiformal:metatheory}
 
 \paragraph{Scoping}
-
-\begin{itemize}
-\item A concern in the formalization is that all occurring expressions are
-  well-scoped at all times. Moreover, this involves lemmas that syntactic
-  operations like substitution produce well-scoped outputs when run on
-  well-scoped inputs. This is syntactic boilerplate.
-
-\item Furthermore, each of the semantic relations itself implies well-scoping,
-  e.g. well-typed terms are also well-scoped:
-
+A concern in the formalisation is that only well-scoped expressions are
+considered. This generates many boilerplate obligations to show that all syntactic operations,
+like substitution, preserve well-scopedness.
+Furthermore, we need to show that all semantic relations imply well-scoping,
+  e.g., well-typed terms are also well-scoped:
   \[ \begin{array}{c}
        \inferrule*[right=\textsc{TypingScopeTm}]
          { %\TODO{$\wellscoped{}{\Gamma}$} \\
@@ -500,12 +490,10 @@ rules directly or indirectly use substitutions.
      \end{array}
    \]
 
-   This is semantic boilerplate.
-\end{itemize}
 
 
 \paragraph{Substitution}
-The interesting steps type preservation proof are the preservations under the 4
+The interesting steps in the type preservation proof are the preservations under the 4
 reduction rules of the operational semantics. These essentially boil down down
 to two substitution lemmas:
 
@@ -642,17 +630,18 @@ proofs.
 
 Figure \ref{fig:systemfdebruijn} shows a term grammar for a de Bruijn
 representation of \fexistsprod.
+A property of this representation is that binding occurrences of variables
+  still mark the binding but
+  do not explictly name the bound variable anymore. For this reason, we replace the variable names
+  in binders
+  uniformly with a bullet $\bullet$ in the new grammar.
 
-\begin{itemize}
-\item A property of this representation is that binding occurrences of variables
-  do not contain any information anymore. In the grammar we replace them
-  uniformly with a bullet $\bullet$.
-
-\item In this representation, variables do no refer to their binding site by
+Also, variables do no refer to their binding site by
   name but by using positional information: A variable is represented by a
-  natural number $n$ that denotes, that the variables is referencing the $n$th
+  natural number $n$ that denotes that the variable is bound by the $n$th
   enclosing binder starting from 0.
 
+  Here are several examples of terms in both the named and the de Bruijn representation:
   \[ \begin{array}{lcl}
        \lambda(x:\tau). x                                                          & \Rightarrow & (\lambda(\bullet:T). 0)                                                              \\
        \lambda(x:\tau). \lambda(y:\sigma). x                                       & \Rightarrow & (\lambda(\bullet:T). \lambda(\bullet:S). 1)                                          \\
@@ -661,15 +650,15 @@ representation of \fexistsprod.
      \end{array}
   \]
 
-  In $\lambda x. x$ the variable $x$ refers to the immediately enclosing binding
-  and can therefore be represented with the index $0$. In
-  $\lambda x. \lambda y. x$ we need to skip the $y$ binding and therefore
-  represent the occurrence of $x$ with 1. The index is not constant but depends
-  on the context a variable appears in. In the third example, the variable $x$
-  is once represented using the index $1$ and once using the index $2$.
+  In the first example, $\lambda(x:\tau). x$, the variable $x$ refers to the immediately enclosing binding
+  and can therefore be represented with the index $0$. Next, in
+  $\lambda(x:\tau). \lambda(y:\sigma). x$, we need to skip the $y$ binding and therefore
+  represent the occurrence of $x$ with 1. In the third example, the variable $x$
+  is once represented using the index $1$ and once using the index $2$. This shows that the indeces of a variable are not constant but depend
+  on the context the variable appears in. 
 
-\item We use different namespaces for term and type variables and treat indices
-  for variables from distinct namespaces independently:
+Finally, we use different namespaces for term and type variables and treat indices
+  for variables from distinct namespaces independently, as illustrated by the following examples:
 
   \[ \begin{array}{lcl}
        \lambda(x:\tau). \Lambda\alpha.  x~\alpha                          & \Rightarrow & \lambda(\bullet:\tau).\Lambda\bullet. 0~0                             \\
@@ -678,9 +667,8 @@ representation of \fexistsprod.
      \end{array}
   \]
 
-  That means, when resolving a term variable index we do not take type variable
+  As a consequence, when resolving a term variable index we do not take type variable
   binders into account and vice versa.
-\end{itemize}
 
 
 \paragraph{Well-scopedness}

@@ -539,13 +539,12 @@ with one of the common interaction lemmas
 \end{align*}
 
 
-\paragraph{Type-safety}
-
-\begin{itemize}
-\item Proceeds similar to the proof in Section \ref{sec:intro:typesafety}.
-\item The main addition to the progress proof is that we need to prove an
-  auxiliary lemma that well-typed pattern matching $\pmatch{v}{p}{e_1}{e_2}$ is
-  always defined:
+\paragraph{Progress}
+The proof of progress proceeds similarly to that in Section
+\ref{sec:intro:typesafety}. 
+The main difference, due to the presence of pattern
+matching, is that we need to prove an auxiliary lemma stating
+that well-typed pattern matching $\pmatch{v}{p}{e_1}{e_2}$ is always defined:
   \[ \inferrule*[]
     {\typing{\epsilon}{v}{\sigma} \\
       \ptyping{\epsilon}{p}{\sigma}{\Delta} \\
@@ -555,44 +554,39 @@ with one of the common interaction lemmas
     {\pmatch{v}{p}{e_1}{e_2}
     }
   \]
+On the whole progress does not involve a lot of semantic variable binding
+boilerplate.
 
-\item The canonical form lemmas and the progress lemma are determined by the
-  value relation and do not involve a lot of semantic variable binding
-  boilerplate.
+\paragraph{Preservation}
+The proof of preservation proceeds by induction on the typing derivation
+$\typing{\Gamma}{e}{\sigma}$ and inversion of the evaluation relation
+$\step{e}{e'}$. There are two kinds of cases.
+Firstly, for evaluation steps that are congruence rules, the
+proof follows immediately by applying the same rule again.
+Secondly, for the reduction rules, which all involve substitution, the
+proof involves boilerplate substitution lemmas.
+Consider the case of reducing a term abstraction
+\[ \step{(\lambda (x:\sigma). e_1)~e_2}{\osubst{x}{e_2}{e_1}}. \]
 
-\item The proof of preservation proceeds by induction on the typing derivation
-  $\typing{\Gamma}{e}{\sigma}$ and inversion of the evaluation relation
-  $\step{e}{e'}$. In case of an evaluation step that is a congruence rule, the
-  proof follows immediately by applying the same rule again.
+The proof obligation is
+\[ \inferrule*[]
+     { \typing{\Gamma}{\lambda (x:\sigma).e_1}{\sigma\to\tau} \\
+       \typing{\Gamma}{e_2}{\sigma}
+     }
+     { \typing{\Gamma}{[x\mapsto e_2]e_1}{\tau}
+     }
+\]
+After inverting the first premise
+$\typing{\Gamma}{\lambda (x:\sigma).e_1}{\tau}$ to get the typing derivation of $e_1$ we
+can apply the boilerplate lemma for well-typed substitutions
+\textsc{SubstTmTm}, with $\Delta = \epsilon$, to finish the proof of this
+case.
 
-\item All reduction rules of the operational semantics use substitutions. As a
-  consequence, the preservation proof for these cases use boilerplate
-  substitution lemmas.
-
-\item Consider the case of reducing a term abstraction
-  \[ \step{(\lambda (x:\sigma). e_1)~e_2}{\osubst{x}{e_2}{e_1}}. \]
-
-  The proof obligation is
-  \[ \inferrule*[]
-       { \typing{\Gamma}{\lambda (x:\sigma).e_1}{\tau} \\
-         \typing{\Gamma}{e_1}{\sigma}
-       }
-       { \typing{\Gamma}{[x\mapsto e_2]e_1}{\tau}
-       }
-  \]
-
-  After inverting the first premise
-  $\typing{\Gamma}{\lambda (x:\sigma).e_1}{\tau}$ to get the typing of $e_1$ we
-  can apply the boilerplate lemma for well-typed substitutions
-  \textsc{SubstTmTm}, with $\Delta = \epsilon$, to finish the proof of this
-  case.
-
-\item Similarly, the cases of universal and existential quantification follow
-  directly from the typing substitution lemmas. The case of a pattern match
-  additionally requires an induction over the matching relation
-  $\pmatch{v}{p}{e_1}{e_2}$. The boilerplate lemma \textsc{SubstTmTm} is used in
-  the variable case.
-\end{itemize}
+Similarly, the cases of universal and existential quantification follow
+directly from the typing substitution lemmas. The case of a pattern match
+additionally requires an induction over the matching relation
+$\pmatch{v}{p}{e_1}{e_2}$. The boilerplate lemma \textsc{SubstTmTm} is used in
+the variable case.
 
 
 

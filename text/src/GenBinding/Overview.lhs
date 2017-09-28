@@ -20,6 +20,7 @@
 \newcommand{\osubst}[3]{{[{#1}\mapsto{#2}]~{#3}}}
 \newcommand{\fv}[1]{{\text{fv}({#1})}}
 \newcommand{\bindp}[1]{{\text{bnd}({#1})}}
+\newcommand{\tapp}[2]{{#1}!{#2}}
 
 %% \section{Overview}\label{sec:overview}
 
@@ -81,7 +82,7 @@ where boilerplate is used in the type-safety proof of \fexistsprod{}.
                         & $\mid$ & $\lambda x:\tau.e$             & term abstraction  \\
                         & $\mid$ & $e_1~e_2$                      & application       \\
                         & $\mid$ & $\Lambda\alpha.e$              & type abstraction  \\
-                        & $\mid$ & $e~\tau$                       & type application  \\
+                        & $\mid$ & $\tapp{e}{\tau}$               & type application  \\
                         & $\mid$ & $\pack{\sigma}{e}{\tau}$       & packing           \\
                         & $\mid$ & $\unpack{\alpha}{x}{e_1}{e_2}$ & unpacking         \\
                         & $\mid$ & $e_1,e_2$                      & pair              \\
@@ -223,7 +224,7 @@ specifications that include \emph{binding specifications} for scoping.
          \fv{\lambda x:\tau.e}             & = & \fv{e} \setminus \{ x \}                            \\
          \fv{e_1~e_2}                      & = & \fv{e_1} \cup \fv{e_2}                              \\
          \fv{\Lambda\alpha.e}              & = & \fv{e} \setminus \{ \alpha \}                       \\
-         \fv{e~\tau}                       & = & \fv{e} \cup \fv{\tau}                               \\
+         \fv{\tapp{e}{\tau}}               & = & \fv{e} \cup \fv{\tau}                               \\
          \fv{\pack{\sigma}{e}{\tau}}       & = & \fv{\sigma} \cup \fv{e} \cup \fv{\tau}              \\
          \fv{\unpack{\alpha}{x}{e_1}{e_2}} & = & \fv{e_1} \cup (\fv{e_2} \setminus  \{ \alpha, x \}) \\
          \fv{e_1,e_2}                      & = & \fv{e_1} \cup \fv{e_2}                              \\
@@ -349,7 +350,7 @@ call-by-value operational semantics.
            {\typing{\Gamma}{e}{\forall\alpha.\tau}
             %%\gray{\kinding{\Gamma}{\sigma}}
            }
-           {\typing{\Gamma}{(e~\sigma)}{([\alpha\mapsto\sigma]\tau)}} \\\\
+           {\typing{\Gamma}{(\tapp{e}{\sigma})}{([\alpha\mapsto\sigma]\tau)}} \\\\
          \inferrule* [right=\textsc{TPack}]
            {\typing{\Gamma}{e}{([\alpha\mapsto\sigma]\tau)}}
            {\typing{\Gamma}{(\pack{\sigma}{e}{\exists\alpha.\tau})}{(\exists\alpha.\tau)}} \\\\
@@ -424,7 +425,7 @@ all variables bound by $p$. This information is concatenated in the rule
              {(\lambda x.e_1)~e_2 \longrightarrow [x \mapsto e_2] e_1} \qquad
            \inferrule*[]
              {\,}
-             {(\Lambda \alpha.e) \tau \longrightarrow [\alpha \mapsto \tau] e} \\\\
+             {\tapp{(\Lambda \alpha.e)}{\tau} \longrightarrow [\alpha \mapsto \tau] e} \\\\
            \inferrule*[]
              {\,}
              {\unpack{\alpha}{x}{\pack{\sigma}{e_1}{\tau}}{e_2} \longrightarrow [\alpha\mapsto\sigma][x\mapsto e_1]e_2} \\\\
@@ -468,30 +469,6 @@ rules directly or indirectly use substitutions.
 %-------------------------------------------------------------------------------
 \subsection{Meta-Theory}\label{sec:gen:semiformal:metatheory}
 
-\paragraph{Scoping}
-A concern in the formalisation is that only well-scoped expressions are
-considered. This generates many boilerplate obligations to show that all syntactic operations,
-like substitution, preserve well-scopedness.
-Furthermore, we need to show that all semantic relations imply well-scoping,
-  e.g., well-typed terms are also well-scoped:
-  \[ \begin{array}{c}
-       \inferrule*[right=\textsc{TypingScopeTm}]
-         { %\TODO{$\wellscoped{}{\Gamma}$} \\
-           \typing{\Gamma}{e}{\tau}
-         }
-         { \wellscopedterm{\Gamma}{e}
-         } \\\\
-       \inferrule*[right=\textsc{TypingScopeTy}]
-         { %\TODO{$\wellscoped{}{\Gamma}$} \\
-           \typing{\Gamma}{e}{\tau}
-         }
-         { \kinding{\Gamma}{\tau}
-         } \\
-     \end{array}
-   \]
-
-
-
 \paragraph{Substitution}
 The interesting steps in the type preservation proof are the preservations under the 4
 reduction rules of the operational semantics. These essentially boil down down
@@ -508,7 +485,7 @@ to two substitution lemmas:
        } \\\\
      \inferrule*[right=\textsc{SubstTyTm}]
        { %\TODO{$\wellscoped{}{\Gamma}$} \\
-         \kinding{\Gamma}{\sigma} \\
+         %\kinding{\Gamma}{\sigma} \\
          \typing{\Gamma,\beta,\Delta}{e}{\tau}
        }
        { \typing{\Gamma,[\beta\mapsto\sigma]\Delta}{[\beta\mapsto\sigma]e}{[\beta\mapsto\sigma]\tau}
@@ -537,9 +514,7 @@ $\Delta = \epsilon$ in the preservation proof. For the inductive step for rule
 \textsc{TTApp} of the second substitution lemma we have to prove the following
 \[
 \inferrule*[]
-  {\kinding
-    {\Gamma}
-    {\sigma} \\
+  {%\kinding{\Gamma}{\sigma} \\
    \Gamma' =  \Gamma,[\beta\mapsto\sigma]\Delta \\
    \typing
     {\Gamma'}
@@ -548,7 +523,7 @@ $\Delta = \epsilon$ in the preservation proof. For the inductive step for rule
   }
   {\typing
     {\Gamma'}
-    {([\beta\mapsto\sigma]e)~([\beta\mapsto\sigma]\sigma')}
+    {\tapp{([\beta\mapsto\sigma]e)}{([\beta\mapsto\sigma]\sigma')}}
     {\gray{[\beta\mapsto\sigma][\alpha\mapsto\sigma']\tau}}
   }
 \]
@@ -557,21 +532,66 @@ As the term in the conclusion remains a type application, we want to apply rule
 \textsc{TTApp} again. However, the \colorbox{light-gray}{type} in the conclusion
 does not have the appropriate form. We first need to commute the two substitutions
 with one of the common interaction lemmas
-\begin{align}
+\begin{align*}
   [\beta\mapsto \sigma][\alpha \mapsto \sigma'] =
-  [\alpha \mapsto [\beta\mapsto\sigma]\sigma'][\beta\mapsto\sigma] \label{lem:substcomm}
-\end{align}
+  [\alpha \mapsto [\beta\mapsto\sigma]\sigma'][\beta\mapsto\sigma] \qquad (\alpha \neq \beta)
+  \label{lem:substcomm}
+\end{align*}
+
 
 \paragraph{Type-safety}
 
 \begin{itemize}
 \item Proceeds similar to the proof in Section \ref{sec:intro:typesafety}.
-  Prove canonical form lemmas, progress and preservation.
+\item The main addition to the progress proof is that we need to prove an
+  auxiliary lemma that well-typed pattern matching $\pmatch{v}{p}{e_1}{e_2}$ is
+  always defined:
+  \[ \inferrule*[]
+    {\typing{\epsilon}{v}{\sigma} \\
+      \ptyping{\epsilon}{p}{\sigma}{\Delta} \\
+      \typing{\Delta}{e_1}{\tau} \\
+      \typing{\epsilon}{e_2}{\tau} \\
+    }
+    {\pmatch{v}{p}{e_1}{e_2}
+    }
+  \]
+
 \item The canonical form lemmas and the progress lemma are determined by the
-  value relation and do not involve a lot of variable binding boilerplate.
-\item All reduction rules use substitutions. As a consequence, the preservation
-  proof for these cases mainly consists of applying the substitution lemmas that
-  we discuss below.
+  value relation and do not involve a lot of semantic variable binding
+  boilerplate.
+
+\item The proof of preservation proceeds by induction on the typing derivation
+  $\typing{\Gamma}{e}{\sigma}$ and inversion of the evaluation relation
+  $\step{e}{e'}$. In case of an evaluation step that is a congruence rule, the
+  proof follows immediately by applying the same rule again.
+
+\item All reduction rules of the operational semantics use substitutions. As a
+  consequence, the preservation proof for these cases use boilerplate
+  substitution lemmas.
+
+\item Consider the case of reducing a term abstraction
+  \[ \step{(\lambda (x:\sigma). e_1)~e_2}{\osubst{x}{e_2}{e_1}}. \]
+
+  The proof obligation is
+  \[ \inferrule*[]
+       { \typing{\Gamma}{\lambda (x:\sigma).e_1}{\tau} \\
+         \typing{\Gamma}{e_1}{\sigma}
+       }
+       { \typing{\Gamma}{[x\mapsto e_2]e_1}{\tau}
+       }
+  \]
+
+  After inverting the first premise
+  $\typing{\Gamma}{\lambda (x:\sigma).e_1}{\tau}$ to get the typing of $e_1$ we
+  can apply the boilerplate lemma for well-typed substitutions
+  \textsc{SubstTmTm}, with $\Delta = \epsilon$, to finish the proof of this
+  case.
+
+\item Similarly, the cases of universal and existential quantification follow
+  directly from the typing substitution lemmas. The case of a pattern match
+  additionally requires an induction over the matching relation
+  $\pmatch{v}{p}{e_1}{e_2}$. The boilerplate lemma \textsc{SubstTmTm} is used in
+  the variable case.
 \end{itemize}
 
 
@@ -601,7 +621,7 @@ discuss changes to the semantics definitions.
       \setlength\tabcolsep{1.5mm}
       \begin{tabular}{lcl lclclcl}
   $q$ & ::=    & $\bullet$ & $t$ & ::=    & $n$                   & $\mid$ & $\Lambda\bullet.t$   & $\mid$ & $t_1,t_2$                             \\
-      & $\mid$ & $q_1,q_2$ &     & $\mid$ & $\lambda \bullet:T.t$ & $\mid$ & $t~T$                & $\mid$ & $\casep{t_1}{q}{t_2}$                  \\
+      & $\mid$ & $q_1,q_2$ &     & $\mid$ & $\lambda \bullet:T.t$ & $\mid$ & $\tapp{t}{T}$        & $\mid$ & $\casep{t_1}{q}{t_2}$                  \\
       &        &           &     & $\mid$ & $t_1~t_2$             & $\mid$ & $\pack{T_1}{t}{T_2}$ & $\mid$ & $\unpack{\bullet}{\bullet}{t_1}{t_2}$ \\
        \end{tabular}
     \end{minipage}
@@ -610,11 +630,12 @@ discuss changes to the semantics definitions.
   \label{fig:systemfdebruijn}
 \end{figure}
 
-\paragraph{Syntax Representation} The first step in the mechanization is to
-choose how to concretely represent variables. Traditionally, one would represent
-variables using identifiers, but this requires a massive amount of reasoning
-modulo $\alpha$-equivalence, i.e. consistent renaming, which makes it inevitable
-to choose a different representation.
+\subsection{Syntax Representation}
+The first step in the mechanization is to choose how to concretely represent
+variables. Traditionally, one would represent variables using identifiers, but
+this requires a massive amount of reasoning modulo $\alpha$-equivalence,
+i.e. consistent renaming, which makes it inevitable to choose a different
+representation.
 
 Our goal is not to develop a new approach to variable binding nor to compare
 existing ones, but rather to scale the generic treatment of a single
@@ -654,15 +675,15 @@ Also, variables do no refer to their binding site by
   and can therefore be represented with the index $0$. Next, in
   $\lambda(x:\tau). \lambda(y:\sigma). x$, we need to skip the $y$ binding and therefore
   represent the occurrence of $x$ with 1. In the third example, the variable $x$
-  is once represented using the index $1$ and once using the index $2$. This shows that the indeces of a variable are not constant but depend
+  is once represented using the index $1$ and once using the index $2$. This shows that the indices of a variable are not constant but depend
   on the context the variable appears in. 
 
 Finally, we use different namespaces for term and type variables and treat indices
   for variables from distinct namespaces independently, as illustrated by the following examples:
 
   \[ \begin{array}{lcl}
-       \lambda(x:\tau). \Lambda\alpha.  x~\alpha                          & \Rightarrow & \lambda(\bullet:\tau).\Lambda\bullet. 0~0                             \\
-       \Lambda\alpha.   \lambda(x:\tau). x~\alpha                         & \Rightarrow & \Lambda\bullet.\lambda(\bullet:\tau). 0~0                             \\
+       \lambda(x:\tau). \Lambda\alpha.  \tapp{x}{\alpha}                  & \Rightarrow & \lambda(\bullet:\tau).\Lambda\bullet. \tapp{0}{0}                     \\
+       \Lambda\alpha.   \lambda(x:\tau). \tapp{x}{\alpha}                 & \Rightarrow & \Lambda\bullet.\lambda(\bullet:\tau). \tapp{0}{0}                     \\
        \Lambda\alpha. \Lambda\beta. \lambda(x:\alpha). \lambda(y:\beta).x & \Rightarrow & \Lambda\bullet.\Lambda\bullet.\lambda(\bullet:1).\lambda(\bullet:0).1 \\
      \end{array}
   \]
@@ -671,7 +692,7 @@ Finally, we use different namespaces for term and type variables and treat indic
   binders into account and vice versa.
 
 
-\paragraph{Well-scopedness}
+\subsection{Well-scopedness}
 The well-scopedness of de Bruijn terms is a syntactic concern. It is common
 practice to define well-scopedness with respect to a \emph{type} context: a term
 is well-scoped iff all its free variables are bound in the context. The
@@ -806,7 +827,7 @@ $h \vdash E$.
 
 
 
-\paragraph{Syntax Operations}
+\subsection{Substitutions}
 
 \newcommand{\shtm}{{\text{sh}_{\text{tm}}}}
 \newcommand{\sutm}{{\text{su}_{\text{tm}}}}
@@ -916,7 +937,73 @@ $$
 %endif
 
 
-\paragraph{Semantic Representation}
+\subsection{Semantic Representation}
+
+\begin{figure}[t!]
+  \fbox{
+    \begin{minipage}{0.96\columnwidth}
+      \framebox{\mbox{$\typing{\Gamma}{e}{\tau}$}} \\
+      \vspace{-6mm}
+      \[ \begin{array}{c}
+         \inferrule* [right=\textsc{TVar}]
+           {x : \tau \in \Gamma}
+           {\typing{\Gamma}{x}{\tau}} \\\\
+         \inferrule* [right=\textsc{TAbs}]
+           {\gray{\kinding{\Gamma}{\sigma}} \\
+            \typing{\Gamma,y:\sigma}{e}{\tau}
+           }
+           {\typing{\Gamma}{(\lambda y:\sigma. e)}{(\sigma\to\tau)}} \qquad
+         \inferrule* [right=\textsc{TTAbs}]
+           {\typing{\Gamma,\alpha}{e}{\tau}}
+           {\typing{\Gamma}{(\Lambda \alpha. e)}{(\forall\alpha.\tau)}} \\\\
+         \inferrule* [right=\textsc{TApp}]
+           {\typing{\Gamma}{e_1}{\sigma \to \tau} \\\\
+            \typing{\Gamma}{e_2}{\sigma}}
+           {\typing{\Gamma}{(e_1~e_2)}{\tau}} \qquad
+         \inferrule* [right=\textsc{TTApp}]
+           {\typing{\Gamma}{e}{\forall\alpha.\tau} \\
+            \gray{\kinding{\Gamma}{\sigma}}
+           }
+           {\typing{\Gamma}{(\tapp{e}{\sigma})}{([\alpha\mapsto\sigma]\tau)}} \\\\
+         \inferrule* [right=\textsc{TPack}]
+           {\typing{\Gamma}{e}{([\alpha\mapsto\sigma]\tau)}}
+           {\typing{\Gamma}{(\pack{\sigma}{e}{\exists\alpha.\tau})}{(\exists\alpha.\tau)}} \\\\
+         \inferrule* [right=\textsc{TPair}]
+           {\typing{\Gamma}{e_1}{\tau_1} \\
+            \typing{\Gamma}{e_2}{\tau_2}}
+           {\typing{\Gamma}{(e_1,e_2)}{(\tau_1 \times \tau_2)}} \\\\
+         \inferrule* [right=\textsc{TUnpack}]
+           {\typing{\Gamma}{e_1}{\exists\alpha.\tau} \\
+            \typing{\Gamma, \alpha, x:\tau}{e_2}{\sigma} \\
+            \gray{\kinding{\Gamma}{\sigma}}
+           }
+           {\typing{\Gamma}{(\unpack{\alpha}{x}{e_1}{e_2})}{\sigma}} \\\\
+         \inferrule* [right=\textsc{TCase}]
+           {\typing{\Gamma}{e_1}{\sigma} \\
+            \ptyping{\Gamma}{p}{\sigma}{\Delta} \\
+            \typing{\Gamma,\Delta}{e_2}{\tau}}
+           {\typing{\Gamma}{(\casep{e_1}{p}{e_2})}{\tau}} \\
+         \end{array}
+      \]
+
+      \framebox{\mbox{$\ptyping{\Gamma}{p}{\tau}{\Delta}$}} \\
+      \vspace{-6mm}
+      \[ \begin{array}{c}
+         \inferrule* [right=\textsc{PVar}]
+           { \gray{\kinding{\Gamma}{\tau}}
+           }
+           {\ptyping{\Gamma}{x}{\tau}{(\epsilon, x:\tau)}} \\\\
+         \inferrule* [right=\textsc{PPair}]
+           {\ptyping{\Gamma}{p_1}{\tau_1}{\Delta_1} \\
+            \ptyping{\Gamma,\Delta_1}{p_2}{\tau_2}{\Delta_2}}
+           {\ptyping{\Gamma}{(p_1,p_2)}{(\tau_1 \times \tau_2)}{(\Delta_1,\Delta_2)}}
+         \end{array}
+      \]
+    \end{minipage}
+  }
+  \caption{\fexistsprod typing rules (de Bruijn)}
+  \label{fig:gen:overview:formalization:typing}
+\end{figure}
 
 The semantic typing relation from Figure \ref{fig:systemfexistssyntax}
 translates almost directly to a relation on the de Bruijn representation. One
@@ -942,7 +1029,31 @@ $$
 $$
 
 
-\paragraph{Meta-Theory}
+\subsection{Meta-Theory}\label{sec:gen:formalization:metatheory}
+
+\paragraph{Scoping}
+A concern in the formalisation is that only well-scoped expressions are
+considered. This generates many boilerplate obligations to show that all syntactic operations,
+like substitution, preserve well-scopedness.
+Furthermore, we need to show that all semantic relations imply well-scoping,
+  e.g., well-typed terms are also well-scoped:
+  \[ \begin{array}{c}
+       \inferrule*[right=\textsc{TypingScopeTm}]
+         { %\TODO{$\wellscoped{}{\Gamma}$} \\
+           \typing{\Gamma}{e}{\tau}
+         }
+         { \wellscopedterm{\Gamma}{e}
+         } \\\\
+       \inferrule*[right=\textsc{TypingScopeTy}]
+         { %\TODO{$\wellscoped{}{\Gamma}$} \\
+           \typing{\Gamma}{e}{\tau}
+         }
+         { \kinding{\Gamma}{\tau}
+         } \\
+     \end{array}
+   \]
+
+
 
 The type-safety proof of \fexistsprod requires additional canonical forms,
 typing inversion and boilerplate lemmas.  This paper focuses on the boilerplate

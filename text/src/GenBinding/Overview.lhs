@@ -12,6 +12,7 @@
 \newcommand{\casep}[3]{\text{case}~{#1}~\text{of}~{#2}\to{#3}}
 %\newcommand{\typing}[3]{{#1} \vdash_\text{tm} {#2} : {#3}}
 \newcommand{\wellscoped}[2]{{#1} \vdash {#2}}
+\newcommand{\wellscopedtermvar}[2]{{#1} \vdash^\text{var}_\text{tm} {#2}}
 \newcommand{\wellscopedterm}[2]{{#1} \vdash_\text{tm} {#2}}
 \newcommand{\kinding}[2]{{#1} \vdash_\text{ty} {#2}}
 \newcommand{\ptyping}[4]{{#1} \vdash_\text{p} {#2} : {#3} ; {#4}}
@@ -686,19 +687,27 @@ Finally, we use different namespaces for term and type variables and treat indic
   binders into account and vice versa.
 
 
-\subsection{Well-scopedness}
+\subsection{Well-scopedness}\label{sec:gen:overview:formalization:wellscoping}
+In the semi-formal specification we have defined a well-scopedness relation
+solely for the purpose to make the scoping rules explicit. Of course, we only
+ever want to consider well-scoped terms which is implicitly assumed in the
+semi-formal development. In a proper formalization and mechanization, however,
+this introduces obligation to actually proof terms to be well-scoped. For
+instance, we need to prove that that all syntactic operations, like
+substitution, preserve well-scopedness.
+
 The well-scopedness of de Bruijn terms is a syntactic concern. It is common
-practice to define well-scopedness with respect to a \emph{type} context: a term
-is well-scoped iff all its free variables are bound in the context. The
-context is extended when going under binders. For example, when going under
-the binder of a type-annotated lambda abstraction the conventional rule
-is:
+practice to define well-scopedness with respect to a \emph{type} context like we
+did in Section \ref{sec:gen:semiformal:syntax} : a term is well-scoped iff all
+its free variables are bound in the context. The context is extended when going
+under binders. For example, when going under the binder of a type-annotated
+lambda abstraction the conventional rule is:
 \[
   \begin{array}{c}
     \inferrule[]
-      {|Γ, x : τ ⊢ e|
+      { \wellscopedterm{\Gamma, x : \tau}{e}
       }
-      {\hsforall |Γ ⊢ λ(x:τ).e|
+      { \wellscopedterm{\Gamma}{\lambda x:\tau.e}
       } \\
   \end{array}
 \]
@@ -707,9 +716,9 @@ type. In this style, well-scopedness comprises a lightweight type system.
 However, in general it is impossible to come up with the intended typing or,
 more generally, establish what the associated data in the extended context
 should be. Furthermore, we allow the user to define different contexts with
-potentially incompatible associated data. Hence, instead we define
-well-scopedness by using \emph{domains} of contexts. In fact, this is all we
-need to establish well-scopedness.
+potentially incompatible associated data. To avoid these issue, we define
+well-scopedness by using \emph{domains} of contexts instead. In fact, this is
+all we need to establish well-scopedness.
 
 \newcommand{\onetm}{1_{\text{tm}}}
 \newcommand{\onety}{1_{\text{ty}}}
@@ -770,29 +779,30 @@ $h \vdash E$.
   \end{minipage}
   \end{tabular}
 
-  \framebox{\mbox{$h \vdash_{\text{tm}} n$}} \\
+  \framebox{\mbox{$\wellscopedtermvar{h}{n}$}} \\
   \vspace{-7mm}
   \[ \begin{array}{c}
      \inferrule* [right=\textsc{WsnTmZero}]
                  {\,}
-                 {S_{\text{tm}}~h \vdash_{\text{tm}} 0} \\\\
+                 {\wellscopedtermvar{S_{\text{tm}}~h}{0}} \\\\
      \inferrule* [right=\textsc{WsnTmTm}]
-                 {h \vdash_{\text{tm}} n}
-                 {S_{\text{tm}}~h \vdash_{\text{tm}} S~n} \\\\
+                 {\wellscopedtermvar{h}{n}}
+                 {\wellscopedtermvar{S_{\text{tm}}~h}{S~n}} \\\\
      \inferrule* [right=\textsc{WsnTmTy}]
-                 {h \vdash_{\text{tm}} n
+                 {\wellscopedtermvar{h}{n}
                  }
-                 {S_{\text{ty}}~h \vdash_{\text{tm}} n}
+                 {\wellscopedtermvar{S_{\text{ty}}~h}{n}}
      \end{array}
   \]
-  \framebox{\mbox{$h \vdash_{\text{tm}} t$}} \\
+  \framebox{\mbox{$\wellscopedterm{h}{t}$}} \\
   \vspace{-7mm}
   \[\begin{array}{c}
       \inferrule*
         [right=\textsc{WsVar}]
-        {h \vdash_\text{tm} n
+        {\wellscopedtermvar{h}{n}
         }
-        {h \vdash_\text{tm} n} \\\\
+        {\wellscopedterm{h}{n}
+        } \\\\
       \inferrule*
         [right=\textsc{WsUnpack}]
         {h \vdash_\text{tm}~t_1 \\
@@ -818,7 +828,6 @@ $h \vdash E$.
 \caption{Well-scopedness of terms (selected rules)}
 \label{fig:wellscopedness:overview}
 \end{figure}
-
 
 
 \subsection{Substitutions}
@@ -931,71 +940,72 @@ $$
 %endif
 
 
-\subsection{Semantic Representation}
+
+
+\subsection{Semantic Representation}\label{sec:gen:overview:formalization:semantics}
 
 \begin{figure}[t!]
   \fbox{
     \begin{minipage}{0.96\columnwidth}
-      \framebox{\mbox{$\typing{\Gamma}{e}{\tau}$}} \\
-      \vspace{-6mm}
+      \framebox{\mbox{$\typing{E}{t}{T}$}} \\
       \[ \begin{array}{c}
-         \inferrule* [right=\textsc{TVar}]
-           {x : \tau \in \Gamma}
-           {\typing{\Gamma}{x}{\tau}} \\\\
+         %% \inferrule* [right=\textsc{TVar}]
+         %%   {x : T \in E}
+         %%   {\typing{E}{x}{T}} \\\\
          \inferrule* [right=\textsc{TAbs}]
-           {\gray{\kinding{\Gamma}{\sigma}} \\
-            \typing{\Gamma,y:\sigma}{e}{\tau}
+           {\gray{\kinding{E}{S}} \\
+            \typing{E,\bullet:S}{t}{T}
            }
-           {\typing{\Gamma}{(\lambda y:\sigma. e)}{(\sigma\to\tau)}} \qquad
-         \inferrule* [right=\textsc{TTAbs}]
-           {\typing{\Gamma,\alpha}{e}{\tau}}
-           {\typing{\Gamma}{(\Lambda \alpha. e)}{(\forall\alpha.\tau)}} \\\\
-         \inferrule* [right=\textsc{TApp}]
-           {\typing{\Gamma}{e_1}{\sigma \to \tau} \\\\
-            \typing{\Gamma}{e_2}{\sigma}}
-           {\typing{\Gamma}{(e_1~e_2)}{\tau}} \qquad
+           {\typing{E}{(\lambda \bullet:S. t)}{(S \to T)}} \\\\
+         %% \inferrule* [right=\textsc{TTAbs}]
+         %%   {\typing{E,\alpha}{e}{T}}
+         %%   {\typing{E}{(\Lambda \alpha. e)}{(\forall\alpha.T)}} \\\\
+         %% \inferrule* [right=\textsc{TApp}]
+         %%   {\typing{E}{e_1}{S \to T} \\\\
+         %%    \typing{E}{e_2}{S}}
+         %%   {\typing{E}{(e_1~e_2)}{T}} \qquad
          \inferrule* [right=\textsc{TTApp}]
-           {\typing{\Gamma}{e}{\forall\alpha.\tau} \\
-            \gray{\kinding{\Gamma}{\sigma}}
+           {\typing{E}{t}{\forall\bullet.T} \\
+            \gray{\kinding{E}{S}}
            }
-           {\typing{\Gamma}{(\tapp{e}{\sigma})}{([\alpha\mapsto\sigma]\tau)}} \\\\
-         \inferrule* [right=\textsc{TPack}]
-           {\typing{\Gamma}{e}{([\alpha\mapsto\sigma]\tau)}}
-           {\typing{\Gamma}{(\pack{\sigma}{e}{\exists\alpha.\tau})}{(\exists\alpha.\tau)}} \\\\
-         \inferrule* [right=\textsc{TPair}]
-           {\typing{\Gamma}{e_1}{\tau_1} \\
-            \typing{\Gamma}{e_2}{\tau_2}}
-           {\typing{\Gamma}{(e_1,e_2)}{(\tau_1 \times \tau_2)}} \\\\
+           {\typing{E}{(\tapp{e}{S})}{(\suty~0~S~T)}} \\\\
+         %% \inferrule* [right=\textsc{TPack}]
+         %%   {\typing{E}{e}{([\alpha\mapstoS]T)}}
+         %%   {\typing{E}{(\pack{S}{e}{\exists\alpha.T})}{(\exists\alpha.T)}} \\\\
+         %% \inferrule* [right=\textsc{TPair}]
+         %%   {\typing{E}{e_1}{T_1} \\
+         %%    \typing{E}{e_2}{T_2}}
+         %%   {\typing{E}{(e_1,e_2)}{(T_1 \times T_2)}} \\\\
          \inferrule* [right=\textsc{TUnpack}]
-           {\typing{\Gamma}{e_1}{\exists\alpha.\tau} \\
-            \typing{\Gamma, \alpha, x:\tau}{e_2}{\sigma} \\
-            \gray{\kinding{\Gamma}{\sigma}}
+           {\typing{E}{t_1}{\exists\bullet.T} \\
+            \typing{E, \bullet, \bullet:T}{e_2}{S} \\
+            \gray{\kinding{E}{S}}
            }
-           {\typing{\Gamma}{(\unpack{\alpha}{x}{e_1}{e_2})}{\sigma}} \\\\
-         \inferrule* [right=\textsc{TCase}]
-           {\typing{\Gamma}{e_1}{\sigma} \\
-            \ptyping{\Gamma}{p}{\sigma}{\Delta} \\
-            \typing{\Gamma,\Delta}{e_2}{\tau}}
-           {\typing{\Gamma}{(\casep{e_1}{p}{e_2})}{\tau}} \\
+           {\typing{E}{(\unpack{\alpha}{x}{e_1}{e_2})}{S}} \\\\
+         %% \inferrule* [right=\textsc{TCase}]
+         %%   {\typing{E}{e_1}{\sigma} \\
+         %%    \ptyping{E}{p}{\sigma}{\Delta} \\
+         %%    \typing{E,\Delta}{e_2}{T}}
+         %%   {\typing{\Gamma}{(\casep{e_1}{p}{e_2})}{T}} \\
          \end{array}
       \]
 
-      \framebox{\mbox{$\ptyping{\Gamma}{p}{\tau}{\Delta}$}} \\
+      \framebox{\mbox{$\ptyping{E}{q}{T}{D}$}} \\
       \vspace{-6mm}
       \[ \begin{array}{c}
          \inferrule* [right=\textsc{PVar}]
-           { \gray{\kinding{\Gamma}{\tau}}
+           { \gray{\kinding{E}{T}}
            }
-           {\ptyping{\Gamma}{x}{\tau}{(\epsilon, x:\tau)}} \\\\
-         \inferrule* [right=\textsc{PPair}]
-           {\ptyping{\Gamma}{p_1}{\tau_1}{\Delta_1} \\
-            \ptyping{\Gamma,\Delta_1}{p_2}{\tau_2}{\Delta_2}}
-           {\ptyping{\Gamma}{(p_1,p_2)}{(\tau_1 \times \tau_2)}{(\Delta_1,\Delta_2)}}
+           {\ptyping{E}{\bullet}{T}{(\epsilon, \bullet:T)}} \\\\
+         % \inferrule* [right=\textsc{PPair}]
+         %   {\ptyping{\Gamma}{p_1}{\tau_1}{\Delta_1} \\
+         %    \ptyping{\Gamma,\Delta_1}{p_2}{\tau_2}{\Delta_2}}
+         %   {\ptyping{\Gamma}{(p_1,p_2)}{(\tau_1 \times \tau_2)}{(\Delta_1,\Delta_2)}}
          \end{array}
       \]
     \end{minipage}
   }
-  \caption{\fexistsprod typing rules (de Bruijn)}
+  \caption{\fexistsprod typing rules (de Bruijn, selected rules)}
   \label{fig:gen:overview:formalization:typing}
 \end{figure}
 
@@ -1003,65 +1013,109 @@ The semantic typing relation from Figure \ref{fig:systemfexistssyntax}
 translates almost directly to a relation on the de Bruijn representation. One
 important aspect that is ignored in Figure~\ref{fig:systemfexistssyntax} is to
 ensure that all rule components are well-scoped.  This requires including
-additional well-scopedness premises in the rules. For example, the lambda
-abstraction rule \textsc{TAbs} needs a well-scopedness premise for the argument
-type:
-$$
-\inferrule*
-  [right=\textsc{TAbs}]
-  {\typing
-    {(E, \bullet:T_1)}
-    {t}
-    {T_2} \\
-   \dom~E \vdash T_1
-  }
-  {\typing
-    {E}
-    {(\lambda\bullet:T_1.t)}
-    {(T_1 \to T_2)}
-  }
-$$
+additional well-scopedness premises in the rules. The rules that need an
+additional premise are shown in Figure
+\ref{fig:gen:overview:formalization:typing} and the new premises have been
+highlighted.
+
+We want to ensure that all appearing terms are well-scoped. For this it suffices
+to know that the objects represented by meta-variables are well-scoped. For instance,
+the meta-variables $S,T$ and $t$ in the \textsc{TAbs} rule. However, we only
+included as premise for $S$. The well-scopedness of $T$ and $t$ follows from
+two boilerplate lemmas:
+%
+\[ \begin{array}{c}
+     \inferrule*[right=\textsc{TypingScopeTm}]
+     { \wellscoped{0}{E} \\
+     \typing{E}{t}{T}
+     }
+     { \wellscopedterm{E}{t}
+     } \quad
+     \inferrule*[right=\textsc{TypingScopeTy}]
+     { \wellscoped{}{E} \\
+     \typing{E}{t}{T}
+     }
+     { \kinding{E}{T}
+     } \\
+   \end{array}
+\]
+%
+These lemmas express that well-typed terms are also well-scoped with a
+well-scoped type. More generally, we require that all semantic relations imply
+well-scoping of their indices. If the well-scoping of a meta-variable is not
+implied by a premise, an explicit well-scoping requirement needs to be added.
+
+%% $$
+%% \inferrule*
+%%   [right=\textsc{TAbs}]
+%%   {\typing
+%%     {(E, \bullet:T_1)}
+%%     {t}
+%%     {T_2} \\
+%%    \kinding{\dom~E}{T_1}
+%%   }
+%%   {\typing
+%%     {E}
+%%     {(\lambda\bullet:T_1.t)}
+%%     {(T_1 \to T_2)}
+%%   }
+%% $$
 
 
 \subsection{Meta-Theory}\label{sec:gen:formalization:metatheory}
 
-\paragraph{Scoping}
-A concern in the formalisation is that only well-scoped expressions are
-considered. This generates many boilerplate obligations to show that all syntactic operations,
-like substitution, preserve well-scopedness.
-Furthermore, we need to show that all semantic relations imply well-scoping,
-  e.g., well-typed terms are also well-scoped:
-  \[ \begin{array}{c}
-       \inferrule*[right=\textsc{TypingScopeTm}]
-         { %\TODO{$\wellscoped{}{\Gamma}$} \\
-           \typing{\Gamma}{e}{\tau}
-         }
-         { \wellscopedterm{\Gamma}{e}
-         } \\\\
-       \inferrule*[right=\textsc{TypingScopeTy}]
-         { %\TODO{$\wellscoped{}{\Gamma}$} \\
-           \typing{\Gamma}{e}{\tau}
-         }
-         { \kinding{\Gamma}{\tau}
-         } \\
-     \end{array}
-   \]
+\begin{itemize}
+\item The essential lemmas that need to be proved and their proofs remain
+  largely unchanged.
+\item We focus on the boilerplate lemmas of which there are two kinds: syntactic
+  related boilerplate and semantic related boilerplate.
+\end{itemize}
+
+\paragraph{Syntactic boilerplate}
+
+The principle syntactic operations that we use in the development are
+
+\begin{itemize}
+\item concatenate two context,
+\item calculate the domain of contexts,
+\item shifting in types, terms and contexts,
+\item and substitution in types, terms and contexts.
+\end{itemize}
+
+The syntactic boilerplate lemmas concern these syntactic operations. As already
+discussed we need to show that they preserve well-scopedness, but we also need
+to prove \emph{interaction lemmas} between two or more of these operations.  In
+Section \ref{sec:gen:semiformal:metatheory} we briefly mentioned one instance of
+an interaction lemma: the commutation of two type-variable substitutions.
+Similarly, we need to prove commutation of e.g. shifting types and substituting
+terms, calculation of the domain of shifted contexts, commute substitution over
+a concatenation of contexts, etc. Moreover, there is a plethora of trivial
+lemmas, like the associativity of context concatenation, that are also
+interaction lemma. The interaction lemmas are all small but come in large
+numbers.
 
 
+\paragraph{Semantic boilerplate}
 
-The type-safety proof of \fexistsprod requires additional canonical forms,
-typing inversion and boilerplate lemmas.  This paper focuses on the boilerplate
-lemmas related to semantic relations. The principal boilerplate lemmas are a
-well-scopedness lemma
+The semantic boilerplate concerns the semantic relations. Only lemmas about
+the typing relation are needed. These are the two well-scoping lemmas we
+discussed in Section \ref{sec:gen:overview:formalization:semantics}
 
-$$
-\inferrule*
-  []
-  {0 \vdash E \\ \typing{E}{t}{T}
-  }
-  {\domain{E} \vdash t \wedge \domain{E} \vdash T
-  }
-$$
+\[ \begin{array}{c}
+     \inferrule*[]
+     { \wellscoped{0}{E} \\
+     \typing{E}{t}{T}
+     }
+     { \wellscopedterm{E}{t}
+     } \quad
+     \inferrule*[]
+     { \wellscoped{}{E} \\
+     \typing{E}{t}{T}
+     }
+     { \kinding{E}{T}
+     } \\
+   \end{array}
+\]
 
 \noindent two shifting lemmas
 $$
@@ -1105,6 +1159,9 @@ $$
 \end{array}
 $$
 
+For the induction, the shifting and substitution lemmas need to be generalized
+to work with under arbitrary suffix $\Delta$ and require extensive use of the
+interaction lemmas.
 
 \section{Mechanization}
 
@@ -1147,8 +1204,11 @@ substitution lemmas for the typing relation of Section \ref{sec:formalization}.
 Table \ref{fig:fexistscasestudy} clearly shows that the boilerplate constitutes
 the major part of the effort. Similar boilerplate arises in the formalization of
 other languages where it constitutes a similar large part of the whole
-formalization. Fortunately, there is much regularity to the boilerplate: it
-follows the structure of the language's syntax and scoping rules.
+formalization.
+
+% Fortunately, there is much regularity to the boilerplate: it
+% follows the structure of the language's syntax, its scoping rules and the
+% structure of expressions in rules of the semantic relations.
 
 % This fact has already been exploited by many earlier works to derive
 % \emph{syntax-related} boilerplate functions and lemmas. The aim of this work is
@@ -1157,23 +1217,58 @@ follows the structure of the language's syntax and scoping rules.
 
 \subsection{Our Approach: Key Ideas}
 
-Our approach consists of extending the \Knot specification language to cover
-specifications of relations and also extending \Knot's code generator \Needle to
-generate code for semantics-related boilerplate.
+As we illustrated in this chapter, the variable binding boilerplate puts a
+dolorous burden on formal mechanized meta-theory of languages.  Fortunately,
+there is much regularity to the boilerplate: it follows the structure of the
+language's syntax, its scoping rules and the structure of expressions in rules
+of the semantic relations. This fact has already been exploited by many earlier
+works to derive \emph{syntax-related} boilerplate functions and lemmas.
 
-\emph{free-monadic view} on syntax \cite{monadic,knotneedle}. At the
-syntax-level this view requires one distinguished \emph{variable constructor}
-per namespace which has a \emph{reference occurrence} as its only argument and
-all other constructors only contain \emph{binding occurrences} and subterms.
-At the level of relations this translates to one distinguished \emph{variable
-  rule} per namespace (or more specifically per environment clause). This
-variable rule has a single lookup as its only premise and the sorts of the
-environment data match the sorts of the indices of the relation.
+The aim of this thesis is to considerably extend the support for binder
+boilerplate in language mechanizations on two accounts. First, we go beyond
+simple single variable binders and tackle complex binding structures, like the
+nested pattern matches of \fexistsprod, sequentially scoped binders, mutually
+recursive binders, heterogeneous binders, etc. Secondly, we cover a larger
+extent of the boilerplate than earlier works, specifically catering to contexts,
+context lookups and well-scopedness relations.
 
+Our approach consists of a specification language, called~\Knot, that allows
+concise and natural specifications of abstract syntax of programming languages
+together with their scoping rules and of semantic relations on top of the
+syntax.
+% We provide generic definitions and lemmas for the variable binding
+%boilerplate that apply to every well-formed \Infra\ specification. Finally,
+We complement \Knot with a code generator, called \Needle, that specializes the
+generic definitions and lemmas for the variable binding boilerplate and allows
+manual customization and extension.
+
+We follow two important principles: Firstly, even though in its most general
+form, syntax with binders has a monadic structure
+\cite{monadsnotendo,relativemonads,monadic}, \Knot restricts itself to free
+monadic structures. This allows us to define substitution and all related
+boilerplate generically and encompasses the vast majority of languages.
+
+Secondly, we hide as much as possible the underlying concrete representation of
+de Bruijn indices as natural numbers. Instead, we provide an easy-to-use
+interface that admits only sensible operations and prevents proofs from going
+astray. In particular, we rule out comparisons using inequalities and
+decrements, and any reasoning using properties of these operations.
+
+
+
+\stevennote{MOVE}{
+At the syntax-level this view requires one distinguished \emph{variable
+  constructor} per namespace which has a \emph{reference occurrence} as its only
+argument and all other constructors only contain \emph{binding occurrences} and
+subterms.  At the level of relations this translates to one distinguished
+\emph{variable rule} per namespace (or more specifically per environment
+clause). This variable rule has a single lookup as its only premise and the
+sorts of the environment data match the sorts of the indices of the relation.
+%
 These restrictions allow us to generically establish the substitution lemmas
 for relations. Consider the small proof tree on the left:
 % , where $A$ is the subtree for the typing judgement of $e_1$.
-
+%
 \[ \begin{array}{ccc}
      \inferrule*[]
        { \highlight{
@@ -1196,7 +1291,7 @@ for relations. Consider the small proof tree on the left:
        {\typing{\Gamma,\Delta}{\lambda y\!\!:\!\!\tau.e'}{\tau\to\sigma}}
    \end{array}
 \]
-
+%
 % \[ \begin{array}{c}
 %      \inferrule*[]
 %        { \inferrule*[]
@@ -1211,13 +1306,14 @@ for relations. Consider the small proof tree on the left:
 %        {\typing{\Gamma,x:\sigma,\Delta}{e_1~x}{\tau}} \\\\
 %    \end{array}
 % \]
-
+%
 From the proof tree on the left we can systematically derive the proof tree on
 the right for $(\lambda y\!\!:\!\!\tau.x)[x \mapsto e]$. We do this by
 substituting the leaf that uses the variable rule to lookup $x$ in the
 environment with the proof tree $B$ for the judgement
 $\typing{\Gamma}{e}{\sigma}$. Note that $B$ and $e$ have to be weakened in the
 process (to $B'$ and $e'$) to account for $y$ and the variables in $\Delta$.
+}
 
 %% SK: MOVE
 %% The term abstraction node in the proof tree can still go through because it is

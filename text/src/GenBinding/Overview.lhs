@@ -62,6 +62,14 @@ where boilerplate is used in the type-safety proof of \fexistsprod{}.
 %-------------------------------------------------------------------------------
 \subsection{Syntax}\label{sec:gen:semiformal:syntax}
 %
+Like in Section \ref{ssec:intro:syntax} we define the syntax of \fexistsprod{}
+using an EBNF grammar. On top of this grammar, we define a substitution
+operation, and its dependencies which we need to specify the semantics in the
+following section. We also pay attention to another concern related to variable
+binding, namely scoping rules, which we define using a well-scopedness
+relation. This is more formal and explicit than what is commonly found in
+textbooks.
+%
 \paragraph{Grammar}
 \begin{figure}[t]
   \fbox{
@@ -338,7 +346,8 @@ call-by-value operational semantics.
            {x : \tau \in \Gamma}
            {\typing{\Gamma}{x}{\tau}} \\\\
          \inferrule* [right=\textsc{TAbs}]
-           {\typing{\Gamma,y:\sigma}{e}{\tau}}
+           {\typing{\Gamma,y:\sigma}{e}{\tau} \\
+            \kinding{\Gamma}{\sigma}}
            {\typing{\Gamma}{(\lambda y:\sigma. e)}{(\sigma\to\tau)}} \qquad
          \inferrule* [right=\textsc{TTAbs}]
            {\typing{\Gamma,\alpha}{e}{\tau}}
@@ -592,12 +601,15 @@ the variable case.
 
 
 %-------------------------------------------------------------------------------
-\section{Formalization}\label{sec:formalization}
+\section{Formalization and Mechanization}\label{sec:formalization}
 
 The next step is to rework the textbook-like specification from Section
 \ref{sec:gen:spec} into a formal one, which can be mechanized in a proof
 assistant. In the following, we will replace the syntax representation and
-discuss changes to the semantics definitions.
+discuss changes to the semantics definitions. Finally, we discuss a mechanization
+itself, and give a breakdown of the different parts of the mechanization to
+quantify the overall effort and particularly the burden of variable binding
+boilerplate.
 
 
 \begin{figure}[t]
@@ -1021,7 +1033,7 @@ highlighted.
 We want to ensure that all appearing terms are well-scoped. For this it suffices
 to know that the objects represented by meta-variables are well-scoped. For instance,
 the meta-variables $S,T$ and $t$ in the \textsc{TAbs} rule. However, we only
-included as premise for $S$. The well-scopedness of $T$ and $t$ follows from
+included an explicit premise for $S$. The well-scopedness of $T$ and $t$ follows from
 two boilerplate lemmas:
 %
 \[ \begin{array}{c}
@@ -1064,12 +1076,14 @@ implied by a premise, an explicit well-scoping requirement needs to be added.
 
 \subsection{Meta-Theory}\label{sec:gen:formalization:metatheory}
 
-\begin{itemize}
-\item The essential lemmas that need to be proved and their proofs remain
-  largely unchanged.
-\item We focus on the boilerplate lemmas of which there are two kinds: syntactic
-  related boilerplate and semantic related boilerplate.
-\end{itemize}
+The essential meta-theoretic lemmas are only slightly affected by the changes to
+the syntax and semantics: the specific statements have to be adapted to the
+changed representation and some premises need additional premises, e.g. context
+well-formedness, but the structure of their proofs, i.e. the specific proof
+steps, remain the same. We therefore focus on the boilerplate lemmas, of which
+there are two kinds: syntactic related boilerplate and semantic related
+boilerplate.
+
 
 \paragraph{Syntactic boilerplate}
 
@@ -1163,7 +1177,7 @@ For the induction, the shifting and substitution lemmas need to be generalized
 to work with under arbitrary suffix $\Delta$ and require extensive use of the
 interaction lemmas.
 
-\section{Mechanization}
+\subsection{Mechanization}
 
 \begin{table}[t]\centering
 \ra{1.3}
@@ -1215,7 +1229,7 @@ formalization.
 % to extend the support for binder boilerplate in mechanization to cover
 % \emph{semantics-related} boilerplate.
 
-\subsection{Our Approach: Key Ideas}
+\section{Our Approach: Key Ideas}
 
 As we illustrated in this chapter, the variable binding boilerplate puts a
 dolorous burden on formal mechanized meta-theory of languages.  Fortunately,
@@ -1242,102 +1256,102 @@ We complement \Knot with a code generator, called \Needle, that specializes the
 generic definitions and lemmas for the variable binding boilerplate and allows
 manual customization and extension.
 
-We follow two important principles: Firstly, even though in its most general
-form, syntax with binders has a monadic structure
-\cite{monadsnotendo,relativemonads,monadic}, \Knot restricts itself to free
-monadic structures. This allows us to define substitution and all related
-boilerplate generically and encompasses the vast majority of languages.
-
-Secondly, we hide as much as possible the underlying concrete representation of
-de Bruijn indices as natural numbers. Instead, we provide an easy-to-use
-interface that admits only sensible operations and prevents proofs from going
-astray. In particular, we rule out comparisons using inequalities and
-decrements, and any reasoning using properties of these operations.
-
-
-
-\stevennote{MOVE}{
-At the syntax-level this view requires one distinguished \emph{variable
-  constructor} per namespace which has a \emph{reference occurrence} as its only
-argument and all other constructors only contain \emph{binding occurrences} and
-subterms.  At the level of relations this translates to one distinguished
-\emph{variable rule} per namespace (or more specifically per environment
-clause). This variable rule has a single lookup as its only premise and the
-sorts of the environment data match the sorts of the indices of the relation.
+% We follow two important principles: Firstly, even though in its most general
+% form, syntax with binders has a monadic structure
+% \cite{monadsnotendo,relativemonads,monadic}, \Knot restricts itself to free
+% monadic structures. This allows us to define substitution and all related
+% boilerplate generically and encompasses the vast majority of languages.
 %
-These restrictions allow us to generically establish the substitution lemmas
-for relations. Consider the small proof tree on the left:
-% , where $A$ is the subtree for the typing judgement of $e_1$.
-%
-\[ \begin{array}{ccc}
-     \inferrule*[]
-       { \highlight{
-         \inferrule*[]
-           {x:\sigma \in \Gamma,x:\sigma,\Delta,y:\tau}
-           {\typing{\Gamma,x:\sigma,\Delta,y:\tau}{x}{\sigma}}
-         }
-       }
-       {\typing{\Gamma,x:\sigma,\Delta}{\lambda y\!\!:\!\!\tau.x}{\tau\to\sigma}}
-    &
-      \quad\quad\Rightarrow\quad\quad
-    &
-     \inferrule*[]
-       { \highlight{
-         \inferrule*[]
-           {B'}
-           {\typing{\Gamma,\Delta,y:\tau}{e'}{\sigma}}
-         }
-       }
-       {\typing{\Gamma,\Delta}{\lambda y\!\!:\!\!\tau.e'}{\tau\to\sigma}}
-   \end{array}
-\]
-%
-% \[ \begin{array}{c}
+% Secondly, we hide as much as possible the underlying concrete representation of
+% de Bruijn indices as natural numbers. Instead, we provide an easy-to-use
+% interface that admits only sensible operations and prevents proofs from going
+% astray. In particular, we rule out comparisons using inequalities and
+% decrements, and any reasoning using properties of these operations.
+
+
+
+% \stevennote{MOVE}{
+% At the syntax-level this view requires one distinguished \emph{variable
+%   constructor} per namespace which has a \emph{reference occurrence} as its only
+% argument and all other constructors only contain \emph{binding occurrences} and
+% subterms.  At the level of relations this translates to one distinguished
+% \emph{variable rule} per namespace (or more specifically per environment
+% clause). This variable rule has a single lookup as its only premise and the
+% sorts of the environment data match the sorts of the indices of the relation.
+% %
+% These restrictions allow us to generically establish the substitution lemmas
+% for relations. Consider the small proof tree on the left:
+% % , where $A$ is the subtree for the typing judgement of $e_1$.
+% %
+% \[ \begin{array}{ccc}
 %      \inferrule*[]
-%        { \inferrule*[]
-%            {A}
-%            {\typing{\Gamma,x:\sigma,\Delta}{e_1}{\sigma\to\tau}} \and
-%          \highlight{
+%        { \highlight{
 %          \inferrule*[]
-%            {x:\sigma \in \Gamma,x:\sigma,\Delta}
-%            {\typing{\Gamma,x:\sigma,\Delta}{x}{\sigma}}
+%            {x:\sigma \in \Gamma,x:\sigma,\Delta,y:\tau}
+%            {\typing{\Gamma,x:\sigma,\Delta,y:\tau}{x}{\sigma}}
 %          }
 %        }
-%        {\typing{\Gamma,x:\sigma,\Delta}{e_1~x}{\tau}} \\\\
+%        {\typing{\Gamma,x:\sigma,\Delta}{\lambda y\!\!:\!\!\tau.x}{\tau\to\sigma}}
+%     &
+%       \quad\quad\Rightarrow\quad\quad
+%     &
+%      \inferrule*[]
+%        { \highlight{
+%          \inferrule*[]
+%            {B'}
+%            {\typing{\Gamma,\Delta,y:\tau}{e'}{\sigma}}
+%          }
+%        }
+%        {\typing{\Gamma,\Delta}{\lambda y\!\!:\!\!\tau.e'}{\tau\to\sigma}}
 %    \end{array}
 % \]
+% %
+% % \[ \begin{array}{c}
+% %      \inferrule*[]
+% %        { \inferrule*[]
+% %            {A}
+% %            {\typing{\Gamma,x:\sigma,\Delta}{e_1}{\sigma\to\tau}} \and
+% %          \highlight{
+% %          \inferrule*[]
+% %            {x:\sigma \in \Gamma,x:\sigma,\Delta}
+% %            {\typing{\Gamma,x:\sigma,\Delta}{x}{\sigma}}
+% %          }
+% %        }
+% %        {\typing{\Gamma,x:\sigma,\Delta}{e_1~x}{\tau}} \\\\
+% %    \end{array}
+% % \]
+% %
+% From the proof tree on the left we can systematically derive the proof tree on
+% the right for $(\lambda y\!\!:\!\!\tau.x)[x \mapsto e]$. We do this by
+% substituting the leaf that uses the variable rule to lookup $x$ in the
+% environment with the proof tree $B$ for the judgement
+% $\typing{\Gamma}{e}{\sigma}$. Note that $B$ and $e$ have to be weakened in the
+% process (to $B'$ and $e'$) to account for $y$ and the variables in $\Delta$.
+% }
 %
-From the proof tree on the left we can systematically derive the proof tree on
-the right for $(\lambda y\!\!:\!\!\tau.x)[x \mapsto e]$. We do this by
-substituting the leaf that uses the variable rule to lookup $x$ in the
-environment with the proof tree $B$ for the judgement
-$\typing{\Gamma}{e}{\sigma}$. Note that $B$ and $e$ have to be weakened in the
-process (to $B'$ and $e'$) to account for $y$ and the variables in $\Delta$.
-}
-
-%% SK: MOVE
-%% The term abstraction node in the proof tree can still go through because it is
-%% not affected by changes to the free variables the context; it is
-%% context-parametric.
-%%
-%% % \[ \begin{array}{c}
-%% %      \inferrule*[]
-%% %        { \inferrule*[]
-%% %            {A'}
-%% %            {\typing{\Gamma,\Delta}{e'_1}{\sigma\to\tau}} \and
-%% %          \highlight{
-%% %          \inferrule*[]
-%% %            {B'}
-%% %            {\typing{\Gamma,\Delta}{e'_2}{\sigma}}
-%% %          }
-%% %        }
-%% %        {\typing{\Gamma,\Delta}{e'_1~e'_2}{\tau}} \\\\
-%% %    \end{array}
-%% % \]
-%%
-%% In practice, it is too restrictive to require that all non-variable rules are
-%% context parametric. Hence, we allow non-parametric regular rules, but rely on
-%% the user to fill in the gaps via proof obligations.
+% %% SK: MOVE
+% %% The term abstraction node in the proof tree can still go through because it is
+% %% not affected by changes to the free variables the context; it is
+% %% context-parametric.
+% %%
+% %% % \[ \begin{array}{c}
+% %% %      \inferrule*[]
+% %% %        { \inferrule*[]
+% %% %            {A'}
+% %% %            {\typing{\Gamma,\Delta}{e'_1}{\sigma\to\tau}} \and
+% %% %          \highlight{
+% %% %          \inferrule*[]
+% %% %            {B'}
+% %% %            {\typing{\Gamma,\Delta}{e'_2}{\sigma}}
+% %% %          }
+% %% %        }
+% %% %        {\typing{\Gamma,\Delta}{e'_1~e'_2}{\tau}} \\\\
+% %% %    \end{array}
+% %% % \]
+% %%
+% %% In practice, it is too restrictive to require that all non-variable rules are
+% %% context parametric. Hence, we allow non-parametric regular rules, but rely on
+% %% the user to fill in the gaps via proof obligations.
 
 } % FEXISTSPROD SCOPE
 

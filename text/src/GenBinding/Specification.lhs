@@ -2,9 +2,6 @@
 %include forall.fmt
 %include Formatting.fmt
 
-\section{The \Knot Specification Language}
-\label{sec:specification}
-
 %% This section introduces \Knot, our language for specifying the abstract syntax
 %% of programming languages and associated variable binder information. The
 %% advantage of specifying programming languages in \Knot\ is straightforward: the
@@ -20,47 +17,368 @@
 
 %-------------------------------------------------------------------------------
 
-This section presents the \Knot~specification language for syntax with binders.
+\begin{itemize}
 
-\subsection{\Knot~Syntax}
+\item This section presents the \Knot~specification language for abstract syntax
+  with binders.
+
+\item Introduce the \Knot specification language by example first in Section
+  \ref{sec:knotbyexample} and a formally in Sections \ref{sec:knotsyntax},
+  \ref{sec:knot:expressions} and \ref{sec:knot:relations}.
+
+\item This makes the \Knot easier to understand and allows us to make our
+  terminology clear.
+
+\item We will reiterate through the different parts of a language specification.
+  Section \ref{sec:knotsyntax} deals with the specification of \emph{abstract
+    syntax} of programmning languages and their scoping rules. In Section
+  \ref{sec:knot:expressions} we will look at \emph{symbolic expressions} build
+  up using abstract syntax constructors, syntactic operations like substitutions
+  and meta-variables as placeholders for concrete subterms. The expressions are
+  used in the specification of \emph{inductive relations}, which we discuss in
+  Section \ref{sec:knot:relations}, where they are used in the indices of rules.
+\end{itemize}
+
+\section{\Knot by Example}\label{sec:knotbyexample}
+
+%format namespace = "{\namespace}"
+%format sort = "{\sort}"
+%format fun = "{\function}"
+%format @ = "{\texttt{@}}"
+%format case = "\Varid{case}"
+%format env = "{\env}"
+%format relation = "{\relation}"
 
 \begin{figure}[t]
-\begin{center}
+  \fbox{
+    \begin{minipage}{0.96\columnwidth}
+      \begin{tabular}{@@{}l@@{\hspace{1.5mm}}c@@{\hspace{0.5mm}}l@@{\hspace{0.5mm}}l@@{\hspace{1.5mm}}c@@{\hspace{0.5mm}}l}
+        \multicolumn{3}{@@{}l}{|namespace Tyv : Ty|}              & & &                                                            \\
+        \multicolumn{3}{@@{}l}{|namespace Tmv : Tm|}              & & &                                                            \\
+         &             &                                     & & &                                                                 \\
+        \multicolumn{3}{@@{}l}{\sort~|Ty|~\cass}             & \multicolumn{3}{@@{}l}{|sort Pat|~\cass}                        \\
+         & \texttt{+}  & |tvar (X@Tyv)|                      & & \texttt{||} & |pvar (x:Tmv)|                                 \\
+         & \texttt{||} & |tarr (T1: Ty) (T2: Ty)|            & & \texttt{||} & |ppair (p1: Pat) (bindspec (bind p1) p2:Pat)|  \\
+         & \texttt{||} & |tall (X:Tyv) (bindspec X T: Ty)|   & \multicolumn{3}{@@{}l}{|fun bind : Pat -> [Tmv]|~\cass}        \\
+         & \texttt{||} & |tprod (T1: Ty) (T2: Ty)|           & & \texttt{||} & |pvar x      -> x|                             \\
+         & \texttt{||} & |texist (X:Tyv) (bindspec X T: Ty)| & & \texttt{||} & |pprod p1 p2 -> bind p1 , bind p2|             \\
+        \multicolumn{3}{@@{}l}{|sort Tm|~\cass}                                         & & &                                      \\
+         & \texttt{+}  & |var (x@Tmv)|                                                  & & &                                      \\
+         & \texttt{||} & |abs (x:Tmv) (T: Ty) (bindspec x t: Tm)|                       & & &                                      \\
+         & \texttt{||} & |app (t1: Tm) (t2: Tm)|                                        & & &                                      \\
+         & \texttt{||} & |tabs (X:Tyv) (bindspec X t: Tm)|                              & & &                                      \\
+         & \texttt{||} & |tapp (t: Tm) (T: Ty)|                                         & & &                                      \\
+         & \texttt{||} & \multicolumn{4}{@@{}l}{|pair (t1:Tm) (t2:Tm)|}                                      \\
+         & \texttt{||} & \multicolumn{4}{@@{}l}{|case (t1:Tm) (p:Pat) (bindspec (bind p) t2:Tm)|}            \\
+         & \texttt{||} & \multicolumn{4}{@@{}l}{|pack (T1: Ty) (t: Tm) (T2: Ty)|}                            \\
+         & \texttt{||} & \multicolumn{4}{@@{}l}{|unpack (t1: Tm) (X: Tyv) (x: Tmv) (bindspec (X,x) t2: Tm)|} \\
+         &             &                                     & & &                        \\
+        \multicolumn{3}{@@{}l}{|env Env|~\cass}                   & & &                   \\
+         & \texttt{+}  & |empty|                                  & & &                   \\
+         & \texttt{||} & |evar  : Tmv| \cto |Ty : Typing|         & & &                   \\
+         & \texttt{||} & |etvar : Tyv| \cto                       & & &                   \\
+      \end{tabular}
+    \end{minipage}
+  }
+  \caption{\Knot specification of $\fexistsprod$ (part 1)}
+  \label{fig:knot:fexistsprodsyntax}
+\end{figure}
+
+\begin{itemize}
+\item Figure \ref{fig:knot:fexistsprodsyntax} contains the first part, dealing
+  with abstract syntax only, of a \Knot specification for our example calculus
+  \fexistsprod.
+
+\item Figure \ref{fig:knot:fexistsprodsyntax} uses four different kind of
+  declarations: namespace, sort, function and environment declarations.
+
+  We start with the declaration of two namespaces. The line |namespace Tyv : Ty|
+  introduces the namespace |Tyv| (short for type variables) and declares that it
+  is a namespace for the sort |Ty|, which represents \fexistsprod
+  types. Similarly, we declare |Tmv| to be a namespace for terms |Tm|.
+
+\item Namespaces and sorts are different concepts in \Knot.
+
+\item Most languages are defined using sorts that have either zero or one
+  namespaces. Therefore often the namespace is not explicitly separated
+  from the sort.
+
+\item In \Knot it is possible to associate multiple namespaces with a single
+  sort.
+
+\item Three sorts are introduced next: types |Ty|, terms |Tm| and patterns |Pat|
+  using an established notation in functional programming for algebraic datatype
+  declarations. Each sort is defined by a list of constructors of which there
+  are two kinds: \emph{variable constructors} and \emph{regular constructors}.
+
+\item Variable constructors are introduced with a plus sign \texttt{+} prefix.
+  In the example, the line $\texttt{+} \hspace{0.5mm} |tvar (X@Tyv)|$ declares
+  the variable constructor |tvar| for types. It holds a single \emph{variable
+    reference} of the namespace |Tyv| for type variables.
+
+\item Regular constructors are declared using the vertical bar \texttt{||} and
+  can have an arbitrary amount of fields. The line
+  $\texttt{+} \hspace{0.5mm} |tall (X : Tyv) ([X]T : Ty)|$ declares the regular
+  constructor |tall| that represents universally quantified types. All fields
+  are explicitly named. The first field declaration |(X : Tyv)| introduces the
+  field |X|, which is a binding for a variable of namespace |Tyv|. The second
+  field declaration |([X]T : Ty)| introduces the field |T| for a subterm of sort
+  |Ty|.  It is prefixed by the \emph{binding specification} |[X]| which
+  stipulates that |X| is brought into scope in the subterm |T|. This is exactly
+  the essential scoping information that we highlighted in Figure
+  \ref{fig:systemfexistsscoping}. In contrast to Figure
+  \ref{fig:systemfexistsscoping} we do not explicitly model (the domain of) the
+  typing context; all variables that are in scope at the point of the |tall|
+  constructor are are implicitly declared to be also in scope in all subterms.
+
+\item Multiple variables can be brought into scope together. For example, the
+  binding specification for the body |t2| of the |unpack| constructor brings
+  both, the type variable |X| and the term variable |x|, into scope.
+
+\item
+  { % FEXISTSPROD SCOPE
+    \input{src/MacrosFExists}
+
+    The sort |Pat| for patterns is special in the sense that it represents a
+    sort of binders. The function |bind| specifies which variables are bound by
+    a pattern, similar to the $\bindp{\cdot}$ function in Figure
+    \ref{fig:systemfexists:textbook:freevariables}. The function declaration for
+    |bind| consists of a signature, which specifies that patterns are binding
+    variables of namespace |Tmv|, and of a body that defines |bind| by means of
+    a exhaustive one-level pattern match. Function can be used in binding
+    specifications. The term constructor |case| for nested pattern matching uses
+    |bind| to specify that the variables bound by the pattern |p| are brought
+    into scope in the body |t2|. \stevennote{CHECK THIS}{The constructor |ppair|
+      also uses |bind| which is explained in Section \ref{sec:wellformedspec}}.
+  }
+
+\item The last declaration defines typing environments. The constructor |empty|
+  for the base case is prefixed with a plus sign. All other cases associate
+  information with variables of a namespace. The constructor |evar| declares
+  that it is representing a mapping of term variables |Tmv| to types |Ty|.
+  It also states that the term variable clause is substitutable for judgements
+  of the typing |Typing|, which we define below. The constructor |etvar| is
+  not associating any information with type variables.
+\end{itemize}
+
+\begin{figure}[t]
+  \centering
+  \fbox{
+    \begin{minipage}{0.96\columnwidth}
+      \begin{tabular}{l@@{\hspace{2mm}}c@@{\hspace{1mm}}l}
+        \multicolumn{3}{l}{|relation [Env] Typing Tm Ty|~\cass}                                                        \\
+         & \texttt{+}  & |Tvar :  {x -> T} -> Typing (var x) T|                                                        \\
+         & \texttt{||} & |Tabs :  [x -> T1] Typing t (weaken T2 x) -> Typing (abs x T1 t) (tarr T1 T2)|                \\
+         & \texttt{||} & |Tapp :  Typing t1 (tarr T11 T12) -> Typing t2 T11 -> Typing (app t1 t2) T12|                 \\
+         & \texttt{||} & |Ttabs : [X -> ] Typing t T -> Typing (tabs X t) (tall X T)|                                  \\
+         & \texttt{||} & |Ttapp : Typing t1 (tall X T12) -> Typing (tapp t1 T2) (subst X T2 T12)|                      \\
+         & \texttt{||} & |Tpack : Typing t2 (subst X U T2) -> Typing (pack U t2 (texist X T2)) (texist X T2)|          \\
+         & \texttt{||} & |Tunpack : Typing t1 (texist X T12) ->|                                                       \\
+         &             & \quad |[X -> , x -> T12] Typing t2 (weaken T2 [X,x]) -> Typing (unpack t1 X x t2) T2|         \\
+         & \texttt{||} & |Tpair : Typing t1 T1 -> Typing t2 T2 -> Typing (prod t1 t2) (tprod T1 T2)|                   \\
+         & \texttt{||} & |Tcase : Typing t1 T1 -> (wtp: PTyping p T1) ->|                                              \\
+         &             & \quad |[bind wtp] Typing t2 (weaken T2 (bind p)) -> Typing (case t1 p t2) T2|                 \\
+        \multicolumn{3}{l}{|relation [Env] PTyping Pat Ty|~\cass}                                                      \\
+         & \texttt{||} & |Pvar : PTyping (pvar x) T ; bind = x -> T|                                                   \\
+         & \texttt{||} & |Pprod : (wtp1: PTyping (pvar x) T1) ->|                                                      \\
+         &             & \quad  |(wtp2: [bind wtp1] PTyping p2 (weaken T2 (bind p1))) ->|                              \\
+         &             & \quad |PTyping (ppair p1 p2) (tprod T1 T2) ;|                                                 \\
+         &             & \qquad |bind = bind wtp1, bind wtp2|                                                          \\
+      \end{tabular}
+    \end{minipage}
+  }
+  \caption{Typing relation for $\fexistsprod$}
+  \label{fig:knot:fexistsprodtyping}
+\end{figure}
+
+\begin{itemize}
+\item Figure \ref{fig:knot:fexistsprodtyping} contains the second part of
+  \fexistsprod{}' \Knot~specification: the typing relations |Typing| for terms
+  and |PTyping| for patterns.
+\item The |Typing| relation makes use of the typing environment |Env| and has
+  two indices: terms |Tm| and types |Ty|.
+\item Similarly to the abstract syntax, the \emph{variable rule} |Tvar| is introduced
+  with a plus sign. The parameter |{x -> T}| defines a lookup of the term variable
+  |x| in the implicit typing environment.
+\item The \emph{regular rule} |Tabs| specifies the typing of term
+  abstractions. Here the domain type |T2| changes scope and needs to be
+  explicitly weakened in the premise.  In contrast, in the rule |Ttabs| the body
+  of the universal quantification is under a binder in the conclusion and it
+  does not change its scope so no weakening is performed.
+\item The rule for type applications |Ttapp| shows the use of symbolic
+  substitution |(subst X T2 T12)| in the conclusion and the rule |Tpack| for
+  packing existentials shows symbolic substitution in the premise.
+\item Finally, in the rule
+ |Tunpack| we need to weaken the type |T2| explicitly with the type variable |X|
+and the term variable |x| for the typing judgement of the body |t2|.
+
+\item The typing of patterns can be similarly translated from the semi-formal
+  specification in Section \ref{sec:gen:semiformal:semantics}. The additional
+  concern is the definition of the relation output that defines the typing
+  context extension for the variables bound by the pattern, or more precisely
+  defined to be bound by the |bind| function on patterns.
+\item In figure \ref{fig:knot:fexistsprodtyping} this output is explicitly
+  referred to by reusing the function name |bind|. After each rule
+
+\end{itemize}
+
+
+
+
+
+%if False
+\begin{figure}[t]
 \fbox{
-  \begin{minipage}{0.98\columnwidth}
-\textbf{Labels}\vspace{-5mm}
-\[\begin{array}{l@@{\hspace{3mm}}r@@{\hspace{15mm}}l@@{\hspace{3mm}}r}
-  \alpha, \beta, \gamma & \textit{Namespace label}       & s, t                  & \textit{Sort meta-variable}\\
-  b                     & \textit{Binding meta-variable} & f                     & \textit{Function label}    \\
-  g                     & \textit{Global meta-variable}  & E                     & \textit{Env label}         \\
-  S, T                  & \textit{Sort label}            & R                     & \textit{Relation label}    \\
-  K                     & \textit{Constructor label}     & r                     & \textit{Rule label}        \\
-  \end{array}
-\]
-\textbf{Declarations and definitions}
-\[\begin{array}{@@{}l@@{\hspace{2mm}}c@@{\hspace{3mm}}l@@{\hspace{5mm}}r}
-  \spec      & ::=  & \ov{\decl}                                                                       & \textit{Specification}    \\
-    \decl    & ::=  & \namedecl \mid \sortdecl \mid \fundecl                                           & \textit{Declaration}      \\
-             & \mid & \envdecl \mid \reldecl                                                           &                           \\
-  \namedecl  & ::=  & \namespace \,\alpha\,\ccol\,S                                                    & \textit{Namespace}        \\
-  \sortdecl  & ::=  & \sort\,S\,\cass\,\ov{\condecl}                                                   & \textit{Sort}             \\
-  \condecl   & ::=  & \texttt{+}  K\,\fieldref{g}{\alpha}                                              & \textit{Constr. decl.}    \\
-             & \mid & \texttt{||} K\,\ov{\fieldbind{b}{\alpha}}\,\ov{\cpar{\cbrk{\bindspec}s \ccol S}} &                           \\
-  \bindspec  & ::=  & \ov{\bsi}                                                                        & \textit{Binding spec.}    \\
-  \bsi       & ::=  & b \mid f s                                                                       & \textit{Bind. spec. item} \\
-  \fundecl   & ::=  & \function\, f \ccol S \cto [\ov{\alpha}]\,\cass\,\ov{\funclause}                 & \textit{Function}         \\
-  \funclause & ::=  & K\,\ov{b}\,\ov{s} \cto \bindspec                                                 & \textit{Function clause}  \\
-  \envdecl   & ::=  & \env\,E\,\cass\,\ov{\envclause}                                                  & \textit{Environment}      \\
-  \envclause & ::=  & \texttt{+}  K                                                                    & \textit{Empty env.}       \\
-             & \mid & \texttt{||} K : \alpha \cto \ov{S} : R                                           & \textit{Env. clause}      \\
-%             & ::=  & \alpha \cto \ov{S}                                                               &                           \\
-  \end{array}
-\]
-  \end{minipage}
+\begin{minipage}{0.95\columnwidth}
+\begin{code}
+relation Value Tm :=
+  | V_abs    : Value (abs x T t)
+  | V_tabs   : Value (tabs X t)
+  | V_pack   : Value t -> Value (pack T1 t T2)
+
+relation Eval Tm Tm :=
+  | E_absbeta   :  Value t2 →
+                   Eval (app (abs x T11 t12) t2) (subst x t2 t12)
+  | E_tabsbeta  :  Eval (tapp (tabs X t11) T2) (subst X T2 t11)
+  | E_packbeta  :
+      Value v12 →
+      Eval (unpack (pack T11 v12 T13) X x t2)
+      (subst X T11 (subst x (weaken v12 X) t2))
+  | E_app1 :    Eval t1 t1' ->
+                Eval (app t1 t2) (app t1' t2)
+  | E_app2 :    Eval t2 t2' ->
+                Eval (app t1 t2) (app t1 t2')
+  | E_tapp :    Eval t t' ->
+                Eval (tapp t T) (tapp t' T)
+  | E_pack :    Eval t t' ->
+                Eval (pack T1 t T2) (pack T1 t' T2)
+  | E_unpack :  Eval t1 t1' ->
+                Eval (unpack t1 X x t2) (unpack t1' X x t2)
+\end{code}
+\end{minipage}
 }
-\end{center}
-\caption{The Syntax of \Knot}
-\label{fig:SpecificationLanguage}
+\caption{Evaluation relation for $\fexistsprod$}
+\label{fig:systemfexiststyping}
+\end{figure}
+%endif
+
+
+\section{Key Design Choices}\label{sec:knotdesign}
+
+\stevennote{MOVED FROM OVERVIEW}{
+Because this rule inspects the context $\Gamma$ we call it \emph{not context
+  parametric}. The other rules either pass the context through unchanged or pass
+an extended context to the premises. We call these rules \emph{context
+  parametric}.
+%
+Rule \textsc{TAbs} deals with abstractions over terms in terms. The
+meta-variable $y$ appears in a different mode in the conclusion than the
+meta-variable $x$ in the variable rule. The $\lambda$-abstraction binds the
+variable $y$ and we call it a \emph{binding occurrence} whereas the $x$ in the
+variable rule is a \emph{reference} or \emph{use occurrence}.
+%
+Following the literature on \emph{locally nameless}~\cite{locallynameless} and
+\emph{locally named}~\cite{externalinternalsyntax} representations we call $y$ a
+\emph{locally bound} variable (aka locally scoped variables \cite{pitts2015}),
+or more concisely a \emph{binding variable}, and $x$ a \emph{global} or
+\emph{free variable}. Another example is the judgement
+$\typing{\Gamma}{(\lambda y. y)~x}{\tau}$. Here $y$ is again locally bound and
+$x$ has to be bound in $\Gamma$ for the judgement to be well-scoped. In this
+example, the meta-variable $y$ appears in both binding and referencing
+positions.
+%
+The distinction between locally bound and free variables goes back to at least
+Frege \cite{begriffsschrift} and representations such as locally nameless and
+locally named have internalized this distinction. Frege characterizes free
+variables as variables that can possibly stand for anything while locally bound
+variables stand for something very specific. Indeed, in the above judgement, the
+use of $y$ can only denote a reference to the directly enclosing
+abstraction. These concepts do not commit us to a particular representation of
+variable binding. Rather, these notions arise naturally in meta-languages.
+%
+The rules \textsc{TTApp} for type-application and \textsc{TPack} for packing
+existential types use a type-substitution operation $[\alpha\mapsto\sigma]\tau$
+that substitutes $\sigma$ for $\alpha$ in $\tau$. \textsc{TTApp} performs the
+substitution in the conclusion while \textsc{TPack} does so in the premise. The
+substituted type-variable $\alpha$ is locally bound in both rules.
+}
+
+\stevennote{MOVED FROM OVERVIEW}{
+As the term in the conclusion remains a type application, we want to apply rule
+\textsc{TTApp} again. However, the \colorbox{light-gray}{type} in the conclusion
+does not have the appropriate form. We first need to commute the two substitutions
+with one of the common interaction lemmas
+\begin{align}
+  [\beta\mapsto \sigma][\alpha \mapsto \sigma'] =
+  [\alpha \mapsto [\beta\mapsto\sigma]\sigma'][\beta\mapsto\sigma] \label{lem:substcomm}
+\end{align}
+%
+Intuitively this commutation is possible because $\beta$ is a free variable
+while $\alpha$ is locally bound and because context parametric rules are
+naturally compatible with any changes to the context.
+}
+
+\stevennote{MOVED FROM OVERVIEW}{
+A key principle is the distinction between \emph{locally bound} and \emph{free}
+variables at the meta-level. This allows us to recognize \emph{context
+parametric} rules which in turn enables us to extend the \emph{free-monadic
+view} on syntax \cite{monadic,knotneedle} of \Knot to relations. At the
+syntax-level this view requires one distinguished \emph{variable constructor}
+per namespace which has a \emph{reference occurrence} as its only argument and
+all other constructors only contain \emph{binding occurrences} and subterms.
+%
+At the level of relations this translates to one distinguished \emph{variable
+  rule} per namespace (or more specifically per environment clause). This
+variable rule has a single lookup as its only premise and the sorts of the
+environment data match the sorts of the indices of the relation. The variable
+rule uses exactly one \emph{free meta-variable}; all other rules only contain
+\emph{locally bound} meta-variables and do not feature lookup premises.  In
+other words, the variable rule is the only not context parametric rule.
+%
+These restrictions allow us to generically establish the substitution lemmas
+for relations. Consider the small proof tree on the left:
+% , where $A$ is the subtree for the typing judgement of $e_1$.
+}
+
+
+\section{\Knot~Syntax}\label{sec:knotsyntax}
+
+\begin{figure}[t]
+  \centering
+  \fbox{
+    \begin{minipage}{0.96\columnwidth}
+      \textbf{Labels}\vspace{-1mm}
+      \[ \begin{array}{l@@{\hspace{3mm}}r@@{\hspace{15mm}}l@@{\hspace{3mm}}r}
+           \alpha, \beta, \gamma & \textit{Namespace label}       & s, t                  & \textit{Sort meta-variable}\\
+           b                     & \textit{Binding meta-variable} & f                     & \textit{Function label}    \\
+           g                     & \textit{Global meta-variable}  & E                     & \textit{Env label}         \\
+           S, T                  & \textit{Sort label}            & R                     & \textit{Relation label}    \\
+           K                     & \textit{Constructor label}     & r                     & \textit{Rule label}        \\
+         \end{array}
+      \]
+      \textbf{Declarations and definitions}
+      \[ \begin{array}{@@{}l@@{\hspace{2mm}}c@@{\hspace{3mm}}l@@{\hspace{5mm}}r}
+           \spec      & ::=  & \ov{\decl}                                                                       & \textit{Specification}    \\
+             \decl    & ::=  & \namedecl \mid \sortdecl \mid \fundecl                                           & \textit{Declaration}      \\
+                      & \mid & \envdecl \mid \reldecl                                                           &                           \\
+           \namedecl  & ::=  & \namespace \,\alpha\,\ccol\,S                                                    & \textit{Namespace}        \\
+           \sortdecl  & ::=  & \sort\,S\,\cass\,\ov{\condecl}                                                   & \textit{Sort}             \\
+           \condecl   & ::=  & \texttt{+}  K\,\fieldref{g}{\alpha}                                              & \textit{Constr. decl.}    \\
+                      & \mid & \texttt{||} K\,\ov{\fieldbind{b}{\alpha}}\,\ov{\cpar{\cbrk{\bindspec}s \ccol S}} &                           \\
+           \bindspec  & ::=  & \ov{\bsi}                                                                        & \textit{Binding spec.}    \\
+           \bsi       & ::=  & b \mid f s                                                                       & \textit{Bind. spec. item} \\
+           \fundecl   & ::=  & \function\, f \ccol S \cto [\ov{\alpha}]\,\cass\,\ov{\funclause}                 & \textit{Function}         \\
+           \funclause & ::=  & K\,\ov{b}\,\ov{s} \cto \bindspec                                                 & \textit{Function clause}  \\
+           \envdecl   & ::=  & \env\,E\,\cass\,\ov{\envclause}                                                  & \textit{Environment}      \\
+           \envclause & ::=  & \texttt{+}  K                                                                    & \textit{Empty env.}       \\
+                      & \mid & \texttt{||} K : \alpha \cto \ov{S} : R                                           & \textit{Env. clause}      \\
+           %            & ::=  & \alpha \cto \ov{S}                                                               &                          \\
+         \end{array}
+    \]
+    \end{minipage}
+  }
+  \caption{The Syntax of \Knot}
+  \label{fig:SpecificationLanguage}
 \end{figure}
 
 Figure \ref{fig:SpecificationLanguage} shows the grammar of \Knot.  A
@@ -71,19 +389,20 @@ declarations $\reldecl$. We defer explaining relation declarations until Section
 \ref{ssec:inductiverelations}.
 
 A namespace declaration $\namespace~\alpha : S$ introduces the namespace
-$\alpha$ and associates it with the syntactic sort $S$. This expresses that variables of
-namespace $\alpha$ can be substituted for terms of sort $S$. While most
-languages feature at most one namespace per sort, it is nevertheless possible to
-associate multiple namespaces with a single sort. This can be used, e.g.,
-in languages with linear type systems to distinguish linearly bound from unrestricted variables.
+$\alpha$ and associates it with the syntactic sort $S$. This expresses that
+variables of namespace $\alpha$ can be substituted for terms of sort $S$. While
+most languages feature at most one namespace per sort, it is nevertheless
+possible to associate multiple namespaces with a single sort. This can be used,
+e.g., in languages with linear type systems to distinguish linearly bound from
+unrestricted variables.
 
 A declaration of sort $S$ comes with two kinds of constructor declarations
 $\condecl$. Variable constructors $\texttt{+} K\,\fieldref{|g|}{\alpha}$ hold a
 variable reference $g$ in the namespace $\alpha$. These are the only
 constructors where variables are used as references. The global variable
 reference $g$ signifies that the reference is free when considering a variable
-constructor in isolation. In larger symbolic expressions, also binding
-variables may appear in variable constructors.
+constructor in isolation. In larger symbolic expressions, also binding variables
+may appear in variable constructors.
 
 Regular constructors $K\,\ov{(b : \alpha)}\,\ov{(s : S)}$ contain
 named variable bindings $\ov{(b : \alpha)}$ and named subterms $\ov{(s :
@@ -101,7 +420,8 @@ variable binding $b$ of the constructor or the invocation of a function $f$,
 that computes which variables in siblings or the same subterm are brought in
 scope of $s$. Functions serve in particular to specify multi-binders in binding
 specifications. In regular programming languages the binding specifications of
-most subterms are empty; to avoid clutter we omit them in that case.
+most subterms are empty; to avoid clutter we omit empty binding specifications
+$\cbrk{}$ in the concrete syntax of \Knot.
 
 Functions are defined by function declarations $\fundecl$. The type signature
 $f : S \rightarrow [\ov{\alpha}]$ denotes that function $f$ operates on terms of
@@ -124,58 +444,7 @@ judgement of relation $R$. If the relation $R$ is omitted, then it defaults to
 well-scopedness of the data. We clarify this, together with the syntax of
 inductive relations, in Section \ref{ssec:inductiverelations}.
 
-%format namespace = "{\namespace}"
-%format sort = "{\sort}"
-%format fun = "{\function}"
-%format @ = "{\texttt{@}}"
-%format case = "\Varid{case}"
-%format env = "{\env}"
-\begin{figure}[t]
-  \fbox{
-    \begin{minipage}{0.96\columnwidth}
-      \begin{tabular}{l@@{\hspace{0.3mm}}c@@{\hspace{0.1mm}}l@@{\hspace{0.5mm}}l@@{\hspace{0.3mm}}c@@{\hspace{0.1mm}}l}
-        \multicolumn{3}{@@{}l}{|namespace Tyv : Ty|}                                 & \multicolumn{3}{@@{}l}{\sort~|Ty|~\cass}                \\
-        \multicolumn{3}{@@{}l}{|namespace Tmv : Tm|}                                 &  & \texttt{+}  & |tvar (X@Tyv)|                         \\
-        \multicolumn{3}{@@{}l}{|sort Pat|~\cass}                                     &  & \texttt{||} & |tarr (T1: Ty) (T2: Ty)|               \\
-         & \texttt{||} & |pvar (x:Tmv) (T:Ty)|                                       &  & \texttt{||} & |tall (X:Tyv) (bindspec X T: Ty)|      \\
-         & \texttt{||} & |ppair (p1: Pat) (bindspec (bind p1) p2:Pat)|               &  & \texttt{||} & |tprod (T1: Ty) (T2: Ty)|              \\
-        \multicolumn{3}{@@{}l}{|sort Tm|~\cass}                                      &  & \texttt{||} & |texist (X:Tyv) (bindspec X T: Ty)|    \\
-         & \texttt{+}  & |var (x@Tmv)|                                               & \multicolumn{3}{@@{}l}{|fun bind : Pat -> [Tmv]|~\cass} \\
-         & \texttt{||} & |abs (x:Tmv) (T: Ty) (bindspec x t: Tm)|                    &  & \texttt{||} & |pvar x T    -> x|                     \\
-         & \texttt{||} & |app (t1: Tm) (t2: Tm)|                                     &  & \texttt{||} & |pprod p1 p2 -> bind p1 , bind p2|     \\
-         & \texttt{||} & |tabs (X:Tyv) (bindspec X t: Tm)|                           & \multicolumn{3}{@@{}l}{|env Env|~\cass}                 \\
-         & \texttt{||} & |tapp (t: Tm) (T: Ty)|                                      &  & \texttt{+}  & |empty|                                \\
-         & \texttt{||} & |pair (t1:Tm) (t2:Tm)|                                      &  & \texttt{||} & |evar  : Tmv| \cto |Ty : Typing|       \\
-         & \texttt{||} & |case (t1:Tm) (p:Pat) (bindspec (bind p) t2:Tm)|            &  & \texttt{||} & |etvar : Tyv| \cto                     \\
-         & \texttt{||} & |pack (T1: Ty) (t: Tm) (T2: Ty)|                            &  & & \\
-         & \texttt{||} & \multicolumn{4}{@@{}l}{|unpack (t1: Tm) (X: Tyv) (x: Tmv) (bindspec (X,x) t2: Tm)|} \\
-      \end{tabular}
-    \end{minipage}
-  }
-  \caption{Example specification of $\fexistsprod$}
-  \label{fig:systemfexists}
-\end{figure}
 
-\paragraph{Example} Figure \ref{fig:systemfexists} shows the \Knot~specification
-of $\fexistsprod$. We start with the declaration of two namespaces: |Tyv| for
-type variables and |Tmv| for term variables, which is followed by the
-declarations of three sorts: types, terms and patterns and a function
-declaration for |bind| that specifies the variables bound by patterns.
-
-As announced, we have omitted the empty binding specifications $\cbrk{}$ for
-readability. There are only seven non-empty binding
-specifications: universal and existential quantification for types and type
-abstraction for terms bind exactly one type variable, the lambda abstraction for
-terms binds exactly one term variable, the unpacking of an existential binds a
-type and a term variable, the pattern matching binds the variables bound by the
-pattern in the body and in the product of a pattern the variables of the first
-component are bound in the second.
-
-The last declaration defines typing environments that map term variables to
-types. It also states that the term variable clause is substitutable for
-|Typing| judgements, defined in Section
-\ref{ssec:inductiverelations}. Type variables are not mapped to any data, but a
-clause still needs to be declared to require well-scopedness of types.
 
 
 %-------------------------------------------------------------------------------
@@ -281,7 +550,7 @@ This section defines which \Knot specifications are well-formed.  To simplify
 the explanation of well-formedness and of the semantics of \Knot\
 specifications, we disregard both function declarations and only consider
 single-variable binding for the rest of this section and the following. See the
-technical appendix for the extended formalisation.
+technical appendix for the extended formalization.
 
 Figure \ref{fig:wellformedspec} defines the well-formedness relation
 $\vdash \spec$ for \Knot\ specifications. The single rule \textsc{WfSpec}
@@ -366,82 +635,7 @@ for declaration heads and one for declaration bodies.
 
 %-------------------------------------------------------------------------------
 
-\subsection{Symbolic Expressions}
-
-\stevennote{MOVED FROM OVERVIEW}{
-Because this rule inspects the context $\Gamma$ we call it \emph{not context
-  parametric}. The other rules either pass the context through unchanged or pass
-an extended context to the premises. We call these rules \emph{context
-  parametric}.
-%
-Rule \textsc{TAbs} deals with abstractions over terms in terms. The
-meta-variable $y$ appears in a different mode in the conclusion than the
-meta-variable $x$ in the variable rule. The $\lambda$-abstraction binds the
-variable $y$ and we call it a \emph{binding occurrence} whereas the $x$ in the
-variable rule is a \emph{reference} or \emph{use occurrence}.
-%
-Following the literature on \emph{locally nameless}~\cite{locallynameless} and
-\emph{locally named}~\cite{externalinternalsyntax} representations we call $y$ a
-\emph{locally bound} variable (aka locally scoped variables \cite{pitts2015}),
-or more concisely a \emph{binding variable}, and $x$ a \emph{global} or
-\emph{free variable}. Another example is the judgement
-$\typing{\Gamma}{(\lambda y. y)~x}{\tau}$. Here $y$ is again locally bound and
-$x$ has to be bound in $\Gamma$ for the judgement to be well-scoped. In this
-example, the meta-variable $y$ appears in both binding and referencing
-positions.
-%
-The distinction between locally bound and free variables goes back to at least
-Frege \cite{begriffsschrift} and representations such as locally nameless and
-locally named have internalized this distinction. Frege characterizes free
-variables as variables that can possibly stand for anything while locally bound
-variables stand for something very specific. Indeed, in the above judgement, the
-use of $y$ can only denote a reference to the directly enclosing
-abstraction. These concepts do not commit us to a particular representation of
-variable binding. Rather, these notions arise naturally in meta-languages.
-%
-The rules \textsc{TTApp} for type-application and \textsc{TPack} for packing
-existential types use a type-substitution operation $[\alpha\mapsto\sigma]\tau$
-that substitutes $\sigma$ for $\alpha$ in $\tau$. \textsc{TTApp} performs the
-substitution in the conclusion while \textsc{TPack} does so in the premise. The
-substituted type-variable $\alpha$ is locally bound in both rules.
-}
-
-\stevennote{MOVED FROM OVERVIEW}{
-As the term in the conclusion remains a type application, we want to apply rule
-\textsc{TTApp} again. However, the \colorbox{light-gray}{type} in the conclusion
-does not have the appropriate form. We first need to commute the two substitutions
-with one of the common interaction lemmas
-\begin{align}
-  [\beta\mapsto \sigma][\alpha \mapsto \sigma'] =
-  [\alpha \mapsto [\beta\mapsto\sigma]\sigma'][\beta\mapsto\sigma] \label{lem:substcomm}
-\end{align}
-%
-Intuitively this commutation is possible because $\beta$ is a free variable
-while $\alpha$ is locally bound and because context parametric rules are
-naturally compatible with any changes to the context.
-}
-
-\stevennote{MOVED FROM OVERVIEW}{
-A key principle is the distinction between \emph{locally bound} and \emph{free}
-variables at the meta-level. This allows us to recognize \emph{context
-parametric} rules which in turn enables us to extend the \emph{free-monadic
-view} on syntax \cite{monadic,knotneedle} of \Knot to relations. At the
-syntax-level this view requires one distinguished \emph{variable constructor}
-per namespace which has a \emph{reference occurrence} as its only argument and
-all other constructors only contain \emph{binding occurrences} and subterms.
-%
-At the level of relations this translates to one distinguished \emph{variable
-  rule} per namespace (or more specifically per environment clause). This
-variable rule has a single lookup as its only premise and the sorts of the
-environment data match the sorts of the indices of the relation. The variable
-rule uses exactly one \emph{free meta-variable}; all other rules only contain
-\emph{locally bound} meta-variables and do not feature lookup premises.  In
-other words, the variable rule is the only not context parametric rule.
-%
-These restrictions allow us to generically establish the substitution lemmas
-for relations. Consider the small proof tree on the left:
-% , where $A$ is the subtree for the typing judgement of $e_1$.
-}
+\section{Symbolic Expressions}\label{sec:knot:expressions}
 
 \begin{figure}[t!]
 \begin{center}
@@ -523,7 +717,7 @@ symbolic expression can also be a reified substitution
 $(\symbolicsubst~b~\symbolicterm_1~\symbolicterm_2)$, that denotes a
 substitution of $\symbolicterm_1$ for $b$ in $\symbolicterm_2$. We only allow
 substitution of locally bound variables to ensure context parametricity. The
-last expression former is a refied weakening
+last expression former is a reified weakening
 $(\symbolicweaken~\symbolicterm~\bindspec)$ that makes context changes
 explicit. For example consider $\eta$-reduction for $\fexistsprod$:
 $$|abs x T (app (weaken t x) (var x))| \longrightarrow_\eta |t|.$$
@@ -694,7 +888,7 @@ the substitute $\symbolicterm_1$ have to agree with that of $b$.
 
 %-------------------------------------------------------------------------------
 
-\subsection{Inductive Relations}\label{ssec:inductiverelations}
+\section{Inductive Relations}\label{sec:knot:relations}
 
 \begin{figure}[t]
 \begin{center}
@@ -754,87 +948,6 @@ substitution lemmas. Each regular rule that makes use of lookups gives rise to
 an obligation. If there is no explicit variable rule for an environment clause,
 the corresponding derived rule needs to be proven.
 
-%format relation = "{\relation}"
-
-\begin{figure}[t]
-\fbox{
-\begin{minipage}{0.99\columnwidth}
-\begin{tabular}{l@@{\hspace{2mm}}c@@{\hspace{1mm}}l}
-\multicolumn{3}{l}{|relation [Env] Typing Tm Ty|~\cass}                                                        \\
- & \texttt{+}  & |Tvar :  {x -> T} -> Typing (var x) T|                                                        \\
- & \texttt{||} & |Tabs :  [x -> T1] Typing t (weaken T2 x) -> Typing (abs x T1 t) (tarr T1 T2)|                \\
- & \texttt{||} & |Tapp :  Typing t1 (tarr T11 T12) -> Typing t2 T11 -> Typing (app t1 t2) T12|                 \\
- & \texttt{||} & |Ttabs : [X -> ] Typing t T -> Typing (tabs X t) (tall X T)|                                  \\
- & \texttt{||} & |Ttapp : Typing t1 (tall X T12) -> Typing (tapp t1 T2) (subst X T2 T12)|                      \\
- & \texttt{||} & |Tpack : Typing t2 (subst X U T2) -> Typing (pack U t2 (texist X T2)) (texist X T2)|          \\
- & \texttt{||} & |Tunpack : Typing t1 (texist X T12) ->|                                                       \\
- &             & \quad |[X -> , x -> T12] Typing t2 (weaken T2 [X,x]) -> Typing (unpack t1 X x t2) T2|         \\
- & \texttt{||} & |Tpair : Typing t1 T1 -> Typing t2 T2 -> Typing (prod t1 t2) (tprod T1 T2)|                   \\
- & \texttt{||} & |Tcase : Typing t1 T1 -> (wtp: PTyping p T1) ->|                                              \\
- &             & \quad |[bind wtp] Typing t2 (weaken T2 (bind p)) -> Typing (case t1 p t2) T2|                 \\
-\multicolumn{3}{l}{|relation [Env] PTyping Pat Ty|~\cass}                                                      \\
- & \texttt{||} & |Pvar : PTyping (pvar x T) T ; bind = x -> T|                                                 \\
- & \texttt{||} & |Pprod : (wtp1: PTyping (pvar x T1) T1) ->|                                                   \\
- &             & \quad  |(wtp2: [bind wtp1] PTyping p2 (weaken T2 (bind p1))) ->|                              \\
- &             & \quad |PTyping (ppair p1 p2) (tprod T1 T2) ;|                                                 \\
- &             & \qquad |bind = bind wtp1, bind wtp2|                                                          \\
-\end{tabular}
-\end{minipage}
-}
-\caption{Typing relation for $\fexistsprod$}
-\label{fig:systemfexiststyping}
-\end{figure}
-
-\paragraph{Example} Figure \ref{fig:systemfexiststyping} contains the definition
-of the typing relation |Typing| for $\fexistsprod$ terms that extends the
-specification of Figure \ref{fig:systemfexists}. The relation makes use of the
-typing environment |Env| and has two indices: terms |Tm| and types |Ty|.  The
-variable rule |Tvar| gets the type of a term variable from the environment. The
-regular rule |Tabs| specifies the typing of term abstractions. Here the domain
-type |T2| changes scope and needs to be explicitly weakened in the premise. In
-contrast, in the rule |Ttabs| the body of the universal quantification is under
-a binder in the conclusion and it does not change its scope so no weakening is
-performed. The rule for type applications |Ttapp| shows the use of symbolic
-substitution in the conclusion and the rule |Tpack| for packing existentials
-shows symbolic substitution in the premise. Finally, in the rule |Tunpack| we
-need to weaken the type |T2| explicitly with the type variable |X| and the term
-variable |x| for the typing judgement of the body |t2|.
-
-%if False
-\begin{figure}[t]
-\fbox{
-\begin{minipage}{0.95\columnwidth}
-\begin{code}
-relation Value Tm :=
-  | V_abs    : Value (abs x T t)
-  | V_tabs   : Value (tabs X t)
-  | V_pack   : Value t -> Value (pack T1 t T2)
-
-relation Eval Tm Tm :=
-  | E_absbeta   :  Value t2 →
-                   Eval (app (abs x T11 t12) t2) (subst x t2 t12)
-  | E_tabsbeta  :  Eval (tapp (tabs X t11) T2) (subst X T2 t11)
-  | E_packbeta  :
-      Value v12 →
-      Eval (unpack (pack T11 v12 T13) X x t2)
-      (subst X T11 (subst x (weaken v12 X) t2))
-  | E_app1 :    Eval t1 t1' ->
-                Eval (app t1 t2) (app t1' t2)
-  | E_app2 :    Eval t2 t2' ->
-                Eval (app t1 t2) (app t1 t2')
-  | E_tapp :    Eval t t' ->
-                Eval (tapp t T) (tapp t' T)
-  | E_pack :    Eval t t' ->
-                Eval (pack T1 t T2) (pack T1 t' T2)
-  | E_unpack :  Eval t1 t1' ->
-                Eval (unpack t1 X x t2) (unpack t1' X x t2)
-\end{code}
-\end{minipage}
-}
-\caption{Evaluation relation for $\fexistsprod$}
-\label{fig:systemfexiststyping}
-\end{figure}
-%endif
 
 
 %-------------------------------------------------------------------------------
@@ -996,6 +1109,17 @@ by rule $\textsc{RbsCall}$. Its flattening is symbolic evaluation of $f$ on the
 first index $\symbolicterm$.  Also, the local scope $\bindspec$ of $j$ is
 checked to be identical to the flattening of the prefix $\rulebindspec$.
 
+
+\section{Discussion}
+
+\begin{itemize}
+\item The specification of the output type $\ov{\alpha}$ is used in
+  \cite{knotneedle} to derive subordination-based strengthening lemmas.
+  However, these lemmas are not necessary to derive the semantics
+  boilerplate. Hence, for simplicity we ignore the output type of functions and
+  any other subordination related information in the remainder of this paper.
+
+\end{itemize}
 
 %%% Local Variables:
 %%% mode: latex

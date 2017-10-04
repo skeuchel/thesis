@@ -1,0 +1,15 @@
+\newcommand{\pack}[3]{\{{#1},{#2}\}~\text{as}~{#3}}
+\newcommand{\unpack}[4]{\text{let}~\{{#1},{#2}\}={#3}~\text{in}~{#4}}
+\newcommand{\casep}[3]{\text{case}~{#1}~\text{of}~{#2}\to{#3}}
+%\newcommand{\typing}[3]{{#1} \vdash_\text{tm} {#2} : {#3}}
+\newcommand{\wellscoped}[2]{{#1} \vdash {#2}}
+\newcommand{\wellscopedtermvar}[2]{{#1} \vdash^\text{var}_\text{tm} {#2}}
+\newcommand{\wellscopedterm}[2]{{#1} \vdash_\text{tm} {#2}}
+\newcommand{\kinding}[2]{{#1} \vdash_\text{ty} {#2}}
+\newcommand{\ptyping}[4]{{#1} \vdash_\text{p} {#2} : {#3} ; {#4}}
+\newcommand{\pmatch}[4]{\text{Match}~{#1}~{#2}~{#3}~{#4}}
+\newcommand{\step}[2]{{#1} \longrightarrow {#2}}
+\newcommand{\osubst}[3]{{[{#1}\mapsto{#2}]~{#3}}}
+\newcommand{\fv}[1]{{\text{fv}({#1})}}
+\newcommand{\bindp}[1]{{\text{bnd}({#1})}}
+\newcommand{\tapp}[2]{{#1}!{#2}}

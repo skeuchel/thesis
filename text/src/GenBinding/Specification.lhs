@@ -29,26 +29,24 @@
 
 %-------------------------------------------------------------------------------
 
-This section presents the \Knot~specification language for programming
-languages. We introduce \Knot by example first Section \ref{sec:knotbyexample}
+This section presents \Knot, a language for specifying programming
+languages. We introduce \Knot by example first in Section \ref{sec:knotbyexample}
 and formally in Sections \ref{sec:knotsyntax}, \ref{sec:knot:expressions} and
-\ref{sec:knot:relations}. This makes the \Knot language easier to understand and
-allows us to make our terminology clear.
+\ref{sec:knot:relations}. 
+% This makes the \Knot language easier to understand and
+% allows us to make our terminology clear.
 
-We will reiterate through the different parts of a language specification.
+% We will reiterate through the different parts of a language specification.
 Section \ref{sec:knotsyntax} deals with the specification of \emph{abstract
   syntax} of programmning languages and their scoping rules. In Section
-\ref{sec:knot:expressions} we will look at \emph{symbolic expressions} build up
-using abstract syntax constructors, syntactic operations like substitutions and
-meta-variables as placeholders for concrete subterms. The expressions are used
-in the specification of \emph{inductive relations}, which we discuss in Section
-\ref{sec:knot:relations}, where they are used in the indices of rules.
+\ref{sec:knot:expressions} we look at \emph{symbolic expressions} that are used
+in the specification of \emph{inductive relations}. The latter are presented in
+Section~\ref{sec:knot:relations}.
 
 \section{\Knot by Example}\label{sec:knotbyexample}
 
-In this Section we showcase \Knot by porting the semi-formal specification of
-their \fexistsprod calculus from Chapter \ref{ch:gen:background} to
-\Knot. Section \ref{sec:knotbyexample:syntax} discusses the \Knot specification
+In this section we showcase \Knot by porting the semi-formal specification of
+their \fexistsprod calculus from Chapter \ref{ch:gen:background}. Section \ref{sec:knotbyexample:syntax} discusses the \Knot specification
 of the abstract syntax of \fexistsprod and Section
 \ref{sec:knotbyexample:semantics} its typing relation.
 
@@ -91,24 +89,24 @@ of the abstract syntax of \fexistsprod and Section
   \label{fig:knot:fexistsprodsyntax}
 \end{figure}
 
-Figure \ref{fig:knot:fexistsprodsyntax} contains the first part, dealing with
-the abstract syntax of \fexistsprod only, which corresponds to EBNF grammar
+Figure \ref{fig:knot:fexistsprodsyntax} contains the \Knot specification of
+\fexistsprod's abstract syntax, which corresponds to EBNF grammar
 specification in Figure \ref{fig:systemfexistssyntax}.
 
-The two sorts for variables and the one for typing contexts have a special
-purpose that is related to variable binding. However, this is completely
-implicit in the EBNF grammar in Figure \ref{fig:systemfexistssyntax} which
-defines all sorts uniformly. \Knot makes the distinction between them explicit
-and uses different declarations forms to introduce them. Specifically, \Knot
-distinguishes between \emph{namespaces}, \emph{regular syntactic sorts} and
-\emph{environments} which we discuss in turn.
+While it is not apparent in the EBNF grammar in Figure \ref{fig:systemfexistssyntax},
+the two sorts for variables and the one for typing contexts have a special
+purpose that is related to variable binding. \Knot makes the distinction
+between these and the other sorts explicit and uses different declarations
+forms to introduce them. Specifically, \Knot distinguishes between
+\emph{namespaces}, \emph{(regular syntactic) sorts} and \emph{environments} which
+we discuss in turn.
 
 
 \paragraph{Namespaces}
-Figure \ref{fig:knot:fexistsprodsyntax} starts with with the declaration of two
+Figure \ref{fig:knot:fexistsprodsyntax} starts with the declaration of two
 namespaces. The line |namespace Tyv : Ty| introduces the namespace |Tyv| (short
 for type variables) and declares that it is a namespace for the sort |Ty|, which
-represents \fexistsprod types and that we define below. Similarly, we declare
+represents \fexistsprod types and which is defined elsewhere in the figure. Similarly, we declare
 |Tmv| to be a namespace for terms |Tm|.
 
 %% \begin{itemize}
@@ -120,23 +118,23 @@ represents \fexistsprod types and that we define below. Similarly, we declare
 %% \end{itemize}
 
 
-\paragraph{Syntactic Sorts}
+\paragraph{Regular Syntactic Sorts}
 Three sorts are introduced next: types |Ty|, terms |Tm| and patterns |Pat| using
 an established notation in functional programming for algebraic datatype
 declarations. Each sort is defined by a list of constructors of which there are
 two kinds: \emph{variable constructors} and \emph{regular constructors}.
 
-Variable constructors are introduced with a plus sign \texttt{+} prefix.  In the
+Variable constructors are introduced with a plus sign. In the
 example, the line \[ \texttt{+} \hspace{0.5mm} |tvar (X@Tyv)| \] declares the
 variable constructor |tvar| for types. It holds a single \emph{variable
   reference} of the namespace |Tyv| for type variables.
 
-Regular constructors are declared using the vertical bar \texttt{||} and can
-have an arbitrary amount of fields. The line
+Regular constructors are declared using the vertical bar and can
+have an arbitrary number of fields. The line
 \[ \texttt{+} \hspace{0.5mm} |tall (X : Tyv) ([X]T :
 Ty)| \]  declares the regular constructor |tall| that represents universally
 quantified types. All fields are explicitly named. The first field declaration
-|(X : Tyv)| introduces the field |X|, which is a binding for a variable of
+|(X : Tyv)| introduces the field (named) |X|, which is a binding for a variable of
 namespace |Tyv|. The second field declaration |([X]T : Ty)| introduces the field
 |T| for a subterm of sort |Ty|.  It is prefixed by the \emph{binding
   specification} |[X]| which stipulates that |X| is brought into scope in the
@@ -144,11 +142,11 @@ subterm |T|. This is exactly the essential scoping information that we
 highlighted in Figure \ref{fig:systemfexistsscoping}. In contrast to Figure
 \ref{fig:systemfexistsscoping} we do not explicitly model (the domain of) the
 typing context; all variables that are in scope at the point of the |tall|
-constructor are are implicitly declared to be also in scope in all subterms.
+constructor are implicitly also in scope in all subterms.
 
 Multiple variables can be brought into scope together. For example, the binding
-specification for the body |t2| of the |unpack| constructor brings both, the
-type variable |X| and the term variable |x|, into scope.
+specification for the body |t2| of the |unpack| constructor brings both the
+type variable |X| and the term variable |x| into scope.
 
 { % FEXISTSPROD SCOPE
   \input{src/MacrosFExists}
@@ -157,9 +155,10 @@ type variable |X| and the term variable |x|, into scope.
   of binders. The function |bind| specifies which variables are bound by a
   pattern, similar to the $\bindp{\cdot}$ function in Figure
   \ref{fig:systemfexists:textbook:freevariables}. The function declaration for
-  |bind| in Figure \ref{fig:knot:fexistsprodsyntax} consists of a signature,
-  which specifies that patterns are binding variables of namespace |Tmv|, and of
-  a body that defines |bind| by means of a exhaustive one-level pattern
+  |bind| in Figure \ref{fig:knot:fexistsprodsyntax} consists of a signature and a body.
+  The signature
+  specifies that patterns bind variables of namespace |Tmv|, and the body
+  defines |bind| by means of an exhaustive one-level pattern
   match. Functions can be used in binding specifications. The term constructor
   |case| for nested pattern matching uses |bind| to specify that the variables
   bound by the pattern |p| are simultaneously brought into scope in the body
@@ -169,10 +168,10 @@ type variable |X| and the term variable |x|, into scope.
 
 
 \paragraph{Environments}
-The last declaration defines typing environments. The constructor |empty| for
-the base case is prefixed with a plus sign. All other cases associate
+The last declaration defines typing environments. The plus sign indicates the
+base case with constructor |empty|. All other cases associate
 information with variables of a namespace. The constructor |evar| declares that
-it is representing a mapping of term variables |Tmv| to types |Ty|.  It also
+it represents a mapping of term variables |Tmv| to types |Ty|.  It also
 states that the term variable clause is substitutable for judgements of the
 typing relation |Typing|. We discuss this below where we define |Typing|. The
 constructor |etvar| is not associating any information with type variables.
@@ -217,9 +216,10 @@ and |PTyping| for patterns.
 The first line of a \emph{relation declaration} fixes the signature of a
 relation. For |Typing|, the declaration stipulates that it makes use of the
 typing environment |Env| and has two indices: terms |Tm| and types |Ty|. The
-remainder of a relation declaration consists of rules of which there are two
-kinds: \emph{variable rules} and \emph{regular rules}. Both kinds use notation
-commonly found for generalized algebraic data-types.
+remainder of a relation declaration consists of rules. Like for sorts,
+the are two kinds of rules for relations: \emph{variable rules} and,
+\emph{regular rules}. Both kinds use notation commonly found for generalized
+algebraic data-types.
 
 Similarly to the abstract syntax, the \emph{variable rules} are introduced with
 a plus sign. Parameters in braces define lookups, e.g. the parameter |{x -> T}|

@@ -36,14 +36,14 @@ that is suitable for mechanization. Third, we discuss the mechanization itself.
 
 \section{Semi-formal Development}\label{sec:gen:spec}
 
-This section presents the semi-formal development of the language \fexistsprod{},
-with an emphasis on variable
-binding related concerns. Section
+This section presents the semi-formal development of the language
+\fexistsprod{}, with an emphasis on variable binding related concerns. Section
 \ref{sec:gen:semiformal:syntax} presents the syntax of \fexistsprod{} and
 elaborates on needed variable binding boilerplate. Subsequently, Section
 \ref{sec:gen:semiformal:semantics} presents the typing and evaluation relations
-and illustrates the boilerplate lemmas they determine. Finally, Section \ref{sec:gen:semiformal:metatheory} shows
-where boilerplate is used in the type-safety proof of \fexistsprod{}.
+and illustrates the boilerplate lemmas they determine. Finally, Section
+\ref{sec:gen:semiformal:metatheory} shows where boilerplate is used in the
+type-safety proof of \fexistsprod{}.
 
 %-------------------------------------------------------------------------------
 \subsection{Syntax}\label{sec:gen:semiformal:syntax}

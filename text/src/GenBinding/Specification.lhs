@@ -2,6 +2,18 @@
 %include forall.fmt
 %include Formatting.fmt
 
+%format namespace = "{\namespace}"
+%format sort = "{\sort}"
+%format fun = "{\function}"
+%format @ = "{\texttt{@}}"
+%format case = "\Varid{case}"
+%format env = "{\env}"
+%format relation = "{\relation}"
+
+%format spec     = "\spec"
+%format condecl  = "\condecl"
+%format vdashS = "\vdash_{" S "}"
+
 %% This section introduces \Knot, our language for specifying the abstract syntax
 %% of programming languages and associated variable binder information. The
 %% advantage of specifying programming languages in \Knot\ is straightforward: the
@@ -17,38 +29,33 @@
 
 %-------------------------------------------------------------------------------
 
-\begin{itemize}
+This section presents the \Knot~specification language for programming
+languages. We introduce \Knot by example first Section \ref{sec:knotbyexample}
+and formally in Sections \ref{sec:knotsyntax}, \ref{sec:knot:expressions} and
+\ref{sec:knot:relations}. This makes the \Knot language easier to understand and
+allows us to make our terminology clear.
 
-\item This section presents the \Knot~specification language for abstract syntax
-  with binders.
-
-\item Introduce the \Knot specification language by example first in Section
-  \ref{sec:knotbyexample} and a formally in Sections \ref{sec:knotsyntax},
-  \ref{sec:knot:expressions} and \ref{sec:knot:relations}.
-
-\item This makes the \Knot easier to understand and allows us to make our
-  terminology clear.
-
-\item We will reiterate through the different parts of a language specification.
-  Section \ref{sec:knotsyntax} deals with the specification of \emph{abstract
-    syntax} of programmning languages and their scoping rules. In Section
-  \ref{sec:knot:expressions} we will look at \emph{symbolic expressions} build
-  up using abstract syntax constructors, syntactic operations like substitutions
-  and meta-variables as placeholders for concrete subterms. The expressions are
-  used in the specification of \emph{inductive relations}, which we discuss in
-  Section \ref{sec:knot:relations}, where they are used in the indices of rules.
-\end{itemize}
+We will reiterate through the different parts of a language specification.
+Section \ref{sec:knotsyntax} deals with the specification of \emph{abstract
+  syntax} of programmning languages and their scoping rules. In Section
+\ref{sec:knot:expressions} we will look at \emph{symbolic expressions} build up
+using abstract syntax constructors, syntactic operations like substitutions and
+meta-variables as placeholders for concrete subterms. The expressions are used
+in the specification of \emph{inductive relations}, which we discuss in Section
+\ref{sec:knot:relations}, where they are used in the indices of rules.
 
 \section{\Knot by Example}\label{sec:knotbyexample}
 
-%format namespace = "{\namespace}"
-%format sort = "{\sort}"
-%format fun = "{\function}"
-%format @ = "{\texttt{@}}"
-%format case = "\Varid{case}"
-%format env = "{\env}"
-%format relation = "{\relation}"
+In this Section we showcase \Knot by porting the semi-formal specification of
+their \fexistsprod calculus from Chapter \ref{ch:gen:background} to
+\Knot. Section \ref{sec:knotbyexample:syntax} discusses the \Knot specification
+of the abstract syntax of \fexistsprod and Section
+\ref{sec:knotbyexample:semantics} its typing relation.
 
+
+%-------------------------------------------------------------------------------
+\subsection{Abstract Syntax Specifications}\label{sec:knotbyexample:syntax}
+%
 \begin{figure}[t]
   \fbox{
     \begin{minipage}{0.96\columnwidth}
@@ -84,88 +91,100 @@
   \label{fig:knot:fexistsprodsyntax}
 \end{figure}
 
-\begin{itemize}
-\item Figure \ref{fig:knot:fexistsprodsyntax} contains the first part, dealing
-  with abstract syntax only, of a \Knot specification for our example calculus
-  \fexistsprod.
+Figure \ref{fig:knot:fexistsprodsyntax} contains the first part, dealing with
+the abstract syntax of \fexistsprod only, which corresponds to EBNF grammar
+specification in Figure \ref{fig:systemfexistssyntax}.
 
-\item Figure \ref{fig:knot:fexistsprodsyntax} uses four different kind of
-  declarations: namespace, sort, function and environment declarations.
+The two sorts for variables and the one for typing contexts have a special
+purpose that is related to variable binding. However, this is completely
+implicit in the EBNF grammar in Figure \ref{fig:systemfexistssyntax} which
+defines all sorts uniformly. \Knot makes the distinction between them explicit
+and uses different declarations forms to introduce them. Specifically, \Knot
+distinguishes between \emph{namespaces}, \emph{regular syntactic sorts} and
+\emph{environments} which we discuss in turn.
 
-  We start with the declaration of two namespaces. The line |namespace Tyv : Ty|
-  introduces the namespace |Tyv| (short for type variables) and declares that it
-  is a namespace for the sort |Ty|, which represents \fexistsprod
-  types. Similarly, we declare |Tmv| to be a namespace for terms |Tm|.
 
-\item Namespaces and sorts are different concepts in \Knot.
+\paragraph{Namespaces}
+Figure \ref{fig:knot:fexistsprodsyntax} starts with with the declaration of two
+namespaces. The line |namespace Tyv : Ty| introduces the namespace |Tyv| (short
+for type variables) and declares that it is a namespace for the sort |Ty|, which
+represents \fexistsprod types and that we define below. Similarly, we declare
+|Tmv| to be a namespace for terms |Tm|.
 
-\item Most languages are defined using sorts that have either zero or one
-  namespaces. Therefore often the namespace is not explicitly separated
-  from the sort.
+%% \begin{itemize}
+%% \item Most languages are defined using sorts that have either zero or one kind
+%%   of variables.
+%% \item In \Knot it is possible to associate multiple namespaces with a single sort.
+%% \item Therefore it is common practice to not explicitly separate the namespace
+%%   from the sort.
+%% \end{itemize}
 
-\item In \Knot it is possible to associate multiple namespaces with a single
-  sort.
 
-\item Three sorts are introduced next: types |Ty|, terms |Tm| and patterns |Pat|
-  using an established notation in functional programming for algebraic datatype
-  declarations. Each sort is defined by a list of constructors of which there
-  are two kinds: \emph{variable constructors} and \emph{regular constructors}.
+\paragraph{Syntactic Sorts}
+Three sorts are introduced next: types |Ty|, terms |Tm| and patterns |Pat| using
+an established notation in functional programming for algebraic datatype
+declarations. Each sort is defined by a list of constructors of which there are
+two kinds: \emph{variable constructors} and \emph{regular constructors}.
 
-\item Variable constructors are introduced with a plus sign \texttt{+} prefix.
-  In the example, the line $\texttt{+} \hspace{0.5mm} |tvar (X@Tyv)|$ declares
-  the variable constructor |tvar| for types. It holds a single \emph{variable
-    reference} of the namespace |Tyv| for type variables.
+Variable constructors are introduced with a plus sign \texttt{+} prefix.  In the
+example, the line \[ \texttt{+} \hspace{0.5mm} |tvar (X@Tyv)| \] declares the
+variable constructor |tvar| for types. It holds a single \emph{variable
+  reference} of the namespace |Tyv| for type variables.
 
-\item Regular constructors are declared using the vertical bar \texttt{||} and
-  can have an arbitrary amount of fields. The line
-  $\texttt{+} \hspace{0.5mm} |tall (X : Tyv) ([X]T : Ty)|$ declares the regular
-  constructor |tall| that represents universally quantified types. All fields
-  are explicitly named. The first field declaration |(X : Tyv)| introduces the
-  field |X|, which is a binding for a variable of namespace |Tyv|. The second
-  field declaration |([X]T : Ty)| introduces the field |T| for a subterm of sort
-  |Ty|.  It is prefixed by the \emph{binding specification} |[X]| which
-  stipulates that |X| is brought into scope in the subterm |T|. This is exactly
-  the essential scoping information that we highlighted in Figure
-  \ref{fig:systemfexistsscoping}. In contrast to Figure
-  \ref{fig:systemfexistsscoping} we do not explicitly model (the domain of) the
-  typing context; all variables that are in scope at the point of the |tall|
-  constructor are are implicitly declared to be also in scope in all subterms.
+Regular constructors are declared using the vertical bar \texttt{||} and can
+have an arbitrary amount of fields. The line
+\[ \texttt{+} \hspace{0.5mm} |tall (X : Tyv) ([X]T :
+Ty)| \]  declares the regular constructor |tall| that represents universally
+quantified types. All fields are explicitly named. The first field declaration
+|(X : Tyv)| introduces the field |X|, which is a binding for a variable of
+namespace |Tyv|. The second field declaration |([X]T : Ty)| introduces the field
+|T| for a subterm of sort |Ty|.  It is prefixed by the \emph{binding
+  specification} |[X]| which stipulates that |X| is brought into scope in the
+subterm |T|. This is exactly the essential scoping information that we
+highlighted in Figure \ref{fig:systemfexistsscoping}. In contrast to Figure
+\ref{fig:systemfexistsscoping} we do not explicitly model (the domain of) the
+typing context; all variables that are in scope at the point of the |tall|
+constructor are are implicitly declared to be also in scope in all subterms.
 
-\item Multiple variables can be brought into scope together. For example, the
-  binding specification for the body |t2| of the |unpack| constructor brings
-  both, the type variable |X| and the term variable |x|, into scope.
+Multiple variables can be brought into scope together. For example, the binding
+specification for the body |t2| of the |unpack| constructor brings both, the
+type variable |X| and the term variable |x|, into scope.
 
-\item
-  { % FEXISTSPROD SCOPE
-    \input{src/MacrosFExists}
+{ % FEXISTSPROD SCOPE
+  \input{src/MacrosFExists}
 
-    The sort |Pat| for patterns is special in the sense that it represents a
-    sort of binders. The function |bind| specifies which variables are bound by
-    a pattern, similar to the $\bindp{\cdot}$ function in Figure
-    \ref{fig:systemfexists:textbook:freevariables}. The function declaration for
-    |bind| consists of a signature, which specifies that patterns are binding
-    variables of namespace |Tmv|, and of a body that defines |bind| by means of
-    a exhaustive one-level pattern match. Function can be used in binding
-    specifications. The term constructor |case| for nested pattern matching uses
-    |bind| to specify that the variables bound by the pattern |p| are brought
-    into scope in the body |t2|. \stevennote{CHECK THIS}{The constructor |ppair|
-      also uses |bind| which is explained in Section \ref{sec:wellformedspec}}.
-  }
+  The sort |Pat| for patterns is special in the sense that it represents a sort
+  of binders. The function |bind| specifies which variables are bound by a
+  pattern, similar to the $\bindp{\cdot}$ function in Figure
+  \ref{fig:systemfexists:textbook:freevariables}. The function declaration for
+  |bind| in Figure \ref{fig:knot:fexistsprodsyntax} consists of a signature,
+  which specifies that patterns are binding variables of namespace |Tmv|, and of
+  a body that defines |bind| by means of a exhaustive one-level pattern
+  match. Functions can be used in binding specifications. The term constructor
+  |case| for nested pattern matching uses |bind| to specify that the variables
+  bound by the pattern |p| are simultaneously brought into scope in the body
+  |t2|. \stevennote{CHECK THIS}{The constructor |ppair| also uses |bind| which
+    is explained in Section \ref{sec:wellformedspec}}.
+}
 
-\item The last declaration defines typing environments. The constructor |empty|
-  for the base case is prefixed with a plus sign. All other cases associate
-  information with variables of a namespace. The constructor |evar| declares
-  that it is representing a mapping of term variables |Tmv| to types |Ty|.
-  It also states that the term variable clause is substitutable for judgements
-  of the typing |Typing|, which we define below. The constructor |etvar| is
-  not associating any information with type variables.
-\end{itemize}
 
+\paragraph{Environments}
+The last declaration defines typing environments. The constructor |empty| for
+the base case is prefixed with a plus sign. All other cases associate
+information with variables of a namespace. The constructor |evar| declares that
+it is representing a mapping of term variables |Tmv| to types |Ty|.  It also
+states that the term variable clause is substitutable for judgements of the
+typing relation |Typing|. We discuss this below where we define |Typing|. The
+constructor |etvar| is not associating any information with type variables.
+
+
+%-------------------------------------------------------------------------------
+\subsection{Inductive Relation Specifications}\label{sec:knotbyexample:semantics}
+%
 \begin{figure}[t]
-  \centering
   \fbox{
     \begin{minipage}{0.96\columnwidth}
-      \begin{tabular}{l@@{\hspace{2mm}}c@@{\hspace{1mm}}l}
+      \begin{tabular}{l@@{\hspace{1.5mm}}c@@{\hspace{1mm}}l}
         \multicolumn{3}{l}{|relation [Env] Typing Tm Ty|~\cass}                                                        \\
          & \texttt{+}  & |Tvar :  {x -> T} -> Typing (var x) T|                                                        \\
          & \texttt{||} & |Tabs :  [x -> T1] Typing t (weaken T2 x) -> Typing (abs x T1 t) (tarr T1 T2)|                \\
@@ -191,36 +210,48 @@
   \label{fig:knot:fexistsprodtyping}
 \end{figure}
 
-\begin{itemize}
-\item Figure \ref{fig:knot:fexistsprodtyping} contains the second part of
-  \fexistsprod{}' \Knot~specification: the typing relations |Typing| for terms
-  and |PTyping| for patterns.
-\item The |Typing| relation makes use of the typing environment |Env| and has
-  two indices: terms |Tm| and types |Ty|.
-\item Similarly to the abstract syntax, the \emph{variable rule} |Tvar| is introduced
-  with a plus sign. The parameter |{x -> T}| defines a lookup of the term variable
-  |x| in the implicit typing environment.
-\item The \emph{regular rule} |Tabs| specifies the typing of term
-  abstractions. Here the domain type |T2| changes scope and needs to be
-  explicitly weakened in the premise.  In contrast, in the rule |Ttabs| the body
-  of the universal quantification is under a binder in the conclusion and it
-  does not change its scope so no weakening is performed.
-\item The rule for type applications |Ttapp| shows the use of symbolic
-  substitution |(subst X T2 T12)| in the conclusion and the rule |Tpack| for
-  packing existentials shows symbolic substitution in the premise.
-\item Finally, in the rule
- |Tunpack| we need to weaken the type |T2| explicitly with the type variable |X|
-and the term variable |x| for the typing judgement of the body |t2|.
+Figure \ref{fig:knot:fexistsprodtyping} contains the second part of
+\Knot~specification for \fexistsprod: the typing relations |Typing| for terms
+and |PTyping| for patterns.
 
-\item The typing of patterns can be similarly translated from the semi-formal
-  specification in Section \ref{sec:gen:semiformal:semantics}. The additional
-  concern is the definition of the relation output that defines the typing
-  context extension for the variables bound by the pattern, or more precisely
-  defined to be bound by the |bind| function on patterns.
-\item In figure \ref{fig:knot:fexistsprodtyping} this output is explicitly
-  referred to by reusing the function name |bind|. After each rule
+The first line of a \emph{relation declaration} fixes the signature of a
+relation. For |Typing|, the declaration stipulates that it makes use of the
+typing environment |Env| and has two indices: terms |Tm| and types |Ty|. The
+remainder of a relation declaration consists of rules of which there are two
+kinds: \emph{variable rules} and \emph{regular rules}. Both kinds use notation
+commonly found for generalized algebraic data-types.
 
-\end{itemize}
+Similarly to the abstract syntax, the \emph{variable rules} are introduced with
+a plus sign. Parameters in braces define lookups, e.g. the parameter |{x -> T}|
+of |Tvar| represents a lookup of the term variable |x| in the \emph{implicit
+  typing environment}. We require that each variable rule consists of exactly
+one lookup which corresponds exactly to the signature of the relation that is
+being defined and is consistent with the declaration of the environment.
+
+The \emph{regular rule} |Tabs| specifies the typing of term abstractions.  In
+square brackets before a field, we can add \emph{rule binding specifications}
+that allow us to change the implicit environment for this field. In this case,
+we extend the implicit typing context with a binding for the \textlambda-bound
+variable |x|. In this rule, the domain type |T2| changes scope and needs to be
+explicitly weakened in the premise. In contrast, in the rule |Ttabs| the body of
+the universal quantification is under a binder in the conclusion and it does not
+change its scope so no weakening is performed. \stevennote{TODO}{Add comparison
+  with the free variable check in the semi-formal development} The rule for type
+applications |Ttapp| shows the use of symbolic substitution |(subst X T2 T12)|
+in the conclusion and the rule |Tpack| for packing existentials shows symbolic
+substitution in the premise. Finally, in the rule |Tunpack| we need to weaken
+the type |T2| explicitly with the type variable |X| and the term variable |x|
+for the typing judgement of the body |t2|.
+
+The typing of patterns can be similarly translated from the semi-formal
+specification in Section \ref{sec:gen:semiformal:semantics}. The additional
+concern is the definition of the relation output that defines the typing context
+extension for the variables bound by the pattern, or more precisely defined to
+be bound by the |bind| function on patterns.  In Figure
+\ref{fig:knot:fexistsprodtyping} this output is explicitly referred to by
+reusing the function name |bind|. After each rule, we include a clause that
+defines |bind| for this rule. For this purpose, we also allow naming the fields
+of rules. Calling |bind| on a field gives access to its output.
 
 
 
@@ -265,12 +296,8 @@ relation Eval Tm Tm :=
 
 \section{Key Design Choices}\label{sec:knotdesign}
 
-\stevennote{MOVED FROM OVERVIEW}{
-Because this rule inspects the context $\Gamma$ we call it \emph{not context
-  parametric}. The other rules either pass the context through unchanged or pass
-an extended context to the premises. We call these rules \emph{context
-  parametric}.
-%
+\paragraph{Local and Global Variables}
+\stevennote{TODO}{
 Rule \textsc{TAbs} deals with abstractions over terms in terms. The
 meta-variable $y$ appears in a different mode in the conclusion than the
 meta-variable $x$ in the variable rule. The $\lambda$-abstraction binds the
@@ -282,7 +309,7 @@ Following the literature on \emph{locally nameless}~\cite{locallynameless} and
 \emph{locally bound} variable (aka locally scoped variables \cite{pitts2015}),
 or more concisely a \emph{binding variable}, and $x$ a \emph{global} or
 \emph{free variable}. Another example is the judgement
-$\typing{\Gamma}{(\lambda y. y)~x}{\tau}$. Here $y$ is again locally bound and
+\[ \typing{\Gamma}{(\lambda y. y)~x}{\tau} \]. Here $y$ is again locally bound and
 $x$ has to be bound in $\Gamma$ for the judgement to be well-scoped. In this
 example, the meta-variable $y$ appears in both binding and referencing
 positions.
@@ -303,21 +330,31 @@ substitution in the conclusion while \textsc{TPack} does so in the premise. The
 substituted type-variable $\alpha$ is locally bound in both rules.
 }
 
-\stevennote{MOVED FROM OVERVIEW}{
-As the term in the conclusion remains a type application, we want to apply rule
-\textsc{TTApp} again. However, the \colorbox{light-gray}{type} in the conclusion
-does not have the appropriate form. We first need to commute the two substitutions
-with one of the common interaction lemmas
-\begin{align}
-  [\beta\mapsto \sigma][\alpha \mapsto \sigma'] =
-  [\alpha \mapsto [\beta\mapsto\sigma]\sigma'][\beta\mapsto\sigma] \label{lem:substcomm}
-\end{align}
+\paragraph{Context Parametricity}
+\stevennote{TODO}{
+Because the variable rule \textsc{TVar} inspects the context $\Gamma$ we call it
+\emph{not context parametric}. The other rules either pass the context through
+unchanged or pass an extended context to the premises. We call these rules
+\emph{context parametric}.
 %
-Intuitively this commutation is possible because $\beta$ is a free variable
-while $\alpha$ is locally bound and because context parametric rules are
-naturally compatible with any changes to the context.
 }
 
+%% \stevennote{MOVED FROM OVERVIEW}{
+%% As the term in the conclusion remains a type application, we want to apply rule
+%% \textsc{TTApp} again. However, the \colorbox{light-gray}{type} in the conclusion
+%% does not have the appropriate form. We first need to commute the two substitutions
+%% with one of the common interaction lemmas
+%% \begin{align}
+%%   [\beta\mapsto \sigma][\alpha \mapsto \sigma'] =
+%%   [\alpha \mapsto [\beta\mapsto\sigma]\sigma'][\beta\mapsto\sigma] \label{lem:substcomm}
+%% \end{align}
+%% %
+%% Intuitively this commutation is possible because $\beta$ is a free variable
+%% while $\alpha$ is locally bound and because context parametric rules are
+%% naturally compatible with any changes to the context.
+%% }
+
+\paragraph{Free Monadic Constructions}
 \stevennote{MOVED FROM OVERVIEW}{
 A key principle is the distinction between \emph{locally bound} and \emph{free}
 variables at the meta-level. This allows us to recognize \emph{context
@@ -340,6 +377,11 @@ for relations. Consider the small proof tree on the left:
 % , where $A$ is the subtree for the typing judgement of $e_1$.
 }
 
+\stevennote{MOVE}{The distinction between variable and regular constructors
+  follows straightforwardly from \Knot's free-monad-like view on syntax.  This
+  rules out languages for normal forms, but as they require custom behavior
+  (renormalization) during substitution \cite{anormalform,clf} their
+  substitution boilerplate cannot be defined generically anyway.}
 
 \section{\Knot~Syntax}\label{sec:knotsyntax}
 
@@ -381,12 +423,12 @@ for relations. Consider the small proof tree on the left:
   \label{fig:SpecificationLanguage}
 \end{figure}
 
-Figure \ref{fig:SpecificationLanguage} shows the grammar of \Knot.  A
-\Knot language specification $\spec$ consists of variable namespace
-declarations $\namedecl$, syntactic sort declarations $\sortdecl$, function
-declarations $\fundecl$, environment declarations $\envdecl$ and relation
-declarations $\reldecl$. We defer explaining relation declarations until Section
-\ref{ssec:inductiverelations}.
+Figure \ref{fig:SpecificationLanguage} shows the grammar of \Knot.  A \Knot
+language specification $\spec$ consists of variable namespace declarations
+$\namedecl$, syntactic sort declarations $\sortdecl$, function declarations
+$\fundecl$, environment declarations $\envdecl$ and relation declarations
+$\reldecl$. We defer explaining relation declarations until Section
+\ref{sec:knot:relations}.
 
 A namespace declaration $\namespace~\alpha : S$ introduces the namespace
 $\alpha$ and associates it with the syntactic sort $S$. This expresses that
@@ -404,14 +446,9 @@ reference $g$ signifies that the reference is free when considering a variable
 constructor in isolation. In larger symbolic expressions, also binding variables
 may appear in variable constructors.
 
-Regular constructors $K\,\ov{(b : \alpha)}\,\ov{(s : S)}$ contain
-named variable bindings $\ov{(b : \alpha)}$ and named subterms $\ov{(s :
-  S)}$. For the sake of presentation we assume that the variable bindings
-precede subterms. The distinction between variable and regular constructors
-follows straightforwardly from \Knot's free-monad-like view on syntax.  This rules
-out languages for normal forms, but as they require custom behavior
-(renormalization) during substitution \cite{anormalform,clf} their substitution
-boilerplate cannot be defined generically anyway.
+Regular constructors $K\,\ov{(b : \alpha)}\,\ov{(s : S)}$ contain named variable
+bindings $\ov{(b : \alpha)}$ and named subterms $\ov{(s : S)}$. For the sake of
+presentation we assume that the variable bindings precede subterms.
 
 Every subterm $s$ is preceded by a binding specification $\bindspec$ that
 stipulates which variable bindings are brought in scope of $s$. The binding
@@ -430,10 +467,10 @@ is defined by exhaustive case analysis on a term of sort $S$.  A crucial
 requirement is that functions cannot be defined for sorts that have variables.
 Otherwise it would be possible to change the set of variables that a pattern
 binds with a substitution. The specification of the output type $\ov{\alpha}$ is
-used in \cite{knotneedle} to derive subordination-based strengthening lemmas.
-However, these lemmas are not necessary to derive the semantics
-boilerplate. Hence, for simplicity we ignore the output type of functions and
-any other subordination related information in the remainder of this paper.
+used by \Needle to derive \emph{subordination-based strengthening}
+lemmas~\cite{knotneedle}. For simplicity we ignore the output type of functions
+and any other subordination related information in the remainder of this thesis.
+% However, these lemmas are not necessary to derive the semantics boilerplate.
 
 Environments $E$ represent a mapping from variables in scope to additional data
 such as typing information. To this end, an environment declaration $\envdecl$
@@ -441,20 +478,12 @@ consists of named clauses $K : (\alpha \cto \ov{S} : R)$ that stipulate that
 variables in namespace $\alpha$ are mapped to terms of sorts
 $\ov{S}$. Additionally, we specify that this clause can be substituted for
 judgement of relation $R$. If the relation $R$ is omitted, then it defaults to
-well-scopedness of the data. We clarify this, together with the syntax of
-inductive relations, in Section \ref{ssec:inductiverelations}.
-
-
+well-scopedness of the data. We elaborate on this, together with the syntax of
+inductive relations, in Section \ref{sec:knot:relations}.
 
 
 %-------------------------------------------------------------------------------
-
 \subsection{Well-Formed \Knot~Specifications}\label{sec:wellformedspec}
-%format spec     = "\spec"
-%format condecl  = "\condecl"
-
-
-%format vdashS = "\vdash_{" S "}"
 \begin{figure}[t]
 \begin{center}
 \fbox{
@@ -603,13 +632,15 @@ specifications. As a consequence it is impossible to define scoping constructs
 such as recursive scoping. This is a trade-off between expressivity and
 simplicity. We plan to add multiple (potentially circular) input scopes in
 future work, so that recursive constructs can be checked with two scopes: one
-for declaration heads and one for declaration bodies.
+for declaration heads and one for declaration bodies. We come back to this issue
+in the concluding discussion of this chapter in Section
+\ref{sec:gen:spec:discussion}.
 
 %if False
 \begin{figure}[t]
 \begin{center}
 \fbox{
-  \begin{minipage}{0.98\columnwidth}
+  \begin{minipage}{0.96\columnwidth}
   \framebox{\mbox{$\vdash \envdecl$}} \\
   \vspace{-5mm}
   \[ \inferrule* [right=\textsc{WfEnv}]
@@ -751,53 +782,55 @@ $\symbolicenv$ that maps binding meta-variables to new names and sort
 meta-variables to expressions. Symbolic environments $\symbolicenv$ are
 defined in Figure \ref{fig:symbolicevaluation} (top).
 
-\paragraph{Symbolic Evaluation} Figure \ref{fig:symbolicevaluation} (middle)
-contains definitions for the symbolic evaluation as a big-step operational
-semantics. The relation $\evalbig{\symbolicenv}{\bindspec_1}{\bindspec_2}$
-defines the evaluation of the binding specification $\bindspec_1$ with respect
-to environment $\symbolicenv$.
 
-Rule \textsc{EvalNil} handles the empty case and rule \textsc{EvalSng} the
-singleton case in which we simply use the new name of the binding variable and
-evaluate recursively. The case of a function call is delegated to the relation
-$\evalbigf{f}{\symbolicterm}{\bindspec}$ that explains the evaluation of the
-function $f$ on the expression $\symbolicterm$. The straightforward case of a
-meta-variable is handled by \textsc{EvalCallVar}. Rule \textsc{EvalCallCon}
-handles expressions built by a regular constructor. It builds up an
-environment $\symbolicenv$ that maps the left-hand side |(overline x)
-(overline s)| of the function clause to the fields of the symbolic
-construction and evaluates the right-hand side of the clause.
-
-Notably absent from the symbolic evaluation are rules for reified
-substitutions and reified weakenings. The de Bruijn representation admits for
-example the rule
-$$
-\inferrule* []
- { \evalbigf{f}{\symbolicterm_2}{\bindspec'}
- }
- { \evalbigf{f}{\symbolicsubst~x~\symbolicterm_1~\symbolicterm_2}{\bindspec'}
- }.
-$$
-Yet, adding this rule would break subject reduction of symbolic
-evaluation. The reason is that the typing of $\bindspec$ in Figure
-\ref{fig:symbolicevaluation} (bottom) is not strong enough to keep track of
-the scope when performing substitutions or weakenings. In essence, the result
-cannot be $\bindspec'$ but has to be ``$\bindspec'$ without $x$''. Tracking
-scopes during substitutions or other user-defined functions is the focus of
-research on \emph{binding safe programming}~\cite{freshlook,romeo}. In the
-framework of \cite{freshlook}, $\bindspec'$ in the premise and conclusion of
-the above rule are two distinct (chains of) weak links with distinct types
-which are in a commutative relationship with the world inclusion induced by
-the substitution.
-
-We side-step the issue by sticking to the simple scope checking of Figure
-\ref{fig:symbolicevaluation} (bottom) and effectively disallow symbolic
-substitutions and weakenings to appear in positions that are accessed by
-functions. Another consequence is that substitution and weakening are only
-allowed ``at the end of the context''. These restrictions are usually met by
-relations for typing and operational semantics, and thus do not get in the
-way of type-safety proofs. However, it may be too restrictive for other kinds
-of meta-theoretical formalizations.
+%% \paragraph{Symbolic Evaluation} Figure \ref{fig:symbolicevaluation} (middle)
+%% contains definitions for the symbolic evaluation as a big-step operational
+%% semantics. The relation $\evalbig{\symbolicenv}{\bindspec_1}{\bindspec_2}$
+%% defines the evaluation of the binding specification $\bindspec_1$ with respect
+%% to environment $\symbolicenv$.
+%%
+%% Rule \textsc{EvalNil} handles the empty case and rule \textsc{EvalSng} the
+%% singleton case in which we simply use the new name of the binding variable and
+%% evaluate recursively.
+%%
+%% The case of a function call is delegated to the relation
+%% $\evalbigf{f}{\symbolicterm}{\bindspec}$ that explains the evaluation of the
+%% function $f$ on the expression $\symbolicterm$. The straightforward case of a
+%% meta-variable is handled by \textsc{EvalCallVar}. Rule \textsc{EvalCallCon}
+%% handles expressions built by a regular constructor. It builds up an environment
+%% $\symbolicenv$ that maps the left-hand side |(overline x) (overline s)| of the
+%% function clause to the fields of the symbolic construction and evaluates the
+%% right-hand side of the clause.
+%%
+%% Notably absent from the symbolic evaluation are rules for reified
+%% substitutions and reified weakenings. The de Bruijn representation admits for
+%% example the rule
+%% $$
+%% \inferrule* []
+%%  { \evalbigf{f}{\symbolicterm_2}{\bindspec'}
+%%  }
+%%  { \evalbigf{f}{\symbolicsubst~x~\symbolicterm_1~\symbolicterm_2}{\bindspec'}
+%%  }.
+%% $$
+%% Yet, adding this rule would break subject reduction of symbolic evaluation. The
+%% reason is that the typing of $\bindspec$ in Figure \ref{fig:symbolicevaluation}
+%% (bottom) is not strong enough to keep track of the scope when performing
+%% substitutions or weakenings. In essence, the result cannot be $\bindspec'$ but
+%% has to be ``$\bindspec'$ without $x$''. Tracking scopes during substitutions or
+%% other user-defined functions is the focus of research on \emph{binding safe
+%%   programming}~\cite{freshlook,romeo}. In the framework of \cite{freshlook},
+%% $\bindspec'$ in the premise and conclusion of the above rule are two distinct
+%% (chains of) weak links with distinct types, which are in a commutative
+%% relationship with the world inclusion induced by the substitution.
+%%
+%% We side-step the issue by sticking to the simple scope checking of Figure
+%% \ref{fig:symbolicevaluation} (bottom) and effectively disallow symbolic
+%% substitutions and weakenings to appear in positions that are accessed by
+%% functions. Another consequence is that substitution and weakening are only
+%% allowed ``at the end of the context''. These restrictions are usually met by
+%% relations for typing and operational semantics, and thus do not get in the
+%% way of type-safety proofs. However, it may be too restrictive for other kinds
+%% of meta-theoretical formalizations.
 
 
 %% The two remaining rules \textsc{EvalCallWeaken} and \textsc{EvalCallSubst}
@@ -1110,7 +1143,7 @@ first index $\symbolicterm$.  Also, the local scope $\bindspec$ of $j$ is
 checked to be identical to the flattening of the prefix $\rulebindspec$.
 
 
-\section{Discussion}
+\section{Discussion}\label{sec:gen:spec:discussion}
 
 \begin{itemize}
 \item The specification of the output type $\ov{\alpha}$ is used in
@@ -1119,7 +1152,44 @@ checked to be identical to the flattening of the prefix $\rulebindspec$.
   boilerplate. Hence, for simplicity we ignore the output type of functions and
   any other subordination related information in the remainder of this paper.
 
+\item This is a trade-off between expressivity and simplicity. We plan to add
+  multiple (potentially circular) input scopes in future work, so that recursive
+  constructs can be checked with two scopes: one for declaration heads and one
+  for declaration bodies.
+
+\item
+  The first stage in the development of \Knot and \Needle concerned itself
+  with the abstract syntax only and was published in the article
+
+  \begin{center}
+    \begin{minipage}{0.8\columnwidth}
+      Keuchel, S., Weirich, S., and Schrijvers, T. (2016).
+      \newblock Needle {\&} {K}not: {B}inder {B}oilerplate {T}ied {U}p.
+      \newblock In {\em Programming Languages and Systems: 25th European Symposium
+        on Programming}, ESOP '16, pages 419--445. Springer.
+    \end{minipage}
+  \end{center}
+
+\item The article
+  \begin{center}
+    \begin{minipage}{0.8\columnwidth}
+      Keuchel, S.,  Schrijvers, T., and Weirich, S. (2016).
+      \newblock Needle {\&} {K}not: {B}oilerplate {B}ound {T}ighter.
+      \newblock Unpublished draft.
+    \end{minipage}
+  \end{center}
+
+  extends the framework with the support for inductive relations, which also
+  includes the development of the symbolic expressions related part.
 \end{itemize}
+
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../Main"
+%%% End:
+
 
 %%% Local Variables:
 %%% mode: latex

@@ -42,12 +42,55 @@ This section presents the semi-formal development of the language
 elaborates on needed variable binding boilerplate. Subsequently, Section
 \ref{sec:gen:semiformal:semantics} presents the typing and evaluation relations
 and illustrates the boilerplate lemmas they determine. Finally, Section
-\ref{sec:gen:semiformal:metatheory} shows where boilerplate is used in the
+\ref{sec:gen:semiformal:metatheory} shows where the boilerplate is used in the
 type-safety proof of \fexistsprod{}.
 
 %-------------------------------------------------------------------------------
 \subsection{Syntax}\label{sec:gen:semiformal:syntax}
-%
+\begin{figure}[t]
+  \centering
+  \fbox{
+    \begin{minipage}{0.96\columnwidth}
+      \setlength{\tabcolsep}{0.4em}
+      \begin{tabular}{@@{}l@@{\hspace{0.2em}}lll l@@{\hspace{0.1em}}lll@@{}}
+        $\alpha,\beta$   & ::= &                              & type variable    & $e$ & ::=    &                                                & term             \\
+        $\tau,\sigma$    & ::= &                              & type             & \multicolumn{3}{l}{$\quad \mid x$}                            & term variable    \\
+          \multicolumn{3}{l}{$\quad \mid \alpha$}             & type variable    & \multicolumn{3}{l}{$\quad \mid \lambda x:\tau.e$}             & term abstraction                                           \\
+          \multicolumn{3}{l}{$\quad \mid \sigma \to \tau$}    & function type    & \multicolumn{3}{l}{$\quad \mid e_1~e_2$}                      & application                                                \\
+          \multicolumn{3}{l}{$\quad \mid \forall\alpha.\tau$} & universal type   & \multicolumn{3}{l}{$\quad \mid \Lambda\alpha.e$}              & type abstraction                                           \\
+          \multicolumn{3}{l}{$\quad \mid \exists\alpha.\tau$} & existential type & \multicolumn{3}{l}{$\quad \mid \tapp{e}{\tau}$}               & type application                                           \\
+          \multicolumn{3}{l}{$\quad \mid \sigma \times \tau$} & product type     & \multicolumn{3}{l}{$\quad \mid \pack{\sigma}{e}{\tau}$}       & packing                                                    \\
+        $x,y$            & ::= &                              & term variable    & \multicolumn{3}{l}{$\quad \mid \unpack{\alpha}{x}{e_1}{e_2}$} & unpacking        \\
+        $p$              & ::= &                              & pattern          & \multicolumn{3}{l}{$\quad \mid e_1,e_2$}                      & pair             \\
+          \multicolumn{3}{l}{$\quad \mid x$}                  & variable pattern & \multicolumn{3}{l}{$\quad \mid \casep{e_1}{p}{e_2}$}          & pattern binding                                            \\
+          \multicolumn{3}{l}{$\quad \mid p_1 , p_2$}          & pair pattern     & $v$ & ::=    &                                                & value                                                      \\
+        $\Gamma,\Delta$  & ::= &                              & type context     & \multicolumn{3}{l}{$\quad \mid \lambda x:\tau.e$}            & term abstraction \\
+          \multicolumn{3}{l}{$\quad \mid \epsilon$}           & empty context    & \multicolumn{3}{l}{$\quad \mid \Lambda\alpha.e$}             & type abstraction                                           \\
+          \multicolumn{3}{l}{$\quad \mid \Gamma, \alpha$}     & type binding     & \multicolumn{3}{l}{$\quad \mid \pack{\sigma}{v}{\tau}$}      & existential value                                          \\
+          \multicolumn{3}{l}{$\quad \mid \Gamma, x:\tau$}     & term binding     & \multicolumn{3}{l}{$\quad \mid v_1,v_2$}                     & pair value                                                 \\
+      \end{tabular}
+    \end{minipage}
+  }
+  \caption{\fexistsprod syntax}
+  \label{fig:systemfexistssyntax}
+\end{figure}
+
+        %%  \\
+        %%  \\
+        %%  \\
+        %%  \\
+        %%  \\
+        %%  \\
+        %%  \\
+        %%  \\
+        %%  \\
+        %%  \\
+        %%  \\
+        %%  \\
+        %%  \\
+        %%  \\
+        %%  \\
+
 Like in Section \ref{ssec:intro:syntax} we define the syntax of \fexistsprod{}
 using an EBNF grammar. On top of this grammar, we define a substitution
 operation, and its dependencies which we need to specify the semantics in the
@@ -55,49 +98,8 @@ following section. We also pay attention to another concern related to variable
 binding, namely scoping rules, which we define using a well-scopedness
 relation. This is more formal and explicit than what is commonly found in
 textbooks.
-%
+
 \paragraph{Grammar}
-\begin{figure}[t]
-  \fbox{
-    \begin{minipage}{0.96\columnwidth}
-      \begin{tabular}{lcll@@{\hspace{8mm}}lcll}
-        $\alpha,\beta$  & ::=    &                                & type variable     \\
-        $\tau,\sigma$   & ::=    &                                & type              \\
-                        & $\mid$ & $\alpha$                       & type variable     \\
-                        & $\mid$ & $\sigma \to \tau$              & function type     \\
-                        & $\mid$ & $\forall\alpha.\tau$           & universal type    \\
-                        & $\mid$ & $\exists\alpha.\tau$           & existential type  \\
-                        & $\mid$ & $\sigma \times \tau$           & product type      \\
-        $x,y$           & ::=    &                                & term variable     \\
-        $p$             & ::=    &                                & pattern           \\
-                        & $\mid$ & $x$                            & variable pattern  \\
-                        & $\mid$ & $p_1 , p_2$                    & pair pattern      \\
-        $e$             & ::=    &                                & term              \\
-                        & $\mid$ & $x$                            & term variable     \\
-                        & $\mid$ & $\lambda x:\tau.e$             & term abstraction  \\
-                        & $\mid$ & $e_1~e_2$                      & application       \\
-                        & $\mid$ & $\Lambda\alpha.e$              & type abstraction  \\
-                        & $\mid$ & $\tapp{e}{\tau}$               & type application  \\
-                        & $\mid$ & $\pack{\sigma}{e}{\tau}$       & packing           \\
-                        & $\mid$ & $\unpack{\alpha}{x}{e_1}{e_2}$ & unpacking         \\
-                        & $\mid$ & $e_1,e_2$                      & pair              \\
-                        & $\mid$ & $\casep{e_1}{p}{e_2}$          & pattern binding   \\
-        %% $v$             & ::=    &                                & value             \\
-        %%                 & $\mid$ & $\lambda x:\tau.e$             & term abstraction  \\
-        %%                 & $\mid$ & $\Lambda\alpha.e$              & type abstraction  \\
-        %%                 & $\mid$ & $\pack{\sigma}{v}{\tau}$       & existential value \\
-        %%                 & $\mid$ & $v_1,v_2$                      & pair value        \\
-        $\Gamma,\Delta$ & ::=    &                                & type context      \\
-                        & $\mid$ & $\epsilon$                     & empty context     \\
-                        & $\mid$ & $\Gamma, \alpha$               & type binding      \\
-                        & $\mid$ & $\Gamma, x:\tau$               & term binding      \\
-      \end{tabular}
-    \end{minipage}
-  }
-  \caption{\fexistsprod syntax}
-  \label{fig:systemfexistssyntax}
-\end{figure}
-%
 Figure \ref{fig:systemfexistssyntax} shows the first part of the language
 specification: the definition of the syntax of \fexistsprod, in a textbook-like
 manner.
@@ -120,9 +122,10 @@ pattern $p$ scope over $e_2$ but not $e_1$, and in the unpacking of an
 existential $(\unpack{\alpha}{x}{e_1}{e_2})$ the variables $\alpha$ and $x$
 scope over $e_2$.
 
+\stevennote{TODO}{Introduce reference and bindings.}
 
+%-------------------------------------------------------------------------------
 \paragraph{Scoping}
-%
 \begin{figure}[t]
   \fbox{
     \begin{minipage}{0.96\columnwidth}
@@ -158,7 +161,13 @@ scope over $e_2$.
   \caption{Well-scoping of types}
   \label{fig:systemfexistsscoping}
 \end{figure}
-%
+
+\stevennote{TODO}{Add motivation for this paragraph, i.e. making scoping rules
+  explicit or giving them a formal treatment. There is a well-scoping relation
+  defined for types, but obviously there should be similar relations for other
+  sorts. Hence, we cannot speak of ``the well-scoping relation'' but should
+  speak more generally about ``well-scoping relations''. Reflect this in the
+  text and make sure this is consistently used.}
 The well-scopedness relation for types $\kinding{\Gamma}{\tau}$ is defined in
 Figure \ref{fig:systemfexistsscoping}.  This relation takes a typing context
 $\Gamma$ as an index to represent the set of variables that are in scope and an
@@ -170,27 +179,27 @@ variable indeed appears in the typing context $\Gamma$. In the rules
 \textsc{WsAll} for universal and \textsc{WsEx} for existential quantification,
 the bound variable is added to the typing context in the premise for the bodies.
 Hence, the relation formally and explicitly defines the scoping rules that we
-defined in Section \ref{sec:gen:overview:syntax} in prose.
+defined in prose above.
 
-The definition of the well-scoping relation follows a standard recipe and
-usually its definition is left out in pen-and-paper specifications. In
-mechanizations, however, such a relation usually needs to be defined (unless it
-is not used in the meta-theory) by the human prover. Therefore, this relation is
-an example of syntax-related boilerplate that we want to derive generically. The
-structure of the relation only depends on the syntax of types and their scoping
-rules. The EBNF syntax of Figure \ref{fig:systemfexistssyntax} is insufficient
-since it does not contain information about scoping. One option is to make the
-scoping relation part of the specification and derive other boilerplate from it,
-but this relation already repeats a lot of information that is already given in
-the EBNF grammar. If possible we want to avoid that repetition in our
-specifications. The only new detail that the well-scopedness relation adds
-explicitly, is that the type variables in the quantifications scope over the
-bodies, which is highlighted in \textgray{gray} in Figure
-\ref{fig:systemfexistsscoping}.
+The definition of well-scoping relations follows a standard recipe and usually
+its definition is left out in pen-and-paper specifications. In mechanizations,
+however, such a relation usually needs to be defined (unless it is not used in
+the meta-theory) by the human prover. Therefore, this relation is an example of
+syntax-related boilerplate that we want to derive generically. The structure of
+the relation only depends on the syntax of types and their scoping rules. The
+EBNF syntax of Figure \ref{fig:systemfexistssyntax} is insufficient since it
+does not contain information about scoping. One option is to make the scoping
+relations like $\kinding{\Gamma}{\tau}$ part of the specification and derive
+other boilerplate from it, but this relation already repeats a lot of
+information that is already given in the EBNF grammar. If possible we want to
+avoid that repetition in our specifications. The only new detail that the
+well-scopedness relation adds explicitly, is that the type variables in the
+quantifications scope over the bodies, which is highlighted in \textgray{gray}
+in Figure \ref{fig:systemfexistsscoping}.
 
 These issues ask to develop a new formal and concise way to specify scoping
-rules. We come back to this in Section \ref{sec:specification} which presents
-our solution to the problem: we develop a language of (abstract) syntax
+rules. We come back to this in Chapter \ref{ch:knotsyntax} which presents our
+solution to the problem: we develop a language of (abstract) syntax
 specifications that include \emph{binding specifications} for scoping.
 
 \paragraph{Free Variables}
@@ -231,20 +240,20 @@ specifications that include \emph{binding specifications} for scoping.
   \label{fig:systemfexists:textbook:freevariables}
 \end{figure}
 
-Figure \ref{fig:systemfexists:textbook:freevariables} shows the definition
-  of the calculations of free variables of types and terms, i.e., reference
-  occurrences of variables that are not bound in the type or term itself.
+Figure \ref{fig:systemfexists:textbook:freevariables} shows the definition of
+the calculations of free variables of types and terms, i.e., reference
+occurrences of variables that are not bound in the type or term itself.
 % \item This operation is specific to a nameful syntax representation.
-The implementation is a recursive traversal that accumulates free
-  variables from variable references upward and removes binding
-  occurrences of variables.
-For sorts like patterns that represent binders we define an auxiliary
-  function $\bindp{\cdot}$ that calculates the set of bound variables.
-The definition of the free variable function follows a standard
-  recipe, which only depends on the grammar and the scoping rules of the
-  syntactic sorts, and is therefore boilerplate.
-Free variables are used for the definition of capture-avoiding substitution below.
-% and will not be used in the remainder of this thesis.
+Free variables are used for the definition of capture-avoiding substitution
+below. % and will not be used in the remainder of this thesis.
+
+The implementation is a recursive traversal that accumulates free variables from
+the variable case leaves upward and removes variables when they are found to be
+bound. For sorts like patterns that represent binders we define an auxiliary
+function $\bindp{\cdot}$ that calculates the set of bound variables.  The
+definition of the free variable function follows a standard recipe, which only
+depends on the grammar and the scoping rules of the syntactic sorts, and is
+therefore boilerplate.
 
 
 \paragraph{Substitution}
@@ -267,43 +276,44 @@ Free variables are used for the definition of capture-avoiding substitution belo
   \label{fig:systemfexists:textbook:substitution}
 \end{figure}
 
-A correct definition of substitution is subtle when it comes to specific
-  names of variables. A mere textual replacement is not sufficient. The
-  following two examples illustrate situations where we expect a different result than a
-  textual replacement:
+A correct definition of substitution is subtle when it comes to specific names
+of variables. A mere textual replacement is not
+sufficient. \stevennote{TODO}{Introduce the syntax of substitution.} The
+following two examples illustrate situations where we expect a different result
+than a textual replacement:
 
-  \[ \begin{array}{lcl}
-       \osubst{\alpha}{\sigma}{(\Lambda\alpha.\alpha)}          & \neq & \Lambda\alpha.\sigma          \\
-       \osubst{\alpha}{(\sigma\to\beta)}{(\Lambda\beta.\alpha)} & \neq & \Lambda\beta.(\sigma\to\beta) \\
-     \end{array}
-   \]
+\[ \begin{array}{lcl}
+     \osubst{\alpha}{\sigma}{(\Lambda\alpha.\alpha)}          & \neq & \Lambda\alpha.\sigma          \\
+     \osubst{\alpha}{(\sigma\to\beta)}{(\Lambda\beta.\alpha)} & \neq & \Lambda\beta.(\sigma\to\beta) \\
+   \end{array}
+\]
 
-   In the first case, the type variable $\alpha$ is bound in the type we operate
-   on and should not have been substituted. In the second case, the type variable $\beta$
-   that appears free in the substitute $\sigma \to \beta$ wrongly points to
-   the $\beta$ binder after replacement. This is commonly called a
-   \emph{variable capture}.
+In the first case, the type variable $\alpha$ is bound in a universal
+quantification in the type $(\Lambda\alpha.\alpha)$ we operate on. It should not
+have been substituted. The substitution should only substitute free
+variables. In the second case, we substitute the free variable $\alpha$ but
+another issue arises. The variable $\beta$ that appears free in the substitute
+$(\sigma \to \beta)$ wrongly points to the $\beta$ binder after
+replacement. This is commonly called a \emph{variable capture}.
 
-Figure \ref{fig:systemfexists:textbook:substitution} contains a
-  definition of a (capture-avoiding) substitution operator that uses
-  side-conditions to rule out the two problematic cases above. However, it
-  rules out certain inputs and therefore makes the operations partial. This is
-  widely accepted in semi-formal pen-and-paper proofs, but a stumbling
-  block for mechanization.
+Figure \ref{fig:systemfexists:textbook:substitution} contains a definition of a
+(capture-avoiding) substitution operator that uses side-conditions to rule out
+the two problematic cases above. However, it rules out certain inputs and
+therefore makes the operations partial. This is widely accepted in semi-formal
+pen-and-paper proofs, but a stumbling block for mechanization.
 
-The partiality can be addressed by taking into account the intuition that
-  the names of bound variables do not matter. For example, for our intended
-  semantics the terms $\lambda (x:\tau). x$ and
-  $\lambda (y:\tau). y$ are essentially equivalent, i.e. we consider terms that
-  are \emph{equal up to consistent renaming of bound variables}. We can apply
-  this in the definition of the substitution operators to
-  replace bound variables with \emph{fresh} ones, i.e. variables that are not
-  used elsewhere.
+The partiality can be addressed by taking into account the intuition that the
+names of bound variables do not matter. For example, for our intended semantics
+the terms $\lambda (x:\tau). x$ and $\lambda (y:\tau). y$ are essentially
+equivalent, i.e. we consider terms that are \emph{equal up to consistent
+  renaming of bound variables}. We can apply this in the definition of the
+substitution operators to replace bound variables with \emph{fresh} ones,
+i.e. variables that are not used elsewhere.
 
 % \item Terms that are equal up to consistent renaming form an equivalence relation
 %   which is called $\alpha$-equivalence. Put differently, we really want to
 %   define terms as being the quotient set of $\alpha$-equivalent (raw) terms.
-% 
+%
 %   This step is easy in a semi-formal setting, but in the proof assistant setting
 %   this results in a abundance of proof obligations of preservation of
 %   $\alpha$-equivalence.
@@ -332,8 +342,9 @@ call-by-value operational semantics.
            {x : \tau \in \Gamma}
            {\typing{\Gamma}{x}{\tau}} \\\\
          \inferrule* [right=\textsc{TAbs}]
-           {\typing{\Gamma,y:\sigma}{e}{\tau} \\
-            \kinding{\Gamma}{\sigma}}
+           {\typing{\Gamma,y:\sigma}{e}{\tau}
+            %%gray{\kinding{\Gamma}{\sigma}}
+           }
            {\typing{\Gamma}{(\lambda y:\sigma. e)}{(\sigma\to\tau)}} \qquad
          \inferrule* [right=\textsc{TTAbs}]
            {\typing{\Gamma,\alpha}{e}{\tau}}
@@ -389,10 +400,11 @@ call-by-value operational semantics.
 \end{figure}
 
 Figure \ref{fig:systemfexiststyping:textbook} contains the rules for the term
-and pattern typing relations. The variable rule \textsc{TVar} of the term typing
-looks up a term variable $x$ with its associated type $\tau$ in the typing
-context $\Gamma$ and rule \textsc{TAbs} deals with abstractions over terms in
-terms which adds a binding to the typing context for the premise of the body
+and pattern typing relations. \stevennote{TODO}{Discuss the shape of the typing
+  relations.} The variable rule \textsc{TVar} of the term typing looks up a term
+variable $x$ with its associated type $\tau$ in the typing context $\Gamma$ and
+rule \textsc{TAbs} deals with abstractions over terms in terms which adds the
+binding $(y : \sigma)$ to the typing context for the premise of the body
 $e$. The rules \textsc{TTApp} for type-application and \textsc{TPack} for
 packing existential types use a type-substitution operation
 $[\alpha\mapsto\sigma]\tau$ that substitutes $\sigma$ for $\alpha$ in
@@ -418,13 +430,13 @@ all variables bound by $p$. This information is concatenated in the rule
       \[ \begin{array}{c}
            \inferrule*[]
              {\,}
-             {(\lambda x.e_1)~e_2 \longrightarrow [x \mapsto e_2] e_1} \qquad
+             {(\lambda x.e)~v \longrightarrow [x \mapsto v] e} \qquad
            \inferrule*[]
              {\,}
              {\tapp{(\Lambda \alpha.e)}{\tau} \longrightarrow [\alpha \mapsto \tau] e} \\\\
            \inferrule*[]
              {\,}
-             {\unpack{\alpha}{x}{\pack{\sigma}{e_1}{\tau}}{e_2} \longrightarrow [\alpha\mapsto\sigma][x\mapsto e_1]e_2} \\\\
+             {\unpack{\alpha}{x}{\pack{\sigma}{v}{\tau}}{e} \longrightarrow [\alpha\mapsto\sigma][x\mapsto v]e} \\\\
            \inferrule*[]
              {\pmatch{v}{p}{e_1}{e_2}}
              {\step{(\casep{v}{p}{e_1})}{e_2}}
@@ -453,7 +465,7 @@ all variables bound by $p$. This information is concatenated in the rule
 \end{figure}
 
 The operational semantics is defined with 4 reduction rules shown in Figure
-\ref{fig:systemfexistevaluation:textbook}. We omitted Further congruence rules
+\ref{fig:systemfexistevaluation:textbook}. We omitted further congruence rules
 that determine the evaluation order. The reduction of the case construct uses an
 auxiliary pattern-matching relation $\pmatch{v}{p}{e_1}{e_2}$ which denotes that
 when matching the value $v$ against the pattern $p$ and applying the resulting
@@ -465,6 +477,7 @@ rules directly or indirectly use substitutions.
 %-------------------------------------------------------------------------------
 \subsection{Meta-Theory}\label{sec:gen:semiformal:metatheory}
 
+\stevennote{TODO}{Intro sentence}
 \paragraph{Substitution}
 The interesting steps in the type preservation proof are the preservations under the 4
 reduction rules of the operational semantics. These essentially boil down down
@@ -537,21 +550,20 @@ with one of the common interaction lemmas
 
 \paragraph{Progress}
 The proof of progress proceeds similarly to that in Section
-\ref{sec:intro:typesafety}. 
-The main difference, due to the presence of pattern
-matching, is that we need to prove an auxiliary lemma stating
-that well-typed pattern matching $\pmatch{v}{p}{e_1}{e_2}$ is always defined:
-  \[ \inferrule*[]
-    {\typing{\epsilon}{v}{\sigma} \\
-      \ptyping{\epsilon}{p}{\sigma}{\Delta} \\
-      \typing{\Delta}{e_1}{\tau} \\
-      \typing{\epsilon}{e_2}{\tau} \\
-    }
-    {\pmatch{v}{p}{e_1}{e_2}
-    }
-  \]
-On the whole progress does not involve a lot of semantic variable binding
-boilerplate.
+\ref{sec:intro:typesafety}.  The main difference, due to the presence of pattern
+matching, is that we need to prove an auxiliary lemma stating that well-typed
+pattern matching $\pmatch{v}{p}{e_1}{e_2}$ is always defined:
+\[ \inferrule*[]
+  {\typing{\epsilon}{v}{\sigma} \\
+    \ptyping{\epsilon}{p}{\sigma}{\Delta} \\
+    \typing{\Delta}{e_1}{\tau} \\
+    \typing{\epsilon}{e_2}{\tau} \\
+  }
+  {\pmatch{v}{p}{e_1}{e_2}
+  }
+\]
+On the whole, the proof of progress does not involve a lot of semantic variable
+binding boilerplate.
 
 \paragraph{Preservation}
 The proof of preservation proceeds by induction on the typing derivation
@@ -573,16 +585,14 @@ The proof obligation is
      }
 \]
 After inverting the first premise
-$\typing{\Gamma}{\lambda (x:\sigma).e_1}{\tau}$ to get the typing derivation of $e_1$ we
-can apply the boilerplate lemma for well-typed substitutions
-\textsc{SubstTmTm}, with $\Delta = \epsilon$, to finish the proof of this
-case.
+$\typing{\Gamma}{\lambda (x:\sigma).e_1}{\tau}$ to get the typing derivation of
+$e_1$ we can apply the boilerplate lemma for well-typed substitutions
+\textsc{SubstTmTm}, with $\Delta = \epsilon$, to finish the proof of this case.
 
-Similarly, the cases of universal and existential quantification follow
-directly from the typing substitution lemmas. The case of a pattern match
-additionally requires an induction over the matching relation
-$\pmatch{v}{p}{e_1}{e_2}$. The boilerplate lemma \textsc{SubstTmTm} is used in
-the variable case.
+Similarly, the cases of universal and existential quantification follow directly
+from the typing substitution lemmas. The case of a pattern match additionally
+requires an induction over the matching relation $\pmatch{v}{p}{e_1}{e_2}$. The
+boilerplate lemma \textsc{SubstTmTm} is used in the pattern variable case.
 
 
 
@@ -643,12 +653,10 @@ language. This helps us in treating boilerplate generically and automating
 proofs.
 
 Figure \ref{fig:systemfdebruijn} shows a term grammar for a de Bruijn
-representation of \fexistsprod.
-A property of this representation is that binding occurrences of variables
-  still mark the binding but
-  do not explictly name the bound variable anymore. For this reason, we replace the variable names
-  in binders
-  uniformly with a bullet $\bullet$ in the new grammar.
+representation of \fexistsprod.  A property of this representation is that
+binding occurrences of variables still mark the binding but do not explictly
+name the bound variable anymore. For this reason, we replace the variable names
+in binders uniformly with a bullet $\bullet$ in the new grammar.
 
 Also, variables do no refer to their binding site by
   name but by using positional information: A variable is represented by a
@@ -1215,7 +1223,7 @@ formalization.
 % to extend the support for binder boilerplate in mechanization to cover
 % \emph{semantics-related} boilerplate.
 
-\section{Our Approach: Key Ideas}
+\section{Our Approach}
 
 As we illustrated in this chapter, the variable binding boilerplate puts a
 dolorous burden on formal mechanized meta-theory of languages.  Fortunately,

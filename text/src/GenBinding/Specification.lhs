@@ -29,10 +29,10 @@
 
 %-------------------------------------------------------------------------------
 
-This section presents \Knot, a language for specifying programming
-languages. We introduce \Knot by example first in Section \ref{sec:knotbyexample}
-and formally in Sections \ref{sec:knotsyntax}, \ref{sec:knot:expressions} and
-\ref{sec:knot:relations}. 
+This section presents \Knot, a language for specifying programming languages. We
+introduce \Knot by example first in Section \ref{sec:knotbyexample} and formally
+in Sections \ref{sec:knotsyntax}, \ref{sec:knot:expressions} and
+\ref{sec:knot:relations}.
 % This makes the \Knot language easier to understand and
 % allows us to make our terminology clear.
 
@@ -43,6 +43,8 @@ Section \ref{sec:knotsyntax} deals with the specification of \emph{abstract
 in the specification of \emph{inductive relations}. The latter are presented in
 Section~\ref{sec:knot:relations}.
 
+
+%-------------------------------------------------------------------------------
 \section{\Knot by Example}\label{sec:knotbyexample}
 
 In this section we showcase \Knot by porting the semi-formal specification of
@@ -131,15 +133,15 @@ variable constructor |tvar| for types. It holds a single \emph{variable
 
 Regular constructors are declared using the vertical bar and can
 have an arbitrary number of fields. The line
-\[ \texttt{+} \hspace{0.5mm} |tall (X : Tyv) ([X]T :
-Ty)| \]  declares the regular constructor |tall| that represents universally
-quantified types. All fields are explicitly named. The first field declaration
-|(X : Tyv)| introduces the field (named) |X|, which is a binding for a variable of
-namespace |Tyv|. The second field declaration |([X]T : Ty)| introduces the field
-|T| for a subterm of sort |Ty|.  It is prefixed by the \emph{binding
-  specification} |[X]| which stipulates that |X| is brought into scope in the
-subterm |T|. This is exactly the essential scoping information that we
-highlighted in Figure \ref{fig:systemfexistsscoping}. In contrast to Figure
+\[ \texttt{||} \hspace{0.5mm} |tall (X : Tyv) ([X]T : Ty)| \] declares the
+regular constructor |tall|, which represents universally quantified types. All
+fields are explicitly named. The first field declaration |(X : Tyv)| introduces
+the field (named) |X|, which is a binding for a variable of namespace |Tyv|. The
+second field declaration |([X]T : Ty)| introduces the field |T| for a subterm of
+sort |Ty|.  It is prefixed by the \emph{binding specification} |[X]| which
+stipulates that |X| is brought into scope in the subterm |T|. This is exactly
+the essential scoping information that we highlighted in Figure
+\ref{fig:systemfexistsscoping}. In contrast to Figure
 \ref{fig:systemfexistsscoping} we do not explicitly model (the domain of) the
 typing context; all variables that are in scope at the point of the |tall|
 constructor are implicitly also in scope in all subterms.
@@ -294,68 +296,109 @@ relation Eval Tm Tm :=
 %endif
 
 
+%-------------------------------------------------------------------------------
 \section{Key Design Choices}\label{sec:knotdesign}
 
-\paragraph{Local and Global Variables}
-\stevennote{TODO}{
-Rule \textsc{TAbs} deals with abstractions over terms in terms. The
-meta-variable $y$ appears in a different mode in the conclusion than the
-meta-variable $x$ in the variable rule. The $\lambda$-abstraction binds the
-variable $y$ and we call it a \emph{binding occurrence} whereas the $x$ in the
-variable rule is a \emph{reference} or \emph{use occurrence}.
-%
+This section discusses concepts, that influenced the design of \Knot, which
+makes it easier to understand the specification of \Knot in the next section and
+motivate some of the made choices. \Knot has two different kinds of
+meta-variables. The intuition behind them and their treatment are discussed in
+Section \ref{ssec:knotdesign:localglobal}. Sections
+\ref{ssec:knotdesign:contextparametricity} and \ref{ssec:knotdesign:freemonad}
+explain restrictions that \Knot puts on rules of relations to guarantee that
+boilerplate lemmas for them can be automatically generated.
+
+%-------------------------------------------------------------------------------
+\subsection{Local and Global Variables}\label{ssec:knotdesign:localglobal}
+
+In the variable rule of \fexistsprod{}
+\[ \inferrule* [right=\textsc{TVar}]
+      {x : \tau \in \Gamma}
+      {\typing{\Gamma}{x}{\tau}} \\\\
+\]
+the variable $x$ is used as a reference and is bound in the context $\Gamma$.
+
+On the other hand, in the judgement
+\[ \typing{\Gamma}{(\lambda y : \tau. y)}{\tau \to \tau}. \] the variable $y$
+appears in both, a binding position and a reference position.  The reference use
+of $y$ has to refer to the enclosing binding and not to a binding in the context
+$\Gamma$.
+
 Following the literature on \emph{locally nameless}~\cite{locallynameless} and
 \emph{locally named}~\cite{externalinternalsyntax} representations we call $y$ a
 \emph{locally bound} variable (aka locally scoped variables \cite{pitts2015}),
-or more concisely a \emph{binding variable}, and $x$ a \emph{global} or
-\emph{free variable}. Another example is the judgement
-\[ \typing{\Gamma}{(\lambda y. y)~x}{\tau} \]. Here $y$ is again locally bound and
-$x$ has to be bound in $\Gamma$ for the judgement to be well-scoped. In this
-example, the meta-variable $y$ appears in both binding and referencing
-positions.
-%
-The distinction between locally bound and free variables goes back to at least
-Frege \cite{begriffsschrift} and representations such as locally nameless and
-locally named have internalized this distinction. Frege characterizes free
-variables as variables that can possibly stand for anything while locally bound
-variables stand for something very specific. Indeed, in the above judgement, the
-use of $y$ can only denote a reference to the directly enclosing
-abstraction. These concepts do not commit us to a particular representation of
-variable binding. Rather, these notions arise naturally in meta-languages.
-%
-The rules \textsc{TTApp} for type-application and \textsc{TPack} for packing
-existential types use a type-substitution operation $[\alpha\mapsto\sigma]\tau$
-that substitutes $\sigma$ for $\alpha$ in $\tau$. \textsc{TTApp} performs the
-substitution in the conclusion while \textsc{TPack} does so in the premise. The
-substituted type-variable $\alpha$ is locally bound in both rules.
-}
+or more concisely a \emph{local variable}, and $x$ a \emph{global} or \emph{free
+  variable}.
 
-\paragraph{Context Parametricity}
-\stevennote{TODO}{
-Because the variable rule \textsc{TVar} inspects the context $\Gamma$ we call it
-\emph{not context parametric}. The other rules either pass the context through
-unchanged or pass an extended context to the premises. We call these rules
-\emph{context parametric}.
-%
-}
+The distinction between local and global variables goes back to at least
+Frege~\cite{begriffsschrift} and representations such as locally nameless and
+locally named have internalized this distinction. These concepts do not commit
+us to a particular representation of variable binding, such as a locally
+nameless representation. Rather, these notions arise naturally in
+meta-languages.
 
-%% \stevennote{MOVED FROM OVERVIEW}{
-%% As the term in the conclusion remains a type application, we want to apply rule
-%% \textsc{TTApp} again. However, the \colorbox{light-gray}{type} in the conclusion
-%% does not have the appropriate form. We first need to commute the two substitutions
-%% with one of the common interaction lemmas
-%% \begin{align}
-%%   [\beta\mapsto \sigma][\alpha \mapsto \sigma'] =
-%%   [\alpha \mapsto [\beta\mapsto\sigma]\sigma'][\beta\mapsto\sigma] \label{lem:substcomm}
-%% \end{align}
-%% %
-%% Intuitively this commutation is possible because $\beta$ is a free variable
-%% while $\alpha$ is locally bound and because context parametric rules are
-%% naturally compatible with any changes to the context.
-%% }
+Frege characterizes global variables as variables that can possibly stand for
+anything while local variables stand for something very specific. Indeed, the
+variable rule is parameterized over the global (meta-)variable which can refer
+to any variable in the typing context. As previously mentioned, $y$ can only
+possibly refer to the enclosing binder. This distinction is also visible in the
+de Bruijn representation: The variable rule is parameterized over an index for
+variable $x$. A local reference, however, is always statically determined. For
+instance, the index for $y$ in the judgement above is necessarily 0.
 
-\paragraph{Free Monadic Constructions}
-\stevennote{MOVED FROM OVERVIEW}{
+The type-substitutions in the rules \textsc{TTApp} for type-application and
+\textsc{TPack} for packing existential types operate on local variables
+only. \stevennote{TODO}{This is not really a coincidence. Locally substituting a
+  global variable is not unthinkable but is very particular.  Can this be
+  expressed in a good way?} For reasons, that are explained in Section
+\ref{ssec:knotdesign:contextparametricity} below, we enforce substitutions in
+the definition of relations to only operate on local variables.
+
+We adopt the \stevennote{INTRODUCE IN CH5}{Barendregt variable convention} in
+\Knot at the meta-level. Two locally bound meta-variables that have distinct
+names are considered to represent distinct object-variables, or, put
+differently, distinct local variables cannot be aliased. However, global
+meta-variables with distinct names can be aliased, i.e. represent the same
+object-variable.
+
+
+%-------------------------------------------------------------------------------
+\subsection{Context Parametricity}\label{ssec:knotdesign:contextparametricity}
+
+The variable rule is special in the sense that it is the only rule where a
+global variable is used. The variable rule performs a lookup of the type in the
+implicit typing context. More generally, \Knot implicitly assumes that any
+global variable, independent of an explicit lookup, is bound in the context.  As
+a consequence, the use of a global variable inspects the context.
+
+We call a rule \emph{not context parametric}, iff it makes any assumptions about
+the context, e.g. through inspection with a global variable. The variable rule
+of \fexistsprod's typing relation is the only not context parametric rule. The
+other rules either pass the context through unchanged to the premises, or pass
+an extended context to the premises without inspecting the prefix. We call these
+rules \emph{context parametric}.
+
+Context parametricity is important for the automatic derivation of boilerplate.
+For instance, for the semi-formal substitution lemma of \fexistsprod's typing
+relation in Section \ref{sec:gen:semiformal:metatheory}, the inductive step of
+each regular rule consists of applying the same rule again modulo commutation of
+substitutions. Independent of the language at hand, this is automatically
+possible for any context parametric rule.
+
+To understand this, not that in the proof, the substitution is in fact a
+substitution of a global variable. Hence, it represents a context change. Since
+context parametric rules do not make assumptions about the context, they are
+naturally compatible with any changes to the context as long as the change can
+be properly reflected in the indices. For this we needed the commutation of two
+type substitutions. However, this will always be a substitution of a global
+variable which comes from the lemma we are proving, and a local variable from
+the definition of the relation. Intuitively, such a commutation is always
+possible.
+
+
+%-------------------------------------------------------------------------------
+\subsection{Free Monadic Constructions}\label{ssec:knotdesign:freemonad}
+
 A key principle is the distinction between \emph{locally bound} and \emph{free}
 variables at the meta-level. This allows us to recognize \emph{context
 parametric} rules which in turn enables us to extend the \emph{free-monadic
@@ -363,7 +406,7 @@ view} on syntax \cite{monadic,knotneedle} of \Knot to relations. At the
 syntax-level this view requires one distinguished \emph{variable constructor}
 per namespace which has a \emph{reference occurrence} as its only argument and
 all other constructors only contain \emph{binding occurrences} and subterms.
-%
+
 At the level of relations this translates to one distinguished \emph{variable
   rule} per namespace (or more specifically per environment clause). This
 variable rule has a single lookup as its only premise and the sorts of the
@@ -371,18 +414,18 @@ environment data match the sorts of the indices of the relation. The variable
 rule uses exactly one \emph{free meta-variable}; all other rules only contain
 \emph{locally bound} meta-variables and do not feature lookup premises.  In
 other words, the variable rule is the only not context parametric rule.
-%
+
 These restrictions allow us to generically establish the substitution lemmas
 for relations. Consider the small proof tree on the left:
 % , where $A$ is the subtree for the typing judgement of $e_1$.
-}
 
-\stevennote{MOVE}{The distinction between variable and regular constructors
-  follows straightforwardly from \Knot's free-monad-like view on syntax.  This
-  rules out languages for normal forms, but as they require custom behavior
-  (renormalization) during substitution \cite{anormalform,clf} their
-  substitution boilerplate cannot be defined generically anyway.}
+The distinction between variable and regular constructors follows
+straightforwardly from \Knot's free-monad-like view on syntax.  This rules out
+languages for normal forms, but as they require custom behavior
+(renormalization) during substitution \cite{anormalform,clf} their substitution
+boilerplate cannot be defined generically anyway.
 
+%-------------------------------------------------------------------------------
 \section{\Knot~Syntax}\label{sec:knotsyntax}
 
 \begin{figure}[t]
@@ -625,16 +668,15 @@ extended scope $\bindspec,b$.
 Including function calls in the binding specification requires checking them for
 well-scopedness too which can be found in Appendix
 \ref{app:sec:wellformedspec}. In short: For calling a function
-$(f : T \to \ov{\alpha})$ on a field $([\bindspec]t : T)$ we require
+$(f : T \to \ov{\alpha})$ on a field $([\bindspec]t : T)$, we require
 $\wfbindspec{\bindspec}{f~t}{\ov{\alpha}}$, i.e. the local scope of the function
-call is the binding specification of $s$. However, this forbids cyclic binding
-specifications. As a consequence it is impossible to define scoping constructs
-such as recursive scoping. This is a trade-off between expressivity and
-simplicity. We plan to add multiple (potentially circular) input scopes in
-future work, so that recursive constructs can be checked with two scopes: one
-for declaration heads and one for declaration bodies. We come back to this issue
-in the concluding discussion of this chapter in Section
+call is the binding specification of $s$. However, this is very restrictive in
+general since it rules out scoping constructs such as recursive scoping.  We
+come back to this issue in the concluding discussion of this chapter in Section
 \ref{sec:gen:spec:discussion}.
+
+
+
 
 %if False
 \begin{figure}[t]
@@ -1145,50 +1187,110 @@ checked to be identical to the flattening of the prefix $\rulebindspec$.
 
 \section{Discussion}\label{sec:gen:spec:discussion}
 
-\begin{itemize}
-\item The specification of the output type $\ov{\alpha}$ is used in
-  \cite{knotneedle} to derive subordination-based strengthening lemmas.
-  However, these lemmas are not necessary to derive the semantics
-  boilerplate. Hence, for simplicity we ignore the output type of functions and
-  any other subordination related information in the remainder of this paper.
+The first stage in the development of \Knot and \Needle concerned itself with
+the abstract syntax only and was published in the article
 
-\item This is a trade-off between expressivity and simplicity. We plan to add
-  multiple (potentially circular) input scopes in future work, so that recursive
-  constructs can be checked with two scopes: one for declaration heads and one
-  for declaration bodies.
+\begin{center}
+  \begin{minipage}{0.8\columnwidth}
+    Keuchel, S., Weirich, S., and Schrijvers, T. (2016).
+    \newblock Needle {\&} {K}not: {B}inder {B}oilerplate {T}ied {U}p.
+    \newblock In {\em Programming Languages and Systems: 25th European Symposium
+      on Programming}, ESOP '16, pages 419--445. Springer.
+  \end{minipage}
+\end{center}
 
-\item
-  The first stage in the development of \Knot and \Needle concerned itself
-  with the abstract syntax only and was published in the article
+\noindent The framework was subsequently extended with the support for inductive
+relations, which also includes the symbolic expressions. This part is contained
+in the article
 
-  \begin{center}
-    \begin{minipage}{0.8\columnwidth}
-      Keuchel, S., Weirich, S., and Schrijvers, T. (2016).
-      \newblock Needle {\&} {K}not: {B}inder {B}oilerplate {T}ied {U}p.
-      \newblock In {\em Programming Languages and Systems: 25th European Symposium
-        on Programming}, ESOP '16, pages 419--445. Springer.
-    \end{minipage}
-  \end{center}
+\begin{center}
+  \begin{minipage}{0.8\columnwidth}
+    Keuchel, S.,  Schrijvers, T., and Weirich, S. (2016).
+    \newblock Needle {\&} {K}not: {B}oilerplate {B}ound {T}ighter.
+    \newblock Unpublished draft.
+  \end{minipage}
+\end{center}
 
-\item The article
-  \begin{center}
-    \begin{minipage}{0.8\columnwidth}
-      Keuchel, S.,  Schrijvers, T., and Weirich, S. (2016).
-      \newblock Needle {\&} {K}not: {B}oilerplate {B}ound {T}ighter.
-      \newblock Unpublished draft.
-    \end{minipage}
-  \end{center}
+\paragraph{Recursive Scoping}
+{ \input{src/MacrosFExists}
 
-  extends the framework with the support for inductive relations, which also
-  includes the development of the symbolic expressions related part.
-\end{itemize}
+  The first version of the framework, as presented in the first article above,
+  uses a more lenient well-formedness relation for binding specifications than the
+  one presented in Figure \ref{fig:wellformedspec}. This alternative version also
+  allowed for recursive scoping to be specified. Recursive scoping as implemented
+  in the article, uses cyclic binding specifications which
+  Figure~\ref{fig:wellformedspec} rules out. This is a trade-off between
+  expressivity and simplicity.
+
+  To illustrate this, consider a hypothetical typing judgement for a mutual
+  recursive declarations list $ds$ that binds $\Delta$ variables with their
+  types. The well-scopedness lemma for terms of such a language require us to
+  proof the following derivation:
+
+  \[ \inferrule* []
+       {\decltyping{\Gamma,\Delta}{ds}{\Delta}}
+       {\wellscoped{\Gamma,\Delta}{ds} \wedge
+        \wellscoped{\Gamma}{\Delta}
+       }
+   \]
+
+   \noindent However, the well-scopedness hypothesis only gives us
+   $\wellscoped{\Gamma,\Delta}{\Delta}$. The usual step is to argue that
+   $\Delta$ only has term variable bindings and terms do not appear in typing
+   contexts or in types. Therefore, we can use subordination based strengthening
+   to get $\wellscoped{\Gamma,\Delta}{\Delta}$. \Knot provides enough information to
+   allow \Needle to derive such lemmas. However, the cyclicity of such
+   specifications adds unnecessary complexity to the checking and elaboration of
+   symbolic expressions. Furthermore, this approach does not scale to richer
+   type theories that allow inductive-recursive or inductive-inductive
+   declarations, for which the subordination used above is not valid.
+
+   Instead of pushing the shortcut over subordination information, we plan to
+   solve the problem in a more principled manner in future work by allowing
+   multiple (potentially circular, but not cyclic) input scopes. Recursive
+   constructs can then be checked with two scopes: one for declaration heads and
+   one for declaration bodies.
+}
 
 
+% -------------------------------------------------------------------------------
+\paragraph{Symbolic Substitution}
 
-%%% Local Variables:
-%%% mode: latex
-%%% TeX-master: "../Main"
-%%% End:
+Checking the scopes of expressions for language that define scoping functions,
+requires such functions to be symbolically evaluated on expressions. These
+definitions can be found in the technical appendix \ref{app:sec:wellformedspec}.
+
+Notably absent from the symbolic evaluation are rules for symbolic substitutions
+and weakenings. The de Bruijn representation admits for example the rule
+$$
+\inferrule* []
+ { \evalbigf{f}{\symbolicterm_2}{\bindspec'}
+ }
+ { \evalbigf{f}{\symbolicsubst~x~\symbolicterm_1~\symbolicterm_2}{\bindspec'}
+ }.
+$$
+Yet, adding this rule would break subject reduction of symbolic evaluation. The
+reason is that the typing of $\bindspec$ in Figure \ref{fig:symbolicevaluation}
+(bottom) is not strong enough to keep track of the scope when performing
+substitutions or weakenings. In essence, the result cannot be $\bindspec'$ but
+has to be ``$\bindspec'$ without $x$''. Tracking scopes during substitutions or
+other user-defined functions is the focus of research on \emph{binding safe
+  programming}~\cite{freshlook,romeo}. In the framework of \cite{freshlook},
+$\bindspec'$ in the premise and conclusion of the above rule are two distinct
+(chains of) weak links with distinct types, which are in a commutative
+relationship with the world inclusion induced by the substitution.
+
+We side-step the issue by sticking to the simple scope checking of Figure
+\ref{fig:symbolicevaluation} (bottom) and effectively disallow symbolic
+substitutions and weakenings to appear in positions that are accessed by
+functions. Another consequence is that substitution and weakening are only
+allowed ``at the end of the context''. These restrictions are usually met by
+relations for typing and operational semantics, and thus do not get in the way
+of type-safety proofs. However, in general this too restrictive. In future work
+we would like to extend the scope checking to correctly handle substitutions in
+the middle of the context and also introduce first-class substitutions and
+develop the scope checking for them. \stevennote{TODO}{Find and reference
+  Belugas equational theory for (fist-class) substitutions.}
 
 
 %%% Local Variables:

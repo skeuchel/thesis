@@ -26,110 +26,112 @@
 
 
 %-------------------------------------------------------------------------------
-\section{\Knot\ Semantics}
-\label{sec:semantics}
+\section{Syntax terms}\label{sec:semantics}
 
 This section generically defines the semantics of \Knot in terms of a de Bruijn
 representation, declares the abstract syntax that is valid with respect to the
-specification and defines the semantics of binding specifications. We assume a
-given well-formed specification $\spec$ in the rest of this section.
+specification and defines the semantics of binding specifications.
+
+%We assume a given well-formed specification $\spec$ in the rest of this section.
 
 %-------------------------------------------------------------------------------
-\subsection{Term Semantics}
-\label{sec:terms}
+%% \subsection{Term Semantics}\label{sec:sem:terms}
 
 \begin{figure}[t]
-\begin{center}
-\fbox{
-  \begin{minipage}{0.98\columnwidth}
-    \vspace{-2mm}
-    \begin{tabular}{@@{}ll}
-     \begin{minipage}[c]{0.6\columnwidth}
-       \[\begin{array}{@@{}l@@{\hspace{1mm}}c@@{\hspace{1mm}}lcl@@{\hspace{5mm}}r}
+  \centering
+  \fbox{
+    \begin{minipage}{0.96\columnwidth}
+      \[ \begin{array}{@@{}l@@{\hspace{1mm}}c@@{\hspace{1mm}}lcl@@{\hspace{5mm}}r}
            n,m       & ::= & 0                  & \mid & S~n           & \text{de Bruijn index} \\
            u,v,w     & ::= & K~n                & \mid & K~\ov{u}      & \text{de Bruijn term}  \\
            h, c      & ::= & 0                  & \mid & S_\alpha~h     & \text{Het. number}     \\
            \vartheta & ::= & \multicolumn{3}{l}{\ov{g \mapsto n}, \ov{t \mapsto u}}    & \text{Value env.}      \\
          \end{array}
-       \]
-     \end{minipage}
-    &
-     \begin{minipage}[c]{0.3\columnwidth}
-       \begin{code}
-       box ((evalbs _ _) : bs → ϑ → h)
-
-       evalbs ε ϑ            =  0
-       evalbs (bs , xα) ϑ    =  evalbs bs ϑ  +  Iα
-       \end{code}
-       % evalbs (bs , f t) ϑ   =  evalbs bs ϑ  +  ⟦ f ⟧ (ϑ t)
-     \end{minipage} \\
-   \end{tabular}
-
-   %% \begin{tabular}{@@{}ll}
-   %% \begin{minipage}[c]{0.3\columnwidth}
-   %%  \begin{code}
-   %%  box (⟦ _ ⟧ : f → u → h)
-   %% \end{code}
-   %% \end{minipage}
-   %% &
-   %% \begin{minipage}[c]{0.4\columnwidth}
-   %%  \begin{code}
-   %%  ⟦ f ⟧ (K (overline u))  = evalbs bs (overline (t ↦ u))
-   %%    where  f (K (overline x) (overline t)) = bs
-   %%  \end{code}
-   %% \end{minipage}
-   %%       \end{tabular}
-
-   \hrule
-    \begin{code}
-    box (⟦ _ | _ ⟧ (sub _) : bs → sym → ϑ → u)
-
-    ⟦ bs        | t                               ⟧ (sub ϑ) = ϑ t
-    ⟦ bs        | K g                             ⟧ (sub ϑ) = K (ϑ g + ⟦ bs ⟧ (sub ϑ))
-    ⟦ bs,b,bs'  | K b                             ⟧ (sub ϑ) = K (0 + ⟦ bs' ⟧ (sub ϑ))
-    ⟦ bs        | K (overline b) (overline sym)   ⟧ (sub ϑ) = K (overline (⟦ bs, {b' ↦ b}bs' | sym ⟧ (sub ϑ)))
-      where  K : (overline ((b':α))) → (overline (([bs']s:S))) → T
-    ⟦ bs,bs'    | weaken sym bs'                 ⟧ (sub ϑ)         =  shstar (evalsym bs sym ϑ) (evalbs bs' ϑ)
-    ⟦ bs        | subst b sym1 sym2              ⟧ (sub ϑ)         =  su 0 (evalsym bs sym1 ϑ) (evalsym (bs,b) sym2 ϑ)
-    \end{code}
-
-    %% \begin{code}
-    %% box (⟦ _ | _ ⟧ (sub _) : bs → sym → ϑ → u)
-    %%
-    %% ⟦ bs        | t                               ⟧ (sub ϑ) = ϑ t
-    %% ⟦ bs        | K g                             ⟧ (sub ϑ) = K (ϑ g + ⟦ bs ⟧ (sub ϑ))
-    %% ⟦ bs,b,bs'  | K b                             ⟧ (sub ϑ) = K (0 + ⟦ bs' ⟧ (sub ϑ))
-    %% ⟦ bs        | K (overline b) (overline sym)   ⟧ (sub ϑ) = K (overline (⟦ bs, bs'' | sym ⟧ (sub ϑ)))
-    %%   where  K : (overline ((b':α))) → (overline (([bs']s:S))) → T
-    %%          (overline (evalbig (overline (b' ↦ b),overline (s ↦ sym)) bs' bs''))
-    %% ⟦ bs,bs'    | weaken sym bs'                 ⟧ (sub ϑ)         =
-    %%   shstar (evalsym bs sym ϑ) (evalbs bs' ϑ)
-    %% ⟦ bs        | subst b sym1 sym2              ⟧ (sub ϑ)         =
-    %%   su 0 (evalsym bs sym1 ϑ) (evalsym (bs,b) sym2 ϑ)
-    %% \end{code}
-   \vspace{-3mm}
-   \begin{tabular}{@@{}ll}
-     \begin{minipage}[c]{0.25\columnwidth}
-      \begin{code}
-      box (shstar : u → h → u)
-      \end{code}
-      \end{minipage}
-      &
-     \begin{minipage}[c]{0.4\columnwidth}
-     \begin{code}
-      shstar u  0        = u
-      shstar u  (Sα  h)  = shα 0 (shstar u h)
-      \end{code}
-      \end{minipage}
-   \end{tabular}
-   \vspace{-2mm}
-  \end{minipage}
-}
-\end{center}
-\caption{\Knot semantics: key definitions}
-\label{fig:grammarast}
+      \]
+    \end{minipage}
+  }
+  \caption{\Knot semantics: key definitions}
+  \label{fig:sem:terms}
 \end{figure}
 
+\begin{figure}[t]
+  \centering
+  \fbox{
+    \begin{minipage}{0.96\columnwidth}
+      \begin{code}
+      box ((evalbs _ _) : bs → ϑ → h)
+
+      evalbs ε ϑ            =  0
+      evalbs (bs , xα) ϑ    =  evalbs bs ϑ  +  Iα
+      evalbs (bs , f t) ϑ   =  evalbs bs ϑ  +  ⟦ f ⟧ (ϑ t)
+      \end{code}
+
+      \begin{code}
+      box (⟦ _ ⟧ : f → u → h)
+      ⟦ f ⟧ (K (overline u))  = evalbs bs (overline (t ↦ u))
+        where  f (K (overline x) (overline t)) = bs
+      \end{code}
+    \end{minipage}
+  }
+  \caption{Binding specification evaluation}
+  \label{fig:sem:bindspec}
+\end{figure}
+
+
+
+
+%if False
+\begin{figure}[t]
+  \centering
+  \fbox{
+    \begin{minipage}{0.96\columnwidth}
+
+      \begin{code}
+      box (⟦ _ | _ ⟧ (sub _) : bs → sym → ϑ → u)
+
+      ⟦ bs        | t                               ⟧ (sub ϑ) = ϑ t
+      ⟦ bs        | K g                             ⟧ (sub ϑ) = K (ϑ g + ⟦ bs ⟧ (sub ϑ))
+      ⟦ bs,b,bs'  | K b                             ⟧ (sub ϑ) = K (0 + ⟦ bs' ⟧ (sub ϑ))
+      ⟦ bs        | K (overline b) (overline sym)   ⟧ (sub ϑ) = K (overline (⟦ bs, {b' ↦ b}bs' | sym ⟧ (sub ϑ)))
+        where  K : (overline ((b':α))) → (overline (([bs']s:S))) → T
+      ⟦ bs,bs'    | weaken sym bs'                 ⟧ (sub ϑ)         =  shstar (evalsym bs sym ϑ) (evalbs bs' ϑ)
+      ⟦ bs        | subst b sym1 sym2              ⟧ (sub ϑ)         =  su 0 (evalsym bs sym1 ϑ) (evalsym (bs,b) sym2 ϑ)
+      \end{code}
+
+      %% \begin{code}
+      %% box (⟦ _ | _ ⟧ (sub _) : bs → sym → ϑ → u)
+      %%
+      %% ⟦ bs        | t                               ⟧ (sub ϑ) = ϑ t
+      %% ⟦ bs        | K g                             ⟧ (sub ϑ) = K (ϑ g + ⟦ bs ⟧ (sub ϑ))
+      %% ⟦ bs,b,bs'  | K b                             ⟧ (sub ϑ) = K (0 + ⟦ bs' ⟧ (sub ϑ))
+      %% ⟦ bs        | K (overline b) (overline sym)   ⟧ (sub ϑ) = K (overline (⟦ bs, bs'' | sym ⟧ (sub ϑ)))
+      %%   where  K : (overline ((b':α))) → (overline (([bs']s:S))) → T
+      %%          (overline (evalbig (overline (b' ↦ b),overline (s ↦ sym)) bs' bs''))
+      %% ⟦ bs,bs'    | weaken sym bs'                 ⟧ (sub ϑ)         =
+      %%   shstar (evalsym bs sym ϑ) (evalbs bs' ϑ)
+      %% ⟦ bs        | subst b sym1 sym2              ⟧ (sub ϑ)         =
+      %%   su 0 (evalsym bs sym1 ϑ) (evalsym (bs,b) sym2 ϑ)
+      %% \end{code}
+     \begin{tabular}{@@{}ll}
+       \begin{minipage}[c]{0.25\columnwidth}
+        \begin{code}
+        box (shstar : u → h → u)
+        \end{code}
+        \end{minipage}
+        &
+       \begin{minipage}[c]{0.4\columnwidth}
+       \begin{code}
+        shstar u  0        = u
+        shstar u  (Sα  h)  = shα 0 (shstar u h)
+        \end{code}
+        \end{minipage}
+     \end{tabular}
+    \end{minipage}
+  }
+  \caption{Term semantics: key definitions}
+  \label{fig:sem:terms}
+\end{figure}
+%endif
 
 
 % \begin{figure}[t]
@@ -174,13 +176,13 @@ given well-formed specification $\spec$ in the rest of this section.
 % \label{fig:eval}
 % \end{figure}
 
-Figure \ref{fig:grammarast} (top) contains a term grammar for raw terms $u$ of sorts
+Figure \ref{fig:sem:terms} contains a term grammar for raw terms $u$ of sorts
 and environments. A de Bruijn term consists of either a term constructor applied
-to a de Bruijn index or a term constructor applied to other terms.  We omit
-the straightforward well-sortedness judgement $\vdash u : S$ for sort
-terms and $\vdash u : E$ for environment terms.
+to a de Bruijn index or a term constructor applied to other terms.  We omit the
+straightforward well-sortedness judgement $\vdash u : S$ for sort terms and
+$\vdash u : E$ for environment terms.
 
-Figure \ref{fig:grammarast} (middle) defines the interpretation
+Figure \ref{fig:sem:bindspecs} defines the interpretation
 $\evalbs{\bindspec}{\vartheta}$ of a binding specification $\bindspec$ as a
 meta-level evaluation. Interpretation is always performed in the context of a
 particular constructor $K$. This is taken into account in the interpretation
@@ -225,6 +227,7 @@ and associated generic shifting and substitution lemmas
 
 %-------------------------------------------------------------------------------
 
+%if False
 \subsection{Expression Semantics}
 \label{sec:exprsemantics}
 
@@ -294,6 +297,8 @@ to be evaluated in their respective local scopes.
 % \caption{Interpretation of symbolic expressions}
 % \label{fig:evalsymbolicterm}
 % \end{figure}
+
+%endif
 
 %%% Local Variables:
 %%% mode: latex

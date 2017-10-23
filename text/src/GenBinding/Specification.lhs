@@ -29,10 +29,11 @@
 
 %-------------------------------------------------------------------------------
 
-This section presents \Knot, a language for specifying programming languages. We
-introduce \Knot by example first in Section \ref{sec:knotbyexample} and formally
-in Sections \ref{sec:knotsyntax}, \ref{sec:knot:expressions} and
-\ref{sec:knot:relations}.
+This chapter presents \Knot, a language for specifying programming languages.
+The language semantics, elaboration of boilerplate and the implementation are
+discussed in later chapters. We introduce \Knot by example first in Section
+\ref{sec:knotbyexample} and formally in Sections \ref{sec:knotsyntax},
+\ref{sec:knot:expressions} and \ref{sec:knot:relations}.
 % This makes the \Knot language easier to understand and
 % allows us to make our terminology clear.
 
@@ -150,6 +151,7 @@ Multiple variables can be brought into scope together. For example, the binding
 specification for the body |t2| of the |unpack| constructor brings both the
 type variable |X| and the term variable |x| into scope.
 
+\paragraph{Binders}
 { % FEXISTSPROD SCOPE
   \input{src/MacrosFExists}
 
@@ -157,15 +159,21 @@ type variable |X| and the term variable |x| into scope.
   of binders. The function |bind| specifies which variables are bound by a
   pattern, similar to the $\bindp{\cdot}$ function in Figure
   \ref{fig:systemfexists:textbook:freevariables}. The function declaration for
-  |bind| in Figure \ref{fig:knot:fexistsprodsyntax} consists of a signature and a body.
-  The signature
-  specifies that patterns bind variables of namespace |Tmv|, and the body
-  defines |bind| by means of an exhaustive one-level pattern
+  |bind| in Figure \ref{fig:knot:fexistsprodsyntax} consists of a signature and
+  a body.  The signature specifies that patterns bind variables of namespace
+  |Tmv|, and the body defines |bind| by means of an exhaustive one-level pattern
   match. Functions can be used in binding specifications. The term constructor
   |case| for nested pattern matching uses |bind| to specify that the variables
   bound by the pattern |p| are simultaneously brought into scope in the body
-  |t2|. \stevennote{CHECK THIS}{The constructor |ppair| also uses |bind| which
-    is explained in Section \ref{sec:wellformedspec}}.
+  |t2|.
+
+  The constructor |ppair| also uses |bind| in a binding specification of the
+  right component, even though patterns themselves do not contain terms or term
+  variable references. However, since |bind| \emph{concatenates} the bound
+  variables of |p1| and |p2|, the binding specification denotes that the
+  variables of |p2| are considered bound after the variables of |p1|. This is
+  used in the scope checking of \Knot specifications which is explained in
+  Section \ref{sec:wellformedspec}.
 }
 
 
@@ -223,6 +231,7 @@ the are two kinds of rules for relations: \emph{variable rules} and,
 \emph{regular rules}. Both kinds use notation commonly found for generalized
 algebraic data-types.
 
+\paragraph{Variable rules}
 Similarly to the abstract syntax, the \emph{variable rules} are introduced with
 a plus sign. Parameters in braces define lookups, e.g. the parameter |{x -> T}|
 of |Tvar| represents a lookup of the term variable |x| in the \emph{implicit
@@ -230,21 +239,41 @@ of |Tvar| represents a lookup of the term variable |x| in the \emph{implicit
 one lookup which corresponds exactly to the signature of the relation that is
 being defined and is consistent with the declaration of the environment.
 
-The \emph{regular rule} |Tabs| specifies the typing of term abstractions.  In
+\paragraph{Regular rules}
+The \emph{regular rule} |Tabs| specifies the typing of term abstractions. In
 square brackets before a field, we can add \emph{rule binding specifications}
 that allow us to change the implicit environment for this field. In this case,
 we extend the implicit typing context with a binding for the \textlambda-bound
-variable |x|. In this rule, the domain type |T2| changes scope and needs to be
-explicitly weakened in the premise. In contrast, in the rule |Ttabs| the body of
-the universal quantification is under a binder in the conclusion and it does not
-change its scope so no weakening is performed. \stevennote{TODO}{Add comparison
-  with the free variable check in the semi-formal development} The rule for type
-applications |Ttapp| shows the use of symbolic substitution |(subst X T2 T12)|
-in the conclusion and the rule |Tpack| for packing existentials shows symbolic
-substitution in the premise. Finally, in the rule |Tunpack| we need to weaken
-the type |T2| explicitly with the type variable |X| and the term variable |x|
-for the typing judgement of the body |t2|.
+variable |x|.
 
+{ % FEXISTSPROD SCOPE
+  \input{src/MacrosFExists}
+
+  In this rule, the domain type |T2| changes scope. In the semi-formal typing
+  relation in Figure \ref{fig:systemfexiststyping:textbook}, the meta-variable
+  $\tau$, that corresponds to |T2|, appears in the context $\Gamma, y : \sigma$
+  in the premise and in $\Gamma$ in the conclusion. The scope change in the
+  semi-formal development is implicit and is only possible because of language
+  specific (non-)subordination information, i.e. the term variable $y$ cannot
+  appear in the type $\tau$. In \Knot the scope change has to be explicitly
+  indicated by weakening |T2| in the premise.  Similarly, in the semi-formal
+  development, the subordination information is insufficient for $\sigma$ in the
+  \textsc{TUnpack} rule. The rule uses the additional side-condition
+  $\alpha \notin \fv{\sigma}$ to allow $\sigma$ to be well-scoped in both
+  $\Gamma, \alpha, x : \tau$ and $\Gamma$. In the \Knot specification, the |T2|
+  is explicitly weakened by the type variable |X|, which corresponding to
+  $\alpha$, and the term variable |x|.  In contrast, in the rule |Ttabs| the
+  body of the universal quantification is under a binder in the conclusion and
+  it does not change its scope so no weakening is performed.
+}
+
+The rule for type applications |Ttapp| shows the use of symbolic substitution
+|(subst X T2 T12)| in the conclusion and the rule |Tpack| for packing
+existentials shows symbolic substitution in the premise. Finally, in the rule
+|Tunpack| we need to weaken the type |T2| explicitly with the type variable |X|
+and the term variable |x| for the typing judgement of the body |t2|.
+
+\paragraph{Relation outputs}
 The typing of patterns can be similarly translated from the semi-formal
 specification in Section \ref{sec:gen:semiformal:semantics}. The additional
 concern is the definition of the relation output that defines the typing context

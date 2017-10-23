@@ -17,18 +17,15 @@ terms of a de Bruijn representation. We assume a given and fixed well-formed
 specification $\spec$ in the rest of this chapter. The discussion follows these
 consecutive steps:
 
-\begin{enumerate}
-\item Section \ref{sec:sem:terms} declares \emph{abstract syntax terms} that are
-  valid with respect to the specification and defines the \emph{semantics of
-    binding specifications}.
-\item \emph{Shifting and substitution functions} operating on terms are defined
-  in Section \ref{sec:operation}. This is necessary boilerplate that is needed
-  to define
-\item \emph{evaluation of expressions} which is the topic of Section
-  \ref{sec:exprsemantics}.
-\item The \emph{interpretation of relation specifications} is discussed in
-  Section \ref{sec:relationsemantics}.
-\end{enumerate}
+Section \ref{sec:semantics} declares \emph{de Bruijn syntax terms} for \Knot's
+\emph{abstract syntax declarations} of the given specification and specifies
+which are well-sorted and well-scoped with respect to the specification. It also
+defines the \emph{semantics of binding specifications} by means of evaluation.
+\emph{Shifting and substitution functions} operating on terms are defined in
+Section \ref{sec:operation}. This is necessary boilerplate that is needed to
+define \emph{evaluation of expressions} which is the topic of Section
+\ref{sec:exprsemantics}. The \emph{interpretation of relation specifications} is
+discussed in Section \ref{sec:relationsemantics}.
 
 \input{src/GenBinding/TermSemantics}
 \input{src/GenBinding/Operations}

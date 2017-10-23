@@ -8,8 +8,59 @@
 \section{Expression Semantics}
 \label{sec:exprsemantics}
 
+\begin{figure}[t]
+  \centering
+  \fbox{
+    \begin{minipage}{0.96\columnwidth}
+
+      \begin{code}
+      box (⟦ _ | _ ⟧ (sub _) : bs → sym → ϑ → u)
+
+      ⟦ bs        | t                               ⟧ (sub ϑ) = ϑ t
+      ⟦ bs        | K g                             ⟧ (sub ϑ) = K (ϑ g + ⟦ bs ⟧ (sub ϑ))
+      ⟦ bs,b,bs'  | K b                             ⟧ (sub ϑ) = K (0 + ⟦ bs' ⟧ (sub ϑ))
+      ⟦ bs        | K (overline b) (overline sym)   ⟧ (sub ϑ) = K (overline (⟦ bs, {b' ↦ b}bs' | sym ⟧ (sub ϑ)))
+        where  K : (overline ((b':α))) → (overline (([bs']s:S))) → T
+      ⟦ bs,bs'    | weaken sym bs'                 ⟧ (sub ϑ)         =  shstar (evalsym bs sym ϑ) (evalbs bs' ϑ)
+      ⟦ bs        | subst b sym1 sym2              ⟧ (sub ϑ)         =  su 0 (evalsym bs sym1 ϑ) (evalsym (bs,b) sym2 ϑ)
+      \end{code}
+
+      %% \begin{code}
+      %% box (⟦ _ | _ ⟧ (sub _) : bs → sym → ϑ → u)
+      %%
+      %% ⟦ bs        | t                               ⟧ (sub ϑ) = ϑ t
+      %% ⟦ bs        | K g                             ⟧ (sub ϑ) = K (ϑ g + ⟦ bs ⟧ (sub ϑ))
+      %% ⟦ bs,b,bs'  | K b                             ⟧ (sub ϑ) = K (0 + ⟦ bs' ⟧ (sub ϑ))
+      %% ⟦ bs        | K (overline b) (overline sym)   ⟧ (sub ϑ) = K (overline (⟦ bs, bs'' | sym ⟧ (sub ϑ)))
+      %%   where  K : (overline ((b':α))) → (overline (([bs']s:S))) → T
+      %%          (overline (evalbig (overline (b' ↦ b),overline (s ↦ sym)) bs' bs''))
+      %% ⟦ bs,bs'    | weaken sym bs'                 ⟧ (sub ϑ)         =
+      %%   shstar (evalsym bs sym ϑ) (evalbs bs' ϑ)
+      %% ⟦ bs        | subst b sym1 sym2              ⟧ (sub ϑ)         =
+      %%   su 0 (evalsym bs sym1 ϑ) (evalsym (bs,b) sym2 ϑ)
+      %% \end{code}
+     \begin{tabular}{@@{}ll}
+       \begin{minipage}[c]{0.25\columnwidth}
+        \begin{code}
+        box (shstar : u → h → u)
+        \end{code}
+        \end{minipage}
+        &
+       \begin{minipage}[c]{0.4\columnwidth}
+       \begin{code}
+        shstar u  0        = u
+        shstar u  (Sα  h)  = shα 0 (shstar u h)
+        \end{code}
+        \end{minipage}
+     \end{tabular}
+    \end{minipage}
+  }
+  \caption{Expression semantics}
+  \label{fig:sem:expressions}
+\end{figure}
+
 We now define the semantics of symbolic expressions as an evaluation to concrete
-de Bruijn terms. Figure~\ref{fig:grammarast} (bottom) contains the definition. The
+de Bruijn terms. Figure~\ref{fig:sem:expressions} contains the definition. The
 evaluation function takes as inputs a symbolic expression $\symbolicterm$, the
 local scope $\bindspec$ of $\symbolicterm$ and an environment $\vartheta$ that
 maps reference variables to concrete de Bruijn indices and sort variables to

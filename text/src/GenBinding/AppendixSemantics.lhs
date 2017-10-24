@@ -3,7 +3,7 @@
 %include polycode.fmt
 %include Formatting.fmt
 
-\section{Appendix A}\label{appendix:semantics}
+\section{Appendix B}\label{appendix:semantics}
 
 \subsection{Term well-scopedness}
 

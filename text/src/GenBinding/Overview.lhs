@@ -122,7 +122,11 @@ pattern $p$ scope over $e_2$ but not $e_1$, and in the unpacking of an
 existential $(\unpack{\alpha}{x}{e_1}{e_2})$ the variables $\alpha$ and $x$
 scope over $e_2$.
 
-\stevennote{TODO}{Introduce reference and bindings.}
+Term and type variables appear in two different modes in the productions for
+terms and types. First, in the variable production of each sort. We call this a
+\emph{variable use} or \emph{variable reference}. All other occurrences of term
+and type variable are \emph{variable bindings}.
+
 
 %-------------------------------------------------------------------------------
 \paragraph{Scoping}
@@ -162,12 +166,10 @@ scope over $e_2$.
   \label{fig:systemfexistsscoping}
 \end{figure}
 
-\stevennote{TODO}{Add motivation for this paragraph, i.e. making scoping rules
-  explicit or giving them a formal treatment. There is a well-scoping relation
-  defined for types, but obviously there should be similar relations for other
-  sorts. Hence, we cannot speak of ``the well-scoping relation'' but should
-  speak more generally about ``well-scoping relations''. Reflect this in the
-  text and make sure this is consistently used.}
+We defined the scoping rules using prose above. We now give them a formal
+treatment by defining \emph{well-scoping relations} that encode the scoping
+rules.
+
 The well-scopedness relation for types $\kinding{\Gamma}{\tau}$ is defined in
 Figure \ref{fig:systemfexistsscoping}.  This relation takes a typing context
 $\Gamma$ as an index to represent the set of variables that are in scope and an
@@ -178,24 +180,26 @@ quantifiers. In the variable case, rule \textsc{WsVar} checks that a type
 variable indeed appears in the typing context $\Gamma$. In the rules
 \textsc{WsAll} for universal and \textsc{WsEx} for existential quantification,
 the bound variable is added to the typing context in the premise for the bodies.
-Hence, the relation formally and explicitly defines the scoping rules that we
-defined in prose above.
+Similar relations can be defined for terms, patterns and typing contexts as
+well.
 
 The definition of well-scoping relations follows a standard recipe and usually
 its definition is left out in pen-and-paper specifications. In mechanizations,
 however, such a relation usually needs to be defined (unless it is not used in
 the meta-theory) by the human prover. Therefore, this relation is an example of
 syntax-related boilerplate that we want to derive generically. The structure of
-the relation only depends on the syntax of types and their scoping rules. The
-EBNF syntax of Figure \ref{fig:systemfexistssyntax} is insufficient since it
-does not contain information about scoping. One option is to make the scoping
-relations like $\kinding{\Gamma}{\tau}$ part of the specification and derive
-other boilerplate from it, but this relation already repeats a lot of
-information that is already given in the EBNF grammar. If possible we want to
-avoid that repetition in our specifications. The only new detail that the
-well-scopedness relation adds explicitly, is that the type variables in the
-quantifications scope over the bodies, which is highlighted in \textgray{gray}
-in Figure \ref{fig:systemfexistsscoping}.
+the relation only depends on the syntax of types and their scoping rules. But
+since the scoping rules are not reflected in the EBNF syntax of Figure
+\ref{fig:systemfexistssyntax} we need to add other pieces of \emph{essential
+  information} to the specification from which we can derive boilerplate.
+
+One option is to make the scoping relations like $\kinding{\Gamma}{\tau}$ part
+of the specification and derive other boilerplate from it, but this relation
+repeats a lot of information that is already given in the EBNF grammar. If
+possible we want to avoid that repetition in our specifications. The only new
+detail that the well-scopedness relation adds explicitly, is that the type
+variables in the quantifications scope over the bodies, which is highlighted in
+\textgray{gray} in Figure \ref{fig:systemfexistsscoping}.
 
 These issues ask to develop a new formal and concise way to specify scoping
 rules. We come back to this in Chapter \ref{ch:knotsyntax} which presents our
@@ -258,7 +262,37 @@ therefore boilerplate.
 
 \paragraph{Substitution}
 
+The typing and evaluation relations of \fexistsprod{} use type and term variable
+substitution which we define now. We need to define 3 substitution operators
+\[
+  \osubst{\alpha}{\sigma}{\tau} \quad
+  \osubst{\alpha}{\sigma}{e}    \quad
+  \osubst{x}{e_1}{e_2}
+\]
+that correspond to substituting type variables in types and terms, and term
+variables in terms.
+
+A correct definition of substitution is subtle when it comes to specific names
+of variables. A mere textual replacement is not sufficient. The following two
+examples illustrate situations where we expect a different result than a textual
+replacement:
+
+\[ \begin{array}{lcl}
+     \osubst{\alpha}{\sigma}{(\Lambda\alpha.\alpha)}          & \neq & \Lambda\alpha.\sigma          \\
+     \osubst{\alpha}{(\sigma\to\beta)}{(\Lambda\beta.\alpha)} & \neq & \Lambda\beta.(\sigma\to\beta) \\
+   \end{array}
+\]
+
+In the first case, the type variable $\alpha$ is bound in a universal
+quantification in the type $(\Lambda\alpha.\alpha)$ we operate on. It should not
+have been substituted. The substitution should only substitute free
+variables. In the second case, we substitute the free variable $\alpha$ but
+another issue arises. The variable $\beta$ that appears free in the substitute
+$(\sigma \to \beta)$ wrongly points to the $\beta$ binder after
+replacement. This is commonly called a \emph{variable capture}.
+
 \begin{figure}[t]
+  \centering
   \fbox{
     \begin{minipage}{0.96\columnwidth}
       \framebox{\mbox{$\osubst{\alpha}{\sigma}{\tau}$}} \\
@@ -276,26 +310,6 @@ therefore boilerplate.
   \label{fig:systemfexists:textbook:substitution}
 \end{figure}
 
-A correct definition of substitution is subtle when it comes to specific names
-of variables. A mere textual replacement is not
-sufficient. \stevennote{TODO}{Introduce the syntax of substitution.} The
-following two examples illustrate situations where we expect a different result
-than a textual replacement:
-
-\[ \begin{array}{lcl}
-     \osubst{\alpha}{\sigma}{(\Lambda\alpha.\alpha)}          & \neq & \Lambda\alpha.\sigma          \\
-     \osubst{\alpha}{(\sigma\to\beta)}{(\Lambda\beta.\alpha)} & \neq & \Lambda\beta.(\sigma\to\beta) \\
-   \end{array}
-\]
-
-In the first case, the type variable $\alpha$ is bound in a universal
-quantification in the type $(\Lambda\alpha.\alpha)$ we operate on. It should not
-have been substituted. The substitution should only substitute free
-variables. In the second case, we substitute the free variable $\alpha$ but
-another issue arises. The variable $\beta$ that appears free in the substitute
-$(\sigma \to \beta)$ wrongly points to the $\beta$ binder after
-replacement. This is commonly called a \emph{variable capture}.
-
 Figure \ref{fig:systemfexists:textbook:substitution} contains a definition of a
 (capture-avoiding) substitution operator that uses side-conditions to rule out
 the two problematic cases above. However, it rules out certain inputs and
@@ -309,6 +323,10 @@ equivalent, i.e. we consider terms that are \emph{equal up to consistent
   renaming of bound variables}. We can apply this in the definition of the
 substitution operators to replace bound variables with \emph{fresh} ones,
 i.e. variables that are not used elsewhere.
+
+In pen-and-paper proofs, the convention is to assume that at any time, all bound
+variables are distinct and implicitly rename them as needed. This is also called
+the \emph{Barendregt variable convention}~\cite{barendregt1984lambda}.
 
 % \item Terms that are equal up to consistent renaming form an equivalence relation
 %   which is called $\alpha$-equivalence. Put differently, we really want to
@@ -400,13 +418,12 @@ call-by-value operational semantics.
 \end{figure}
 
 Figure \ref{fig:systemfexiststyping:textbook} contains the rules for the term
-and pattern typing relations. \stevennote{TODO}{Discuss the shape of the typing
-  relations.} The variable rule \textsc{TVar} of the term typing looks up a term
-variable $x$ with its associated type $\tau$ in the typing context $\Gamma$ and
-rule \textsc{TAbs} deals with abstractions over terms in terms which adds the
-binding $(y : \sigma)$ to the typing context for the premise of the body
-$e$. The rules \textsc{TTApp} for type-application and \textsc{TPack} for
-packing existential types use a type-substitution operation
+and pattern typing relations. The variable rule \textsc{TVar} of the term typing
+looks up a term variable $x$ with its associated type $\tau$ in the typing
+context $\Gamma$ and rule \textsc{TAbs} deals with abstractions over terms in
+terms which adds the binding $(y : \sigma)$ to the typing context for the
+premise of the body $e$. The rules \textsc{TTApp} for type-application and
+\textsc{TPack} for packing existential types use a type-substitution operation
 $[\alpha\mapsto\sigma]\tau$ that substitutes $\sigma$ for $\alpha$ in
 $\tau$. \textsc{TTApp} performs the substitution in the conclusion while
 \textsc{TPack} does so in the premise. The remaining two rules, \textsc{TPair}
@@ -477,11 +494,14 @@ rules directly or indirectly use substitutions.
 %-------------------------------------------------------------------------------
 \subsection{Meta-Theory}\label{sec:gen:semiformal:metatheory}
 
-\stevennote{TODO}{Intro sentence}
+We conclude the semi-formal development by discussing the meta-theoretic proof
+of type safety for \fexistsprod{}. We do not go into the details of the proof,
+but focus instead on the variable binding related proof steps.
+
 \paragraph{Substitution}
-The interesting steps in the type preservation proof are the preservations under the 4
-reduction rules of the operational semantics. These essentially boil down down
-to two substitution lemmas:
+The interesting steps in the type preservation proof are the preservations under
+the 4 reduction rules of the operational semantics. These essentially boil down
+down to two substitution lemmas:
 
 %% TODO: numbering and references
 \[ \begin{array}{c}
@@ -541,11 +561,10 @@ As the term in the conclusion remains a type application, we want to apply rule
 \textsc{TTApp} again. However, the \colorbox{light-gray}{type} in the conclusion
 does not have the appropriate form. We first need to commute the two substitutions
 with one of the common interaction lemmas
-\begin{align*}
+\begin{align}
   [\beta\mapsto \sigma][\alpha \mapsto \sigma'] =
-  [\alpha \mapsto [\beta\mapsto\sigma]\sigma'][\beta\mapsto\sigma] \qquad (\alpha \neq \beta)
-  \label{lem:substcomm}
-\end{align*}
+  [\alpha \mapsto [\beta\mapsto\sigma]\sigma'][\beta\mapsto\sigma] \qquad (\alpha \neq \beta) \label{lem:substcomm} \\
+\end{align}
 
 
 \paragraph{Progress}

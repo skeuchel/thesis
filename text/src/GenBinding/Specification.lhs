@@ -193,16 +193,19 @@ constructor |etvar| is not associating any information with type variables.
 \begin{figure}[t]
   \fbox{
     \begin{minipage}{0.96\columnwidth}
-      \begin{tabular}{l@@{\hspace{1.5mm}}c@@{\hspace{1mm}}l}
-        \multicolumn{3}{l}{|relation [Env] Typing Tm Ty|~\cass}                                                        \\
+      \begin{tabular}{@@{}l@@{\hspace{1mm}}c@@{\hspace{1mm}}l}
+        \multicolumn{3}{@@{}l}{|relation [Env] Typing Tm Ty|~\cass}                                                        \\
          & \texttt{+}  & |Tvar :  {x -> T} -> Typing (var x) T|                                                        \\
-         & \texttt{||} & |Tabs :  [x -> T1] Typing t (weaken T2 x) -> Typing (abs x T1 t) (tarr T1 T2)|                \\
+         & \texttt{||} & |Tabs :  [x -> T1] Typing t (weaken T2 x) -> | \\
+         &             & \quad |Typing (abs x T1 t) (tarr T1 T2)|                \\
          & \texttt{||} & |Tapp :  Typing t1 (tarr T11 T12) -> Typing t2 T11 -> Typing (app t1 t2) T12|                 \\
          & \texttt{||} & |Ttabs : [X -> ] Typing t T -> Typing (tabs X t) (tall X T)|                                  \\
          & \texttt{||} & |Ttapp : Typing t1 (tall X T12) -> Typing (tapp t1 T2) (subst X T2 T12)|                      \\
-         & \texttt{||} & |Tpack : Typing t2 (subst X U T2) -> Typing (pack U t2 (texist X T2)) (texist X T2)|          \\
+         & \texttt{||} & |Tpack : Typing t2 (subst X U T2) -> |                                                        \\
+         &             & \quad |Typing (pack U t2 (texist X T2)) (texist X T2)|                                        \\
          & \texttt{||} & |Tunpack : Typing t1 (texist X T12) ->|                                                       \\
-         &             & \quad |[X -> , x -> T12] Typing t2 (weaken T2 [X,x]) -> Typing (unpack t1 X x t2) T2|         \\
+         &             & \quad |[X -> , x -> T12] Typing t2 (weaken T2 [X,x]) -> | \\
+         &             & \quad |Typing (unpack t1 X x t2) T2|         \\
          & \texttt{||} & |Tpair : Typing t1 T1 -> Typing t2 T2 -> Typing (prod t1 t2) (tprod T1 T2)|                   \\
          & \texttt{||} & |Tcase : Typing t1 T1 -> (wtp: PTyping p T1) ->|                                              \\
          &             & \quad |[bind wtp] Typing t2 (weaken T2 (bind p)) -> Typing (case t1 p t2) T2|                 \\
@@ -377,18 +380,19 @@ instance, the index for $y$ in the judgement above is necessarily 0.
 
 The type-substitutions in the rules \textsc{TTApp} for type-application and
 \textsc{TPack} for packing existential types operate on local variables
-only. \stevennote{TODO}{This is not really a coincidence. Locally substituting a
-  global variable is not unthinkable but is very particular.  Can this be
-  expressed in a good way?} For reasons, that are explained in Section
+only.
+%%\stevennote{TODO}{This is not really a coincidence. Locally substituting a
+%%  global variable is not unthinkable but is very particular.  Can this be
+%%  expressed in a good way?}
+For reasons, that are explained in Section
 \ref{ssec:knotdesign:contextparametricity} below, we enforce substitutions in
 the definition of relations to only operate on local variables.
 
-We adopt the \stevennote{INTRODUCE IN CH5}{Barendregt variable convention} in
-\Knot at the meta-level. Two locally bound meta-variables that have distinct
-names are considered to represent distinct object-variables, or, put
-differently, distinct local variables cannot be aliased. However, global
-meta-variables with distinct names can be aliased, i.e. represent the same
-object-variable.
+We adopt the Barendregt variable convention in \Knot at the meta-level. Two
+locally bound meta-variables that have distinct names are considered to
+represent distinct object-variables, or, put differently, distinct local
+variables cannot be aliased. However, global meta-variables with distinct names
+can be aliased, i.e. represent the same object-variable.
 
 
 %-------------------------------------------------------------------------------
@@ -696,7 +700,7 @@ extended scope $\bindspec,b$.
 
 Including function calls in the binding specification requires checking them for
 well-scopedness too which can be found in Appendix
-\ref{app:sec:wellformedspec}. In short: For calling a function
+\ref{appendix:specification}. In short: For calling a function
 $(f : T \to \ov{\alpha})$ on a field $([\bindspec]t : T)$, we require
 $\wfbindspec{\bindspec}{f~t}{\ov{\alpha}}$, i.e. the local scope of the function
 call is the binding specification of $s$. However, this is very restrictive in
@@ -827,7 +831,7 @@ Here the term $t$ is assumed to be in the outer context of the whole expression
 and is explicitly weakened under the abstraction. The symbolic weakening implies
 and replaces freshness conditions. We discuss larger examples of symbolic
 expressions after introducing inductive relations in Section
-\ref{ssec:inductiverelations}.
+\ref{sec:knot:relations}.
 
 
 %-------------------------------------------------------------------------------
@@ -1287,7 +1291,7 @@ in the article
 
 Checking the scopes of expressions for language that define scoping functions,
 requires such functions to be symbolically evaluated on expressions. These
-definitions can be found in the technical appendix \ref{app:sec:wellformedspec}.
+definitions can be found in the technical appendix \ref{appendix:specification}.
 
 Notably absent from the symbolic evaluation are rules for symbolic substitutions
 and weakenings. The de Bruijn representation admits for example the rule
@@ -1318,8 +1322,10 @@ relations for typing and operational semantics, and thus do not get in the way
 of type-safety proofs. However, in general this too restrictive. In future work
 we would like to extend the scope checking to correctly handle substitutions in
 the middle of the context and also introduce first-class substitutions and
-develop the scope checking for them. \stevennote{TODO}{Find and reference
-  Belugas equational theory for (fist-class) substitutions.}
+develop the scope checking for them.
+
+%%\stevennote{TODO}{Find and reference
+%%  Belugas equational theory for (fist-class) substitutions.}
 
 
 %%% Local Variables:

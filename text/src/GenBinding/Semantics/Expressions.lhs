@@ -4,7 +4,6 @@
 %include forall.fmt
 
 %-------------------------------------------------------------------------------
-
 \section{Expression Semantics}
 \label{sec:exprsemantics}
 
@@ -127,73 +126,6 @@ to be evaluated in their respective local scopes.
 % \end{figure}
 
 %-------------------------------------------------------------------------------
-\section{Relation Semantics}\label{sec:relationsemantics}
-
-Semantics of relations are derivation trees of judgements. However, for the
-purpose of deriving boilerplate lemmas the interesting structure lies primarily
-in the symbolic expressions used to define the rules of the
-relations. Therefore, we only introduce declaration heads as notation for use in
-subsequent sections, but refer to the technical Appendix
-\ref{appendix:semantics} for details.
-
-\begin{figure}[t]
-\begin{center}
-\fbox{
-  \begin{minipage}{0.98\columnwidth}
-    \begin{code}
-    box (⟦ _ | _ ⟧ (sub _) : bs → sym → ϑ → u)
- 
-    ⟦ bs        | t                               ⟧ (sub ϑ) = ϑ t
-    ⟦ bs        | K g                             ⟧ (sub ϑ) = K (ϑ g + ⟦ bs ⟧ (sub ϑ))
-    ⟦ bs,b,bs'  | K b                             ⟧ (sub ϑ) = K (0 + ⟦ bs' ⟧ (sub ϑ))
-    ⟦ bs        | K (overline b) (overline sym)   ⟧ (sub ϑ) = K (overline (⟦ bs, bs'' | sym ⟧ (sub ϑ)))
-      where  K : (overline ((b':α))) → (overline (([bs']s:S))) → T
-             (overline (evalbig (overline (b' ↦ b),overline (s ↦ sym)) bs' bs''))
-    ⟦ bs,bs'    | weaken sym bs'                 ⟧ (sub ϑ)         =
-      shstar (evalsym bs sym ϑ) (evalbs bs' ϑ)
-    ⟦ bs        | subst b sym1 sym2              ⟧ (sub ϑ)         =
-      su 0 (evalsym bs sym1 ϑ) (evalsym (bs,b) sym2 ϑ)
-    \end{code}
-
-   \begin{tabular}{@@{}ll}
-   \begin{minipage}[c]{0.3\columnwidth}
-    \begin{code}
-    box (shstar : u → h → u)
-    \end{code}
-    \end{minipage}
-    &
-   \begin{minipage}[c]{0.4\columnwidth}
-   \begin{code}
-    shstar u  0        = u
-    shstar u  (Sα  h)  = shα 0 (shstar u h)
-    \end{code}
-    \end{minipage}
-    \end{tabular}
-  \end{minipage}
-}
-\end{center}
-\caption{\Knot semantics: Expression evaluation}
-\label{fig:knot:defs}
-\end{figure}
-
-The next ingredient of the semantics is an interpretation of lookup formulas
-$\{ g \cto \ov{S} \}$ of rules with implicit environment type $E$ as containment
-judgements
-$$\knotbox{\lookupenv{n}{\ov{v}}{E}{\alpha}{u_E}}$$
-\noindent on environment terms $u_E$. We can generically establish weakening and
-well-scopedness lemmas \cite{knotneedle} for containment. Rule binding specification are evaluated
-% $$\knotbox{\evalrbs{|_|}{|_|}{|_|}{|_|}: \rulebindspec \to E \to \vartheta \to u_E}$$
-to an environment term of type $E$ with respect to values $\vartheta$. Finally,
-relations are generically modelled by judgements of the form
-$$\knotbox{\judg{u_E?}{R}{\ov{u_t}}{\ov{u_f}}}$$
-where $u_E$ is an optional environment term and $\ov{u_t}$ are the
-sort indices of the relations. Rather than interpreting binding functions as
-computations over derivation trees, we include the results as indices
-$\ov{u_f}$ of the judgements. To further simplify the presentation, we assume
-that all relations have an environment $E$ and ignore outputs of functions, i.e.
-we only consider judgements of the form
-$$\knotbox{\judgsimpl{u_E}{R}{\ov{u_t}}}.$$
-
 
 %%% Local Variables:
 %%% mode: latex

@@ -25,6 +25,33 @@ substitution in sort and environment terms and lookups in environments.
   contributions of the work. What is the new idea here? What was difficult?}
 
 
+%% Using the interpretation of binding specification we can generically define
+%% \cite{knotneedle} shifting and substitution on terms:
+%% $$
+%% \begin{array}{c@@{\hspace{5mm}}c}
+%%   $\knotbox{\text{sh}_{\alpha,S} : h \to u \to u}$ &
+%%   $\knotbox{\text{su}_{\alpha,S} : h \to u \to u \to u}$ \\
+%%   $\knotbox{\text{sh}_{\alpha,E} : h \to u \to u}$ &
+%%   $\knotbox{\text{su}_{\alpha,E} : h \to u \to u \to u}$ \\
+%% \end{array}
+%% $$
+%%
+%% \noindent To simplify the presentation we assume that these are defined
+%% without any subordination in mind, i.e. for all possible namespace and sort
+%% combinations even if these amount to being the identity function and we drop the
+%% subscript in cases where these can be inferred from the type of the arguments.
+%%
+%% Furthermore, we can generically define well-scopedness predicates on de Bruijn terms
+%% which can be found in Appendix \ref{appendix:semantics}
+%% $$
+%% \begin{array}{c@@{\hspace{5mm}}c@@{\hspace{5mm}}c}
+%%   \knotbox{h \vdash_\alpha n} & \knotbox{h \vdash_S u} & \knotbox{h \vdash_E u} \\
+%% \end{array}
+%% $$
+%% and associated generic shifting and substitution lemmas
+%% \cite{knotneedle}.
+
+
 %-------------------------------------------------------------------------------
 \subsection{Shifting}\label{ssec:shifting}
 

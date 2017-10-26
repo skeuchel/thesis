@@ -5,13 +5,14 @@ CaseStudy.tex
 Generation.tex
 Introduction.tex
 Lemmas.tex
-Operations.tex
 Overview.tex
 RelatedWork.tex
-RelationSemantics.tex
 Specification.tex
-TermSemantics.tex
 RelShifting.tex
 RelSubstitution.tex
 WellScopedness.tex
 Conclusion.tex
+Semantics/Expressions.tex
+Semantics/Relations.tex
+Semantics/Terms.tex
+Semantics/Operations.tex

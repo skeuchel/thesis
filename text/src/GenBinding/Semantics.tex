@@ -10,14 +10,15 @@ Section \ref{sec:semantics} declares \emph{de Bruijn syntax terms} for \Knot's
 \emph{abstract syntax declarations} of the given specification and specifies
 which are well-sorted and well-scoped with respect to the specification. It also
 defines the \emph{semantics of binding specifications} by means of evaluation.
-\emph{Shifting and substitution functions} operating on terms are defined in
-Section \ref{sec:operation}. This is necessary boilerplate that is needed to
-define \emph{evaluation of expressions} which is the topic of Section
-\ref{sec:exprsemantics}. The \emph{interpretation of relation specifications} is
-discussed in Section \ref{sec:relationsemantics}.
+\emph{Evaluation of expressions} is the topic of Section
+\ref{sec:exprsemantics}. A dependency of evaluation is the definition of
+boilerplate \emph{shiftings and substitutions function} that operate on terms.
+These are also defined in Section \ref{sec:exprsemantics}. The
+\emph{interpretation of relation specifications} is discussed in Section
+\ref{sec:relationsemantics} including boilerplate \emph{environment lookup
+  relations}.
 
 \input{src/GenBinding/Semantics/Terms}
-\input{src/GenBinding/Semantics/Operations}
 \input{src/GenBinding/Semantics/Expressions}
 \input{src/GenBinding/Semantics/Relations}
 

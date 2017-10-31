@@ -29,13 +29,13 @@
 \section{Syntax terms}\label{sec:semantics}
 
 This section generically defines the semantics of \Knot in terms of a de Bruijn
-representation, declares the abstract syntax that is valid with respect to the
-specification and defines the semantics of binding specifications.
-\stevennote{TODO}{The goal is to fully define what well-scoped object language
-  terms are. That includes all the dependencies like evaluation of binding
-  specifications}
-
-%We assume a given well-formed specification $\spec$ in the rest of this section.
+representation. The goal is to fully define what well-scoped object language
+terms are with respect to a specification. We therefore start with the
+definition of de Bruijn terms in Section \ref{ssec:sem:rawterms} and their
+well-sortedness. Section \ref{ssec:sem:bindspeceval} follows with the evaluation
+of binding specification of well-sorted terms. Finally, Section
+\ref{ssec:sem:wellscopedness} discusses the well-scopedness judgement for de
+Bruijn terms.
 
 %-------------------------------------------------------------------------------
 \subsection{Raw Terms}\label{ssec:sem:rawterms}
@@ -65,10 +65,11 @@ and a list of associated sort terms. The cons is additionally tagged with a
 namespace $\alpha$. Appendix \ref{appendix:semantics} defines a straightforward
 well-sortedness judgement $\vdash u : S$ for raw sort terms and $\vdash u : E$
 for raw environment terms.  See also the well-scopedness relation in Figure
-\ref{fig:wellscopedness} that refines well-sortedness. \stevennote{TODO}{Better
-  transition to the next paragraph.}
+\ref{fig:wellscopedness} that refines well-sortedness.
 
-\subsection{Binding specification evaluation}\label{ssec:sem:bindspeceval}
+%-------------------------------------------------------------------------------
+\subsection{Binding Specification Evaluation}\label{ssec:sem:bindspeceval}
+
 \begin{figure}[t]
   \centering
   \fbox{
@@ -89,26 +90,30 @@ for raw environment terms.  See also the well-scopedness relation in Figure
     \end{minipage}
   }
   \caption{Binding specification evaluation}
-  \label{fig:sem:bindspec}
+  \label{fig:sem:bindspeceval}
 \end{figure}
 
 The binding specification |[bs] t| for a particular subterm |t| of a given term
 constructor |K| defines the variables that are brought into scope in |t|. For
 example, the binding specification of the pattern-matching case of \fprod in
-Figure \ref{fig:systemfprodspec} states that the pattern variables are bound in
-the body by means of a function |bind| that collects these variables. We need to
-define an interpretation of binding specifications and functions that we can use
-in the definitions of boilerplate functions.
+Figure \ref{fig:knot:fexistsprodsyntax} states that the pattern variables are
+bound in the body by means of a function |bind| that collects these
+variables. We need to define an interpretation of binding specifications and
+functions. This is a prerequisite for defining well-scopedness of terms and
+other boilerplate.
 
-Figure \ref{fig:sem:bindspecs} defines the interpretation
+Figure \ref{fig:sem:bindspeceval} defines the interpretation
 $\evalbs{\bindspec}{\vartheta}$ of a binding specification $\bindspec$ as a
 meta-level evaluation. Interpretation is always performed in the context of a
-particular constructor $K$. \stevennote{LOCAL ENV. Also say that the global
-  variable mapping is used in the semantics of relations}{This is taken into
-  account in the interpretation function: the parameter $\vartheta$ is a mapping
-  from field labels to concrete subterms (and an unused mapping from global
-  variables to de Bruijn indices).} We assume well-sortedness of the terms in
-$\vartheta$.
+particular constructor $K$. This is taken into account in the interpretation
+function: the parameter $\vartheta$ represents a \emph{constructor local
+  environment} which assigns values to meta-variables that are used in $K$,
+i.e. it maps field labels for sub-terms to concrete de Brujin terms and global
+variables to concrete de Bruijn indices. We implicitly assume that all terms in
+$\vartheta$ are well-sortedness. In this section, we only use the subterm part
+of local environments. The global variable part is needed in the semantics of
+expressions and relations.
+
 %% Traditionally, one would use a natural number to count the number of variables
 %% that are being bound. Instead, we use heterogeneous variable lists $\hvl$ --
 %% a refinement of natural numbers -- defined in Figure \ref{fig:eval} for dealing
@@ -176,17 +181,17 @@ here.
                    {h \vdash K~\overline{u} : S}
        \end{array}
     \]
-    \framebox{\mbox{$h \vdash \Gamma : E$}} \\
+    \framebox{\mbox{$h \vdash u : E$}} \\
     \vspace{-8mm}
     \[ \begin{array}{c}
        \inferrule* [right=\textsc{WsNil}]
                    {\,}
-                   {h \vdash [~] : E} \quad\quad
+                   {h \vdash K : E} \quad\quad
        \inferrule* [right=\textsc{WsCons}]
                    {E : \alpha \to \overline{T} \\
-                    |h ⊢ Γ| \\\\
-                    |h + domain Γ ⊢ u_i : T_i| \quad (\forall i)}
-                   {|h ⊢ (Γ ► overline u) : E|}
+                    |h ⊢ v| \\\\
+                    |h + domain v ⊢ u_i : T_i| \quad (\forall i)}
+                   {|h ⊢ (K v (overline u)) : E|}
        \end{array}
     \]
     \end{minipage}

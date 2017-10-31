@@ -6,6 +6,53 @@
 %-------------------------------------------------------------------------------
 \section{Relation Semantics}\label{sec:relationsemantics}
 
+\subsection{Environment lookups}\label{ssec:contextlookups}
+
+The paramount infrastructure operation on environments is the lookup of
+variables and their associated data. Lookup is a partial function. For that
+reason, we define it as a relation |(n:overline u) inα Γ| that witnesses that
+looking up the index |n| of namespace |α| in the environment term |Γ| is valid
+and that |overline u| is the associated data. Figure \ref{fig:environmentlookup}
+contains the definition.
+
+Rule \textsc{InHere} forms the base case where |n = 0|. In this case the
+environment term needs to be a cons for namespace |α|. Note that well-scopedness
+of the associated data is included as a premise. This reflects common practice
+of annotating variable cases with with well-scopedness conditions. By moving it
+into the lookup itself, we free the user from dealing with this obligation
+explicitly. We need to |weaken| the result of the lookup to account for the
+binding.
+
+Rule \textsc{InThere} encodes the case that the lookup is not the last cons of
+the environment. The rule handles both the homogeneous |α = β| and the
+heterogeneous case |α ≠ β| by means of weakening the index |n|. The associated
+data is also shifted to account for the new |β| binding.
+
+\begin{figure}[t]
+\begin{center}
+\fbox{
+  \begin{minipage}{0.95\columnwidth}
+  \framebox{\mbox{|(n : overline u) inα Γ|}} \\
+  \vspace{-7mm}
+  \[ \begin{array}{c}
+     \inferrule* [right=\textsc{InHere}]
+                 {|domain Γ ⊢ u_i| \quad (\forall i)}
+                 {|(0 : overline (weaken u Iα)) inα (Γ ► overline u)|}  \\
+     \inferrule* [right=\textsc{InThere}]
+                 {|(n : overline u) inα Γ|}
+                 {|(weakenα n Iβ : overline (weaken u Iβ)) inα (Γ ►► overline v)|}
+     \end{array}
+  \]
+  \end{minipage}
+}
+\end{center}
+\caption{Environment lookup}
+\label{fig:environmentlookup}
+\end{figure}
+
+
+\subsection{Derivations}
+
 Semantics of relations are derivation trees of judgements. However, for the
 purpose of deriving boilerplate lemmas the interesting structure lies primarily
 in the symbolic expressions used to define the rules of the

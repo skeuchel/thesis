@@ -163,14 +163,21 @@
 %format nᵢ   = n "_i"
 %format e₁   = e "_1"
 %format e₂   = e "_2"
+%format shiftαN  =  shift "_{\alpha,\mathbb{N}}"
+%format shiftαS  =  shift "_{\alpha,S}"
+%format shiftαT  =  shift "_{\alpha,T}"
 %format shiftN  =  shift "_\mathbb{N}"
 %format substT = subst "_" T
+%format substαN = subst "_{\alpha,\mathbb{N}}"
+%format substαS = subst "_{\alpha,S}"
+%format substαT = subst "_{\alpha,T}"
 %format substN = subst "_\mathbb{N}"
 %format substt = subst "_" t
 %format subste = subst "_" e
 
 %format shifte = shift "_" e
 %format shiftα = shift "_" α
+%format substα = subst "_" α
 %format substα = subst "_" α
 %format shiftβ = shift "_" β
 %format substβ = subst "_" β
@@ -180,7 +187,12 @@
 %format substβ'  = subst' "_" β
 %format substℕα = subst "_{\mathbb{N},\alpha}"
 %format weakenα = weaken "_" α
-
+%format weakenS = weaken "_" S
+%format weakenT = weaken "_" T
+%format appendE = append "_" E
+%format evalsymS = eval "_" S
+%format evalsymT = eval "_" T
+%format evalrbsE = eval "_{E," LENV ", \vartheta}"
 %format liftα = lift "_{\alpha}"
 %format lifts = lift "_" s
 
@@ -230,13 +242,28 @@
 %format inα      = ∈ "_" α
 %format inβ      = ∈ "_" β
 %format inγ      = ∈ "_" γ
+%format inαE      = ∈ "_{\alpha, E}"
+%format inβE      = ∈ "_{\beta, E}"
+%format inγE      = ∈ "_{\gamma, E}"
 %format ∨        = "\vee"
 %format •        = "\bullet"
 
 %format (bindspec (bs) (s)) = "[" bs "]" s
 %format dom      = "\dom"
 
-%format (evalsym (bs) sym th) = "{\evalsym{" bs "}{" sym "}{" th "}}"
-%format (evalrbs (rbs) l e th) = "{\evalrbs{" rbs "}{" l "}{" e "}{" th "}}"
+%% %format (evalsym bs sym th) = "{\evalsym{" bs "}{" sym "}{" th "}}"
+%% %format (evalrbs (rbs) l e th) = "{\evalrbs{" rbs "}{" l "}{" e "}{" th "}}"
 %format LENV = "\LENV"
 %format (symflatten l r b) = "{\symflatten{" l "}{" r "}{" b "}}"
+
+%% %format (evalsym (bs) sym th) = "\llbracket\: {" bs "} \mid {" sym "} \:\rrbracket_{" th "}"
+
+%format (box (stuff)) = "\hspace{-1em}\framebox{\mbox{\ensuremath{" stuff "}}}"
+%format (evalbs (bs) th) = "{\llbracket\: {" bs "} \:\rrbracket_{" th "}}"
+%format (sub (s)) = "_{" s "}"
+
+%format shα = "{{" sh "}_{\alpha}}"
+%format shstar = "{{" sh "}^{*}}"
+%format sym1
+%format sym2
+%format (evalbig x y z) = "{\evalbig{" x "}{" y "}{" z "}}"

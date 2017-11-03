@@ -91,19 +91,6 @@ successors for namespace $\alpha$ in $h$ are taken into account.
 \fbox{\small
   \begin{minipage}{0.98\columnwidth}
 
-  \begin{code}
-  box ((evalrbs _ _ _ _) : rbs → LENV → E → ϑ → u)
-
-  evalrbs ε LENV E ϑ  =  0
-  evalrbs (rbs , b → overline sym) LENV E ϑ  =
-      K ((evalrbs rbs LENV E ϑ)) ((evalsym bs sym ϑ))
-    where  (b : α) ∈ LENV
-           (K : α → overline T) ∈ E
-           (symflatten LENV rbs bs)
-  evalrbs (rbs , f j) LENV E ϑ             =
-    append ((evalrbs rbs LENV E ϑ)) (ϑ (f,j))
-  \end{code}
-
   \framebox{\mbox{$\judg{u_E?}{R}{\ov{u_t}}{\ov{u_f}}$}} \\
   \[ \begin{array}{c}
 

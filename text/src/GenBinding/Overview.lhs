@@ -5,6 +5,11 @@
 %include macros.fmt
 %include exists.fmt
 
+\chapter{Background}\label{ch:gen:background}
+%% \input{src/GenBackground/Introduction}
+%% \input{src/GenBinding/Introduction}
+%% \clearpage
+
 { % FEXISTSPROD SCOPE
 
 \input{src/MacrosFExists}
@@ -736,14 +741,6 @@ lambda abstraction the conventional rule is:
       } \\
   \end{array}
 \]
-The rule follows the intention that the term variable should be of the given
-type. In this style, well-scopedness comprises a lightweight type system.
-However, in general it is impossible to come up with the intended typing or,
-more generally, establish what the associated data in the extended context
-should be. Furthermore, we allow the user to define different contexts with
-potentially incompatible associated data. To avoid these issue, we define
-well-scopedness by using \emph{domains} of contexts instead. In fact, this is
-all we need to establish well-scopedness.
 
 \newcommand{\onetm}{1_{\text{tm}}}
 \newcommand{\onety}{1_{\text{ty}}}
@@ -753,6 +750,91 @@ all we need to establish well-scopedness.
 %format Ity = "\onety"
 %format Stm = "\Stm"
 %format Sty = "\Sty"
+
+%format epsilon = "\epsilon"
+%format bullet = "\bullet"
+
+\begin{figure}[t]
+  \centering
+  \fbox{
+    \begin{minipage}{0.96\columnwidth}
+      \begin{tabular}{lcl}
+        $h$ & ::= & $0 \mid \Sty~h \mid \Stm~h$
+      \end{tabular}
+
+      \begin{tabular}{@@{}ll}
+      \begin{minipage}[t]{0.3\columnwidth}
+      \begin{code}
+      box (dom : E → h)
+      \end{code}
+    \end{minipage}
+    &
+    \begin{minipage}[t]{0.3\columnwidth}
+    \begin{code}
+    dom epsilon         =  0
+    dom (E, bullet)     =  dom E + Ity
+    dom (E, bullet :T)  =  dom E + Itm
+    \end{code}
+    \end{minipage}
+    \end{tabular}
+
+    \framebox{\mbox{$\wellscopedtermvar{h}{n}$}} \\
+    \vspace{-7mm}
+    \[ \begin{array}{c}
+       \inferrule* [right=\textsc{WsnTmZero}]
+                   {\,}
+                   {\wellscopedtermvar{S_{\text{tm}}~h}{0}} \\\\
+       \inferrule* [right=\textsc{WsnTmTm}]
+                   {\wellscopedtermvar{h}{n}}
+                   {\wellscopedtermvar{S_{\text{tm}}~h}{S~n}} \\\\
+       \inferrule* [right=\textsc{WsnTmTy}]
+                   {\wellscopedtermvar{h}{n}
+                   }
+                   {\wellscopedtermvar{S_{\text{ty}}~h}{n}}
+       \end{array}
+    \]
+    \framebox{\mbox{$\wellscopedterm{h}{t}$}} \\
+    \vspace{-7mm}
+    \[\begin{array}{c}
+        \inferrule*
+          [right=\textsc{WsVar}]
+          {\wellscopedtermvar{h}{n}
+          }
+          {\wellscopedterm{h}{n}
+          } \\\\
+        \inferrule*
+          [right=\textsc{WsUnpack}]
+          {h \vdash_\text{tm}~t_1 \\
+           h + 1_{\text{ty}} + 1_{\text{tm}} \vdash_\text{tm}~t_2
+          }
+          {h \vdash_\text{tm} (\unpack{\bullet}{\bullet}{t_1}{t_2})} \\
+       \end{array}
+    \]
+    \framebox{\mbox{$h \vdash E$}} \\
+    \vspace{-8mm}
+    \[ \begin{array}{c}
+       \inferrule* [right=\textsc{WseTm}]
+                   {h \vdash E \\
+                    h + \text{dom}~E \vdash T
+                   }
+                   {h \vdash E,\bullet:T
+                   }
+       \end{array}
+    \]
+    \end{minipage}
+  }
+  \caption{Well-scopedness of terms (selected rules)}
+  \label{fig:wellscopedness:overview}
+\end{figure}
+
+The rule follows the intention that the term variable should be of the given
+type. In this style, well-scopedness comprises a lightweight type system.
+However, in general it is impossible to come up with the intended typing or,
+more generally, establish what the associated data in the extended context
+should be. Furthermore, we allow the user to define different contexts with
+potentially incompatible associated data. To avoid these issue, we define
+well-scopedness by using \emph{domains} of contexts instead. In fact, this is
+all we need to establish well-scopedness.
 
 In a de Bruijn approach the domain is traditionally represented by a natural number
 that denotes the number of bound variables. Instead,
@@ -776,86 +858,11 @@ $h \vdash_{\text{tm}} t$ and well-scopedness of typing environments
 $h \vdash E$.
 
 
-%format epsilon = "\epsilon"
-%format bullet = "\bullet"
-
-\begin{figure}[t]
-\begin{center}
-  \small
-\fbox{
-  \begin{minipage}{0.96\columnwidth}
-  \begin{tabular}{lcl}
-    $h$ & ::= & $0 \mid \Sty~h \mid \Stm~h$
-  \end{tabular}
-
-  \begin{tabular}{@@{}ll}
-  \begin{minipage}[t]{0.3\columnwidth}
-  \begin{code}
-  box (dom : E → h)
-  \end{code}
-  \end{minipage}
-  &
-  \begin{minipage}[t]{0.3\columnwidth}
-  \begin{code}
-  dom epsilon         =  0
-  dom (E, bullet)     =  dom E + Ity
-  dom (E, bullet :T)  =  dom E + Itm
-  \end{code}
-  \end{minipage}
-  \end{tabular}
-
-  \framebox{\mbox{$\wellscopedtermvar{h}{n}$}} \\
-  \vspace{-7mm}
-  \[ \begin{array}{c}
-     \inferrule* [right=\textsc{WsnTmZero}]
-                 {\,}
-                 {\wellscopedtermvar{S_{\text{tm}}~h}{0}} \\\\
-     \inferrule* [right=\textsc{WsnTmTm}]
-                 {\wellscopedtermvar{h}{n}}
-                 {\wellscopedtermvar{S_{\text{tm}}~h}{S~n}} \\\\
-     \inferrule* [right=\textsc{WsnTmTy}]
-                 {\wellscopedtermvar{h}{n}
-                 }
-                 {\wellscopedtermvar{S_{\text{ty}}~h}{n}}
-     \end{array}
-  \]
-  \framebox{\mbox{$\wellscopedterm{h}{t}$}} \\
-  \vspace{-7mm}
-  \[\begin{array}{c}
-      \inferrule*
-        [right=\textsc{WsVar}]
-        {\wellscopedtermvar{h}{n}
-        }
-        {\wellscopedterm{h}{n}
-        } \\\\
-      \inferrule*
-        [right=\textsc{WsUnpack}]
-        {h \vdash_\text{tm}~t_1 \\
-         h + 1_{\text{ty}} + 1_{\text{tm}} \vdash_\text{tm}~t_2
-        }
-        {h \vdash_\text{tm} (\unpack{\bullet}{\bullet}{t_1}{t_2})} \\
-     \end{array}
-  \]
-  \framebox{\mbox{$h \vdash E$}} \\
-  \vspace{-8mm}
-  \[ \begin{array}{c}
-     \inferrule* [right=\textsc{WseTm}]
-                 {h \vdash E \\
-                  h + \text{dom}~E \vdash T
-                 }
-                 {h \vdash E,\bullet:T
-                 }
-     \end{array}
-  \]
-  \end{minipage}
-}
-\end{center}
-\caption{Well-scopedness of terms (selected rules)}
-\label{fig:wellscopedness:overview}
-\end{figure}
 
 
 \subsection{Substitutions}
+
+\stevennote{TODO}{Make this consistent again.}
 
 \newcommand{\shtm}{{\text{sh}_{\text{tm}}}}
 \newcommand{\sutm}{{\text{su}_{\text{tm}}}}
@@ -876,10 +883,13 @@ boilerplate definitions for the de Bruijn representation: substitution of type
 variables in types, terms and type contexts, and of term variables in terms. We
 also need to define four auxiliary boilerplate \emph{shifting} functions that
 adapt indices of free variables when going under binders, or, put differently,
-when inserting new variables in the context. We need to generalize shiftings so
-that variables can be inserted in the middle of the context, i.e. operations
-that corresponds to the weakenings $|Γ,Δ ⊢ e| \leadsto |Γ,x,Δ ⊢ e|$ and
-$|Γ,Δ ⊢ e| \leadsto |Γ,α,Δ ⊢ e|$.
+when inserting new variables in the context.
+
+
+\paragraph{Shifting}
+We need to generalize shiftings so that variables can be inserted in the middle
+of the context, i.e. operations that corresponds to the weakenings
+$|Γ,Δ ⊢ e| \leadsto |Γ,x,Δ ⊢ e|$ and $|Γ,Δ ⊢ e| \leadsto |Γ,α,Δ ⊢ e|$.
 
 Only indices for variables in $\Gamma$ need to be adapted. For this purpose the
 shifting functions take a \emph{cutoff} parameter that represents the domain of
@@ -904,6 +914,65 @@ $$
 %   |box (sh : t → h → t)| & |box (sh : T → h → T)| & |box (sh : E → h → E)|
 % \end{array}
 % $$
+
+\paragraph{Substitution}
+
+Next, we define substitution of a single variable |x| for a term |e| in some
+other term |e'| generically. In the literature, two commonly used variants can
+be found.
+
+\begin{enumerate}
+
+\item The first variant keeps the invariant that |e| and |e'| are in the same
+  context and immediately weakens |e| when passing under a binder while
+  traversing |e'| to keep this invariant. It corresponds to the substition lemma
+$$
+\begin{array}{c}
+\inferrule*[]
+  {\gray{|Γ,Δ ⊢ e : σ|} \\
+   |Γ,x:σ,Δ ⊢ e' : τ|
+  }
+  {|Γ,Δ ⊢ {x ↦ e}e' : τ|}
+\end{array}
+$$
+
+\item The second variant keeps the invariant that |e'| is in a weaker context
+  than |e|. It defers weakening of |e| until the variable positions are reached
+  to keep the invariant and performs shifting if the variable is substituted. It
+  corresponds to the substitution lemma
+$$
+\begin{array}{c}
+\inferrule*[]
+  {\gray{|Γ ⊢ e : σ|} \\
+   |Γ,x:σ,Δ ⊢ e' : τ|
+  }
+  {|Γ,Δ ⊢ [x ↦ e]e' : τ|}
+\end{array}
+$$
+\end{enumerate}
+
+Both variants were already present in de Bruijn's seminal paper
+\cite{namelessdummies}, but the first variant has enjoyed more widespread
+use. However, we will use the second variant because it has the following
+advantages:
+
+\begin{enumerate}
+\item It supports the more general case of languages with a dependent context:
+$$
+\begin{array}{c}
+\inferrule*[]
+  {|Γ ⊢ e : σ| \\
+   |Γ,x:σ,Δ ⊢ e' : τ|
+  }
+  {|Γ,[x ↦ e]Δ ⊢ [x ↦ e]e' : [x ↦ e]τ|}
+\end{array}
+$$
+
+\item The parameter |e| is constant while recursing into |e'| and hence it can
+also be moved outside of inductions on the structure of |e|. Proofs become
+slightly simpler because we do not need to reason about any changes to |s| when
+going under binders.
+\end{enumerate}
 
 We use substitution functions which keep the substitute in its original context
 and perform (multi-place) shifting when reaching the variable positions. This

@@ -28,6 +28,7 @@
 
 
 %-------------------------------------------------------------------------------
+\chapter{The \Knot Specification Language}\label{ch:knotsyntax}
 
 This chapter presents \Knot, a language for specifying programming languages.
 The language semantics, elaboration of boilerplate and the implementation are

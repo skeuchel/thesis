@@ -677,44 +677,44 @@ language. This helps us in treating boilerplate generically and automating
 proofs.
 
 Figure \ref{fig:systemfdebruijn} shows a term grammar for a de Bruijn
-representation of \fexistsprod.  A property of this representation is that
+representation of \fexistsprod. A property of this representation is that
 binding occurrences of variables still mark the binding but do not explictly
 name the bound variable anymore. For this reason, we replace the variable names
-in binders uniformly with a bullet $\bullet$ in the new grammar.
+in binders uniformly with a bullet $\bullet$ in the new grammar. Variables do no
+refer to their binding site by name but by using positional information: A
+variable is represented by a natural number $n$ that denotes that the variable
+is bound by the $n$th enclosing binder starting from 0.
 
-Also, variables do no refer to their binding site by
-  name but by using positional information: A variable is represented by a
-  natural number $n$ that denotes that the variable is bound by the $n$th
-  enclosing binder starting from 0.
+Here are several examples of terms in both the named and the de Bruijn representation:
+\[ \begin{array}{lcl}
+     \lambda(x:\tau). x                                                          & \Rightarrow & (\lambda(\bullet:T). 0)                                                              \\
+     \lambda(x:\tau). \lambda(y:\sigma). x                                       & \Rightarrow & (\lambda(\bullet:T). \lambda(\bullet:S). 1)                                          \\
+     \lambda(x:\tau_1). \lambda(y:\tau_1 \to \tau_2). (\lambda(z:\tau_1). y~x)~x & \Rightarrow \\
+       \multicolumn{3}{c}{\lambda(\bullet:T_1). \lambda(\bullet:T_1 \to T_2). (\lambda(\bullet:T_1). 2~0)~1} \\
+   \end{array}
+\]
 
-  Here are several examples of terms in both the named and the de Bruijn representation:
-  \[ \begin{array}{lcl}
-       \lambda(x:\tau). x                                                          & \Rightarrow & (\lambda(\bullet:T). 0)                                                              \\
-       \lambda(x:\tau). \lambda(y:\sigma). x                                       & \Rightarrow & (\lambda(\bullet:T). \lambda(\bullet:S). 1)                                          \\
-       \lambda(x:\tau_1). \lambda(y:\tau_1 \to \tau_2). (\lambda(z:\tau_1). y~x)~x & \Rightarrow \\
-         \multicolumn{3}{c}{\lambda(\bullet:T_1). \lambda(\bullet:T_1 \to T_2). (\lambda(\bullet:T_1). 2~0)~1} \\
-     \end{array}
-  \]
+In the first example, $\lambda(x:\tau). x$, the variable $x$ refers to the
+immediately enclosing binding and can therefore be represented with the index
+$0$. Next, in $\lambda(x:\tau). \lambda(y:\sigma). x$, we need to skip the $y$
+binding and therefore represent the occurrence of $x$ with 1. In the third
+example, the variable $x$ is once represented using the index $1$ and once using
+the index $2$. This shows that the indices of a variable are not constant but
+depend on the context the variable appears in.
 
-  In the first example, $\lambda(x:\tau). x$, the variable $x$ refers to the immediately enclosing binding
-  and can therefore be represented with the index $0$. Next, in
-  $\lambda(x:\tau). \lambda(y:\sigma). x$, we need to skip the $y$ binding and therefore
-  represent the occurrence of $x$ with 1. In the third example, the variable $x$
-  is once represented using the index $1$ and once using the index $2$. This shows that the indices of a variable are not constant but depend
-  on the context the variable appears in. 
+Finally, we use different namespaces for term and type variables and treat
+indices for variables from distinct namespaces independently, as illustrated by
+the following examples:
 
-Finally, we use different namespaces for term and type variables and treat indices
-  for variables from distinct namespaces independently, as illustrated by the following examples:
+\[ \begin{array}{lcl}
+     \lambda(x:\tau). \Lambda\alpha.  \tapp{x}{\alpha}                  & \Rightarrow & \lambda(\bullet:\tau).\Lambda\bullet. \tapp{0}{0}                     \\
+     \Lambda\alpha.   \lambda(x:\tau). \tapp{x}{\alpha}                 & \Rightarrow & \Lambda\bullet.\lambda(\bullet:\tau). \tapp{0}{0}                     \\
+     \Lambda\alpha. \Lambda\beta. \lambda(x:\alpha). \lambda(y:\beta).x & \Rightarrow & \Lambda\bullet.\Lambda\bullet.\lambda(\bullet:1).\lambda(\bullet:0).1 \\
+   \end{array}
+\]
 
-  \[ \begin{array}{lcl}
-       \lambda(x:\tau). \Lambda\alpha.  \tapp{x}{\alpha}                  & \Rightarrow & \lambda(\bullet:\tau).\Lambda\bullet. \tapp{0}{0}                     \\
-       \Lambda\alpha.   \lambda(x:\tau). \tapp{x}{\alpha}                 & \Rightarrow & \Lambda\bullet.\lambda(\bullet:\tau). \tapp{0}{0}                     \\
-       \Lambda\alpha. \Lambda\beta. \lambda(x:\alpha). \lambda(y:\beta).x & \Rightarrow & \Lambda\bullet.\Lambda\bullet.\lambda(\bullet:1).\lambda(\bullet:0).1 \\
-     \end{array}
-  \]
-
-  As a consequence, when resolving a term variable index we do not take type variable
-  binders into account and vice versa.
+As a consequence, when resolving a term variable index we do not take type
+variable binders into account and vice versa.
 
 
 \subsection{Well-scopedness}\label{sec:gen:overview:formalization:wellscoping}
@@ -862,14 +862,12 @@ $h \vdash E$.
 
 \subsection{Substitutions}
 
-\stevennote{TODO}{Make this consistent again.}
-
-\newcommand{\shtm}{{\text{sh}_{\text{tm}}}}
-\newcommand{\sutm}{{\text{su}_{\text{tm}}}}
-\newcommand{\shty}{{\text{sh}_{\text{ty}}}}
-\newcommand{\suty}{{\text{su}_{\text{ty}}}}
-\newcommand{\SH}{{\text{sh}_{*}}}
-\newcommand{\SU}{{\text{su}_{*}}}
+\newcommand{\shtm}{{\text{shift}_{\text{tm}}}}
+\newcommand{\sutm}{{\text{subst}_{\text{tm}}}}
+\newcommand{\shty}{{\text{shift}_{\text{ty}}}}
+\newcommand{\suty}{{\text{subst}_{\text{ty}}}}
+\newcommand{\SH}{{\text{shift}_{*}}}
+\newcommand{\SU}{{\text{subst}_{*}}}
 
 %format shtm = "\shtm"
 %format sutm = "\sutm"
@@ -887,33 +885,99 @@ when inserting new variables in the context.
 
 
 \paragraph{Shifting}
-We need to generalize shiftings so that variables can be inserted in the middle
-of the context, i.e. operations that corresponds to the weakenings
-$|Γ,Δ ⊢ e| \leadsto |Γ,x,Δ ⊢ e|$ and $|Γ,Δ ⊢ e| \leadsto |Γ,α,Δ ⊢ e|$.
+
+
+%% $\Lambda\bullet.t$
+%% $t_1,t_2$
+%% $\lambda \bullet:T.t$
+%% $\tapp{t}{T}$
+%% $\casep{t_1}{q}{t_2}$
+%% $t_1~t_2$
+%% $\pack{T_1}{t}{T_2}$
+%% $\unpack{\bullet}{\bullet}{t_1}{t_2}$
+
+
+\begin{figure}[t]
+  \centering
+  \fbox{
+    \begin{minipage}{0.96\columnwidth}
+      \framebox{\mbox{\ensuremath{|shtm : h → n → n|}}}\\
+
+      $
+      \begin{array}{lllcl}
+           |shtm| & |0      | & |n    | & = & |S n         | \\
+           |shtm| & |(Stm h)| & |0    | & = & |0           | \\
+           |shtm| & |(Stm h)| & |(S n)| & = & |S (shtm h n)| \\
+           |shtm| & |(Sty h)| & |n    | & = & |shtm h n    | \\
+      \end{array}
+      $ \\
+
+      \framebox{\mbox{\ensuremath{|shtm : h → t → t → n|}}}\\
+
+      $
+      \begin{array}{lllcl}
+        |shtm| & h & (\Lambda\bullet.t)                   & = & \Lambda\bullet. (|shtm|~(|Sty|~h)~t)                   \\ 
+        |shtm| & h & (t_1,t_2)                             & = & (|shtm|~h~t_1), (|shtm|~h~t_2)                            \\ 
+        |shtm| & h & (\lambda \bullet:T.t)                 & = & \lambda \bullet:T. (|shtm|~(|Stm|~h)~t)       \\ 
+        |shtm| & h & (\tapp{t}{T})                        & = & \tapp{(|shtm|~h~t)}{T}                         \\ 
+        |shtm| & h & (\casep{t_1}{q}{t_2})                 & = & \\
+           \multicolumn{5}{l}{\quad \casep{(|shtm|~h~t_1)}{q}{(|shtm|~(h + \bindp{q})~t_2})}            \\ 
+        |shtm| & h & (t_1~t_2)                             & = & (|shtm|~h~t_1)~(|shtm|~h~t_2)                     \\ 
+        |shtm| & h & (\pack{T_1}{t}{T_2})                  & = & \pack{T_1}{|shtm|~h~t}{T_2}                  \\ 
+        |shtm| & h & (\unpack{\bullet}{\bullet}{t_1}{t_2}) & = & \\
+           \multicolumn{5}{l}{\quad \unpack{\bullet}{\bullet}{(|shtm|~h~t_1)}{(|shtm|~(|Stm|~(|Sty|~h))~t_2)}} \\ 
+      \end{array}
+      $
+    \end{minipage}
+  }
+  \caption{Shifting functions}
+  \label{fig:overview:shifting}
+\end{figure}
+
+\emph{Shifting} is an operation that adapts indices in terms when the context is
+extended with new variables, e.g. when recursing under a binder during
+substitution. For example, when going under a term or a type abstraction we need
+to transport the substitutes along the following context changes:
+\[ |Γ ⊢ e| \leadsto |Γ,x ⊢ e| \quad \text{and} \quad |Γ ⊢ e| \leadsto |Γ,α ⊢ e|.
+\]
+
+To implement shiftings, we need to generalize them first, so that variables can
+be inserted in the middle of the context, i.e. operations that corresponds to
+the context changes
+\[ |Γ,Δ ⊢ e| \leadsto |Γ,x,Δ ⊢ e| \quad \text{and} \quad |Γ,Δ ⊢ e| \leadsto |Γ,α,Δ ⊢ e|.
+\]
 
 Only indices for variables in $\Gamma$ need to be adapted. For this purpose the
 shifting functions take a \emph{cutoff} parameter that represents the domain of
 $\Delta$. Only indices ``above'' the cutoff are adapted. We overload the name of
-type variable shifting and hence use the following four single-place shift
-functions:
-$$
+type variable shifting and hence use the following four shift functions:
+\[
 \begin{array}{c@@{\hspace{1cm}}c}
   |box (shtm : h → t → t)|  &  |box (shty : h → E → E)| \\
   |box (shty : h → t → t)|  &  |box (shty : h → T → T)|
 \end{array}
-$$
+\]
 
-% These can be iterated to get multiplace shiftings that represent the weakenings
-% $$
-% \Gamma\vdash e       \leadsto \Gamma,\Delta\vdash e        \quad
-% \Gamma\vdash \tau    \leadsto \Gamma,\Delta\vdash \tau     \quad
-% \Gamma\vdash \Delta' \leadsto \Gamma,\Delta\vdash \Delta'
-% $$
-% $$
-% \begin{array}{c@@{\hspace{5mm}}c@@{\hspace{5mm}}c}
-%   |box (sh : t → h → t)| & |box (sh : T → h → T)| & |box (sh : E → h → E)|
-% \end{array}
-% $$
+Figure \ref{fig:overview:shifting} defines the shifting of term variables on
+indices and terms. Instead of using the traditional arithmetical implementation
+\[ |if n < c then n else n + 1| \]
+for the shifting of indices, we use an equivalent recursive definition that
+inserts the successor constructor \emph{at the right place}. This follows the
+inductive structure of |Δ| which facilitates inductive proofs on |Δ|.
+
+The single-place shiftings can be iterated to get multiplace shiftings 
+\[ \begin{array}{c@@{\hspace{9mm}}c@@{\hspace{9mm}}c}
+     |sh : t → h → t| & |sh : T → h → T| & |sh : E → h → E| \\
+   \end{array}
+\]
+\noindent that represent the weakenings
+\[ \begin{array}{c@@{\hspace{9mm}}c@@{\hspace{9mm}}c}
+     \Gamma\vdash e       \leadsto \Gamma,\Delta\vdash e       &
+     \Gamma\vdash \tau    \leadsto \Gamma,\Delta\vdash \tau    & 
+     \Gamma\vdash \Delta' \leadsto \Gamma,\Delta\vdash \Delta' \\
+       |sh : t → h → t| & |sh : T → h → T| & |sh : E → h → E| \\
+   \end{array}
+\]
 
 \paragraph{Substitution}
 
@@ -1436,6 +1500,34 @@ manual customization and extension.
 % %% the user to fill in the gaps via proof obligations.
 
 } % FEXISTSPROD SCOPE
+\subsection{Scientific Output}
+
+The first stage in the development of \Knot and \Needle concerned itself with
+the abstract syntax only and was published in the article
+
+\begin{center}
+  \begin{minipage}{0.8\columnwidth}
+    Keuchel, S., Weirich, S., and Schrijvers, T. (2016).
+    \newblock Needle {\&} {K}not: {B}inder {B}oilerplate {T}ied {U}p.
+    \newblock In {\em Programming Languages and Systems: 25th European Symposium
+      on Programming}, ESOP '16, pages 419--445. Springer.
+  \end{minipage}
+\end{center}
+
+\noindent The framework was subsequently extended with the support for inductive
+relations, which also includes the symbolic expressions. This part is contained
+in the article
+
+\begin{center}
+  \begin{minipage}{0.8\columnwidth}
+    Keuchel, S.,  Schrijvers, T., and Weirich, S. (2016).
+    \newblock Needle {\&} {K}not: {B}oilerplate {B}ound {T}ighter.
+    \newblock Unpublished draft.
+  \end{minipage}
+\end{center}
+
+The remainder of the second part of this thesis presents the contents of the two
+articles.
 
 %%% Local Variables:
 %%% mode: latex

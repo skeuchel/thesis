@@ -78,7 +78,7 @@ back to evaluation in Section \ref{ssec:sem:evaluation}.
 
 
 Shifting adapts indices when a variable $x$ is inserted into the context which
-is generically defined Figure \ref{fig:shift}. The |shift| function is
+is generically defined in Figure \ref{fig:shift}. The |shift| function is
 parameterized over the namespace $\alpha$ of variable $x$ in which the shift is
 performed and the sort $S$ of the term that the function operates on. In case of
 a variable constructor $K : \alpha \to S$, the index is shifted using the
@@ -109,7 +109,6 @@ Weakening is the transportation of a sort term to a bigger context where
 variables are only added at the end.  Figure~\ref{fig:shift} shows the
 implementation of |weakenS| that iterates the 1-place |shiftαS| function. Its
 second parameter |h| represents the domain of the context extension.
-
 
 \subsection{Substitution}\label{ssec:sem:substitution}
 

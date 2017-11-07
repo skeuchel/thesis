@@ -1221,30 +1221,6 @@ checked to be identical to the flattening of the prefix $\rulebindspec$.
 
 \section{Discussion}\label{sec:gen:spec:discussion}
 
-The first stage in the development of \Knot and \Needle concerned itself with
-the abstract syntax only and was published in the article
-
-\begin{center}
-  \begin{minipage}{0.8\columnwidth}
-    Keuchel, S., Weirich, S., and Schrijvers, T. (2016).
-    \newblock Needle {\&} {K}not: {B}inder {B}oilerplate {T}ied {U}p.
-    \newblock In {\em Programming Languages and Systems: 25th European Symposium
-      on Programming}, ESOP '16, pages 419--445. Springer.
-  \end{minipage}
-\end{center}
-
-\noindent The framework was subsequently extended with the support for inductive
-relations, which also includes the symbolic expressions. This part is contained
-in the article
-
-\begin{center}
-  \begin{minipage}{0.8\columnwidth}
-    Keuchel, S.,  Schrijvers, T., and Weirich, S. (2016).
-    \newblock Needle {\&} {K}not: {B}oilerplate {B}ound {T}ighter.
-    \newblock Unpublished draft.
-  \end{minipage}
-\end{center}
-
 \paragraph{Recursive Scoping}
 { \input{src/MacrosFExists}
 

@@ -47,6 +47,10 @@
 %format v2
 %format e1
 %format e2
+%format h1
+%format h2
+%format h₁ = h1
+%format h₂ = h2
 %format t1
 %format t2
 %format evalErr = "\Varid{eval_{Err}}"
@@ -95,6 +99,9 @@
 %format Γ2   = Γ "_2"
 %format Γ3   = Γ "_3"
 %format Δ    = "{\Delta}"
+%format Δ₁   = "{\Delta_1}"
+%format Δ₂   = "{\Delta_2}"
+%format Δ₃   = "{\Delta_3}"
 %format Δ1   = "{\Delta_1}"
 %format Δ2   = "{\Delta_2}"
 %format Δ3   = "{\Delta_3}"

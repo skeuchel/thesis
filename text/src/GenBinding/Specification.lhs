@@ -191,6 +191,9 @@ constructor |etvar| is not associating any information with type variables.
 %-------------------------------------------------------------------------------
 \subsection{Inductive Relation Specifications}\label{sec:knotbyexample:semantics}
 %
+%format wtp1
+%format wtp2
+
 \begin{figure}[t]
   \fbox{
     \begin{minipage}{0.96\columnwidth}

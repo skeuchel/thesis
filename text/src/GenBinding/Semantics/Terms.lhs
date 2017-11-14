@@ -40,7 +40,7 @@ Bruijn terms.
            n,m       & ::= & 0                  & \mid & S~n           & \text{de Bruijn index} \\
            u,v,w     & ::= & K~n                & \mid & K~\ov{u}      & \text{de Bruijn term}  \\
            h, c      & ::= & 0                  & \mid & S_\alpha~h     & \text{Het. number}     \\
-           \vartheta & ::= & \multicolumn{3}{l}{\ov{g \mapsto n}, \ov{t \mapsto u}}    & \text{Value env.}      \\
+           \vartheta & ::= & \multicolumn{3}{l}{\ov{g \mapsto n}, \ov{t \mapsto u}, \ov{(f,j) \mapsto u}}    & \text{Value env.}      \\
          \end{array}
       \]
     \end{minipage}
@@ -55,11 +55,11 @@ Bruijn terms.
     \begin{minipage}{0.96\columnwidth}
       \framebox{\mbox{$\wellsorted{u}{S}$}} \\
       \[ \begin{array}{c}
-         \inferrule* [right=\textsc{WsVar}]
+         \inferrule* [right=\textsc{SortedVar}]
                      {K : \alpha \rightarrow S
                      }
                      {\wellsorted{K~n}{S}} \quad\quad
-         \inferrule* [right=\textsc{WsCtor}]
+         \inferrule* [right=\textsc{SortedCtor}]
                      {K : \overline{x : \alpha} \rightarrow \overline{[bs] t : T} \rightarrow S \\\\
                       \wellsorted{u_i}{T_i} \quad (\forall i)
                      }
@@ -68,10 +68,10 @@ Bruijn terms.
       \]
       \framebox{\mbox{$\wellsorted{u}{E}$}} \\
       \[ \begin{array}{c}
-         \inferrule* [right=\textsc{WsNil}]
+         \inferrule* [right=\textsc{SortedNil}]
                      {K : E}
                      {\wellsorted{K}{E}} \quad\quad
-         \inferrule* [right=\textsc{WsCons}]
+         \inferrule* [right=\textsc{SortedCons}]
                      {K : E \to \alpha \to \overline{T} \to E \\
                       \wellsorted{v}{E} \\\\
                       \wellsorted{u_i}{T_i} \quad (\forall i)}
@@ -130,7 +130,7 @@ the representation.
       domain K = 0
         where K : E
       domain (K v (overline u))  = domain v + Iα
-        where K : E -> alpha -> (overline T) -> E
+        where K : E -> α -> (overline T) -> E
       \end{code}
 
     \end{minipage}

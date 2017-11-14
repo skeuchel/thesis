@@ -5,7 +5,7 @@
 %include macros.fmt
 %include exists.fmt
 
-\chapter{Background}\label{ch:gen:background}
+\chapter{Overview}\label{ch:gen:background}
 %% \input{src/GenBackground/Introduction}
 %% \input{src/GenBinding/Introduction}
 %% \clearpage

@@ -6,9 +6,12 @@ Conclusion.tex
 Elaboration/Implementation.tex
 Elaboration/RelShifting.tex
 Elaboration/RelSubstitution.tex
+Elaboration/ShiftCommutation.tex
+Elaboration/Stability.tex
 Elaboration/WellScopedness.tex
 Overview.tex
 RelatedWork.tex
+Semantics/Discussion.tex
 Semantics/Expressions.tex
 Semantics/Operations.tex
 Semantics/Relations.tex

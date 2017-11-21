@@ -1,4 +1,4 @@
-%include lhs2TeX.fmt
+E%include lhs2TeX.fmt
 %include polycode.fmt
 %include Formatting.fmt
 %include forall.fmt
@@ -115,13 +115,13 @@ the representation.
 
       evalbs ε ϑ            =  0
       evalbs (bs , xα) ϑ    =  evalbs bs ϑ  +  Iα
-      evalbs (bs , f t) ϑ   =  evalbs bs ϑ  +  ⟦ f ⟧ (ϑ t)
+      evalbs (bs , f t) ϑ   =  evalbs bs ϑ  +  evalfun f (ϑ t)
       \end{code}
 
       \begin{code}
-      box (⟦ _ ⟧ : f → u → h)
-      ⟦ f ⟧ (K (overline u))  = evalbs bs (overline (t ↦ u))
-        where  f (K (overline x) (overline t)) = bs
+      box ((evalfun _ _) : f → u → h)
+      evalfun f (K (overline u)) = evalbs bs (overline (t ↦ u))
+        where f (K (overline x) (overline t)) = bs
       \end{code}
 
       \begin{code}

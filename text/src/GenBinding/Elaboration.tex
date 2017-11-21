@@ -1,20 +1,22 @@
 \chapter{Elaboration}\label{ch:elaboration}
 Programming language mechanizations typically rely on many boilerplate
 properties of the boilerplate operations that we introduced in the previous
-section. To further reduce the hand-written boilerplate, we have set up the
+chapter. To further reduce the hand-written boilerplate, we have set up the
 \Knot specification language in such a way that it provides all the necessary
-information to generically state and prove a wide range of these
-properties.
+information to generically state and prove a wide range of these properties.
 
 %% \footnote{In fact, we provide more such lemmas than any other framework based on
 %%   first-order representations -- see Section~\ref{sec:related}.}
 
 Below we discuss different kinds of ubiquitous lemmas that \Needle covers;
-Appendix~\ref{app:lemmas} provides more detail. In general, it is quite
-challenging to tackle these boilerplate lemmas generically because their exact
-statements, and in particular which premises are needed, depend highly on the
-dependencies between sorts and of the associated data in environments.
+Appendix~\ref{app:lemmas} provides more detail.
 
+\stevennote{MOVE}{It is quite challenging to tackle these boilerplate lemmas
+  generically because their exact statements, and in particular which premises
+  are needed, depend highly on the dependencies between sorts and of the
+  associated data in environments.}
+
+\input{src/GenBinding/Elaboration/Stability}
 \input{src/GenBinding/Elaboration/ShiftCommutation}
 \input{src/GenBinding/Elaboration/WellScopedness}
 \input{src/GenBinding/Elaboration/RelShifting}

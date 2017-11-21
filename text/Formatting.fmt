@@ -267,6 +267,7 @@
 
 %format (box (stuff)) = "\hspace{-1em}\framebox{\mbox{\ensuremath{" stuff "}}}"
 %format (evalbs (bs) th) = "{\llbracket\: {" bs "} \:\rrbracket_{" th "}}"
+%format (evalfun f (u)) = "{\llbracket\: {" f "} \:\rrbracket (" u ")}"
 %format (sub (s)) = "_{" s "}"
 
 %format shα = "{{" sh "}_{\alpha}}"
@@ -274,3 +275,13 @@
 %format sym1
 %format sym2
 %format (evalbig x y z) = "{\evalbig{" x "}{" y "}{" z "}}"
+
+%format congplus = cong "_{+}"
+%format congsuccα = cong "_{S_\alpha}"
+%format eqh1
+%format eqh2
+%format eqh3
+
+%format ϑ = "\vartheta"
+%format ϑ'
+%format ϑ''

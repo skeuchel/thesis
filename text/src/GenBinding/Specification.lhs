@@ -1282,16 +1282,20 @@ $$
  { \evalbigf{f}{\symbolicsubst~x~\symbolicterm_1~\symbolicterm_2}{\bindspec'}
  }.
 $$
-Yet, adding this rule would break subject reduction of symbolic evaluation. The
-reason is that the typing of $\bindspec$ in Figure \ref{fig:symbolicevaluation}
-(bottom) is not strong enough to keep track of the scope when performing
-substitutions or weakenings. In essence, the result cannot be $\bindspec'$ but
-has to be ``$\bindspec'$ without $x$''. Tracking scopes during substitutions or
-other user-defined functions is the focus of research on \emph{binding safe
-  programming}~\cite{freshlook,romeo}. In the framework of \cite{freshlook},
-$\bindspec'$ in the premise and conclusion of the above rule are two distinct
-(chains of) weak links with distinct types, which are in a commutative
-relationship with the world inclusion induced by the substitution.
+which expresses that the variables bound by $\symbolicterm_2$ remain invariant
+under substitution and this rule is also used in our elaboration of boilerplate
+lemmas for the de Bruijn representation (cf. Section \ref{sec:elab:stability}).
+Yet, adding this rule to the specification language would break subject
+reduction of symbolic evaluation. The reason is that the typing of $\bindspec$
+in Figure \ref{fig:symbolicevaluation} (bottom) is not strong enough to keep
+track of the scope when performing substitutions or weakenings. In essence, the
+result cannot be $\bindspec'$ but has to be ``$\bindspec'$ without $x$''.
+Tracking scopes during substitutions or other user-defined functions is the
+focus of research on \emph{binding safe programming}~\cite{freshlook,romeo}. In
+the framework of \cite{freshlook}, $\bindspec'$ in the premise and conclusion of
+the above rule are two distinct (chains of) weak links with distinct types,
+which are in a commutative relationship with the world inclusion induced by the
+substitution.
 
 We side-step the issue by sticking to the simple scope checking of Figure
 \ref{fig:symbolicevaluation} (bottom) and effectively disallow symbolic

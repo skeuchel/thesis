@@ -4,10 +4,10 @@ AppendixSpecification.tex
 CaseStudy.tex
 Conclusion.tex
 Elaboration/Implementation.tex
+Elaboration/Interaction.tex
 Elaboration/RelShifting.tex
 Elaboration/RelSubstitution.tex
 Elaboration/ShiftCommutation.tex
-Elaboration/Stability.tex
 Elaboration/WellScopedness.tex
 Overview.tex
 RelatedWork.tex

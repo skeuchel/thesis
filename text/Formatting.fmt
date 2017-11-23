@@ -278,9 +278,20 @@
 
 %format congplus = cong "_{+}"
 %format congsuccα = cong "_{S_\alpha}"
+%format congsuccβ = cong "_{S_\beta}"
 %format eqh1
 %format eqh2
 %format eqh3
+%format evalBindspecShiftα = evalBindspecShift "_\alpha"
+%format evalBindspecShiftβ = evalBindspecShift "_\beta"
+
+%format congshiftα = "{{" cong "}_{{" shift "}_{\alpha}}}"
+%format congshiftβ = "{{" cong "}_{{" shift "}_{\beta}}}"
+%format congsubstα = "{{" cong "}_{{" subst "}_{\alpha}}}"
+%format congsubstβ = "{{" cong "}_{{" subst "}_{\beta}}}"
+%format equ1
+%format equ2
+%format equ3
 
 %format ϑ = "\vartheta"
 %format ϑ'

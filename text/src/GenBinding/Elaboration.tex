@@ -1,20 +1,116 @@
 \chapter{Elaboration}\label{ch:elaboration}
-Programming language mechanizations typically rely on many boilerplate
-properties of the boilerplate operations that we introduced in the previous
-chapter. To further reduce the hand-written boilerplate, we have set up the
-\Knot specification language in such a way that it provides all the necessary
-information to generically state and prove a wide range of these properties.
+
+\begin{itemize}
+\item We defined the semantics of \Knot specification generically and also
+  implemented boilerplate functions generically.
+\item In an actual implementation, for instance a code generator, these generic
+  definitions needs to be expanded into specialized code for a particular
+  specification, or put differently, we need to turn the generic implementation
+  into an elaboration into the target language.
+\item Elaborating the functional definitions is comparably easy. Much more
+  challenging is to elaborate a specification into lemmas and proofs.
+\item Programming language mechanizations typically rely on many boilerplate
+  properties of the boilerplate operations that we introduced in the previous
+  chapter.
+\item The elaborations of specification into these boilerplate lemmas and their
+  proofs will be the focus of this chapter.
+\item There are too many lemmas to give an exhaustive account of all the
+  necessary elaborations. Instead we concentrate on representative and key
+  lemmas.
+\item The boilerplate lemmas themselves are not novel. The novelties lie in our
+  elaboration of them. Hence we specifically turn our attention to the
+  elaboration methodology.
+\end{itemize}
+
+\paragraph{Methodology}
+There are two connected problems that we solve:
+\begin{itemize}
+\item Generic proofs of the boilerplate lemmas.
+
+\item Once a proof has been generically established in a meta-language, the
+  proof structure is not directly accessible, e.g. to implement an elaboration
+  for these proofs.
+
+  One can aim to implement an elaboration that follows the same structure as the
+  generic proof, but the faithfulness and therefore correctness of the
+  elaboration is called into question.
+
+\item
+  We solve this problem by factoring the generic proofs through domain-specific
+  witness languages. This splits the generic proof into multiple distinct parts:
+  \begin{enumerate}
+  \item A (syntax-directed) elaboration into a witness language that we designed
+    for the given class of lemmas.
+  \item A semantics of the witness langauge.
+  \item The correctness of the elaboration, i.e. the produced witness indeed
+    encodes a proof of the desired lemma w.r.t. the chosen semantics.
+  \item A soundness proof of the semantics of the witness language, e.g. the
+    statement that a witness proves w.r.t. to the chosen semantics is valid (in
+    our proof meta-language).
+  \end{enumerate}
+
+\item The benefit of this approach is that we can give a formal definition of
+  elaborations and analyze the elaborations formally, i.e. proof their
+  correctness. At the same time, we minimize the part of the generic proof that
+  is not formally accessible to the soundness of the witness language.
+\end{itemize}
+
+
+\paragraph{Overview}
+
+\begin{itemize}
+\item The sections in this chapter show how the witness language methodology
+  is applied to several classes of boilerplate lemmas.
+
+\item Section \ref{ssec:elab:interaction:overview} discusses common interaction
+  lemmas between syntactic operations. Since this class of lemmas state the
+  equality of different applications of operations, we develop a witness
+  language for term equality of our de Bruijn representation.
+
+\item Section \ref{sec:elab:wellscopedness} deals with the well-scopedness
+  lemmas that we discussed in Section
+  \ref{sec:gen:overview:formalization:semantics} and
+  \ref{sec:gen:formalization:metatheory}, i.e. lemmas that prove that indices of
+  relations are always well-scoped. This boils down to proving that the
+  expressions in the conclusion of a rule are well-scoped assuming that the
+  expressions in the premises are well-scoped. The witness language for this
+  class of lemmas is therefore developed around well-scopedness for expressions.
+
+\item Section \ref{sec:elab:shifting} covers shifting and substitution lemmas
+  for relations. As outlined in Section \ref{sec:knotdesign} these operations
+  keep the functorial structure of a derivation tree intact and substitution is
+  implemented by splicing derivations into variable positions. However, in the
+  inductive steps we still need to use interaction lemmas to massage the indices
+  into the expected shape of the corresponding rule.
+
+  Hence, we deal with equality of different evaluations of expressions, and our
+  witness language again observes term equalities, albeit more expressive
+  equalities than the witness language for the interaction lemmas.
+
+\item Section \ref{sec:elab:impl:generic} discusses a generic implementation of
+  \Knot in \Coq and generic proofs of lemmas that follow the methodology of this
+  chapter.
+
+\item Finally, Section \ref{sec:elab:impl:codegen} covers the implementation of
+  our code generator \Needle.
+\end{itemize}
+
+
+%% \stevennote{MOVE}{To further reduce the hand-written boilerplate, we have set up
+%%   the \Knot specification language in such a way that it provides all the
+%%   necessary information to generically state and prove a wide range of these
+%%   properties.}
 
 %% \footnote{In fact, we provide more such lemmas than any other framework based on
 %%   first-order representations -- see Section~\ref{sec:related}.}
 
-Below we discuss different kinds of ubiquitous lemmas that \Needle covers;
-Appendix~\ref{app:lemmas} provides more detail.
+%% \stevennote{MOVE}{Below we discuss different kinds of ubiquitous lemmas that
+%%   \Needle covers; Appendix~\ref{app:lemmas} provides more detail.}
 
-\stevennote{MOVE}{It is quite challenging to tackle these boilerplate lemmas
-  generically because their exact statements, and in particular which premises
-  are needed, depend highly on the dependencies between sorts and of the
-  associated data in environments.}
+%% \stevennote{MOVE}{It is quite challenging to tackle these boilerplate lemmas
+%%   generically because their exact statements, and in particular which premises
+%%   are needed, depend highly on the dependencies between sorts and of the
+%%   associated data in environments.}
 
 \input{src/GenBinding/Elaboration/Interaction} \clearpage
 \input{src/GenBinding/Elaboration/WellScopedness}

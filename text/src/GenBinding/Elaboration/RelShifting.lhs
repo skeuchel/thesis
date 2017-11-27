@@ -4,7 +4,7 @@
 %include forall.fmt
 
 
-\section{Shifting and Substitution}\label{sec:elabshifting}
+\section{Shifting and Substitution}\label{sec:elab:shifting}
 
 Finally, we provide generic lemmas for shifting and substitution. 
 

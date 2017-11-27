@@ -9,7 +9,7 @@ existence for all well-formed specifications. The second, called \Needle, is a
 code generator that is better suited to practical mechanization.
 
 %-------------------------------------------------------------------------------
-\section{The Generic \Knot\ Implementation}
+\section{The Generic \Knot\ Implementation}\label{sec:elab:impl:generic}
 We implemented the boilerplate functions generically for all well-formed \Knot
 specifications in about 4.3k lines of Coq by employing datatype-generic programming techniques
 \cite{genericprogramming}. Following our free monad principle, we capture de Bruijn terms in a
@@ -27,7 +27,7 @@ operations and lemmas for this universe generically.
 
 
 %-------------------------------------------------------------------------------
-\section{The \Needle\ Code Generator}
+\section{The \Needle\ Code Generator}\label{sec:elab:impl:codegen}
 
 While the generic Coq definitions presented in the previous sections are
 satisfactory from a theoretical point of view, they are less so from a pragmatic

@@ -3,7 +3,7 @@
 %include Formatting.fmt
 %include forall.fmt
 
-\section{Interaction Lemmas}
+\section{Interaction Lemmas}\label{sec:elab:interaction}
 
 Formalizations involve a number of interaction boilerplate lemmas between
 |shift|, |weaken| and |subst|. These lemmas are for example needed in weakening
@@ -12,7 +12,52 @@ interaction lemmas that appear and their generic proofs. First by giving
 informal induction proofs of the lemmas and then a formal elaboration of the
 inductive steps.
 
-\subsection{Stability of Binding Specifications}\label{sec:elab:stability}
+\subsection{Overview}\label{ssec:elab:interaction:overview}
+
+\subsubsection{Commutation}\label{ssec:elab:interaction:overview:commutation}
+Two operation always commute when they are operating on different variables. For
+instance, weakening of terms by introducing two distinct variables $x$ and $y$
+%
+\[ \Gamma,\Delta_1,\Delta_2 \leadsto \Gamma,x,\Delta_1,y,\Delta_2 \]
+%
+\noindent can be implemented by 2 consecutive shifts. The order of these shifts
+is irrelevant, which we have to prove, i.e. we have the following commuting
+diagram:
+%
+\[ \xymatrixcolsep{5pc}
+   \xymatrix{
+   |Γ,Δ₁,Δ₂|   \ar[r]^{|shiftβ h₂|}   \ar[d]_{|shiftα (h₁ + h₂)|} & |Γ,Δ₁,y,Δ₂| \ar[d]^{|shiftα (h₁ + Iβ + h₂)|}  \\
+   |Γ,x,Δ₁,Δ₂|                   \ar[r]_{|shiftβ h₂|} & |Γ,x,Δ₁,y,Δ₂|
+   }
+\]
+%
+\noindent where $h_1 := |dom Δ₁|$ and $h_2 := |dom Δ₂|$, $\alpha$ is the
+namespace of $x$, and $\beta$ the namespace of $y$. Usually only the special
+case $\Delta_2 \equiv \epsilon$ of this lemma is used. However, for the
+induction to go throught the more general case needs to be proved. Also the
+lemma can be homogenous, i.e. $\alpha = \beta$, or heterogeneous, i.e. $\alpha
+\neq \beta$.
+
+\begin{lem}\label{lem:elab:shiftcomm}
+\[ \forall u, h_1, h_2.
+     |shiftα (h1 + Iβ + h2) (shiftβ h2 u)| =
+     |shiftβ h2 (shiftα (h1 + h2) u)|
+\]
+\end{lem}
+
+Similar lemmas hold for the commutation of a substitution and a shifting and two
+substitutions. Extra care needs to be taken when a substitution is involved,
+since the substitute(s) may also need to be changed.
+
+\subsubsection{Cancelation}
+When operating on the same variable, a shifting followed by a substitution
+cancel each other out:
+ $$|substα v 0α (shiftα 0α u) = u|.$$
+
+
+\subsection{Semi-formal Proofs}
+
+\subsubsection{Stability of Binding Specifications}\label{sec:elab:stability}
 
 A crucial property of \Knot is the stability of binding specifications under
 syntactic operations. This property enforces lexical scoping: shifting and
@@ -62,48 +107,8 @@ substitutes $\overline{v_i}^i$ define the following value environments
 \end{cor}
 
 
-\subsection{Commutation}
-Two operation always commute when they are operating on different variables. For
-instance, weakening of terms by introducing two distinct variables $x$ and $y$
-%
-\[ \Gamma,\Delta_1,\Delta_2 \leadsto \Gamma,x,\Delta_1,y,\Delta_2 \]
-%
-\noindent can be implemented by 2 consecutive shifts. The order of these shifts
-is irrelevant, which we have to prove, i.e. we have the following commuting
-diagram:
-%
-\[ \xymatrixcolsep{5pc}
-   \xymatrix{
-   |Γ,Δ₁,Δ₂|   \ar[r]^{|shiftβ h₂|}   \ar[d]_{|shiftα (h₁ + h₂)|} & |Γ,Δ₁,y,Δ₂| \ar[d]^{|shiftα (h₁ + Iβ + h₂)|}  \\
-   |Γ,x,Δ₁,Δ₂|                   \ar[r]_{|shiftβ h₂|} & |Γ,x,Δ₁,y,Δ₂|
-   }
-\]
-%
-\noindent where $h_1 := |dom Δ₁|$ and $h_2 := |dom Δ₂|$, $\alpha$ is the
-namespace of $x$, and $\beta$ the namespace of $y$. Usually only the special
-case $\Delta_2 \equiv \epsilon$ of this lemma is used. However, for the
-induction to go throught the more general case needs to be proved. Also the
-lemma can be homogenous, i.e. $\alpha = \beta$, or heterogeneous, i.e. $\alpha
-\neq \beta$.
 
-\begin{lem}\label{lem:elab:shiftcomm}
-\[ \forall u, h_1, h_2.
-     |shiftα (h1 + Iβ + h2) (shiftβ h2 u)| =
-     |shiftβ h2 (shiftα (h1 + h2) u)|
-\]
-\end{lem}
-
-Similar lemmas hold for the commutation of a substitution and a shifting and two
-substitutions. Extra care needs to be taken when a substitution is involved,
-since the substitute(s) may also need to be changed.
-
-\subsection{Cancelation}
-When operating on the same variable, a shifting followed by a substitution
-cancel each other out:
- $$|substα v 0α (shiftα 0α u) = u|.$$
-
-
-\subsection{Proof of Shift Commutation}
+\subsubsection{Shift Commutation}
 In this section we discuss the proof and elaboration of Lemma
 \ref{lem:elab:shiftcomm} in detail. The other interaction lemmas are proved
 similarly.
@@ -146,7 +151,8 @@ $u$ with binding specification |bs|:
   & |shiftβ (h2 + evalbs bs ϑ'')|             & |(shiftα ((h1 + h2) + evalbs bs ϑ) u)| \\
 \end{tabular}
 
-\subsection{Equality Proof Elaboration}
+
+\subsection{Term Equality Witnesses}
 
 \begin{figure}[t]
   \centering
@@ -268,7 +274,9 @@ $u$ with binding specification |bs|:
 \end{lem}
 
 
-\subsection{Elaboration of Stability}
+\subsection{Proof Elaboration}
+
+\subsubsection{Elaboration of Stability}
 
 \begin{figure}[t]
   \centering
@@ -306,7 +314,7 @@ $u$ with binding specification |bs|:
 \end{lem}
 %}
 
-\subsection{Elaboration of Shift Commutation}
+\subsubsection{Elaboration of Shift Commutation}
 
 %format shiftcomm1
 %format shiftcomm2

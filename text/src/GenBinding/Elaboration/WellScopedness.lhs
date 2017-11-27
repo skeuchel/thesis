@@ -24,7 +24,7 @@
 %format  wsV   =   "\text{ws}_V"
 %format  wsW   =   "\text{ws}_W"
 
-\section{Well-scopedness}\label{sec:wellscopedness}
+\section{Well-scopedness}\label{sec:elab:wellscopedness}
 
 For user-defined relations with environments we want to generically establish
 that a proof of a judgement implies well-scopedness of the sort terms of the

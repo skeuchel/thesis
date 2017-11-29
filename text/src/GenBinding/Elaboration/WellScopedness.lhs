@@ -26,6 +26,8 @@
 
 \section{Well-scopedness}\label{sec:elab:wellscopedness}
 
+\begin{itemize}
+\item
 For user-defined relations with environments we want to generically establish
 that a proof of a judgement implies well-scopedness of the sort terms of the
 judgement. For example for the typing relation $\Gamma \vdash e : \tau$ from
@@ -38,9 +40,15 @@ $$
     }
 $$
 
-A proof of this lemma follows by induction on the derivation of the premise and
-is accomplished in two steps. First, we establish well-scopedness of the sort
-and global meta-variables of the conclusion, potentially by using inversion
+\item This boils down to proving that the
+  expressions in the conclusion of a rule are well-scoped assuming that the
+  expressions in the premises are well-scoped. The witness language for this
+  class of lemmas is therefore developed around well-scopedness for expressions.
+\end{itemize}
+
+A proof of well-scopedness follows by induction on the derivation of the premise
+and is accomplished in two steps. First, we establish well-scopedness of the
+sort and global meta-variables of the conclusion, potentially by using inversion
 lemmas on the induction hypotheses. For example for an application rule
 $$
 \inferrule*[]

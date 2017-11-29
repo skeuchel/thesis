@@ -6,7 +6,20 @@
 
 \section{Shifting and Substitution}\label{sec:elab:shifting}
 
-Finally, we provide generic lemmas for shifting and substitution. 
+\begin{itemize}
+\item Finally, we provide generic lemmas for shifting and substitution of relations.
+
+\item As outlined in Section \ref{sec:knotdesign} these operations keep the
+  functorial structure of a derivation tree intact and substitution is
+  implemented by splicing derivations into variable positions. However, in the
+  inductive steps we still need to use interaction lemmas to massage the indices
+  into the expected shape of the corresponding rule. \stevennote{TODO}{Make sure
+    this is properly described in Section \ref{sec:knotdesign}}
+
+\item Hence, we deal with equality of different evaluations of expressions, and
+  our witness language again observes term equalities, albeit more expressive
+  equalities than the witness language for the interaction lemmas.
+\end{itemize}
 
 \paragraph{Shifting}
 As in the

@@ -7,10 +7,20 @@
 
 Formalizations involve a number of interaction boilerplate lemmas between
 |shift|, |weaken| and |subst|. These lemmas are for example needed in weakening
-and substitution lemmas for typing relations. We discuss the two types of
-interaction lemmas that appear and their generic proofs. First by giving
-informal induction proofs of the lemmas and then a formal elaboration of the
-inductive steps.
+and substitution lemmas for typing relations.
+
+In this Section, we develop an syntax-directed elaboration for these lemmas.
+Since this class of lemmas state the equality of different applications of
+operations, we develop a witness language for term equality of our de Bruijn
+representation.
+
+We discuss the two types of interaction lemmas in Section
+\ref{ssec:elab:interaction:overview} and develop a semi-formal induction proof
+for one of them in Section \ref{ssec:elab:interaction:semiformal}. The formal
+witness language is developed in Section \ref{ssec:elab:interaction:witness}.
+Finally, the elaboration is presented in Section
+\ref{ssec:elab:interaction:elaboration}.
+
 
 \subsection{Overview}\label{ssec:elab:interaction:overview}
 
@@ -55,7 +65,7 @@ cancel each other out:
  $$|substα v 0α (shiftα 0α u) = u|.$$
 
 
-\subsection{Semi-formal Proofs}
+\subsection{Semi-formal Proofs}\label{ssec:elab:interaction:semiformal}
 
 \subsubsection{Stability of Binding Specifications}\label{sec:elab:stability}
 
@@ -152,7 +162,7 @@ $u$ with binding specification |bs|:
 \end{tabular}
 
 
-\subsection{Term Equality Witnesses}
+\subsection{Term Equality Witnesses}\label{ssec:elab:interaction:witness}
 
 \begin{figure}[t]
   \centering
@@ -274,7 +284,7 @@ $u$ with binding specification |bs|:
 \end{lem}
 
 
-\subsection{Proof Elaboration}
+\subsection{Proof Elaboration}\label{ssec:elab:interaction:elaboration}
 
 \subsubsection{Elaboration of Stability}
 

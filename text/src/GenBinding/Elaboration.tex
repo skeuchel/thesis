@@ -1,22 +1,87 @@
 \chapter{Elaboration}\label{ch:elaboration}
 
+For the meta-theoretical formalization of programming language we need
+properties of the semantical definitions. For instance, for type-theory proofs
+via progress and preservation we generally need substitution properties of the
+typing relation, and all the other boilerplate that is necessary to prove it.
+
+There are multiple ways to the boilerplate lemmas for use in mechanizations. We
+can develop a \emph{code generator} that produces code for a proof-assistant.
+Alternatively, we can develop a \emph{datatype-generic} library inside a
+proof-assistant. Both approaches have different trade-offs.
+
+
+\paragraph{Generic Library}
+
+Alternatively, we can with (well-formed) \Knot specifications as the codes of a
+generic universe. The main benefit of a library is, that its code, including all
+proofs, can be checked separately independently of a concrete specification.
+Hence, instantiating the library is guaranteed to yield valid theorems for all
+specifications.
+
+Disadvantages of a generic library:
+\begin{itemize}
+\item Hiding of the internals.
+\item Induction over the generic generic representation is usually not the
+  desired ont. Do not use datatypes of the extension directly, but instead
+  write isomorphism to user defined types. This also applies to
+  well-scopedness predicates and relations.
+\item Generically handling relations with arbitrary arities is challenging.
+\item Generic implementation shines through. For example, during
+  simplification, the generic implementation might be exposed.
+\item The statement of a generic lemma may not unify with all goals it applies
+  to, before it has been properly specialized to a given specification. This
+  impacts automatic proof search.
+\item Proof discovery.
+\end{itemize}
+
+
+\paragraph{Code Generators}
+A code generator can parse textual \Knot specifications and produces code for
+use in a proof-assistant. In terms of usability, there are clear advantages.
+
+The code generator can produce definition of datatypes and functions that are
+close to what a human prover might write manually. Hence, the user can inspect
+the code to understand the provided functionality in detail. Moreover, since the
+code generator can specialize the statements of lemmas to the given
+specification, it is much easier for the user to look at the provided proofs
+and for proof automation to apply the provided proofs.
+
+The main downside of a code generator is that the output still needs to be
+checked. This raises the question if correct code is generated in all cases.
+Proofs can also be implemented differently, depending on the available methods
+in the proof assistant. For instance, Coq has a powerful scripting language to
+automate writing proofs. However, very generic proof scripts tend to be brittle
+and can possibly take a long time to execute. Furthermore, reasoning about the
+correctness of the code generator not only involves the language of the proof
+assistant, but also that of the scripting system.
+
+
+
+
 \begin{itemize}
 \item We defined the semantics of \Knot specification generically and also
   implemented boilerplate functions generically.
+
 \item In an actual implementation, for instance a code generator, these generic
   definitions needs to be expanded into specialized code for a particular
   specification, or put differently, we need to turn the generic implementation
   into an elaboration into the target language.
+
 \item Elaborating the functional definitions is comparably easy. Much more
   challenging is to elaborate a specification into lemmas and proofs.
+
 \item Programming language mechanizations typically rely on many boilerplate
   properties of the boilerplate operations that we introduced in the previous
   chapter.
+
 \item The elaborations of specification into these boilerplate lemmas and their
   proofs will be the focus of this chapter.
+
 \item There are too many lemmas to give an exhaustive account of all the
   necessary elaborations. Instead we concentrate on representative and key
   lemmas.
+
 \item The boilerplate lemmas themselves are not novel. The novelties lie in our
   elaboration of them. Hence we specifically turn our attention to the
   elaboration methodology.
@@ -58,42 +123,19 @@ There are two connected problems that we solve:
 
 \paragraph{Overview}
 
-\begin{itemize}
-\item The sections in this chapter show how the witness language methodology
-  is applied to several classes of boilerplate lemmas.
-
-\item Section \ref{ssec:elab:interaction:overview} discusses common interaction
-  lemmas between syntactic operations. Since this class of lemmas state the
-  equality of different applications of operations, we develop a witness
-  language for term equality of our de Bruijn representation.
-
-\item Section \ref{sec:elab:wellscopedness} deals with the well-scopedness
-  lemmas that we discussed in Section
-  \ref{sec:gen:overview:formalization:semantics} and
-  \ref{sec:gen:formalization:metatheory}, i.e. lemmas that prove that indices of
-  relations are always well-scoped. This boils down to proving that the
-  expressions in the conclusion of a rule are well-scoped assuming that the
-  expressions in the premises are well-scoped. The witness language for this
-  class of lemmas is therefore developed around well-scopedness for expressions.
-
-\item Section \ref{sec:elab:shifting} covers shifting and substitution lemmas
-  for relations. As outlined in Section \ref{sec:knotdesign} these operations
-  keep the functorial structure of a derivation tree intact and substitution is
-  implemented by splicing derivations into variable positions. However, in the
-  inductive steps we still need to use interaction lemmas to massage the indices
-  into the expected shape of the corresponding rule.
-
-  Hence, we deal with equality of different evaluations of expressions, and our
-  witness language again observes term equalities, albeit more expressive
-  equalities than the witness language for the interaction lemmas.
-
-\item Section \ref{sec:elab:impl:generic} discusses a generic implementation of
-  \Knot in \Coq and generic proofs of lemmas that follow the methodology of this
-  chapter.
-
-\item Finally, Section \ref{sec:elab:impl:codegen} covers the implementation of
-  our code generator \Needle.
-\end{itemize}
+The sections in this chapter show how the witness language methodology is
+applied to several classes of boilerplate lemmas. Section
+\ref{ssec:elab:interaction:overview} discusses common interaction lemmas between
+syntactic operations. Section \ref{sec:elab:wellscopedness} deals with the
+well-scopedness lemmas that we discussed in Section
+\ref{sec:gen:overview:formalization:semantics} and
+\ref{sec:gen:formalization:metatheory}, i.e. lemmas that prove that indices of
+relations are always well-scoped. Section \ref{sec:elab:shifting} covers
+shifting and substitution lemmas for relations. Section
+\ref{sec:elab:impl:generic} discusses a generic implementation of \Knot in \Coq
+and generic proofs of lemmas that follow the methodology of this chapter.
+Finally, Section \ref{sec:elab:impl:codegen} covers the implementation of our
+code generator \Needle.
 
 
 %% \stevennote{MOVE}{To further reduce the hand-written boilerplate, we have set up

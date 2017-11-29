@@ -218,7 +218,7 @@ conventions and make their meaning precise.
                       & $\mid$ & $\ite{e}{e}{e}$            & conditional      \\
                       & $\mid$ & $x$                        & term variable    \\
                       & $\mid$ & $\lambda x:\tau.e$         & term abstraction \\
-                      & $\mid$ & $e~e$                      & application      \\
+                      & $\mid$ & $e~e$                      & term application \\
       $v$             & ::=    &                            & value            \\
                       & $\mid$ & $\true$                    & true constant    \\
                       & $\mid$ & $\false$                   & false constant   \\
@@ -252,7 +252,7 @@ expression $e_2$. In the case of an abstraction $(\lambda x:\tau.e)$ the
 also say that $x$ is bound in $e$ and more generally that this construct and the
 \stlcbool language itself use \emph{variable binding}.
 
-Of course we only want to apply expressions $e_1$ that represent functions:
+Of course, we only want to apply expressions $e_1$ that represent functions:
 either by being a \textlambda-abstraction or evaluating to one. Applying any
 \emph{value} other than a \textlambda-abstraction is a \emph{type error}. We
 make this more precise below and come back to it in Section
@@ -263,7 +263,7 @@ The grammar also includes the meta-variable $\tau$ that describes the types of
 for the argument variable $x$. The denotation is that the function represented
 by the \textlambda-abstraction expects a value of type $\tau$ when it is
 applied. We discuss types and typing contexts $\Gamma$ in more detail in Section
-\ref{ssec:intro:typing} which deals with static typing.
+\ref{ssec:intro:typing}, which deals with static typing.
 
 
 %-------------------------------------------------------------------------------
@@ -405,11 +405,11 @@ can conclude the one step reduction
 The last two rules cover the evaluation of \textlambda-terms. The rule
 \textsc{EAppAbs} handles the case where the left-hand side of an application is
 a \textlambda-term $(\lambda x:\tau.e_1)$. The residual program is the the body
-$e_1$ of the function after substituting $e_2$ for $x$ which we write as
-$[x \mapsto e_2]e_1$. The argument of the function does not have to be fully
-evaluated, i.e., the rules encode a \emph{call-by-name} evaluation strategy. If
-the left-hand side is not yet a \textlambda-term, we evaluate it first similarly
-to \textsc{EIf}.
+$e_1$ of the function after substituting $e_2$ for $x$ which we write as $[x
+  \mapsto e_2]e_1$. The argument of the function does not have to be fully
+evaluated, i.e., the rules encode a \stevennote{MENTION
+  EARLIER}{\emph{call-by-name}} evaluation strategy. If the left-hand side is
+not yet a \textlambda-term, we evaluate it first similarly to \textsc{EIf}.
 
 Note that this definition does not cover all possible cases. In particular the
 case of a \textlambda-term in the condition of an \textbf{if}-expression
@@ -475,8 +475,8 @@ time. This motivates the development of \emph{static type systems}.
   \label{fig:intro:stlcbooltyping}
 \end{figure}
 
-A \emph{type system} is an assignment of types to expressions. Usually not all
-expressions are typeable and un-typeable expressions are rejected. Also in some
+A \emph{type system} is an assignment of types to expressions. Usually, not all
+expressions are typeable and un-typeable expressions are rejected. Also, in some
 languages there are expressions that can be assigned multiple, potentially
 incomparable types. Both the partiality and the ambiguity of types suggest a
 \emph{relational} rather than a \emph{functional} assignment. Such a relation is
@@ -487,21 +487,22 @@ an expression $e$ and a type $\tau$.
 The typing relation is defined using six rules. The two rules \textsc{TTrue} and
 \textsc{TFalse} respectively state that the boolean constants $\true$ and
 $\false$ have a boolean type. The rule \textsc{TIf} handles the case of an
-\textbf{if}-expression. The three sub-expression position contain a
+\textbf{if}-expression. The three sub-expression positions contain
 meta-variables $e_c$, $e_t$ and $e_e$. The premises require that the condition
 $e_c$ has type boolean and the \textbf{then} and \textbf{else} branches have the
 same type $\tau$. The rule then concludes that the entire \textbf{if}-expression
 also has type $\tau$.
 
-The three remaining rules deal with $\lambda$-abstractions. The typing context
-$\Gamma$ is a list that associates term variables with types. In the case of a
-variable, rule \textsc{TVar} looks up the corresponding type in $\Gamma$. Rule
-\textsc{TAbs} checks the body of a $\lambda$-abstraction in the context
-$(\Gamma,y:\sigma)$ which is the outside context $\Gamma$ extended with a pair
-for the $\lambda$-bound variable $y$. The type of the $\lambda$-abstraction is
-the function type $(\sigma \to \tau)$ between the argument type $\sigma$ and the
+\stevennote{Is including TVar here confusing?}{The three remaining rules deal
+  with $\lambda$-abstractions.} The typing context $\Gamma$ is a list that
+associates term variables with types. In the case of a variable, rule
+\textsc{TVar} looks up the corresponding type in $\Gamma$. Rule \textsc{TAbs}
+checks the body of a $\lambda$-abstraction in the context $(\Gamma,y:\sigma)$
+which is the outside context $\Gamma$ extended with a pair for the
+$\lambda$-bound variable $y$. The type of the $\lambda$-abstraction is the
+function type $(\sigma \to \tau)$ between the argument type $\sigma$ and the
 type of the body $\tau$. Finally, rule \textsc{TApp} requires that the left
-expressions of an application has a function type that is compatible with the
+expression of an application has a function type that is compatible with the
 argument.
 
 
@@ -513,10 +514,11 @@ Consider the boolean negation function
 
 This function sends booleans to booleans and should therefore have the type
 $\bool\to\bool$. Giving the above typing relations, we can repeatedly apply the
-rule to get a typing derivation for this. At each step only one possible rule
+rules to get a typing derivation for this. At each step only one possible rule
 applies. We can arrange the rule applications in a so called \emph{derivation
-  tree} that illustrates the whole derivation. Using the abbreviation
-$\Gamma' := \Gamma, y:\bool$, we have the following tree:
+  tree} that illustrates the whole derivation. Using the abbreviation $\Gamma'
+:= \Gamma, y:\bool$, we have the \stevennote{Try fitting the rule
+  names}{following tree}:
 
 \[
   \inferrule*
@@ -552,23 +554,23 @@ example calculus \stlcbool. In order to prove these properties we first need to
 understand how to reason about languages and their semantics. We therefore look
 at standard reasoning principles for relations like our typing and evaluation
 relations. We show how language properties can be expressed precisely and define
-two properties for our language: determinacy of evaluation and type safety. We
-give a complete proof of determinacy for our language to in order to demonstrate
-the reasoning principles. In the remainder of the thesis the type safety
-property plays a prominent role. Below we present an established way of proving
-type safety, namely through progress and preservation lemmas, and sketch the
-proofs.
+two properties for our language: \emph{determinacy of evaluation} and \emph{type
+  safety}, which we define below. We give a complete proof of determinacy for
+our language in order to demonstrate the reasoning principles. In the remainder
+of the thesis the type safety property plays a prominent role. Below we present
+an established way of proving type safety, namely through progress and
+preservation lemmas, and sketch the proofs.
 
 
 \paragraph{Inductive Reasoning}
 For our meta-theoretical analyses, we first need to establish methods for
 reasoning about the evaluation and typing of \stlcbool. Figures
-\ref{fig:intro:stlcbooleval} and \ref{fig:intro:stlcbooltyping} define
-evaluation and typing for \stlcbool. More precisely, our intention in both
-figures is to define the \emph{smallest relation} that includes the presented
-rules. This gives rise to a \emph{structural induction principle} for the
-relations. Put differently, we can induct over the shape of derivation trees (or
-their size or height).
+\ref{fig:intro:stlcbooleval} and \ref{fig:intro:stlcbooltyping} respectively
+define evaluation and typing for \stlcbool. More precisely, our intention in
+both figures is to define the \emph{smallest relation} that includes the
+presented rules. This gives rise to a \emph{structural induction principle} for
+the relations. Put differently, we can induct over the shape of derivation trees
+(or their size or height).
 
 As an example consider the following determinacy theorem which states that at
 each point there is at most one possible successor state.
@@ -630,11 +632,11 @@ type-safe. In these situations type safety is a property of programs, but in
 this section we want to make it a property of languages, or put differently, we
 want that all programs of a language are type-safe.
 
-Below we look at a precise formal definition of a type safety property that
-guarantees that the expectations of the programmer are met. Our definition will
-be slightly stronger than what a programmer might anticipate. The intuition is
-that we disallow dynamic type errors during evaluation instead of focusing on
-the result of evaluation.
+Below we look at a formal definition of a type safety property that guarantees
+that the expectations of the programmer are met. Our definition will be slightly
+stronger than what a programmer might anticipate. The intuition is that we
+disallow dynamic type errors during evaluation instead of focusing on the result
+of evaluation.
 
 We first make vague concepts like \emph{value}, or \emph{type error} precise.
 Values are expressions that are canonical for the types of the language.
@@ -651,7 +653,7 @@ Values are expressions that are canonical for the types of the language.
     \end{tabular}
   \end{center}
 \end{defn}
-f
+
 By inspecting all the rules of the evaluation relation, we can see that there
 are no further transitions from a value. Values are thus fully
 evaluated\footnote{Fully evaluated with respect to the given semantics. Redexes
@@ -666,7 +668,7 @@ evaluated\footnote{Fully evaluated with respect to the given semantics. Redexes
   \[ \forall e_2. \neg (\eval{e_1}{e_2}) \]
 \end{defn}
 
-\begin{lem}[Value are Normal]
+\begin{lem}[Values are Normal]
   If an expression $e$ is a value, then it's also a normal form.
   \begin{proof}
     By inspecting the evaluation rules for each value form.
@@ -753,13 +755,13 @@ as we do not reach a value.
 %-------------------------------------------------------------------------------
 \section{Mechanisation}
 
-Meta-theoretical proofs are long and require the management of many
-details. Consequently, these proofs are prone to error and it is easy for human
-verifiers and reviewers to overlook mistakes. This is aggravated by the fact,
-that properties tend to fail in subtle edge cases. For instance, the unsoundness
+Meta-theoretical proofs are long and require the management of many details.
+Consequently, these proofs are prone to error and it is easy for human verifiers
+and reviewers to overlook mistakes. This is aggravated by the fact, that
+properties tend to fail in subtle edge cases. For instance, the unsoundness
 example of \cite{amin2016java} for Java involves the interplay between
-constrained wildcards of generics and null references. Hence there is a real
-danger that an overlooked detail or an falsely assumed assumption lead to both
+constrained wildcards of generics and null references. Hence, there is a real
+danger that an overlooked detail or a falsely assumed assumption leads to both
 invalid proofs and invalid results.
 
 \paragraph{Theorem provers}
@@ -781,11 +783,11 @@ increases the confidence in the validity of (meta-theory) proofs.
 % theories generally require the use of a proof assistant.
 
 Among programming language researchers proof assistants are more popular,
-because they provide richer logics. % for which proof search is harder to automate.
-Systems like Abella~\cite{abella}, Agda~\cite{norellthesis},
+because they provide richer logics. % for which proof search is harder to
+automate. Systems like Abella~\cite{abella}, Agda~\cite{norellthesis},
 Beluga~\cite{beluga}, Coq~\cite{coq}, Isabelle/HOL~\cite{isabelle} and
 Twelf~\cite{twelf} have been used to check various meta-theoretic proofs. The
-development of this thesis have been done in the context of the Coq proof
+developments of this thesis have been done in the context of the Coq proof
 assistant which offers a competitive degree of automation and is one of the most
 widely used proof assistants for meta-theory.
 
@@ -933,19 +935,19 @@ language meta-theory, identifying repeated functionality and patterns, and
 implementing them only once in a way that can be used across proofs for
 different languages.
 
-Unfortunately the current practice to achieve reuse is to copy an existing
+Unfortunately, the current practice to achieve reuse is to copy an existing
 formalization, \emph{change the existing definitions} manually, integrate new
 features and to subsequently \emph{patch up the proofs} to cater for the
 changes. This unprincipled approach to reuse leaves much to be desired. First,
 editing and patching the existing definitions breaks \emph{abstraction}, a core
-principle of computer science. Ideally we would like to reuse existing code via
+principle of computer science. Ideally, we would like to reuse existing code via
 an interface that provides functionality (for programming) and properties (for
 reasoning). Second, this approach does not encourage \emph{isolation} of new
 features from existing ones, which hinders backporting improvements to the
 existing formalization.
 
 Our goal is to replace the current practice with principled ways to achieve
-reusability. More specifically this thesis is examining two different means of
+reusability. More specifically, this thesis is examining two different means of
 reuse: 1. Through \emph{modularity} and 2. through \emph{genericity}.
 
 \paragraph{Modularity}
@@ -953,8 +955,9 @@ Programming languages, just like regular software systems, can be described by
 the functionality or features that they provide. The meta-theoretic development
 of our example language \stlcbool consists of different functionality: the
 syntax, semantics and its type safety proof. It easy to reuse the syntax and
-semantics and prove other kinds of properties, e.g. termination. Or reuse the
-syntax and switch out the semantics and prove type safety for the new semantics.
+semantics and prove other kinds of properties, e.g. termination, or, to reuse
+the syntax and switch out the semantics and prove type safety for the new
+semantics.
 
 Furthermore, \stlcbool has two easily distinguishable features:
 \textlambda-terms and boolean expressions. Many programming languages and their
@@ -988,17 +991,18 @@ reuse: by implementing substitution \emph{once} generically and specializing
 this generic implementation to any given concrete language.
 
 While other kinds of \emph{generic functionality} are commonly found in
-programming language meta-theory, e.g. term equality or (first-order)
-unification, the generic functionality considered in this thesis is
-substitution. Substitution is interesting functionality for reuse because the
-need for substitutions arise in nearly all meta-theory proofs for languages with
-variable binding. Furthermore, many theorems need a large amount of lemmas about
-substitutions. Discharging them automatically, e.g. through reusable generic
-implementations, can save a lot of development effort.
+programming language meta-theory, e.g. term equality or \stevennote{Cite TAPL
+  and/or some generic rewriting paper}{(first-order) unification}, the generic
+functionality considered in this thesis is substitution. Substitution is
+interesting functionality for reuse because the need for substitutions arises in
+nearly all meta-theory proofs for languages with variable binding. Furthermore,
+many theorems need a large amount of lemmas about substitutions. Discharging
+them automatically, e.g. through reusable generic implementations, can save a
+lot of development effort.
 
 \section{Overview}
 
-This thesis is split into two parts corresponding to the two means of achieving
+This thesis is split into two parts, corresponding to the two means of achieving
 reuse with the discussed focus.
 
 \paragraph{Part I: Modularity}
@@ -1040,11 +1044,10 @@ This part deals with the development of a generic substitution operation and
 associated theorems. The solution put forward is a framework consisting of a
 specification language \Knot for abstract syntax with variable binding and the
 tool \Needle that compiles \Knot-specifications to Coq code which includes
-substitution operators and proofs about
-substitutions. Chapters \label{ch:knotsyntax} and \label{ch:knotsemantics}
-present the syntax and semantics of \Knot respectively, while Chapters
-\ref{ch:elaboration} and \ref{ch:codegen} discuss the elaboration and code
-generation underlying \Needle.
+substitution operators and proofs about substitutions. Chapters
+\ref{ch:knotsyntax} and \ref{ch:knotsemantics} present the syntax and semantics
+of \Knot respectively, while Chapter \ref{ch:elaboration} discusses the
+elaboration and code generation underlying \Needle.
 
 Part \ref{part:gen} is based on
 

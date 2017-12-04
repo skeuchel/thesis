@@ -1,5 +1,4 @@
 \chapter{Elaboration}\label{ch:elaboration}
-
 For the meta-theoretical formalization of programming language we need
 properties of the semantical definitions. For instance, for type-theory proofs
 via progress and preservation we generally need substitution properties of the
@@ -10,6 +9,9 @@ can develop a \emph{code generator} that produces code for a proof-assistant.
 Alternatively, we can develop a \emph{datatype-generic} library inside a
 proof-assistant. Both approaches have different trade-offs.
 
+%% \item Programming language mechanizations typically rely on many boilerplate
+%%   properties of the boilerplate operations that we introduced in the previous
+%%   chapter.
 
 \paragraph{Generic Library}
 
@@ -19,20 +21,38 @@ proofs, can be checked separately independently of a concrete specification.
 Hence, instantiating the library is guaranteed to yield valid theorems for all
 specifications.
 
+Advantages:
+\begin{itemize}
+\item First, \Yarn provides evidence for the existence of type-sound boilerplate
+  definitions and proofs for for every language specified with \Knot.
+\item It shows coherence of the specification language itself, all information
+  is contained in the universe codes of \Yarn, i.e. in \Knot specifications.
+\end{itemize}
+
 Disadvantages of a generic library:
 \begin{itemize}
-\item Hiding of the internals.
-\item Induction over the generic generic representation is usually not the
-  desired ont. Do not use datatypes of the extension directly, but instead
-  write isomorphism to user defined types. This also applies to
-  well-scopedness predicates and relations.
+\item Hiding of the internals. Do not expose the user of the library
+  to its complexity. Ideally, the user does not have to be an expert
+  in datatype-generic programming to use the library.
+
 \item Generically handling relations with arbitrary arities is challenging.
+
+\item Induction over the generic generic representation is usually not the
+  desired one. Do not use datatypes of the extension directly, but instead write
+  isomorphism to user defined types. This also applies to well-scopedness
+  predicates and relations.
+
 \item Generic implementation shines through. For example, during
   simplification, the generic implementation might be exposed.
+
 \item The statement of a generic lemma may not unify with all goals it applies
   to, before it has been properly specialized to a given specification. This
   impacts automatic proof search.
-\item Proof discovery.
+
+\item Related to that is the problem of proof discovery. Conceptually, both pose
+  not a problem since in theory a proof assistant could specialize the types of
+  lemmas when instantiating the generic code for a specification. However,
+  currently none of the available proof assistants provide such functionality.
 \end{itemize}
 
 
@@ -49,79 +69,97 @@ and for proof automation to apply the provided proofs.
 
 The main downside of a code generator is that the output still needs to be
 checked. This raises the question if correct code is generated in all cases.
-Proofs can also be implemented differently, depending on the available methods
-in the proof assistant. For instance, Coq has a powerful scripting language to
+There are multiple ways to implement proofs; depending on the available methods
+in the proof assistant. For instance, \Coq has a powerful scripting language to
 automate writing proofs. However, very generic proof scripts tend to be brittle
 and can possibly take a long time to execute. Furthermore, reasoning about the
 correctness of the code generator not only involves the language of the proof
 assistant, but also that of the scripting system.
 
 
+\paragraph{Our Approach}
 
+The main trade-off between the approaches is the confidence in a generic
+implementation and the usability of a code generator. Ideally, we could combine
+both approaches in order to get the advantages of either one, and also mitigate
+their disadvantages.
 
-\begin{itemize}
-\item We defined the semantics of \Knot specification generically and also
-  implemented boilerplate functions generically.
+This is the approach that we take. More specifically, we implement both a
+generic implementation of \Knot in \Coq, called \Yarn, and a code generator
+named \Needle that produces \Coq code and is implemented in Haskell. Even though
+both implementations do not share code directly, we try to transfer as much
+confidence as possible from \Yarn to \Needle. We outline our methodology to this
+below. Alternatively, one could imagine a datatype-generic core library and a
+code generator around it that takes care of the usability problem. We come back
+to this idea in the discussion of this chapter in Section
+\ref{sec:elab:discussion}.
 
-\item In an actual implementation, for instance a code generator, these generic
-  definitions needs to be expanded into specialized code for a particular
-  specification, or put differently, we need to turn the generic implementation
-  into an elaboration into the target language.
+\Yarn defines de Bruijn interpretation of \Knot specification generically and
+also implemented boilerplate functions and lemmas generically. To derive a code
+generator based on \Yarn's code, generic definitions needs to be expanded into
+specialized code for a particular specification, or put differently, we need to
+turn the generic implementation into an elaboration into the target language.
+Elaborating datatype and function definitions is comparably easy. Much more
+challenging is to elaborate a specification into boilerplate lemmas and their
+proofs. This will be the focus of this chapter. The boilerplate lemmas that are
+implemented in \Yarn and \Needle are not novel. The novelties lie in our
+elaboration of them. Hence we specifically turn our attention to the elaboration
+methodology.
 
-\item Elaborating the functional definitions is comparably easy. Much more
-  challenging is to elaborate a specification into lemmas and proofs.
-
-\item Programming language mechanizations typically rely on many boilerplate
-  properties of the boilerplate operations that we introduced in the previous
-  chapter.
-
-\item The elaborations of specification into these boilerplate lemmas and their
-  proofs will be the focus of this chapter.
-
-\item There are too many lemmas to give an exhaustive account of all the
-  necessary elaborations. Instead we concentrate on representative and key
-  lemmas.
-
-\item The boilerplate lemmas themselves are not novel. The novelties lie in our
-  elaboration of them. Hence we specifically turn our attention to the
-  elaboration methodology.
-\end{itemize}
 
 \paragraph{Methodology}
-There are two connected problems that we solve:
-\begin{itemize}
-\item Generic proofs of the boilerplate lemmas.
+The main obstacle, that we need to solve, is how to turn a generic proof of
+\Yarn into an elaboration function in the code generator \Needle. One can aim to
+implement an elaboration that follows the \emph{same strategy as the generic
+  proof}. However, the question remains if this is a faithful implementation of
+the same proof and if it indeed is correct in all cases, especially when proof
+scripts are used.
 
-\item Once a proof has been generically established in a meta-language, the
-  proof structure is not directly accessible, e.g. to implement an elaboration
-  for these proofs.
+We solve this problem by factoring the generic proofs through domain-specific
+witness languages, i.e. rather than implementing the proofs directly, we
+implement generic and formal elaborations into an intermediate language of
+proofs.
 
-  One can aim to implement an elaboration that follows the same structure as the
-  generic proof, but the faithfulness and therefore correctness of the
-  elaboration is called into question.
+This splits the generic proof into multiple distinct parts:
+\begin{enumerate}
+\item A (syntax-directed) elaboration into a witness language that we designed
+  for the given class of lemmas.
+\item A semantics of the witness langauge.
+\item The correctness of the elaboration, i.e. the produced witness indeed
+  encodes a proof of the desired lemma w.r.t. the chosen semantics.
+\item A soundness proof of the semantics of the witness language, e.g. the
+  statement that a witness proves w.r.t. to the chosen semantics is valid (in
+  our meta-language).
+\end{enumerate}
 
-\item
-  We solve this problem by factoring the generic proofs through domain-specific
-  witness languages. This splits the generic proof into multiple distinct parts:
-  \begin{enumerate}
-  \item A (syntax-directed) elaboration into a witness language that we designed
-    for the given class of lemmas.
-  \item A semantics of the witness langauge.
-  \item The correctness of the elaboration, i.e. the produced witness indeed
-    encodes a proof of the desired lemma w.r.t. the chosen semantics.
-  \item A soundness proof of the semantics of the witness language, e.g. the
-    statement that a witness proves w.r.t. to the chosen semantics is valid (in
-    our proof meta-language).
-  \end{enumerate}
+The benefit of this approach is that we can give a formal definition of
+elaborations and analyze the elaborations formally, i.e. formally proof their
+correctness. Subsequently, we can implement the same elaborations in the code
+generator. The correctness of \Needle still relies on some factors
 
-\item The benefit of this approach is that we can give a formal definition of
-  elaborations and analyze the elaborations formally, i.e. proof their
-  correctness. At the same time, we minimize the part of the generic proof that
-  is not formally accessible to the soundness of the witness language.
-\end{itemize}
+\begin{enumerate}
+\item \emph{The elaboration functions from \Knot specifications to the witness
+  languages is correctly ported from \Coq to \Haskell.} The elaborations are
+  recursive and pure functions\footnote{In reality, the elaboration functions
+    are exclusively folds.} over algebraic dataypes which both \Coq and \Haskell
+  support. Therefore, we port the elaboration code by direct translation from
+  \Coq to \Haskell. In fact, most \Haskell elaboration functions were derived
+  by a copy \& paste of the \Coq code.
+\item \emph{The elaboration of the witness language into the language of the
+  target proof-assistant is correctly implemented.} For our witness languages,
+  this translation is straightforward, since each witness primitive is either
+  implemented by an application of a lemma or a rule.
+\item \emph{The impact of any differences, between \Needle and \Yarn.}
+  \stevennote{TODO}{Discuss differences between \Needle and \Yarn. Glue code not
+    verified.}
+\end{enumerate}
+
 
 
 \paragraph{Overview}
+
+There are too many lemmas to give an exhaustive account of all the
+necessary elaborations. Instead we concentrate on representative and key lemmas.
 
 The sections in this chapter show how the witness language methodology is
 applied to several classes of boilerplate lemmas. Section
@@ -159,6 +197,7 @@ code generator \Needle.
 \input{src/GenBinding/Elaboration/RelShifting}
 \input{src/GenBinding/Elaboration/RelSubstitution}
 \input{src/GenBinding/Elaboration/Implementation}
+\input{src/GenBinding/Elaboration/Discussion}
 
 %%% Local Variables:
 %%% mode: latex

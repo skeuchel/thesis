@@ -279,6 +279,7 @@
 %format congplus = cong "_{+}"
 %format congsuccα = cong "_{S_\alpha}"
 %format congsuccβ = cong "_{S_\beta}"
+%format assocplus = assoc "_{+}"
 %format eqh1
 %format eqh2
 %format eqh3

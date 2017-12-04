@@ -134,9 +134,6 @@ The proof of the lemma proceeds by induction over u. As discussed the variable
 constructor is easy to handle. Hence, we focus on the the inductive steps of the
 regular constructors.
 
-\end{proof}
-
-
 For the regular case suppose that we need to show the statement for $K~\ov{u}$
 with $K : \overline{x : \alpha} \rightarrow \overline{[bs] t : T} \rightarrow
 S$. Define the constructor local value environment $\vartheta$ and two shifted
@@ -160,9 +157,22 @@ $u$ with binding specification |bs|:
   & |shiftβ (h2 + evalbs bs ϑ)|               & |(shiftα ((h1 + h2) + evalbs bs ϑ) u)| \\ $\equiv$ & \multicolumn{2}{l}{By Lemma \ref{lem:elab:evalstability}.} \\
   & |shiftβ (h2 + evalbs bs ϑ'')|             & |(shiftα ((h1 + h2) + evalbs bs ϑ) u)| \\
 \end{tabular}
+\end{proof}
 
 
 \subsection{Term Equality Witnesses}\label{ssec:elab:interaction:witness}
+
+Figure \ref{fig:elab:equalitywitness:grammar} shows a grammar for our witness
+language. There are two sorts: |eqh| which encodes equalities between domains
+and |equ| that encodes equalities between de Bruijn terms. Both sorts have
+productions for |refl|, |sym| and |trans| that represent the \emph{reflexivity},
+\emph{symmetry} and \emph{transitivity} of an \emph{equivalence relation}. The
+remaining productions encode other properties of the respective equalities.
+
+The productions for |congsuccα| respectively |congplus| encode congruences for
+the successors and plus functions, and |assocplus| witnesses the associativity
+of plus. The stability of evaluating a binding function |f| is added as the
+primitive |shiftα f t|.
 
 \begin{figure}[t]
   \centering
@@ -171,7 +181,7 @@ $u$ with binding specification |bs|:
       \vspace{-3mm}
       \[ \begin{array}{lcl}
            |eqh| & ::=  & |refl| \mid |sym eqh| \mid |trans eqh eqh| \mid |congsuccα eqh| \mid |congplus eqh eqh| \\
-                 & \mid & |assoc| \mid |shiftα f t| \\ %% \mid |substα f t|
+                 & \mid & |assocplus| \mid |shiftα f t| \\ %% \mid |substα f t|
            |equ| & ::=  & |refl| \mid |sym equ| \mid |trans equ equ| \mid |ih| \\
                  & \mid & |congshiftα eqh equ| \\ %% \mid |congsubstα eqh equ equ| \\
          \end{array}
@@ -182,6 +192,10 @@ $u$ with binding specification |bs|:
   \label{fig:elab:equalitywitness:grammar}
 \end{figure}
 
+The interpretation of the domain equality witnesses is show in Figure
+\ref{fig:elab:equalitywitness:domain:interpretation}. The judgement
+$\Eqh{\vartheta}{eqh}{h_1}{h_2}$ denotes that $eqh$ witnesses the equality of
+$h_1$ and $h_2$ under the value environment $\vartheta$.
 
 \begin{figure}[t]
   \centering
@@ -209,7 +223,7 @@ $u$ with binding specification |bs|:
                       {\Eqh{\vartheta}{|congplus eqh1 eqh2|}{h_1 + h_2}{h_3 + h_4}} \\\\
            \inferrule*[right=\textsc{EqhAssocPlus}]
                       {\;}
-                      {\Eqh{\vartheta}{|assoc|}{(h_1 + h_2) + h_3}{h_1 + (h_2 + h_3)}} \\\\
+                      {\Eqh{\vartheta}{|assocplus|}{(h_1 + h_2) + h_3}{h_1 + (h_2 + h_3)}} \\\\
            \inferrule*[right=\textsc{EqhFunShift}]
                       {\;}
                       {\Eqh{\vartheta}{|shiftα f t|}{|evalfun f (shiftα h (ϑ (t)))|}{|evalfun f (ϑ (t))|}} \\\\
@@ -221,7 +235,7 @@ $u$ with binding specification |bs|:
     \end{minipage}
   }
   \caption{Interpretation of Domain Equality Witnesses}
-  \label{fig:elab:equalitywitness:interpretation}
+  \label{fig:elab:equalitywitness:domain:interpretation}
 \end{figure}
 
 
@@ -335,13 +349,13 @@ $u$ with binding specification |bs|:
       \begin{spec}
         shiftcomm1     :  bs → equ
         shiftcomm1 bs  =  congshiftα
-                            (trans (congplus refl (evalBindspecShiftβ bs)) assoc)
+                            (trans (congplus refl (evalBindspecShiftβ bs)) assocplus)
                             refl
 
         shiftcomm2     :  bs → equ
         shiftcomm2 bs  =  congshiftβ
                             (congplus refl (evalBindspecShiftα bs))
-                            (congshiftα assoc refl)
+                            (congshiftα assocplus refl)
 
         shiftcomm      :  bs → equ
         shiftcomm bs   =  trans (shiftcomm1 bs) (trans ih (sym (shiftcomm2 bs))

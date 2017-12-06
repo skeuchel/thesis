@@ -24,6 +24,9 @@ Finally, the elaboration is presented in Section
 
 \subsection{Overview}\label{ssec:elab:interaction:overview}
 
+There are two distinct types of interaction lemmas: commutation lemmas and a
+cancelation lemma.
+
 \subsubsection{Commutation}\label{ssec:elab:interaction:overview:commutation}
 Two operation always commute when they are operating on different variables. For
 instance, weakening of terms by introducing two distinct variables $x$ and $y$
@@ -67,17 +70,22 @@ cancel each other out:
 
 \subsection{Semi-formal Proofs}\label{ssec:elab:interaction:semiformal}
 
+
 \subsubsection{Stability of Binding Specifications}\label{sec:elab:stability}
 
-A crucial property of \Knot is the stability of binding specifications under
-syntactic operations. This property enforces lexical scoping: shifting and
-substituting variables in |t| does not change the scoping of bound variables.
+For the proofs of interaction lemmas we need an auxiliary property of \Knot's de
+Bruijn interpretation: shifting and substituting variables in |t| does not
+change the scoping of bound variables. This property can be seen as an
+enforcement of lexical scoping. In particular this means that evaluation of
+binding specifications functions should remain stable under syntactic
+operations. This is ultimately achieved by ruling out functions over sorts with
+variables: function evaluation can never reach variable cases and thus their
+results only depends on the parts of the structure that are left unchanged by
+syntactic operations. The following lemma states the stability property.
 
-We achieve this by ruling out functions over sorts with variables: function
-evaluation can never reach variable cases and thus their results only depends on
-the parts of the structure that are left unchanged by syntactic operations. This
-includes, in particular the stabiltity of evaluation of binding specifications
-functions.
+
+%% This includes, in particular the stabiltity of evaluation of binding
+%% specifications functions.
 
 \begin{lem}\label{lem:elab:funstability}
 For all terms |t| of sort |S| and all |f : S → overline α| the
@@ -302,6 +310,14 @@ $h_1$ and $h_2$ under the value environment $\vartheta$.
 
 \subsubsection{Elaboration of Stability}
 
+The elaboration function in Figure \ref{fig:elab:shiftstability} produces an
+equality witness for Corollary \ref{lem:elab:evalstability}. The corollary is
+proven by induction over list-like binding specifications. The elaboration
+function follows the same recursive structure and is a fold over binding
+specifications. When the binding specification contains a function call, the
+stability axiom is used. Congruences are used to make sure we are in the proper
+position.
+
 \begin{figure}[t]
   \centering
   \fbox{
@@ -323,6 +339,9 @@ $h_1$ and $h_2$ under the value environment $\vartheta$.
 %format hi = h "_" i
 %format ui = u "_" i
 
+It remains to proof that the elaboration function indeed produces a witness for
+Corollary \ref{lem:elab:evalstability}, which is done in the following lemma.
+
 \begin{lem}[Correctness of Stability Elaboration]
   The elaboration for the stability of binding specification evaluation under
   shifting is correct.
@@ -339,6 +358,16 @@ $h_1$ and $h_2$ under the value environment $\vartheta$.
 %}
 
 \subsubsection{Elaboration of Shift Commutation}
+
+Figure \ref{fig:elab:shiftcomm} contains the elaboration function |shiftcomm|
+for the inductive step of the shift commutation lemma. We split the semi-formal
+proof of Section \ref{ssec:elab:interaction:semiformal} into three parts
+\begin{enumerate}
+\item the reasoning steps before the application of the induction hypothesis,
+  which are encoded by |shiftcomm1|,
+\item the application of the induction hypothesis, and
+\item the remaining reasoning steps, which are encoded by |shiftcomm2|.
+\end{enumerate}
 
 %format shiftcomm1
 %format shiftcomm2
@@ -363,7 +392,7 @@ $h_1$ and $h_2$ under the value environment $\vartheta$.
     \end{minipage}
   }
   \caption{Elaboration of Shift Commutation}
-  \label{fig:elab:shiftstability}
+  \label{fig:elab:shiftcomm}
 \end{figure}
 
 %{

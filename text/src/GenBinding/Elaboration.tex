@@ -19,21 +19,21 @@ Alternatively, we can with (well-formed) \Knot specifications as the codes of a
 generic universe. The main benefit of a library is, that its code, including all
 proofs, can be checked separately independently of a concrete specification.
 Hence, instantiating the library is guaranteed to yield valid theorems for all
-specifications.
-
-Advantages:
-\begin{itemize}
-\item First, \Yarn provides evidence for the existence of type-sound boilerplate
-  definitions and proofs for for every language specified with \Knot.
-\item It shows coherence of the specification language itself, all information
-  is contained in the universe codes of \Yarn, i.e. in \Knot specifications.
-\end{itemize}
+specifications. Beyond providing strong correctness guarantees this approach has
+other merits. A generic library provides evidence for the existence of
+type-sound boilerplate definitions and proofs for for every language specified
+with \Knot. Furthermore, it shows that \Knot embodies all necessary information
+and constraints to derive the boilerplate.
 
 Disadvantages of a generic library:
 \begin{itemize}
 \item Hiding of the internals. Do not expose the user of the library
   to its complexity. Ideally, the user does not have to be an expert
   in datatype-generic programming to use the library.
+
+\item Constraints like well-formedness of binding specifications and expressions
+  needs to be part of the universe code. Looking up meta-variables can
+  potentially introduce partiality which needs to be dealt with.
 
 \item Generically handling relations with arbitrary arities is challenging.
 
@@ -77,43 +77,54 @@ correctness of the code generator not only involves the language of the proof
 assistant, but also that of the scripting system.
 
 
-\paragraph{Our Approach}
+\paragraph{Hybrid Approaches}
 
 The main trade-off between the approaches is the confidence in a generic
 implementation and the usability of a code generator. Ideally, we could combine
-both approaches in order to get the advantages of either one, and also mitigate
-their disadvantages.
+both approaches in order to get the advantages of both, and also mitigate their
+disadvantages.
 
-This is the approach that we take. More specifically, we implement both a
-generic implementation of \Knot in \Coq, called \Yarn, and a code generator
-named \Needle that produces \Coq code and is implemented in Haskell. Even though
-both implementations do not share code directly, we try to transfer as much
-confidence as possible from \Yarn to \Needle. We outline our methodology to this
-below. Alternatively, one could imagine a datatype-generic core library and a
-code generator around it that takes care of the usability problem. We come back
-to this idea in the discussion of this chapter in Section
-\ref{sec:elab:discussion}.
+The obvious approach is to develop a generic library and address the usability
+problems by developing a user-friendly code generator around it. The code
+generator can instantiate the library with a user-defined specification and
+specialize the generic definitions and lemmas as much as possible to hide the
+complexity of the library. However, the technical challenges to develop a
+generic library remain.
 
-\Yarn defines de Bruijn interpretation of \Knot specification generically and
-also implemented boilerplate functions and lemmas generically. To derive a code
-generator based on \Yarn's code, generic definitions needs to be expanded into
-specialized code for a particular specification, or put differently, we need to
-turn the generic implementation into an elaboration into the target language.
-Elaborating datatype and function definitions is comparably easy. Much more
-challenging is to elaborate a specification into boilerplate lemmas and their
-proofs. This will be the focus of this chapter. The boilerplate lemmas that are
-implemented in \Yarn and \Needle are not novel. The novelties lie in our
-elaboration of them. Hence we specifically turn our attention to the elaboration
-methodology.
+To ensure that all generic definitions are hidden, we need to generate
+specialized definitions for every generic definition that appears in the user
+facing interface. This ranges from obvious user-defined things like datatype
+declarations for sorts, environments and relations to generically derived
+inductive definitions like domains, well-scopedness relations and environment
+lookups. This is crucial in case the user wants to perform induction over these
+definitions. However, this also add duplication between the code-generator and
+the generic implementation.
+\footnote{In our case-study we used induction over well-scopedness of types to
+  prove reflexivity of algorithmic subtyping of \fsub\xspace and induction over
+  type variable lookups to prove that \fomega\xspace types that appear in a
+  typing judgement are always well-kinded.}
+
+Simplification of boilerplate functions like environment concatenation, shifting
+and substitution may still reveal the generic implementation. In \Coq this
+should be easily addressable with customized tactics.
+
+An alternative approach, is to use a code-generator as the principle
+implementation and try to transfer as much confidence in correctness as possible
+from the generic approach. This is the path that we took and the remainder of
+this chapter outlines our methodology to do so. We have built both, a
+datatype-generic library called \Loom in \Coq, and acode generator named \Needle
+that produces \Coq code and is implemented in Haskell.
 
 
 \paragraph{Methodology}
-The main obstacle, that we need to solve, is how to turn a generic proof of
-\Yarn into an elaboration function in the code generator \Needle. One can aim to
-implement an elaboration that follows the \emph{same strategy as the generic
-  proof}. However, the question remains if this is a faithful implementation of
-the same proof and if it indeed is correct in all cases, especially when proof
-scripts are used.
+\Loom defines de Bruijn interpretation of \Knot specification generically and
+also implemented boilerplate functions and lemmas generically. Elaborating
+datatype and function definitions in \Needle is comparably easy. The main
+obstacle, that we need to solve, is how to turn a generic proof of \Loom into an
+elaboration function in \Needle. One can aim to implement an elaboration that
+follows the \emph{same strategy as the generic proof}. However, the question
+remains if this is a faithful implementation of the same proof and if it indeed
+is correct in all cases, especially when proof scripts are used.
 
 We solve this problem by factoring the generic proofs through domain-specific
 witness languages, i.e. rather than implementing the proofs directly, we
@@ -135,7 +146,8 @@ This splits the generic proof into multiple distinct parts:
 The benefit of this approach is that we can give a formal definition of
 elaborations and analyze the elaborations formally, i.e. formally proof their
 correctness. Subsequently, we can implement the same elaborations in the code
-generator. The correctness of \Needle still relies on some factors
+generator. The confidence in the correctness of \Needle still relies on some
+factors
 
 \begin{enumerate}
 \item \emph{The elaboration functions from \Knot specifications to the witness
@@ -145,15 +157,29 @@ generator. The correctness of \Needle still relies on some factors
   support. Therefore, we port the elaboration code by direct translation from
   \Coq to \Haskell. In fact, most \Haskell elaboration functions were derived
   by a copy \& paste of the \Coq code.
+
 \item \emph{The elaboration of the witness language into the language of the
   target proof-assistant is correctly implemented.} For our witness languages,
   this translation is straightforward, since each witness primitive is either
   implemented by an application of a lemma or a rule.
-\item \emph{The impact of any differences, between \Needle and \Yarn.}
-  \stevennote{TODO}{Discuss differences between \Needle and \Yarn. Glue code not
-    verified.}
+
+\item The formal elaborations target only very specific parts of the boilerplate
+  lemmas. For instance, our formal proof elaborations exclusively deal with
+  inductive steps of induction proofs. Setting up the induction itself is done
+  in unchecked \emph{glue code}. However, in comparison this glue code is less
+  fragile.
 \end{enumerate}
 
+
+%% The boilerplate lemmas
+%% that are implemented in \Loom and \Needle are not novel. The novelties lie in
+%% our elaboration of them. Hence we specifically turn our attention to the
+%% elaboration methodology.
+
+
+%% Even though both implementations do not share code directly, we try to transfer
+%% as much confidence as possible from \Loom to \Needle. We outline our methodology
+%% to do this below.
 
 
 \paragraph{Overview}
@@ -169,11 +195,10 @@ well-scopedness lemmas that we discussed in Section
 \ref{sec:gen:overview:formalization:semantics} and
 \ref{sec:gen:formalization:metatheory}, i.e. lemmas that prove that indices of
 relations are always well-scoped. Section \ref{sec:elab:shifting} covers
-shifting and substitution lemmas for relations. Section
-\ref{sec:elab:impl:generic} discusses a generic implementation of \Knot in \Coq
-and generic proofs of lemmas that follow the methodology of this chapter.
-Finally, Section \ref{sec:elab:impl:codegen} covers the implementation of our
-code generator \Needle.
+shifting and substitution lemmas for relations. Finally, Section
+\ref{sec:elab:impl:generic} discusses the generic library implementation \Loom
+of \Knot in \Coq, and Section \ref{sec:elab:impl:codegen} covers the
+implementation of our code generator \Needle.
 
 
 %% \stevennote{MOVE}{To further reduce the hand-written boilerplate, we have set up

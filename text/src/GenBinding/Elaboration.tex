@@ -126,16 +126,24 @@ follows the \emph{same strategy as the generic proof}. However, the question
 remains if this is a faithful implementation of the same proof and if it indeed
 is correct in all cases, especially when proof scripts are used.
 
-We solve this problem by factoring the generic proofs through domain-specific
-witness languages, i.e. rather than implementing the proofs directly, we
-implement generic and formal elaborations into an intermediate language of
-proofs.
+We solve this problem by factoring the generic proofs of \Loom into elaboration
+proofs. The first part are elaborations that produce for any given specification
+specialized proofs and the second part are formal verifications of the
+correctness of the elaborations.
 
-This splits the generic proof into multiple distinct parts:
+Since the internals of the proofs assistant are not directly accessible for
+elaboration or formal verification, and the language of the proof assistant is
+too big, we choose a different target for the elaboration: namely intermediate
+domain-specific witness languages. For each class of lemmas we develop a new
+witness language specific for that class.
+
+After developing the elaboration functions, their formal verification can be
+divided into three different parts, which together represent alternatives to the
+generic proofs:
 \begin{enumerate}
-\item A (syntax-directed) elaboration into a witness language that we designed
-  for the given class of lemmas.
-\item A semantics of the witness langauge.
+%% \item A (syntax-directed) elaboration into a witness language that we designed
+%%   for the given class of lemmas.
+\item A formal semantics of the witness langauge.
 \item The correctness of the elaboration, i.e. the produced witness indeed
   encodes a proof of the desired lemma w.r.t. the chosen semantics.
 \item A soundness proof of the semantics of the witness language, e.g. the
@@ -143,25 +151,24 @@ This splits the generic proof into multiple distinct parts:
   our meta-language).
 \end{enumerate}
 
-The benefit of this approach is that we can give a formal definition of
-elaborations and analyze the elaborations formally, i.e. formally proof their
-correctness. Subsequently, we can implement the same elaborations in the code
-generator. The confidence in the correctness of \Needle still relies on some
-factors
+Subsequently, we can implement the same elaborations in the code generator
+\Needle. However, this does not establish formal correctness of the code
+generator \Needle. The confidence in the correctness of \Needle still relies on
+some factors.
 
 \begin{enumerate}
 \item \emph{The elaboration functions from \Knot specifications to the witness
   languages is correctly ported from \Coq to \Haskell.} The elaborations are
   recursive and pure functions\footnote{In reality, the elaboration functions
     are exclusively folds.} over algebraic dataypes which both \Coq and \Haskell
-  support. Therefore, we port the elaboration code by direct translation from
-  \Coq to \Haskell. In fact, most \Haskell elaboration functions were derived
-  by a copy \& paste of the \Coq code.
+  support. Therefore, we port the elaboration code by literal translation from
+  \Coq to \Haskell. In fact, most \Haskell elaboration functions were derived by
+  a copy \& paste of the \Coq code.
 
 \item \emph{The elaboration of the witness language into the language of the
   target proof-assistant is correctly implemented.} For our witness languages,
-  this translation is straightforward, since each witness primitive is either
-  implemented by an application of a lemma or a rule.
+  this translation is straightforward, it is compositional and each witness
+  primitive is either implemented by an application of a lemma or a rule.
 
 \item The formal elaborations target only very specific parts of the boilerplate
   lemmas. For instance, our formal proof elaborations exclusively deal with
@@ -171,23 +178,13 @@ factors
 \end{enumerate}
 
 
-%% The boilerplate lemmas
-%% that are implemented in \Loom and \Needle are not novel. The novelties lie in
-%% our elaboration of them. Hence we specifically turn our attention to the
-%% elaboration methodology.
-
-
-%% Even though both implementations do not share code directly, we try to transfer
-%% as much confidence as possible from \Loom to \Needle. We outline our methodology
-%% to do this below.
-
 
 \paragraph{Overview}
 
 There are too many lemmas to give an exhaustive account of all the
 necessary elaborations. Instead we concentrate on representative and key lemmas.
 
-The sections in this chapter show how the witness language methodology is
+The first sections in this chapter show how the witness language methodology is
 applied to several classes of boilerplate lemmas. Section
 \ref{ssec:elab:interaction:overview} discusses common interaction lemmas between
 syntactic operations. Section \ref{sec:elab:wellscopedness} deals with the
@@ -195,10 +192,14 @@ well-scopedness lemmas that we discussed in Section
 \ref{sec:gen:overview:formalization:semantics} and
 \ref{sec:gen:formalization:metatheory}, i.e. lemmas that prove that indices of
 relations are always well-scoped. Section \ref{sec:elab:shifting} covers
-shifting and substitution lemmas for relations. Finally, Section
-\ref{sec:elab:impl:generic} discusses the generic library implementation \Loom
-of \Knot in \Coq, and Section \ref{sec:elab:impl:codegen} covers the
-implementation of our code generator \Needle.
+shifting and substitution lemmas for relations. Each of the Sections looks at
+the class of lemmas that is being discussed, the domain-specific witness
+language for that class, an elaboration for a representative lemma, and the
+verification of the correctness of the elaboration.
+
+Finally, Section \ref{sec:elab:impl:generic} discusses the generic library
+implementation \Loom of \Knot in \Coq, and Section \ref{sec:elab:impl:codegen}
+covers the implementation of our code generator \Needle.
 
 
 %% \stevennote{MOVE}{To further reduce the hand-written boilerplate, we have set up

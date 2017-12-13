@@ -61,7 +61,7 @@ type-safety proof of \fexistsprod{}.
         $\alpha,\beta$   & ::= &                              & type variable    & $e$ & ::=    &                                                & term             \\
         $\tau,\sigma$    & ::= &                              & type             & \multicolumn{3}{l}{$\quad \mid x$}                            & term variable    \\
           \multicolumn{3}{l}{$\quad \mid \alpha$}             & type variable    & \multicolumn{3}{l}{$\quad \mid \lambda x:\tau.e$}             & term abstraction                                           \\
-          \multicolumn{3}{l}{$\quad \mid \sigma \to \tau$}    & function type    & \multicolumn{3}{l}{$\quad \mid e_1~e_2$}                      & application                                                \\
+          \multicolumn{3}{l}{$\quad \mid \sigma \to \tau$}    & function type    & \multicolumn{3}{l}{$\quad \mid e_1~e_2$}                      & term application                                                \\
           \multicolumn{3}{l}{$\quad \mid \forall\alpha.\tau$} & universal type   & \multicolumn{3}{l}{$\quad \mid \Lambda\alpha.e$}              & type abstraction                                           \\
           \multicolumn{3}{l}{$\quad \mid \exists\alpha.\tau$} & existential type & \multicolumn{3}{l}{$\quad \mid \tapp{e}{\tau}$}               & type application                                           \\
           \multicolumn{3}{l}{$\quad \mid \sigma \times \tau$} & product type     & \multicolumn{3}{l}{$\quad \mid \pack{\sigma}{e}{\tau}$}       & packing                                                    \\
@@ -80,29 +80,11 @@ type-safety proof of \fexistsprod{}.
   \label{fig:systemfexistssyntax}
 \end{figure}
 
-        %%  \\
-        %%  \\
-        %%  \\
-        %%  \\
-        %%  \\
-        %%  \\
-        %%  \\
-        %%  \\
-        %%  \\
-        %%  \\
-        %%  \\
-        %%  \\
-        %%  \\
-        %%  \\
-        %%  \\
-
-Like in Section \ref{ssec:intro:syntax} we define the syntax of \fexistsprod{}
+Like in Section \ref{ssec:intro:syntax}, we define the syntax of \fexistsprod{}
 using an EBNF grammar. On top of this grammar, we define a substitution
-operation, and its dependencies which we need to specify the semantics in the
-following section. We also pay attention to another concern related to variable
-binding, namely scoping rules, which we define using a well-scopedness
-relation. This is more formal and explicit than what is commonly found in
-textbooks.
+operation. We particularly pay attention to another concern related to variable
+binding, namely scoping rules, which we define using a well-scopedness relation.
+This is more formal and explicit than what is commonly found in textbooks.
 
 \paragraph{Grammar}
 Figure \ref{fig:systemfexistssyntax} shows the first part of the language
@@ -110,14 +92,14 @@ specification: the definition of the syntax of \fexistsprod, in a textbook-like
 manner.
 
 The three main syntactic sorts of \fexistsprod are types, terms and patterns,
-and there are auxiliary sorts for values, variables and typing
-contexts. Patterns describe \emph{pattern matching} for product types only and
-can be arbitrarily nested. A pattern can therefore bind an arbitrary number of
-variables at once. For simplicity we keep matching on existentials separate from
-products. One level of existentials can be packed via $(\pack{\tau}{e}{\tau})$
-and unpacked via $(\unpack{\alpha}{x}{e_1}{e_2})$.
+and there are auxiliary sorts for values, variables and typing contexts.
+Patterns describe \emph{pattern matching} for product types only and can be
+arbitrarily nested. A pattern can therefore bind an arbitrary number of
+variables at once. For simplicity, we keep matching on existentials separate
+from products. One level of existentials can be packed via
+$(\pack{\tau}{e}{\sigma})$ and unpacked via $(\unpack{\alpha}{x}{e_1}{e_2})$.
 
-In this grammar the scoping rules are left implicit as is common practice. The
+In this grammar, the scoping rules are left implicit as is common practice. The
 intended rules are that in a universal $(\forall\alpha.\tau)$ and existential
 quantification $(\exists\alpha.\tau)$ the type variable $\alpha$ scopes over the
 body $\tau$, in a type abstraction $(\Lambda\alpha.e)$ and term abstraction
@@ -201,7 +183,7 @@ since the scoping rules are not reflected in the EBNF syntax of Figure
 One option is to make the scoping relations like $\kinding{\Gamma}{\tau}$ part
 of the specification and derive other boilerplate from it, but this relation
 repeats a lot of information that is already given in the EBNF grammar. If
-possible we want to avoid that repetition in our specifications. The only new
+possible, we want to avoid that repetition in our specifications. The only new
 detail that the well-scopedness relation adds explicitly, is that the type
 variables in the quantifications scope over the bodies, which is highlighted in
 \textgray{gray} in Figure \ref{fig:systemfexistsscoping}.
@@ -250,7 +232,7 @@ specifications that include \emph{binding specifications} for scoping.
 \end{figure}
 
 Figure \ref{fig:systemfexists:textbook:freevariables} shows the definition of
-the calculations of free variables of types and terms, i.e., reference
+the calculations of free variables of types and terms, i.e. reference
 occurrences of variables that are not bound in the type or term itself.
 % \item This operation is specific to a nameful syntax representation.
 Free variables are used for the definition of capture-avoiding substitution
@@ -568,7 +550,7 @@ does not have the appropriate form. We first need to commute the two substitutio
 with one of the common interaction lemmas
 \begin{align}
   [\beta\mapsto \sigma][\alpha \mapsto \sigma'] =
-  [\alpha \mapsto [\beta\mapsto\sigma]\sigma'][\beta\mapsto\sigma] \qquad (\alpha \neq \beta) \label{lem:substcomm} \\
+  [\alpha \mapsto [\beta\mapsto\sigma]\sigma'][\beta\mapsto\sigma] \qquad (\alpha \neq \beta) \label{lem:substcomm}
 \end{align}
 
 
@@ -680,8 +662,8 @@ Figure \ref{fig:systemfdebruijn} shows a term grammar for a de Bruijn
 representation of \fexistsprod. A property of this representation is that
 binding occurrences of variables still mark the binding but do not explictly
 name the bound variable anymore. For this reason, we replace the variable names
-in binders uniformly with a bullet $\bullet$ in the new grammar. Variables do no
-refer to their binding site by name but by using positional information: A
+in binders uniformly with a bullet $\bullet$ in the new grammar. Variables do
+not refer to their binding site by name but by using positional information: A
 variable is represented by a natural number $n$ that denotes that the variable
 is bound by the $n$th enclosing binder starting from 0.
 
@@ -722,7 +704,7 @@ In the semi-formal specification we have defined a well-scopedness relation
 solely for the purpose to make the scoping rules explicit. Of course, we only
 ever want to consider well-scoped terms which is implicitly assumed in the
 semi-formal development. In a proper formalization and mechanization, however,
-this introduces obligation to actually proof terms to be well-scoped. For
+this introduces obligation to actually prove terms to be well-scoped. For
 instance, we need to prove that that all syntactic operations, like
 substitution, preserve well-scopedness.
 
@@ -832,7 +814,7 @@ type. In this style, well-scopedness comprises a lightweight type system.
 However, in general it is impossible to come up with the intended typing or,
 more generally, establish what the associated data in the extended context
 should be. Furthermore, we allow the user to define different contexts with
-potentially incompatible associated data. To avoid these issue, we define
+potentially incompatible associated data. To avoid this issue, we define
 well-scopedness by using \emph{domains} of contexts instead. In fact, this is
 all we need to establish well-scopedness.
 
@@ -912,22 +894,33 @@ when inserting new variables in the context.
       \end{array}
       $ \\
 
-      \framebox{\mbox{\ensuremath{|shtm : h → t → t → n|}}}\\
+      \framebox{\mbox{\ensuremath{|shtm : h → t → t|}}}\\
 
       $
       \begin{array}{lllcl}
-        |shtm| & h & (\Lambda\bullet.t)                   & = & \Lambda\bullet. (|shtm|~(|Sty|~h)~t)                   \\ 
-        |shtm| & h & (t_1,t_2)                             & = & (|shtm|~h~t_1), (|shtm|~h~t_2)                            \\ 
-        |shtm| & h & (\lambda \bullet:T.t)                 & = & \lambda \bullet:T. (|shtm|~(|Stm|~h)~t)       \\ 
-        |shtm| & h & (\tapp{t}{T})                        & = & \tapp{(|shtm|~h~t)}{T}                         \\ 
-        |shtm| & h & (\casep{t_1}{q}{t_2})                 & = & \\
-           \multicolumn{5}{l}{\quad \casep{(|shtm|~h~t_1)}{q}{(|shtm|~(h + \bindp{q})~t_2})}            \\ 
-        |shtm| & h & (t_1~t_2)                             & = & (|shtm|~h~t_1)~(|shtm|~h~t_2)                     \\ 
-        |shtm| & h & (\pack{T_1}{t}{T_2})                  & = & \pack{T_1}{|shtm|~h~t}{T_2}                  \\ 
-        |shtm| & h & (\unpack{\bullet}{\bullet}{t_1}{t_2}) & = & \\
-           \multicolumn{5}{l}{\quad \unpack{\bullet}{\bullet}{(|shtm|~h~t_1)}{(|shtm|~(|Stm|~(|Sty|~h))~t_2)}} \\ 
+        |shtm| & h & (\Lambda\bullet.t)                    & = & \Lambda\bullet. (|shtm|~(|Sty|~h)~t)     \\
+        |shtm| & h & (t_1,t_2)                             & = & (|shtm|~h~t_1), (|shtm|~h~t_2)           \\
+        |shtm| & h & (\lambda \bullet:T.t)                 & = & \lambda \bullet:T. (|shtm|~(|Stm|~h)~t)  \\
+        |shtm| & h & (\tapp{t}{T})                         & = & \tapp{(|shtm|~h~t)}{T}                   \\
+        |shtm| & h & (\casep{t_1}{q}{t_2})                 & = &                                          \\
+        \multicolumn{5}{l}{\quad \casep{(|shtm|~h~t_1)}{q}{(|shtm|~(h + \bindp{q})~t_2})}                 \\
+        |shtm| & h & (t_1~t_2)                             & = & (|shtm|~h~t_1)~(|shtm|~h~t_2)            \\
+        |shtm| & h & (\pack{T_1}{t}{T_2})                  & = & \pack{T_1}{|shtm|~h~t}{T_2}              \\
+        |shtm| & h & (\unpack{\bullet}{\bullet}{t_1}{t_2}) & = &                                          \\
+        \multicolumn{5}{l}{\quad \unpack{\bullet}{\bullet}{(|shtm|~h~t_1)}{|(shtm (h + Ity + Itm) t_2)|}} \\
+      \end{array}
+      $ \\
+
+      \framebox{\mbox{\ensuremath{|shty : h → E → E|}}}\\
+
+      $
+      \begin{array}{lllcl}
+        |shty| & h & |epsilon|        & = & |epsilon|                               \\
+        |shty| & h & |(E, bullet)|    & = & |(shty h E), bullet|                      \\
+        |shty| & h & |(E, bullet :T)| & = & |(shty h E), bullet : (shty (h + dom E) T)| \\
       \end{array}
       $
+
     \end{minipage}
   }
   \caption{Shifting functions}
@@ -942,8 +935,8 @@ to transport the substitutes along the following context changes:
 \]
 
 To implement shiftings, we need to generalize them first, so that variables can
-be inserted in the middle of the context, i.e. operations that corresponds to
-the context changes
+be inserted in the middle of the context, i.e. operations that correspond to the
+context changes
 \[ |Γ,Δ ⊢ e| \leadsto |Γ,x,Δ ⊢ e| \quad \text{and} \quad |Γ,Δ ⊢ e| \leadsto |Γ,α,Δ ⊢ e|.
 \]
 
@@ -958,26 +951,31 @@ type variable shifting and hence use the following four shift functions:
 \end{array}
 \]
 
-Figure \ref{fig:overview:shifting} defines the shifting of term variables on
-indices and terms. Instead of using the traditional arithmetical implementation
+Figure \ref{fig:overview:shifting} defines selected shiftings: shifting of term
+variables on terms and term indices, and of type variables in typing
+environments.
+
+
+Instead of using the traditional arithmetical implementation
 \[ |if n < c then n else n + 1| \]
 for the shifting of indices, we use an equivalent recursive definition that
 inserts the successor constructor \emph{at the right place}. This follows the
 inductive structure of |Δ| which facilitates inductive proofs on |Δ|.
 
-The single-place shiftings can be iterated to get multiplace shiftings 
-\[ \begin{array}{c@@{\hspace{9mm}}c@@{\hspace{9mm}}c}
-     |sh : t → h → t| & |sh : T → h → T| & |sh : E → h → E| \\
-   \end{array}
+The shiftings can be iterated to get weakenings of multiple variables at once.
+We will only use this form of weakening for adding variables at the end of the
+context. We will call this form of weakening \emph{lifting}.
+
+\[ |lift : t → h → t| \quad |lift : T → h → T| \quad |lift : E → h → E| \\
 \]
 \noindent that represent the weakenings
-\[ \begin{array}{c@@{\hspace{9mm}}c@@{\hspace{9mm}}c}
-     \Gamma\vdash e       \leadsto \Gamma,\Delta\vdash e       &
-     \Gamma\vdash \tau    \leadsto \Gamma,\Delta\vdash \tau    & 
-     \Gamma\vdash \Delta' \leadsto \Gamma,\Delta\vdash \Delta' \\
-       |sh : t → h → t| & |sh : T → h → T| & |sh : E → h → E| \\
-   \end{array}
+%{
+%format hplus = "{" h "^+}"
+\[ \inferrule*[]{h \vdash t}{|h,hplus| \vdash |lift t hplus|}    \qquad
+   \inferrule*[]{h \vdash T}{|h,hplus| \vdash |lift T hplus|}    \qquad
+   \inferrule*[]{h \vdash E'}{|h,hplus| \vdash |lift E' hplus|}
 \]
+%}
 
 \paragraph{Substitution}
 
@@ -990,29 +988,27 @@ be found.
 \item The first variant keeps the invariant that |e| and |e'| are in the same
   context and immediately weakens |e| when passing under a binder while
   traversing |e'| to keep this invariant. It corresponds to the substition lemma
-$$
-\begin{array}{c}
-\inferrule*[]
-  {\gray{|Γ,Δ ⊢ e : σ|} \\
-   |Γ,x:σ,Δ ⊢ e' : τ|
-  }
-  {|Γ,Δ ⊢ {x ↦ e}e' : τ|}
-\end{array}
-$$
+  \[ \begin{array}{c}
+       \inferrule*[]
+         {\gray{|Γ,Δ ⊢ e : σ|} \\
+          |Γ,x:σ,Δ ⊢ e' : τ|
+         }
+         {|Γ,Δ ⊢ {x ↦ e}e' : τ|}
+     \end{array}
+  \]
 
 \item The second variant keeps the invariant that |e'| is in a weaker context
   than |e|. It defers weakening of |e| until the variable positions are reached
   to keep the invariant and performs shifting if the variable is substituted. It
   corresponds to the substitution lemma
-$$
-\begin{array}{c}
-\inferrule*[]
-  {\gray{|Γ ⊢ e : σ|} \\
-   |Γ,x:σ,Δ ⊢ e' : τ|
-  }
-  {|Γ,Δ ⊢ [x ↦ e]e' : τ|}
-\end{array}
-$$
+  \[ \begin{array}{c}
+       \inferrule*[]
+         {\gray{|Γ ⊢ e : σ|} \\
+          |Γ,x:σ,Δ ⊢ e' : τ|
+         }
+         {|Γ,Δ ⊢ [x ↦ e]e' : τ|}
+     \end{array}
+  \]
 \end{enumerate}
 
 Both variants were already present in de Bruijn's seminal paper
@@ -1022,15 +1018,14 @@ advantages:
 
 \begin{enumerate}
 \item It supports the more general case of languages with a dependent context:
-$$
-\begin{array}{c}
-\inferrule*[]
-  {|Γ ⊢ e : σ| \\
-   |Γ,x:σ,Δ ⊢ e' : τ|
-  }
-  {|Γ,[x ↦ e]Δ ⊢ [x ↦ e]e' : [x ↦ e]τ|}
-\end{array}
-$$
+\[ \begin{array}{c}
+     \inferrule*[]
+       {|Γ ⊢ e : σ| \\
+        |Γ,x:σ,Δ ⊢ e' : τ|
+       }
+       {|Γ,[x ↦ e]Δ ⊢ [x ↦ e]e' : [x ↦ e]τ|}
+   \end{array}
+\]
 
 \item The parameter |e| is constant while recursing into |e'| and hence it can
 also be moved outside of inductions on the structure of |e|. Proofs become

@@ -9,21 +9,33 @@ existence for all well-formed specifications. The second, called \Needle, is a
 code generator that is better suited to practical mechanization.
 
 %-------------------------------------------------------------------------------
-\section{The Generic \Knot\ Implementation}\label{sec:elab:impl:generic}
-We implemented the boilerplate functions generically for all well-formed \Knot
-specifications in about 4.3k lines of Coq by employing datatype-generic programming techniques
-\cite{genericprogramming}. Following our free monad principle, we capture de Bruijn terms in a
-free monadic structure that is parameterized by namespaces and whose underlying
-functor covers the regular constructors of sorts. To model the underlying
-functors, we use the universe of finitary containers
-\cite{containers,dependentpolynomialfunctors,lawoftraversals,shapelyfunctors}
-Finitary containers closely model our specification language: a set of shapes
-(constructors) with a finite number of fields. We use an indexed
-\cite{indexedcontainers} version to model mutually recursive types and use a
-higher-order presentation to obtain better induction principles for which we
-assume functional extensionality \footnote{However, the code based on our
-  generator \Needle does not assume any axioms.}. We implemented boilerplate
-operations and lemmas for this universe generically.
+\section{The \Loom\ Generic Library}\label{sec:elab:impl:generic}
+
+We implemented a datatype-generic library around \Knot specifications that
+provides boilerplate functionality. The universe of the library covers generic
+representations of sorts, environments and expressions but does not deal with
+user-defined relations.
+
+Following our free monad principle, we capture de Bruijn terms in a free monadic
+structure similar to the one in Section \ref{ssec:knotdesign:freemonad}. We use
+the universe of finitary containers
+\cite{containers,dependentpolynomialfunctors,lawoftraversals,shapelyfunctors} to
+model the underlying pattern functors of regular constructors of sorts, in order
+to deal with any positivity and termination requirements. Finitary containers
+closely model our specification language: a set of shapes (constructors) with a
+finite number of fields. Each field is associated with a binding specification
+and all constraints for the well-formedness of specifications are encoded in the
+universe codes using strong intrinsic types \stevennote{TODO}{citations}.
+Furthermore, we use an indexed \cite{indexedcontainers} version of finitary
+containers to model mutually recursive types and use a higher-order presentation
+to obtain better induction principles for which we assume functional
+extensionality \footnote{However, the code based on our generator \Needle does
+  not assume any axioms.}. The
+
+The boilerplate lemmas implemented in the library follow the elaboration
+methodology outlined in this chapter. In total, the library consists of about
+\stevennote{CHECK}{4.3k} lines of Coq code.
+
 
 
 %-------------------------------------------------------------------------------

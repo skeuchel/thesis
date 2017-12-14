@@ -13,49 +13,6 @@ proof-assistant. Both approaches have different trade-offs.
 %%   properties of the boilerplate operations that we introduced in the previous
 %%   chapter.
 
-\paragraph{Generic Library}
-
-Alternatively, we can with (well-formed) \Knot specifications as the codes of a
-generic universe. The main benefit of a library is, that its code, including all
-proofs, can be checked separately independently of a concrete specification.
-Hence, instantiating the library is guaranteed to yield valid theorems for all
-specifications. Beyond providing strong correctness guarantees this approach has
-other merits. A generic library provides evidence for the existence of
-type-sound boilerplate definitions and proofs for for every language specified
-with \Knot. Furthermore, it shows that \Knot embodies all necessary information
-and constraints to derive the boilerplate.
-
-Disadvantages of a generic library:
-\begin{itemize}
-\item Hiding of the internals. Do not expose the user of the library
-  to its complexity. Ideally, the user does not have to be an expert
-  in datatype-generic programming to use the library.
-
-\item Constraints like well-formedness of binding specifications and expressions
-  needs to be part of the universe code. Looking up meta-variables can
-  potentially introduce partiality which needs to be dealt with.
-
-\item Generically handling relations with arbitrary arities is challenging.
-
-\item Induction over the generic generic representation is usually not the
-  desired one. Do not use datatypes of the extension directly, but instead write
-  isomorphism to user defined types. This also applies to well-scopedness
-  predicates and relations.
-
-\item Generic implementation shines through. For example, during
-  simplification, the generic implementation might be exposed.
-
-\item The statement of a generic lemma may not unify with all goals it applies
-  to, before it has been properly specialized to a given specification. This
-  impacts automatic proof search.
-
-\item Related to that is the problem of proof discovery. Conceptually, both pose
-  not a problem since in theory a proof assistant could specialize the types of
-  lemmas when instantiating the generic code for a specification. However,
-  currently none of the available proof assistants provide such functionality.
-\end{itemize}
-
-
 \paragraph{Code Generators}
 A code generator can parse textual \Knot specifications and produces code for
 use in a proof-assistant. In terms of usability, there are clear advantages.
@@ -77,6 +34,63 @@ correctness of the code generator not only involves the language of the proof
 assistant, but also that of the scripting system.
 
 
+\paragraph{Generic Library}
+Alternatively, we can with (well-formed) \Knot specifications as the codes of a
+generic universe. The main benefit of a library is, that its code, including all
+proofs, can be checked separately independently of a concrete specification.
+Hence, instantiating the library is guaranteed to yield valid theorems for all
+specifications. Beyond providing strong correctness guarantees this approach has
+other merits. A generic library provides evidence for the existence of
+type-sound boilerplate definitions and proofs for for every language specified
+with \Knot. Furthermore, it shows that \Knot embodies all necessary information
+and constraints to derive the boilerplate.
+
+There are several downsides to this approach. For usability, it is important to
+hide the internals of the library and its complexity, since the use user should
+not be assumed to have expert knowledge about datatype-generic programming to
+use the library. However, there are several ways in which the implementation and
+its complexity might be exposed. In interactive proofs simplification of
+boilerplate functions like concatenation, shifting and substitution may reveal
+the generic implementation. Furthermore, induction over generically defined
+datatypes is (usually) not the one the user would expect. This applies not only
+to algebraic datatypes for sorts and environments, but also to inductive
+families for well-scopedness predicates, variable look-ups, and user-defined
+relations.
+\footnote{In our case-study we used induction over well-scopedness of types to
+  prove reflexivity of algorithmic subtyping of \fsub\xspace and induction over
+  type variable look-ups to prove that \fomega\xspace types that appear in a
+  typing judgement are always well-kinded.} In datatype-generic programming it
+is common to work with user-defined types instead, and only write isomorphisms
+to the generic representation. This means however, that some definitions like
+well-scopedness predicates, which are clearly boilerplate, have to be
+user-defined as well which defeats the purpose of a generic solution to this
+kind of boilerplate. Luckily, it is possible to make the interface of
+datatype-generic libraries aware of isomorphisms so that the user is spared from
+applying the isomorphisms manually.
+
+Automation of proofs when using lemmas of a generic library may also be impaired
+in comparison to manually proved or generated lemmas. For instance, The
+statement of a generic lemma may not unify with all goals it applies to, before
+it has been properly specialized to a given specification. This impacts
+automatic proof search. This applies in particular to user-defined relations,
+which can have arbitrary arities. Related to that is the problem of proof
+discovery. If the user wants to look at the lemmas a library provides, he can
+only the generic statement of the lemmas instead of specialized ones for his
+specification. Conceptually, this should not pose a problem since in theory a
+proof assistant could specialize the types of lemmas when instantiating the
+generic code for a specification. However, currently none of the available proof
+assistants provide such functionality.
+
+Developing a datatype-generic library for \Knot is technically challenging.
+Constraints like well-formedness of binding specifications and expressions needs
+to be part of the universe code. Looking up meta-variables can potentially
+introduce partiality which needs to be dealt with. Furthermore, there is not a
+lot of research on writing datatype-generic libraries at this scale: not only is
+datatype-generic programming more established than datatype-generic proofs, but
+also, research on generic proofs usually deals with universes of algebraic
+datatypes and does not extend to user-defined relations which are part of \Knot
+specifications.
+
 \paragraph{Hybrid Approaches}
 
 The main trade-off between the approaches is the confidence in a generic
@@ -96,13 +110,9 @@ specialized definitions for every generic definition that appears in the user
 facing interface. This ranges from obvious user-defined things like datatype
 declarations for sorts, environments and relations to generically derived
 inductive definitions like domains, well-scopedness relations and environment
-lookups. This is crucial in case the user wants to perform induction over these
-definitions. However, this also add duplication between the code-generator and
-the generic implementation.
-\footnote{In our case-study we used induction over well-scopedness of types to
-  prove reflexivity of algorithmic subtyping of \fsub\xspace and induction over
-  type variable lookups to prove that \fomega\xspace types that appear in a
-  typing judgement are always well-kinded.}
+look-ups. As explained above, this is crucial in case the user wants to perform
+induction over these definitions. However, this also add duplication between the
+code-generator and the generic implementation.
 
 Simplification of boilerplate functions like environment concatenation, shifting
 and substitution may still reveal the generic implementation. In \Coq this

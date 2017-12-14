@@ -1,66 +1,75 @@
 \chapter{Elaboration}\label{ch:elaboration}
 For the meta-theoretical formalization of programming language we need
-properties of the semantical definitions. For instance, for type-theory proofs
-via progress and preservation we generally need substitution properties of the
-typing relation, and all the other boilerplate that is necessary to prove it.
+properties of the semantical definitions. For instance, for proofs of
+type-safety we generally need substitution properties of the typing relation,
+among other boilerplate properties.
 
-There are multiple ways to the boilerplate lemmas for use in mechanizations. We
-can develop a \emph{code generator} that produces code for a proof-assistant.
-Alternatively, we can develop a \emph{datatype-generic} library inside a
-proof-assistant. Both approaches have different trade-offs.
+There are multiple ways to prove the boilerplate lemmas for use in
+mechanizations. We can develop a \emph{code generator} that produces code for a
+proof-assistant.  Alternatively, we can develop a \emph{datatype-generic}
+library inside a proof-assistant. Both approaches have different trade-offs.
 
 %% \item Programming language mechanizations typically rely on many boilerplate
 %%   properties of the boilerplate operations that we introduced in the previous
 %%   chapter.
 
 \paragraph{Code Generators}
-A code generator can parse textual \Knot specifications and produces code for
-use in a proof-assistant. In terms of usability, there are clear advantages.
+A code generator can parse textual \Knot specifications and generate
+definitions and proofs for use in a proof-assistant. 
 
-The code generator can produce definition of datatypes and functions that are
-close to what a human prover might write manually. Hence, the user can inspect
-the code to understand the provided functionality in detail. Moreover, since the
+In terms of usability, this approach has are clear advantages.
+The generated definitions of datatypes and functions can be
+close to what a human prover would write manually. Hence, the user can inspect
+the code to better understand the provided functionality. Moreover, since the
 code generator can specialize the statements of lemmas to the given
 specification, it is much easier for the user to look at the provided proofs
 and for proof automation to apply the provided proofs.
 
-The main downside of a code generator is that the output still needs to be
-checked. This raises the question if correct code is generated in all cases.
-There are multiple ways to implement proofs; depending on the available methods
-in the proof assistant. For instance, \Coq has a powerful scripting language to
-automate writing proofs. However, very generic proof scripts tend to be brittle
-and can possibly take a long time to execute. Furthermore, reasoning about the
-correctness of the code generator not only involves the language of the proof
-assistant, but also that of the scripting system.
+The main downside of a code generator is that we do not know whether the
+correct code is generated in all cases. As a consequence, the proof assistant
+still has to check the generated code. 
+
+\Coq enables a particular staged approach to code generation that leverages its
+proof automation facilities. The idea is that the code generator does not directly
+generate custom proof terms, but instead generates an invocation of a \Coq proof
+script. When this proof script is run, it builds the actual custom proof term.
+This reduces the development effort, because the generator does not have to
+implement its own proof generation. Moreover, the approach is more flexible
+because we can change the definitions of the scripts without changing the
+generator.
+However, generic proof scripts tend to be brittle and can take a
+long time to execute. Furthermore, reasoning about the correctness of the code
+generator not only involves the language of the proof assistant, but also that
+of the scripting system.
 
 
 \paragraph{Generic Library}
-Alternatively, we can with (well-formed) \Knot specifications as the codes of a
-generic universe. The main benefit of a library is, that its code, including all
-proofs, can be checked separately independently of a concrete specification.
-Hence, instantiating the library is guaranteed to yield valid theorems for all
-specifications. Beyond providing strong correctness guarantees this approach has
-other merits. A generic library provides evidence for the existence of
-type-sound boilerplate definitions and proofs for for every language specified
-with \Knot. Furthermore, it shows that \Knot embodies all necessary information
-and constraints to derive the boilerplate.
+Alternatively, we can develop a datatype-generic library with (well-formed)
+\Knot specifications as the codes of a generic universe. The main benefit of such a
+library is, that its code, including all proofs, can be checked once and for all and 
+independently of a concrete specification. Hence, instantiating the library is
+guaranteed to yield valid theorems for all specifications. Moreover, it shows that
+\Knot embodies all necessary information and constraints to derive the
+boilerplate.
 
 There are several downsides to this approach. For usability, it is important to
-hide the internals of the library and its complexity, since the use user should
-not be assumed to have expert knowledge about datatype-generic programming to
-use the library. However, there are several ways in which the implementation and
-its complexity might be exposed. In interactive proofs simplification of
-boilerplate functions like concatenation, shifting and substitution may reveal
-the generic implementation. Furthermore, induction over generically defined
-datatypes is (usually) not the one the user would expect. This applies not only
-to algebraic datatypes for sorts and environments, but also to inductive
-families for well-scopedness predicates, variable look-ups, and user-defined
-relations.
-\footnote{In our case-study we used induction over well-scopedness of types to
-  prove reflexivity of algorithmic subtyping of \fsub\xspace and induction over
-  type variable look-ups to prove that \fomega\xspace types that appear in a
-  typing judgement are always well-kinded.} In datatype-generic programming it
-is common to work with user-defined types instead, and only write isomorphisms
+hide the internals of the library and its complexity, since the user should
+not have expert knowledge about datatype-generic programming to
+use the library. Yet, there are several ways in which the implementation and
+its complexity may be exposed. Firstly, the simplification of
+boilerplate functions may reveal the generic implementation. Secondly,
+the provided induction principle over generically defined
+datatypes is (usually) not the one the user would expect. 
+% This applies not only
+% to algebraic datatypes for sorts and environments, but also to inductive
+% families for well-scopedness predicates, variable look-ups, and user-defined
+% relations.
+% \footnote{In our case-study we used induction over well-scopedness of types to
+%   prove reflexivity of algorithmic subtyping of \fsub\xspace and induction over
+%   type variable look-ups to prove that \fomega\xspace types that appear in a
+%   typing judgement are always well-kinded.} 
+The above problems are usually mitigated in datatype-generic programming by
+working with user-defined types instead, and by writing isomorphisms
 to the generic representation. This means however, that some definitions like
 well-scopedness predicates, which are clearly boilerplate, have to be
 user-defined as well which defeats the purpose of a generic solution to this
@@ -68,63 +77,59 @@ kind of boilerplate. Luckily, it is possible to make the interface of
 datatype-generic libraries aware of isomorphisms so that the user is spared from
 applying the isomorphisms manually.
 
-Automation of proofs when using lemmas of a generic library may also be impaired
+Automation of proofs may also be impaired when using lemmas of a generic library 
 in comparison to manually proved or generated lemmas. For instance, The
 statement of a generic lemma may not unify with all goals it applies to, before
 it has been properly specialized to a given specification. This impacts
-automatic proof search. This applies in particular to user-defined relations,
+automatic proof search, in particular for user-defined relations,
 which can have arbitrary arities. Related to that is the problem of proof
-discovery. If the user wants to look at the lemmas a library provides, he can
-only the generic statement of the lemmas instead of specialized ones for his
+discovery. If the user wants to look at the lemmas a library provides, he sees
+only the generic lemmas instead of the ones specialized for his
 specification. Conceptually, this should not pose a problem since in theory a
 proof assistant could specialize the types of lemmas when instantiating the
 generic code for a specification. However, currently none of the available proof
 assistants provide such functionality.
 
-Developing a datatype-generic library for \Knot is technically challenging.
+Finally, developing a datatype-generic library for \Knot is technically highly challenging.
 Constraints like well-formedness of binding specifications and expressions needs
 to be part of the universe code. Looking up meta-variables can potentially
-introduce partiality which needs to be dealt with. Furthermore, there is not a
-lot of research on writing datatype-generic libraries at this scale: not only is
-datatype-generic programming more established than datatype-generic proofs, but
+introduce partiality which needs to be dealt with. Furthermore, there is little
+research on writing datatype-generic libraries at this scale: not only is
+datatype-generic programming more established than datatype-generic proving, but
 also, research on generic proofs usually deals with universes of algebraic
 datatypes and does not extend to user-defined relations which are part of \Knot
 specifications.
 
 \paragraph{Hybrid Approaches}
 
-The main trade-off between the approaches is the confidence in a generic
-implementation and the usability of a code generator. Ideally, we could combine
-both approaches in order to get the advantages of both, and also mitigate their
-disadvantages.
+The main trade-off of the above two approaches is between the confidence in the
+correctness and the usability. Ideally, we could combine both approaches in
+order to get the best of both worlds, and to mitigate the respective disadvantages.
 
-The obvious approach is to develop a generic library and address the usability
-problems by developing a user-friendly code generator around it. The code
-generator can instantiate the library with a user-defined specification and
-specialize the generic definitions and lemmas as much as possible to hide the
-complexity of the library. However, the technical challenges to develop a
-generic library remain.
-
+The obvious hybrid approach is to develop a generic library and address the
+usability problems by developing a user-friendly code generator around it. The
+code generator can instantiate the library with a user-defined specification
+and specialize the generic definitions and lemmas as much as possible. However,
+the technical challenges to develop a generic library remain.
 To ensure that all generic definitions are hidden, we need to generate
 specialized definitions for every generic definition that appears in the user
-facing interface. This ranges from obvious user-defined things like datatype
+facing interface. This ranges from obvious user-defined datatype
 declarations for sorts, environments and relations to generically derived
 inductive definitions like domains, well-scopedness relations and environment
-look-ups. As explained above, this is crucial in case the user wants to perform
-induction over these definitions. However, this also add duplication between the
-code-generator and the generic implementation.
+look-ups. However, the specialization adds duplication between the
+code generator and the generic implementation.
 
-Simplification of boilerplate functions like environment concatenation, shifting
-and substitution may still reveal the generic implementation. In \Coq this
-should be easily addressable with customized tactics.
+% Simplification of boilerplate functions like environment concatenation, shifting
+% and substitution may still reveal the generic implementation. In \Coq this
+% should be easily addressable with customized tactics.
 
-An alternative approach, is to use a code-generator as the principle
-implementation and try to transfer as much confidence in correctness as possible
-from the generic approach. This is the path that we took and the remainder of
-this chapter outlines our methodology to do so. We have built both, a
-datatype-generic library called \Loom in \Coq, and acode generator named \Needle
-that produces \Coq code and is implemented in Haskell.
-
+An alternative hybrid approach, is to use a code-generator as the principle
+implementation and to transfer as much confidence in correctness as possible
+from the generic approach. This is the path that we take and the remainder of
+this chapter outlines our methodology to do so. To bolster our
+confidence in code generation we have first built \Loom, a
+datatype-generic library in \Coq, and then transferred its proof term
+generation to \Needle, a cod generator in Haskell that produces \Coq code.
 
 \paragraph{Methodology}
 \Loom defines de Bruijn interpretation of \Knot specification generically and

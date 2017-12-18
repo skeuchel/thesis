@@ -41,6 +41,49 @@ methodology outlined in this chapter. In total, the library consists of about
 %-------------------------------------------------------------------------------
 \section{The \Needle\ Code Generator}\label{sec:elab:impl:codegen}
 
+\begin{itemize}
+\item \Needle is a Code generator written in Haskell that produces \Coq code
+  from a \Knot specification.
+
+\item It produces both, proof terms and invocations of proof script that
+  are implemeneted in an accompanying library.
+
+\item
+
+\item It performs both simplifications of de Bruijn terms and of proof
+  witnesses.
+\item Simplification of terms is partial evaluation of functions.
+\item For instance, the elaboration never takes any shortcuts in case of empty
+  binding specifications. As a result, the intermediate terms may lift a
+  terms with 0 newly introduced variables or extend a domain with 0 variables.
+  Partial evaluation of the intermediate representation removes these
+  unnecessary calls.
+
+\item The other simplification is removing function calls based on
+  subordination. This removes unnecessary calls to which are effectively are the
+  identity function such as performing a term substitution in a type in
+  \fexistsprod.
+
+\item Proof terms can be every large. For example, the elaboration of the shift
+  commutation proof term is duplicated for each field. In the case of an empty
+  binding specification the induction hypothesis has already the correct shape
+  and can be invoked directly without the rewriting steps before and after.
+
+\item This is handled by a witness simplifier.
+\item On of the simplification steps is partial evaluation of lemmas. For instance,
+  the shift commutation proof contains two invocations for the associtivity of
+  domain addition. For an empty binding specification the resulting associativity
+  \[ (h_1 + h_2) + 0 = h_1 + (h_2 + 0)
+  \]
+  Since both sides are already definitionally equal, the equality can be
+  alternatively be witnessed by |refl|, which is also the implementation of the
+  associativity lemma for this base case.
+\item The second simplification is using the group structure of equality proofs
+  where transitivity is the group operation, reflexivity the neutral element and
+  symmetry the inversion.
+
+\end{itemize}
+
 While the generic Coq definitions presented in the previous sections are
 satisfactory from a theoretical point of view, they are less so from a pragmatic
 perspective. The reason is that the generic code only covers the variable binder

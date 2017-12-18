@@ -805,7 +805,7 @@ lambda abstraction the conventional rule is:
     \]
     \end{minipage}
   }
-  \caption{Well-scopedness of terms (selected rules)}
+  \caption{Well-Scopedness of Terms (selected rules)}
   \label{fig:wellscopedness:overview}
 \end{figure}
 

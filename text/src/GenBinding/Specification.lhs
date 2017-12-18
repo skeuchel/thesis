@@ -26,7 +26,6 @@
 %% variables that are bound by the term constructors as well as their scoping
 %% rules.
 
-
 %-------------------------------------------------------------------------------
 \chapter{The \Knot Specification Language}\label{ch:knotsyntax}
 
@@ -297,170 +296,43 @@ of rules. Calling |bind| on a field gives access to its output.
 
 %if False
 \begin{figure}[t]
-\fbox{
-\begin{minipage}{0.95\columnwidth}
-\begin{code}
-relation Value Tm :=
-  | V_abs    : Value (abs x T t)
-  | V_tabs   : Value (tabs X t)
-  | V_pack   : Value t -> Value (pack T1 t T2)
+  \centering
+  \fbox{
+    \begin{minipage}{0.95\columnwidth}
+      \begin{spec}
+      relation Value Tm :=
+        | V_abs    : Value (abs x T t)
+        | V_tabs   : Value (tabs X t)
+        | V_pack   : Value t -> Value (pack T1 t T2)
 
-relation Eval Tm Tm :=
-  | E_absbeta   :  Value t2 →
-                   Eval (app (abs x T11 t12) t2) (subst x t2 t12)
-  | E_tabsbeta  :  Eval (tapp (tabs X t11) T2) (subst X T2 t11)
-  | E_packbeta  :
-      Value v12 →
-      Eval (unpack (pack T11 v12 T13) X x t2)
-      (subst X T11 (subst x (weaken v12 X) t2))
-  | E_app1 :    Eval t1 t1' ->
-                Eval (app t1 t2) (app t1' t2)
-  | E_app2 :    Eval t2 t2' ->
-                Eval (app t1 t2) (app t1 t2')
-  | E_tapp :    Eval t t' ->
-                Eval (tapp t T) (tapp t' T)
-  | E_pack :    Eval t t' ->
-                Eval (pack T1 t T2) (pack T1 t' T2)
-  | E_unpack :  Eval t1 t1' ->
-                Eval (unpack t1 X x t2) (unpack t1' X x t2)
-\end{code}
-\end{minipage}
-}
-\caption{Evaluation relation for $\fexistsprod$}
-\label{fig:systemfexiststyping}
+      relation Eval Tm Tm :=
+        | E_absbeta   :  Value t2 →
+                         Eval (app (abs x T11 t12) t2) (subst x t2 t12)
+        | E_tabsbeta  :  Eval (tapp (tabs X t11) T2) (subst X T2 t11)
+        | E_packbeta  :
+            Value v12 →
+            Eval (unpack (pack T11 v12 T13) X x t2)
+            (subst X T11 (subst x (weaken v12 X) t2))
+        | E_app1 :    Eval t1 t1' ->
+                      Eval (app t1 t2) (app t1' t2)
+        | E_app2 :    Eval t2 t2' ->
+                      Eval (app t1 t2) (app t1 t2')
+        | E_tapp :    Eval t t' ->
+                      Eval (tapp t T) (tapp t' T)
+        | E_pack :    Eval t t' ->
+                      Eval (pack T1 t T2) (pack T1 t' T2)
+        | E_unpack :  Eval t1 t1' ->
+                      Eval (unpack t1 X x t2) (unpack t1' X x t2)
+      \end{spec}
+    \end{minipage}
+  }
+  \caption{Evaluation relation for $\fexistsprod$}
+  \label{fig:systemfexiststyping}
 \end{figure}
 %endif
 
+\input{src/GenBinding/Specification/Design}
 
-%-------------------------------------------------------------------------------
-\section{Key Design Choices}\label{sec:knotdesign}
-
-This section discusses concepts, that influenced the design of \Knot, which
-makes it easier to understand the specification of \Knot in the next section and
-motivate some of the made choices. \Knot has two different kinds of
-meta-variables. The intuition behind them and their treatment are discussed in
-Section \ref{ssec:knotdesign:localglobal}. Sections
-\ref{ssec:knotdesign:contextparametricity} and \ref{ssec:knotdesign:freemonad}
-explain restrictions that \Knot puts on rules of relations to guarantee that
-boilerplate lemmas for them can be automatically generated.
-
-%-------------------------------------------------------------------------------
-\subsection{Local and Global Variables}\label{ssec:knotdesign:localglobal}
-
-In the variable rule of \fexistsprod{}
-\[ \inferrule* [right=\textsc{TVar}]
-      {x : \tau \in \Gamma}
-      {\typing{\Gamma}{x}{\tau}} \\\\
-\]
-the variable $x$ is used as a reference and is bound in the context $\Gamma$.
-
-On the other hand, in the judgement
-\[ \typing{\Gamma}{(\lambda y : \tau. y)}{\tau \to \tau}. \] the variable $y$
-appears in both, a binding position and a reference position.  The reference use
-of $y$ has to refer to the enclosing binding and not to a binding in the context
-$\Gamma$.
-
-Following the literature on \emph{locally nameless}~\cite{locallynameless} and
-\emph{locally named}~\cite{externalinternalsyntax} representations we call $y$ a
-\emph{locally bound} variable (aka locally scoped variables \cite{pitts2015}),
-or more concisely a \emph{local variable}, and $x$ a \emph{global} or \emph{free
-  variable}.
-
-The distinction between local and global variables goes back to at least
-Frege~\cite{begriffsschrift} and representations such as locally nameless and
-locally named have internalized this distinction. These concepts do not commit
-us to a particular representation of variable binding, such as a locally
-nameless representation. Rather, these notions arise naturally in
-meta-languages.
-
-Frege characterizes global variables as variables that can possibly stand for
-anything while local variables stand for something very specific. Indeed, the
-variable rule is parameterized over the global (meta-)variable which can refer
-to any variable in the typing context. As previously mentioned, $y$ can only
-possibly refer to the enclosing binder. This distinction is also visible in the
-de Bruijn representation: The variable rule is parameterized over an index for
-variable $x$. A local reference, however, is always statically determined. For
-instance, the index for $y$ in the judgement above is necessarily 0.
-
-The type-substitutions in the rules \textsc{TTApp} for type-application and
-\textsc{TPack} for packing existential types operate on local variables
-only.
-%%\stevennote{TODO}{This is not really a coincidence. Locally substituting a
-%%  global variable is not unthinkable but is very particular.  Can this be
-%%  expressed in a good way?}
-For reasons, that are explained in Section
-\ref{ssec:knotdesign:contextparametricity} below, we enforce substitutions in
-the definition of relations to only operate on local variables.
-
-We adopt the Barendregt variable convention in \Knot at the meta-level. Two
-locally bound meta-variables that have distinct names are considered to
-represent distinct object-variables, or, put differently, distinct local
-variables cannot be aliased. However, global meta-variables with distinct names
-can be aliased, i.e. represent the same object-variable.
-
-
-%-------------------------------------------------------------------------------
-\subsection{Context Parametricity}\label{ssec:knotdesign:contextparametricity}
-
-The variable rule is special in the sense that it is the only rule where a
-global variable is used. The variable rule performs a lookup of the type in the
-implicit typing context. More generally, \Knot implicitly assumes that any
-global variable, independent of an explicit lookup, is bound in the context.  As
-a consequence, the use of a global variable inspects the context.
-
-We call a rule \emph{not context parametric}, iff it makes any assumptions about
-the context, e.g. through inspection with a global variable. The variable rule
-of \fexistsprod's typing relation is the only not context parametric rule. The
-other rules either pass the context through unchanged to the premises, or pass
-an extended context to the premises without inspecting the prefix. We call these
-rules \emph{context parametric}.
-
-Context parametricity is important for the automatic derivation of boilerplate.
-For instance, for the semi-formal substitution lemma of \fexistsprod's typing
-relation in Section \ref{sec:gen:semiformal:metatheory}, the inductive step of
-each regular rule consists of applying the same rule again modulo commutation of
-substitutions. Independent of the language at hand, this is automatically
-possible for any context parametric rule.
-
-To understand this, not that in the proof, the substitution is in fact a
-substitution of a global variable. Hence, it represents a context change. Since
-context parametric rules do not make assumptions about the context, they are
-naturally compatible with any changes to the context as long as the change can
-be properly reflected in the indices. For this we needed the commutation of two
-type substitutions. However, this will always be a substitution of a global
-variable which comes from the lemma we are proving, and a local variable from
-the definition of the relation. Intuitively, such a commutation is always
-possible.
-
-
-%-------------------------------------------------------------------------------
-\subsection{Free Monadic Constructions}\label{ssec:knotdesign:freemonad}
-
-A key principle is the distinction between \emph{locally bound} and \emph{free}
-variables at the meta-level. This allows us to recognize \emph{context
-parametric} rules which in turn enables us to extend the \emph{free-monadic
-view} on syntax \cite{monadic,knotneedle} of \Knot to relations. At the
-syntax-level this view requires one distinguished \emph{variable constructor}
-per namespace which has a \emph{reference occurrence} as its only argument and
-all other constructors only contain \emph{binding occurrences} and subterms.
-
-At the level of relations this translates to one distinguished \emph{variable
-  rule} per namespace (or more specifically per environment clause). This
-variable rule has a single lookup as its only premise and the sorts of the
-environment data match the sorts of the indices of the relation. The variable
-rule uses exactly one \emph{free meta-variable}; all other rules only contain
-\emph{locally bound} meta-variables and do not feature lookup premises.  In
-other words, the variable rule is the only not context parametric rule.
-
-These restrictions allow us to generically establish the substitution lemmas
-for relations. Consider the small proof tree on the left:
-% , where $A$ is the subtree for the typing judgement of $e_1$.
-
-The distinction between variable and regular constructors follows
-straightforwardly from \Knot's free-monad-like view on syntax.  This rules out
-languages for normal forms, but as they require custom behavior
-(renormalization) during substitution \cite{anormalform,clf} their substitution
-boilerplate cannot be defined generically anyway.
 
 %-------------------------------------------------------------------------------
 \section{\Knot~Syntax}\label{sec:knotsyntax}

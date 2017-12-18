@@ -51,6 +51,10 @@
 %format h2
 %format h₁ = h1
 %format h₂ = h2
+%format d1
+%format d2
+%format d₁ = d1
+%format d₂ = d2
 %format t1
 %format t2
 %format evalErr = "\Varid{eval_{Err}}"

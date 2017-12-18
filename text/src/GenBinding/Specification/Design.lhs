@@ -128,14 +128,14 @@ possible.
 
 One of the remaining questions is for which class of languages is the
 substitution boilerplate derivable? To find the answer to this question, observe
-that it is folklore that the syntax of lambda calculi have a \emph{monadic
+that it is folklore that the syntax of lambda calculi has a \emph{monadic
   presentation}: We can for example model well-scoped terms of the untyped
 lambda calculus as an ordinary monad on sets using nested datatypes
 \cite{nested,monadic}, or well-scoped and well-typed terms of the simply-typed
 lambda calculus using a generalization of monads
 \cite{monadic,monadsnotendo,relativemonads}. In these cases, the variable
-constructor represent the \emph{unit} of the monad and (simultaneous)
-substitutions of all variables the \emph{bind}.
+constructor represents the \emph{unit} of the monad and (simultaneous)
+substitution of all variables the \emph{bind}.
 
 The unit and bind morphism for monads on sets are not generically derivable.
 However, for the class of \emph{free monads} the operations are derivable from a

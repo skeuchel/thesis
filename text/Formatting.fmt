@@ -301,3 +301,10 @@
 %format ϑ = "\vartheta"
 %format ϑ'
 %format ϑ''
+
+%format FreeSet = "{" Free  "}_{" Set "}"
+%format ReturnSet = "{" Return  "}_{" Set "}"
+%format StepSet = "{" Step  "}_{" Set "}"
+
+%format substLam = "{" subst  "}_{" Lam "}"
+%format upSubLam = "{" upSub  "}_{" Lam "}"

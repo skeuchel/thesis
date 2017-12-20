@@ -1,24 +1,43 @@
 \chapter{Conclusions}
 
-Widespread formalization and mechanization of programming language meta-theory
-is hindered by the large development costs. For further adoption, reducing the
-costs is crucial. This thesis promotes reuse as a way to reduce the
-mechanization effort of programming language meta-theory and investigates the
-two principled approaches \emph{modularity} and \emph{genericity} to reuse in
-general, and the application of these approaches to programming language theory
-in particular.
+In this concluding chapter we revisit the research question, summarize the
+results of this thesis and evaluate the contributions in the context of the
+research question. Furthermore, we highlight opportunities for future work and
+hypothesize how the contributions of this thesis can benefit the programming
+language research community at large in the future.
 
-\paragraph{Summary}
+\section{Research Question}
+Widespread formalization and mechanisation of programming language meta-theory
+is hindered by the large development costs. For further adoption, reducing the
+costs is crucial. This leads us back to the research question laid out in the
+beginning of this thesis:
+
+\begin{center}
+  \begin{minipage}{0.8\columnwidth}\bf
+    How can we reduce the cost of mechanising the formal meta-theory of
+    programming languages?
+  \end{minipage}
+\end{center}
+
+This thesis promotes reuse as a way to reduce the mechanisation effort of
+programming language meta-theory and investigates the two principled approaches
+\emph{modularity} and \emph{genericity} to reuse in general, and the application
+of these approaches to programming language theory in particular.
+
+\section{Summary}
+
 Part I of this pursues the modularity approach and universal method for
 modularization of functional programs on inductive datatypes and modularization
-of induction proofs for properties of these programs. This universal method
-is showcased by modularizing type-safety proofs for lambda calculi with
-several different features.
+of induction proofs for properties of these programs. This universal method is
+showcased by modularizing type-safety proofs for lambda calculi with several
+different features. This is particularly challenging since the proof-assistant
+settings imposes several restrictions for logical consistency.
 
-\begin{itemize}
-\item Uses datatype-generic programming techniques for representation.
-\item Complies with the restricted setting of proof-assistants.
-\end{itemize}
+This challenge is addressed in work prior to this thesis in the
+\emph{Meta-Theory \`a la Carte (MTC)} \cite{mtc} framework which uses Church
+encodings to represent inductive datatypes and families. This thesis develops
+and alternative approach using datatype-generic representation that improves
+over MTC in adequacy, convenience and compatibility with classical logic.
 
 A concern in modularization is the interaction between two or more features.
 Each new feature that is integrated potentially interacts with all previous
@@ -28,40 +47,66 @@ applies to software development in general. However, it is an obstacle to
 modularity if the interaction involves the complete set of features instead of
 an isolated subset, e.g. two features.
 
+Problematic feature interactions appear in the semantics of programming
+languages with effectful features. To cut down this particular kind of
+interaction, we developed a denotational semantics based on monad transformers
+and corresponding algebraic laws. This semantics allowed us to to formulate and
+prove a general type-soundness theorem in a modular way that enables the modular
+reuse of language feature proofs and reduce the interaction between effectful
+language features to the interaction between their effects.
+
+Part II examines the genericity approach with a specific use case in mind:
+variable binding boilerplate in mechanisations. A key ingredient of
+reduction-based semantics of programming languages is substitiution.
+Meta-theoretic proofs using these semantics usually involves a large number of
+burdensome boilerplate proofs about substitutions which distracts a human
+semanticist from essential theorems when mechanising her proofs. This thesis
+develops a generic solution to the boilerplate lemmas based on a novel
+specification language \Knot for programming language and a code generator
+\Needle that produces boilerplate code. \Knot allows the specification of
+abstract syntax, with explicit specifications of binding, and of semantical
+relations between syntax terms. Relations are defined using arbitrary
+expressions build from a language's abstract syntax and a type system is used to
+check that all expressions are well-scoped. \Needle produces specialized
+definitions for a given \Knot specification in the \Coq proof assistant and
+produces code for boilerplate functions and boilerplate lemmas. We employ a
+principled approach to elaboration of boilerplate code that gives us confidence
+in the correctness of our code generator: we developed and formally verified
+elaborations in the \Coq proof assistant using our datatype-generic
+implementation \Loom of \Knot. A central contribution of this thesis is the
+identification of a large class of syntaxes for which boilerplate is completely
+generically derivable: syntactic sorts that have a free monad-like structure.
+For relations this translates to context parametricity of regular (non-variable)
+rules.
+
+Our case study compares our generic approach against fully manual mechanisations
+of type safety proofs of 10 lambda calculi. It shows substantial savings in the
+mechanisation for all 10 calculi with the largest savings being about 74\%
+reduction in code size for System~F. This case study indicates that replacing
+manual variable binding boilerplate by reusable generic solutions is indeed an
+effective means of reducing the mechanisation effort.
+
+
+\section{Future Work}
+
+An unanswered question is how well modularity fared in light of our research
+question. We achieved our intermediate goal of developing an approach to modular
+and reusable components for language features and their type-safety proofs and
+reduction of non-modular feature interaction between effectful features.
+
+However, the approach requires substantial bookkeeping of the relationship of
+final and intermediate compositions of datatypes, relations, algebras and proof
+algebras and similarly between the final and intermediate compositions of
+effects for our monadic denotational semantics. This bookkeeping puts additional
+burden on mechanizers which increases the mechanization effort. Furthermore, the
+shift to modular algebras and proof algebras may be unfamiliar so that the
+approach seems inconvenient over traditional monolithic recursive functions and
+induction proofs.
+
+
+
+
 \begin{itemize}
-\item Feature interaction appears in the semantics of programming languages with
-  effectful features.
-
-\item We developed a denotational semantics based on monad transformers and
-  corresponding algebraic laws. This semantics allowed us to to formulate and
-  prove a general type-soundness theorem in a modular way that enables the
-  modular reuse of language feature proofs and reduce the interaction between
-  effectful language features to the interaction between their effects.
-\end{itemize}
-
-Part II examines the genericity approach by developing a generic solution
-to variable binding boilerplate in mechanisations.
-
-\begin{itemize}
-\item Identification of classes of syntax and relations for which
-  boilerplate is derivable.
-\item \Knot domain-specific specification language for syntax with scoping
-  and semantic relations.
-\item The datatype-generic \Loom implementation and the \Needle code generator
-  and the transfer of formal elaborations from the former to the latter.
-\item Case-study showed substantial savings in the mechanization of type-safety
-  proofs (up to 74\%).
-\end{itemize}
-
-
-\paragraph{Outlook}
-
-\begin{itemize}
-\item Modularity enabled reuse but the realization of the approach in \Coq
-  did not result in reducing the effort but increasing it due to the
-  additional bookkeeping.
-\item We achieved the intermediate goal of providing reusable modular proofs
-  but missed the end goal of reducing the overall development costs.
 \item For any practical use we need better or even direct support from the
   proof assistant.
 \item Concepts like \emph{proof algebras} presented in this thesis can

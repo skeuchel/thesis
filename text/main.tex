@@ -31,7 +31,23 @@
 \input{src/Titlepage}
 \input{src/Acknowledgements}
 
+\cleardoublepage\pdfbookmark[0]{\contentsname}{Contents}
 \tableofcontents
+
+% Summaries
+%% \chapter{Summary}
+%% \input{summaries/english.tex}
+%%
+%% \begin{otherlanguage}{dutch}
+%% \chapter{Nederlandstalige samenvatting}
+%% \input{summaries/dutch.tex}
+%% \end{otherlanguage}
+
+\chapter{List of Publications}
+\input{src/Publications.tex}
+% Order taken from Michaels book
+\listoffigures
+\listoftables
 
 \mainmatter
 
@@ -58,9 +74,12 @@
 \input{src/Genericity}
 }
 
+\part*{Conclusion}
+\addcontentsline{toc}{part}{Conclusion}
 \input{src/Conclusion}
 
-\chapter{Technical Appendix}
+\part*{Appendices}
+\addcontentsline{toc}{part}{Appendices}
 {
 \input{src/GenMacros}
 \input{src/GenBinding/AppendixSpecification}
@@ -70,23 +89,13 @@
 
 \backmatter
 
-% Summaries
-\chapter{Summary}
-\input{summaries/english.tex}
 
-\begin{otherlanguage}{dutch}
-\chapter{Nederlandstalige samenvatting}
-\input{summaries/dutch.tex}
-\end{otherlanguage}
 
 % Bibliography settings
 \bibliographystyle{apalike}
 % Keeping stuff in separate bibliography files is not convenient, as we often have duplicate entries.
 \bibliography{Bibliography}
 
-% Order taken from Michaels book
-\listoffigures
-\listoftables
 
 % Fix hyperref displaying/jumping to wrong page number for index: that of the list of tables.
 % See http://tex.stackexchange.com/questions/138903/wrong-hyperref-for-index-in-tableofcontents-since-texlive-2010

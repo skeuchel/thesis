@@ -3,7 +3,7 @@
 %include polycode.fmt
 %include Formatting.fmt
 
-\section{Appendix C}\label{appendix:elaboration}
+\chapter{Appendix C}\label{appendix:elaboration}
 
 \subsection{Well-scoping proof terms}
 

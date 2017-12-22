@@ -23,7 +23,7 @@ class Monad f where
 
 %endif
 
-\section{Appendix A}\label{appendix:specification}
+\chapter{Appendix A}\label{appendix:specification}
 
 %format FreeStx = "{" Free  "}_{" Stx "}"
 %format ReturnStx = "{" Return  "}_{" Stx "}"

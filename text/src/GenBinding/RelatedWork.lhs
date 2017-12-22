@@ -95,7 +95,7 @@ variable binding \cite{cheney:synp,unbound}. Variable binding is an ubiquitous
 aspect of programming languages. Moreover, a lot of functionality like variable
 substitutions and free variable calculations is defined for many
 languages. Licata and Harper \cite{licata:ubc} and Keuchel and Jeuring
-\cite{sk:gcasr} define universes for datatypes with binding in Agda. Lee et
+\cite{genconv} define universes for datatypes with binding in Agda. Lee et
 al.~\cite{gmeta} develop a framework for first-order representations of variable
 binding in Coq that is based on the universe of regular tree types \cite{ertt}
 and that provides many of the so-called \emph{infrastructure lemmas} required

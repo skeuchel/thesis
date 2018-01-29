@@ -106,8 +106,10 @@ contributions.
 \subsubsection{Specification Language}
 \Knot allows the specification of abstract syntax, with explicit specifications
 of binding, and of semantical relations between syntax terms. Relations are
-defined using arbitrary expressions build from a language's abstract syntax and
-a type system is used to check that all expressions are well-scoped.
+defined using arbitrary expressions build from a language's abstract syntax.
+\Knot employs a novel type system that checks that all expressions, including
+substitutions that may appear in them, are always well-scoped.
+
 
 \paragraph{Free Monadic Structure}
 A central contribution of this thesis is the identification of a large class of
@@ -135,36 +137,89 @@ effective means of reducing the mechanisation effort.
 \section{Future Work}
 
 This section presents possible directions for further research. We group the
-ideas around three themes: convenience, scale and mathematical foundation.
+ideas around the two parts of the thesis and also discuss the combination of the
+two parts.
 
-\subsection{Convenience}
+\subsection{Modularity}
 
-An unanswered question is how well modularity fared in light of our research
-question. We achieved our intermediate goal of developing an approach to modular
-and reusable components for language features and their type-safety proofs and
-reduction of non-modular feature interaction between effectful features.
+We achieved modular reuse of structurally recursive functions and structural
+induction proofs. This is a crucial first step towards reducing mechanization
+effort using the modularity methodology. However, the focus was on feasibility.
+Further research is necessary to make the approach more convenient and
+practical. Furthermore we targeted a specific class of languages (simply-typed
+and effectful lambda calculi), specific semantics ((monadic) denotational
+semantics) and specific meta-theoretic properties (type safety). Of course the
+scope can be extended in either of these directions. We discuss the most
+promising ideas for increasing the convenience and scope below.
 
-However, the approach requires substantial bookkeeping of the relationship of
-final and intermediate compositions of datatypes, relations, algebras and proof
-algebras and similarly between the final and intermediate compositions of
-effects for our monadic denotational semantics. This bookkeeping is not only
-inconvenient but also puts additional burden on mechanizers which increases the
-mechanization effort. Furthermore, the shift to modular algebras and proof
-algebras may be unfamiliar so that the approach seems inconvenient over
-traditional monolithic recursive functions and induction proofs.
+\subsubsection{Convenience}
 
-For any practical use we need better or even direct support from the proof
-assistant. Concepts like \emph{proof algebras} presented in this thesis can be
-turned into first-class primitives of the proof-assistant's language. The
-generic universe implementation of the first part can be used as a basis for an
-elaboration into a core calculus.
+Our case study contains a substantial amount of bookkeeping of the relationship
+of final and intermediate compositions of datatypes, relations, algebras and
+proof algebras and similarly between the final and intermediate compositions of
+effects for our monadic denotational semantics. Most of this is of course
+boilerplate code that should be taken care of automatically.
 
-\begin{itemize}
-\item Scale \Needle \& \Knot too.
-\end{itemize}
+Immediate and easy is to provide better specialized proof automation, for
+instance for type class derivations and algebra dispatch proof steps.
+Furthermore, a lot of the repetitive abstractions over super functors and
+algebras can be dealt with available modularity features in proof assistants
+like modular, module functors and canonical substructures.
 
-\subsection{Scale}
+Ultimately, the support for modular induction proofs can be added to proof
+assistants to make this method practical on a larger scale. Concepts like
+\emph{proof algebras} presented in this thesis can be turned into first-class
+primitives of the proof-assistant's language. The generic universe
+implementation of the first part can be used as a basis for an elaboration into
+a core calculus.
 
+
+\subsubsection{Scope}
+
+As previously discussed, our case studies covered type safety proofs for
+simply-typed lambda calculi with a (monadic) denotational semantics. We discuss
+different possible extensions.
+
+\paragraph{Languages}
+An obvious extension would be to investigate the modularizability and feature
+interaction of richer language, be it with more expressive type systems, e.g.
+involving qualified types, polymorphism, dependent types or sub-typing, with
+more complex language features like datatypes or modules, or with a different
+principal programming paradigm like object-oriented or logical programming
+language calculi.
+
+\paragraph{Metatheoretic Properties}
+Another extension of our work, is to modularize other meta-theoretic proofs than
+type safety.
+
+As laid out in the introduction of the thesis, an important direction is
+verified compilation of programs. This can be combined with the modularity
+methodology: write compilers that are modular in the source -- or even source
+and target language -- and modularly verify semantically correct compilation.
+
+Other interesting proofs are logical relation-based proofs of type safety,
+strong normalization, parametricity or full-abstraction. Logical relations are
+defined by structural recursion on the type structure of languages and should
+therefore be easy to modularize. However, feature interactions in the proofs
+still depend on the language features and it remains to be seen how easy it is
+to modularize the interactions.
+
+\paragraph{Semantics}
+In our case studies we modularized type safety proofs and reduced non-modular
+feature interaction between effectful features using a monadic denotational
+semantics. Monads are, however, not the only approach to model side-effects and
+it would be interesting to see how modularizable alternative approaches are.
+Since our monadic typing rules with explicit continuations are reminiscent of
+algebraic effects and handlers \cite{eff,handlers,hia}, this is one particularly
+promising alternative to model effects. Furthermore, since algebraic effects
+handlers have better composability properties than monads, they potentially
+allow further reduction of feature interaction.
+
+
+\subsection{Genericity}
+
+
+\subsubsection{Scope}
 There are multiple possibilities to grow the \Knot specification language to
 handle more object languages. For instance, we can extend \Knot with support for
 programming and let the user write functions. These functions could then also be
@@ -186,7 +241,7 @@ generating boilerplate for different representations like a nominal,
 locally-named or locally-nameless representation.
 
 
-\subsection{Mathematical Foundations}
+\subsubsection{Mathematical Foundations}
 
 Last but not least, it would be interesting to explore the mathematical
 foundations that underly \Knot. Categorical models exist for syntax with
@@ -197,3 +252,11 @@ assumed.
 A promising area is the modelling of well-scoped terms as a generalization of
 relative monads. This is all the more interesting, since there is already
 research available that models semantic relations as modules over relative monads.
+
+%% \subsection{Combination}
+
+%% For both methods, modularity and genericity, we used a datatype-generic
+%% representation as part of the approach. This suggest that we may combine both.
+%% In fact, this is an instance of the idea presented in Section
+%% \ref{sec:pred:polynomialequality} where we complemented modular definitions with
+%% generic definition of equality testing. Similarly, we can use \Loom to define

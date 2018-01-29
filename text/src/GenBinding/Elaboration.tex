@@ -17,13 +17,13 @@ library inside a proof-assistant. Both approaches have different trade-offs.
 A code generator can parse textual \Knot specifications and generate
 definitions and proofs for use in a proof-assistant. 
 
-In terms of usability, this approach has are clear advantages.
-The generated definitions of datatypes and functions can be
-close to what a human prover would write manually. Hence, the user can inspect
-the code to better understand the provided functionality. Moreover, since the
-code generator can specialize the statements of lemmas to the given
-specification, it is much easier for the user to look at the provided proofs
-and for proof automation to apply the provided proofs.
+In terms of usability, this approach has clear advantages. The generated
+definitions of datatypes and functions can be close to what a human prover would
+write manually. Hence, the user can inspect the code to better understand the
+provided functionality. Moreover, since the code generator can specialize the
+statements of lemmas to the given specification, it is much easier for the user
+to look at the provided proofs and for proof automation to apply the provided
+proofs.
 
 The main downside of a code generator is that we do not know whether the
 correct code is generated in all cases. As a consequence, the proof assistant
@@ -45,12 +45,12 @@ of the scripting system.
 
 \paragraph{Generic Library}
 Alternatively, we can develop a datatype-generic library with (well-formed)
-\Knot specifications as the codes of a generic universe. The main benefit of such a
-library is, that its code, including all proofs, can be checked once and for all and 
-independently of a concrete specification. Hence, instantiating the library is
-guaranteed to yield valid theorems for all specifications. Moreover, it shows that
-\Knot embodies all necessary information and constraints to derive the
-boilerplate.
+\Knot specifications as the codes of a generic universe. The main benefit of
+such a library is, that its code, including all proofs, can be checked once and
+for all, and independently of a concrete specification. Hence, instantiating the
+library is guaranteed to yield valid theorems for all specifications. Moreover,
+it shows that \Knot embodies all necessary information and constraints to derive
+the boilerplate.
 
 There are several downsides to this approach. For usability, it is important to
 hide the internals of the library and its complexity, since the user should
@@ -69,26 +69,26 @@ datatypes is (usually) not the one the user would expect.
 %   type variable look-ups to prove that \fomega\xspace types that appear in a
 %   typing judgement are always well-kinded.} 
 The above problems are usually mitigated in datatype-generic programming by
-working with user-defined types instead, and by writing isomorphisms
-to the generic representation. This means however, that some definitions like
+working with user-defined types instead, and by writing isomorphisms to the
+generic representation. This means however, that some definitions like
 well-scopedness predicates, which are clearly boilerplate, have to be
-user-defined as well which defeats the purpose of a generic solution to this
+user-defined as well, which defeats the purpose of a generic solution to this
 kind of boilerplate. Luckily, it is possible to make the interface of
 datatype-generic libraries aware of isomorphisms so that the user is spared from
 applying the isomorphisms manually.
 
-Automation of proofs may also be impaired when using lemmas of a generic library 
-in comparison to manually proved or generated lemmas. For instance, The
-statement of a generic lemma may not unify with all goals it applies to, before
+Automation of proofs may also be impaired when using lemmas of a generic library
+in comparison to manually proved or generated lemmas. For instance, the
+statement of a generic lemma may not unify with all goals it applies to before
 it has been properly specialized to a given specification. This impacts
-automatic proof search, in particular for user-defined relations,
-which can have arbitrary arities. Related to that is the problem of proof
-discovery. If the user wants to look at the lemmas a library provides, he sees
-only the generic lemmas instead of the ones specialized for his
-specification. Conceptually, this should not pose a problem since in theory a
-proof assistant could specialize the types of lemmas when instantiating the
-generic code for a specification. However, currently none of the available proof
-assistants provide such functionality.
+automatic proof search, in particular for user-defined relations, which can have
+arbitrary arities. Related to that is the problem of proof discovery. If the
+user wants to look at the lemmas a library provides, he sees only the generic
+lemmas instead of the ones specialized for his specification. Conceptually, this
+should not pose a problem since in theory a proof assistant could specialize the
+types of lemmas when instantiating the generic code for a specification.
+However, currently none of the available proof assistants provide such
+functionality.
 
 Finally, developing a datatype-generic library for \Knot is technically highly challenging.
 Constraints like well-formedness of binding specifications and expressions needs
@@ -126,10 +126,10 @@ code generator and the generic implementation.
 An alternative hybrid approach, is to use a code-generator as the principle
 implementation and to transfer as much confidence in correctness as possible
 from the generic approach. This is the path that we take and the remainder of
-this chapter outlines our methodology to do so. To bolster our
-confidence in code generation we have first built \Loom, a
-datatype-generic library in \Coq, and then transferred its proof term
-generation to \Needle, a cod generator in Haskell that produces \Coq code.
+this chapter outlines our methodology to do so. To bolster our confidence in
+code generation we have first built \Loom, a datatype-generic library in \Coq,
+and then transferred its proof term generation to \Needle, a code generator in
+Haskell that produces \Coq code.
 
 \paragraph{Methodology}
 \Loom defines de Bruijn interpretation of \Knot specification generically and
@@ -167,9 +167,8 @@ generic proofs:
 \end{enumerate}
 
 Subsequently, we can implement the same elaborations in the code generator
-\Needle. However, this does not establish formal correctness of the code
-generator \Needle. The confidence in the correctness of \Needle still relies on
-some factors.
+\Needle. However, this does not establish formal correctness of \Needle. The
+confidence in the correctness of \Needle still relies on some factors.
 
 \begin{enumerate}
 \item \emph{The elaboration functions from \Knot specifications to the witness
@@ -238,7 +237,7 @@ covers the implementation of our code generator \Needle.
 \input{src/GenBinding/Elaboration/RelShifting}
 \input{src/GenBinding/Elaboration/RelSubstitution}
 \input{src/GenBinding/Elaboration/Implementation}
-\input{src/GenBinding/Elaboration/Discussion}
+%\input{src/GenBinding/Elaboration/Discussion}
 
 %%% Local Variables:
 %%% mode: latex

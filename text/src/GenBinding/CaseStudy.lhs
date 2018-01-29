@@ -14,178 +14,57 @@
 (global-set-key (kbd "C-c e") 'fc-eval-and-replace)
 %endif
 
-\section{Case Studies}\label{sec:casestudy}
+\newcommand{\mycolorbox}[2]{{\setlength{\fboxsep}{0pt}\colorbox{#1}{#2}}}
 
-This sections demonstrates the benefits of the \Knot approach with two case
-studies. First, we compare fully manual versus \Knot-based mechanizations of
-type-safety proofs for 10 languages. Second, we compare \Knot's solution of the
-\POPLmark challenge against various existing ones.
+\definecolor{light-red}{HTML}{FFDDDD}
+\definecolor{light-green}{HTML}{DDFFDD}
+\definecolor{light-blue}{HTML}{DDDDFF}
+\definecolor{light-violet}{HTML}{FFDDFF}
 
-%-------------------------------------------------------------------------------
-\subsection{Manual vs. \Knot Mechanizations}\label{ssec:casestudymechanizations}
+%% Needle column
+\newcolumntype{n}{>{\columncolor{dark-gray}}r}
+%% Boilerplate column
+\newcolumntype{b}{>{\columncolor{light-gray}}r}
+%% Essential column
+\newcolumntype{e}{>{\columncolor{light-gray}}r}
+%% Manual column
+\newcolumntype{m}{>{\columncolor{light-gray}}r}
+%% Group separator
+\newcolumntype{s}{c}
 
-%if False
-(defun pct (part total) (/ (fround (/ (* 1000.0 part) total)) 10))
-(defun fc-eval-and-replace ()
-  "Replace the preceding sexp with its value."
-  (interactive)
-  (backward-kill-sexp)
-  (prin1 (eval (read (current-kill 0)))
-         (current-buffer)))
-(global-set-key (kbd "C-c e") 'fc-eval-and-replace)
-%endif
+\newcommand{\Ndl}{\textsc{Ndl}}
 
-\begin{table*}[t]\centering
-\ra{1.3}
-\begin{tabular}{@@{}rlrrrcrrrcrrl@@{}}
-\toprule&
-        & \multicolumn{3}{c}{\textbf{Specification}} & \phantom{abc}
-        & \multicolumn{3}{c}{\textbf{Lemmas}}        & \phantom{abc}
-        & \multicolumn{3}{c}{\textbf{Total}} \\
-\cmidrule{3-5}  \cmidrule{7-9} \cmidrule{11-13}
-        & & Ess. & Boilerpl. & \Knot &  & Ess. & Terms & Contexts &   & Manual & \multicolumn{2}{c}{\Knot}      \\
-\midrule
- 1) & \stlc     & 44        & 39          & 42     &  & 43        & 0     & 23       &  & 149     & 83  & (55.7\%) \\
- 2) & \stlcprod & 85        & 67          & 82     &  & 117       & 0     & 47       &  & 316     & 198 & (62.7\%) \\
- 3) & \F        & 54        & 102         & 53     &  & 60        & 127   & 111      &  & 454     & 118 & (26.0\%) \\
- 4) & \fprod    & 91        & 149         & 93     &  & 140       & 138   & 158      &  & 676     & 269 & (39.8\%) \\
- 5) & \fseqlet  & 103       & 164         & 99     &  & 137       & 153   & 174      &  & 731     & 247 & (33.8\%) \\
- 6) & \fsub     & 70        & 124         & 69     &  & 268       & 128   & 178      &  & 768     & 289 & (37.6\%) \\
- 7) & \fsubprod & 114       & 163         & 112    &  & 402       & 139   & 243      &  & 1061    & 476 & (44.9\%) \\
- 8) & \fsubrcd  & 214       & 234         & 199    &  & 646       & 161   & 292      &  & 1547    & 831 & (53.7\%) \\
- 9) & \lomega   & 101       & 95          & 100    &  & 355       & 128   & 108      &  & 787     & 504 & (64.0\%) \\
-10) & \fomega   & 124       & 106         & 123    &  & 415       & 129   & 108      &  & 882     & 591 & (67.0\%) \\
-\bottomrule
-\end{tabular}
-\vspace{1mm}
-\caption{Size statistics of the meta-theory mechanizations.}
-\vspace{-6mm}
-\label{tbl:casestudy}
-\end{table*}
+%\section{Case Studies}\label{sec:casestudy}
 
-We compare manual against \Knot-based mechanization of type safety for 10
-textbook calculi: 1) the simply-typed lambda calculus, 2) the simply-typed
-lambda calculus with products, 3) \SystemF, 4) \SystemF with products, 5)
-\SystemF with sequential lets, 6) \SystemFsub as in the \POPLmark challenge 1A +
-2A, 7) \SystemFsub with binary products, 8) \SystemFsub with records as in the
-\POPLmark challenge 1B + 2B, 9) the simply-typed lambda calculus with
-type-operators, and 10) \SystemF with type-operators.
+This chapter evaluates the benefits of the \Knot approach for type-safety
+mechanizations with two complimentary evaluations. The first considers different
+mechanizations for the same language (the \POPLmark challenge) authored by
+different people with different degrees of automation or tool support. The
+second compares \Knot against manual mechanizations (written by the same author
+in a consistent and highly automated style) across different languages.
 
+%% First, we compare fully manual versus \Knot-based mechanizations of type-safety
+%% proofs for 10 lambda-calculi in Section \ref{sec:casestudymechanizations}.
+%% Second, Section \ref{sec:casestudypoplmark} compares \Knot's solution of the
+%% \POPLmark challenge against various existing ones.
 
-For each language, we have two \Coq formalizations: one developed without tool
-support and one that uses \Needle's generated code. Table
-\ref{tbl:casestudy} gives a detailed overview of the code sizes (LoC) of the
-different parts of the formalization for each language and the total and
-relative amount of boilerplate code.
-
-The \emph{Specification} column comprises the language specifications.  For the
-manual approach, it is split into an \emph{essential} part and a
-\emph{boilerplate} part.  The former comprises the abstract syntax declarations
-(including binding specifications), the evaluation rules, typing contexts and
-typing rules and is also captured (slightly more concisely) in the \Knot
-specification.  The latter consists of context lookups for the variable typing
-rule as well as shifting and substitution operators, that are necessary to
-define |β|-reduction and, if supported by the language, type application; all of
-this boilerplate is generated by \Needle and thus not counted towards the
-\Knot-based mechanization.
-
-The essential meta-theoretical \emph{Lemmas} for type-safety are weakening and
-substitution lemmas for the typing relations, typing and value inversion as well
-as progress and preservation and where applicable this includes:
-pattern-matching definedness, reflexivity and transitivity of subtyping and the
-Church-Rosser property for type reductions.
-
-We separate the binder boilerplate in these formalizations into
-two classes:
-\begin{enumerate}
-\item Term-related boilerplate consists of interaction lemmas discussed in
-  Section \ref{sec:lemmas} and other interaction lemmas between shifting,
-  weakening and the size of terms.
-%
-  This is absent form the mechanizations of \stlc and \stlcprod that do not
-  require them. In all other cases, \Needle derives the necessary lemmas. This
-  is about 140 lines of code for each language. The size depends mainly on the
-  number of namespaces, the number of syntactic sorts and the dependency
-  structure between them, which is roughly the same for these languages.
-
-\item The boilerplate context lemmas consist of weakening, strengthening and
-  substitution lemmas for term well-scopedness relations and for context
-  lookups.  The size depends on the number of namespaces that are handled by the
-  context. In the cases where only single-variable binding is used, we can skip
-  weakening and strengthening lemmas related to multi-binders.
-\end{enumerate}
-
-\paragraph{Summary}
-Table \ref{tbl:casestudy} clearly shows that \Knot provides substantial savings
-in each of the language formalizations, ranging up to ~74\% for \SystemF. Note
-that these formalizations of type safety use only a fraction of the lemmas
-generated by \Needle. For instance, none of the above formalization uses any
-of the interaction lemmas for terms that are generated.
-
-%% It is noteworthy that, unlike other solutions of the PoplMark
-%% challenge using de Bruijn indices, we have no lemmas that depend on
-%% the relative order of two indices and we never use commutation of
-%% addition. For the narrowing of \fsub and \fsubprod one lemma
-%% regarding the lookup of bounds uses a disequality between two
-%% indices.
-
-%% However the proof of weakening for \LF typing rules makes use of
-%% all commutation lemmas except for the ones featuring two
-%% substitutions. Moreover, we expect that the lemmas of typing
-%% preservation under substitutions will use all generated lemmas.
-
-%% Secondly, during the formalization the amount of arithmetic
-%% reasoning we had to perform was minimal.
+%% This sections demonstrates the benefits of the \Knot approach with two case
+%% studies. First, we compare fully manual versus \Knot-based mechanizations of
+%% type-safety proofs for 10 languages. Second, we compare \Knot's solution of the
+%% \POPLmark challenge against various existing ones.
 
 
 
-\subsection{Comparison of Approaches}\label{ssec:casestudypoplmark}
 
-Because it is the most widely implemented benchmark for mechanizing metatheory,
-we use parts 1A + 2A of the \POPLmark challenge to compare our work with that of
-others. These parts prove type-safety for \SystemFsub with algorithmic
-subtyping. As they involve only single-variable bindings, they are manageable
-for most existing approaches (though they do not particularly put \Knot's
-expressivity to the test). Figure \ref{fig:casestudypoplmark} compares 9
-different solutions:
-\vspace{-1mm}
-\begin{itemize}
-\item Chargu\'eraud's \cite{poplmark:chargueraud} developments use the
-  locally-nameless representation and come with proof automation for this
-  representation.
-\item Vouillon \cite{poplmark:vouillon} presents a self-contained de
-  Bruijn solution.
-\item Our manual version from Section
-  \ref{ssec:casestudymechanizations}.
-\item \textsc{GMeta} \cite{gmeta} is a datatype-generic library
-  supporting both de Bruijn indices and the locally-nameless representation.
-\item \textsc{LNGen} \cite{lngen} is a code-generator that produces Coq
-  code for the locally-nameless representation from an Ott specification.
-\item \textsc{Autosubst} \cite{autosubst} is a Coq tactic library for
-  de Bruijn indices.
-\item Our \Knot solution from Section
-  \ref{ssec:casestudymechanizations}.
-\end{itemize}
-
-The figure provides the size (in LoC) for each solution. The LoC counts,
-generated by \textit{coqwc}, are separated into \emph{proof} scripts and
-other \emph{spec}ification lines, except for the \textsc{Twelf} solution were we
-made the distinction manually. We excluded both library code and generated code.
-The \AutoSubst and \Knot formalizations are significantly smaller than the
-others due to the uniformity of weakening and substitution lemmas. \Knot's biggest
-savings compared to \AutoSubst come from
-the generation of well-scopedness relations and the automation of
-well-scopedness proof obligations. In summary, the \Knot solution is the
-smallest solutions we are aware of.
-
+\section{Comparison of Approaches}\label{sec:casestudypoplmark}
 
 \begin{figure*}[t]\centering
   \begin{tikzpicture}
     \begin{axis}[
-      width=\linewidth, height=4.1cm,
+      width=\linewidth, height=5.8cm,
       symbolic x coords={ %% Leroy
         Chargueraud,Vouillon,Manual,GMeta dB,
-        GMeta LN,LNGen,Twelf,AutoSubst,Knot
+        GMeta LN,LNGen,Twelf,AutoSubst,Knot*,Knot
       },
       nodes near coords,
       nodes near coords align={vertical},
@@ -201,11 +80,13 @@ smallest solutions we are aware of.
     %% (Leroy LN,1199)
       \addplot coordinates {
         (Chargueraud,523) (Vouillon,500) (Manual,509) (GMeta dB,297)
-        (GMeta LN,376) (LNGen,330) (Twelf,174) (AutoSubst,210) (Knot,168)
+        (GMeta LN,376) (LNGen,330) (Twelf,174) (AutoSubst,210) (Knot*,168)
+        (Knot,117)
       };
       \addplot coordinates {
         (Chargueraud,538) (Vouillon,614) (Manual,259) (GMeta dB,669)
-        (GMeta LN,513) (LNGen,432) (Twelf,402) (AutoSubst,225) (Knot,121)
+        (GMeta LN,513) (LNGen,432) (Twelf,402) (AutoSubst,225) (Knot*,121)
+        (Knot,75)
       };
       \addplot coordinates {
       };
@@ -240,14 +121,207 @@ smallest solutions we are aware of.
       \addplot coordinates {
         (Chargueraud,8.6) (Vouillon,5.3) (Manual,6.4) (GMeta dB,10.4)
         (GMeta LN,37) (LNGen,97) (Twelf,0.2) (AutoSubst,13.9) (Knot,8.4)
+        (Knot,0)
       };
     \end{axis}
 %endif
   \end{tikzpicture}
-\caption{Sizes (in LoC) of \POPLmark solutions}
-\vspace{-1mm}
-\label{fig:casestudypoplmark}
+  \caption{Sizes (in LoC) of \POPLmark solutions}
+  \label{fig:casestudypoplmark}
 \end{figure*}
+
+Because it is the most widely implemented benchmark for mechanizing metatheory,
+we use parts 1A + 2A of the \POPLmark challenge to compare our work with that of
+others. These parts prove type-safety for \SystemFsub with algorithmic
+subtyping. As they involve only single-variable bindings, they are manageable
+for most existing approaches. Figure \ref{fig:casestudypoplmark} compares 10
+different solutions:
+
+\begin{enumerate}
+\item[1.] Chargu\'eraud's \cite{poplmark:chargueraud} developments use the
+  locally-nameless representation and come with automation via proof tactics for
+  this representation.
+\item[2.] Vouillon \cite{poplmark:vouillon} presents a self-contained de Bruijn
+  solution. The solution only moderately uses automation and instead performs
+  proof steps explicitly for didactic purposes.
+\item[3.] Our own more compact manual mechanization (see
+  Section~\ref{sec:casestudymechanizations}) based on de Bruijn terms with more
+  automation than Vouillon's solution.
+\item[4--5.] Two solution based on the \textsc{GMeta}~\cite{gmeta}
+  datatype-generic library for de Bruijn and locally-nameless representations.
+\item[6.] A mechanization in \Coq using a locally-nameless representation
+  and boilerplate produced by the \textsc{LNGen} \cite{lngen} code generator
+  from an \Ott specification.
+\item[7.] A solution in the \textsc{Twelf} logical framework \cite{poplmark:cmu}.
+\item[8.] A solution using the \textsc{Autosubst} \cite{autosubst} \Coq library for
+  de Bruijn terms.
+\item[9.] A \Knot-based solution without generation of semantics-related boilerplate
+  \cite{knotneedle} (\Knot{}*).
+\item[10.] Our \Knot-based solution (\Knot) for both syntax and semantics.
+\end{enumerate}
+
+The figure shows the code size separated into \emph{proof} scripts and other
+\emph{spec}ification lines as generated by \textit{coqwc}, except for the
+\textsc{Twelf} solution were we made the distinction manually. We excluded both
+library code and generated code. The \AutoSubst and \Knot formalizations are
+significantly smaller than the others. \Knot's biggest savings compared to
+\AutoSubst come from the generic handling of well-scopedness predicates and
+semantic relations which are not supported by \AutoSubst. In comparison to the
+\Knot-based solution \cite{knotneedle} without support for relations, we save
+relatively more LoC in \emph{proofs} than in \emph{specifications}. In summary,
+the \Knot solution is the smallest solutions we are aware of.
+
+
+%-------------------------------------------------------------------------------
+\section{Manual vs. \Knot Mechanizations}\label{sec:casestudymechanizations}
+
+%if False
+(defun pct (part total) (/ (fround (/ (* 1000.0 part) total)) 10))
+(defun fc-eval-and-replace ()
+  "Replace the preceding sexp with its value."
+  (interactive)
+  (backward-kill-sexp)
+  (prin1 (eval (read (current-kill 0)))
+         (current-buffer)))
+(global-set-key (kbd "C-c e") 'fc-eval-and-replace)
+%endif
+\afterpage{
+  \clearpage
+  \begin{landscape}
+    \begin{table*}[t]
+      \centering
+      \setlength\tabcolsep{5pt}
+
+      \begin{tabular}{@@{}rlebnsebbnsmnn||rr@@{}}
+        \toprule
+            &
+            & \multicolumn{3}{c}{\textbf{Specification}} & \phantom{abc}
+            & \multicolumn{4}{c}{\textbf{Metatheory}}    & \phantom{abc}
+            & \multicolumn{5}{c}{\textbf{Total}} \\
+        \cmidrule{3-5}      \cmidrule{7-10} \cmidrule{12-16}
+            &              & Ess. & Bpl. & \Ndl &  & Ess. & Syn. & Sem. & \Ndl &  & Man. & \multicolumn{2}{n}{\Ndl} & \multicolumn{2}{r}{$\Delta\Needle$} \\
+        \midrule
+         1) & \stlc        & 41   & 39   & 36   &  & 23   & 22   & 23   & 19   &  & 148  & 55  & (37.2\%)           & 28  & (18.9\%) \\
+         2) & \stlcprod    & 82   & 67   & 75   &  & 32   & 61   & 72   & 75   &  & 314  & 150 & (47.8\%)           & 48  & (15.3\%) \\
+         3) & \F           & 51   & 102  & 46   &  & 185  & 79   & 30   & 30   &  & 447  & 76  & (17.0\%)           & 42  & (9.4\%)  \\
+         4) & \fprod       & 90   & 150  & 85   &  & 230  & 126  & 79   & 87   &  & 675  & 172 & (25.5\%)           & 97  & (14.4\%) \\
+         5) & \fexists     & 71   & 114  & 66   &  & 266  & 86   & 44   & 43   &  & 581  & 109 & (18.8\%)           & 79  & (13.6\%) \\
+         6) & \fexistsprod & 123  & 164  & 103  &  & 365  & 172  & 98   & 101  &  & 922  & 204 & (22.1\%)           & 106 & (11.5\%) \\
+         7) & \fseqlet     & 99   & 165  & 88   &  & 249  & 162  & 49   & 70   &  & 724  & 158 & (21.8\%)           & 89  & (12.3\%) \\
+         8) & \fsub        & 66   & 117  & 57   &  & 264  & 150  & 163  & 138  &  & 760  & 195 & (25.7\%)           & 94  & (12.4\%) \\
+         9) & \fsubprod    & 110  & 155  & 92   &  & 311  & 212  & 256  & 235  &  & 1044 & 327 & (31.3\%)           & 149 & (14.3\%) \\
+        10) & \lomega      & 97   & 88   & 75   &  & 202  & 141  & 251  & 268  &  & 779  & 343 & (44.0\%)           & 161 & (15.4\%) \\
+        11) & \fomega      & 120  & 98   & 92   &  & 204  & 141  & 311  & 330  &  & 874  & 422 & (48.3\%)           & 160 & (15.3\%) \\
+        \bottomrule
+      \end{tabular}
+      \caption{Size statistics of the meta-theory mechanizations.}
+      \label{tbl:casestudy}
+    \end{table*}
+  \end{landscape}
+  \clearpage
+}
+
+The previous comparison only considers the type-safety proof for a single
+language, and thus paints a rather one-sided picture of the savings to be had.
+For this reason, our second comparison considers the savings across 11
+languages. As their mechanizations are not readily available across different
+tools and systems, we here pit \Knot \& \Needle only against our own manual
+mechanizations. To yield representative results, all our manual mechanizations
+have been written by the same author in a consistent and highly automated
+style.\footnote{ E.g., compare our manual solution against Vouillon's in
+  Figure~\ref{fig:casestudypoplmark}: it is smaller due to more automation and
+  simpler definitions that are more amenable to proof search.}
+
+The 11 textbook calculi we consider are: 1) the simply typed lambda calculus
+$\stlc$, 2) \stlc extended with products, 3) \SystemF, 4) F with products, 5) F
+with existentials, 6) F with existentials and products, 7) F with sequential
+lets, 8) $\text{F}_{<:}$ as in the \POPLmark challenge 1A + 2A of
+Section~\ref{ssec:casestudypoplmark}, 9) $\text{F}_{<:}$ with products, 10)
+$\stlc$ with type-operators, and 11) F with type-operators.
+
+For each language, we have two \Coq formalizations: one developed without tool
+support and one that uses \Needle's generated code. Table \ref{tbl:casestudy}
+gives a detailed overview of the code sizes (LoC) of different parts of the
+formalizations and the total and relative amount of boilerplate. It also shows
+the $\Delta\Needle$ savings due to \Needle's new support for relations.
+
+
+The \emph{Specification} column comprises the language specifications.  For the
+manual approach, it is split into an \emph{essential} part
+\mycolorbox{light-gray}{(Ess.)} and a \emph{boilerplate} part
+\mycolorbox{light-gray}{(Bpl.)}.  The former comprises the abstract syntax
+declarations (including binding specifications), the evaluation rules, typing
+contexts and typing rules; this part is also expressed (slightly more concisely) in the
+\Knot specification \mycolorbox{dark-gray}{(\Ndl)}.  The boilerplate part
+consists of lookups for the variable rules and shifting and substitution
+functions, that are necessary to define $\beta$-reduction on terms and, where
+applicable, on types; this boilerplate is generated by \Needle and thus
+not counted towards the size of the \Knot-based mechanization.
+
+The \emph{Metatheory} column shows the effort to establish type-safety of the
+languages. The essential lemmas are canonical forms, typing inversion, progress
+and preservation and where applicable this also includes: pattern-matching
+definedness, reflexivity and transitivity of subtyping and the Church-Rosser
+property for type reductions.
+
+There are two classes of binder boilerplate in the metatheory:
+\begin{enumerate}
+\item Syntax-related boilerplate \mycolorbox{light-gray}{(Syn.)} that consists
+  of interaction lemmas, weakening and substitution lemmas for well-scopedness
+  predicates. The code size for these lemmas depends mainly on the number of
+  namespaces, the number of syntactic sorts and the dependency structure between
+  them, which is roughly the same for these languages. \Needle derives this
+  boilerplate completely automatically.
+
+\item The semantics-related boilerplate \mycolorbox{light-gray}{(Sem.)} are
+  well-scoping, shifting and substitution lemmas for user-defined semantic
+  relations. The size of these lemmas depends on the number of namespaces
+  and the size of the semantics relations.
+
+  We defined \lomega and \fomega using algorithmic type equality with
+  reflexivity only on type-variables, not on types. For the substitution lemmas
+  of these calculi, \Needle generates a proof obligation for the admissibility
+  of reflexivity of types. Similarly, \fsub and \fsubprod use algorithmic
+  subtyping and both, the type-variable reflexivity and type-variable
+  transitivity rule, give rise to a proof obligation. Furthermore, neither of
+  these two rules meets the restrictions of Section \ref{ssec:relationwf} for
+  variable rules, and thus deriving a variable rule yields another proof
+  obligation.
+\end{enumerate}
+
+The final column group contrasts the total sizes of the manual
+\mycolorbox{light-gray}{(Man.)} and \Knot based formalizations
+\mycolorbox{dark-gray}{(\Ndl)}. The last column $\Delta\Needle$ shows the
+difference between \Knot-based solutions with and without generation of
+semantics-related boilerplate.
+
+\paragraph{Summary}
+
+Table \ref{tbl:casestudy} clearly shows that \Needle provides substantial
+savings in each of the language formalizations. On average, {\Needle}-based
+solutions are 71\% smaller than the manual solutions
+$(100\%-\mycolorbox{dark-gray}{\Ndl} / \mycolorbox{light-gray}{Man.})$, the
+generation of semantics-related boilerplate saves $\sim$14\% of the manual
+approach $(\Delta\Needle / \mycolorbox{light-gray}{Man.})$ and $\sim$33\% of the
+\Needle-assisted approach $(\Delta\Needle / \mycolorbox{dark-gray}{\Ndl})$.
+
+
+%% It is noteworthy that, unlike other solutions of the PoplMark
+%% challenge using de Bruijn indices, we have no lemmas that depend on
+%% the relative order of two indices and we never use commutation of
+%% addition. For the narrowing of \fsub and \fsubprod one lemma
+%% regarding the lookup of bounds uses a disequality between two
+%% indices.
+
+%% However the proof of weakening for \LF typing rules makes use of
+%% all commutation lemmas except for the ones featuring two
+%% substitutions. Moreover, we expect that the lemmas of typing
+%% preservation under substitutions will use all generated lemmas.
+
+%% Secondly, during the formalization the amount of arithmetic
+%% reasoning we had to perform was minimal.
+
+
 
 
 %if False
@@ -287,253 +361,6 @@ proof obligations.
 %endif
 
 
-\section{Case Studies}\label{sec:casestudy}
-
-\begin{table*}[t]\centering
-\ra{1.3}
-\begin{tabular}{@@{}rlrrrcrrrcrrl||rr@@{}}
-\toprule&
-        & \multicolumn{3}{c}{\textbf{Specification}} & \phantom{abc}
-        & \multicolumn{3}{c}{\textbf{Metatheory}}        & \phantom{abc}
-        & \multicolumn{5}{c}{\textbf{Total}} \\
-\cmidrule{3-5}  \cmidrule{7-9} \cmidrule{11-15}
-    &           & Ess. & Boilerpl. & \Needle &  & Ess. & Syntax & Semantics &  & Manual & \multicolumn{2}{c}{\Needle} & \multicolumn{2}{c}{$\Delta$ \Needle} \\
-  \midrule
- 1) & \stlc     & 41   & 39        & 36      &  & 22   & 23     & 22        &  & 147    & 54   & (36.7\%)             & 29   & (19.7\%)      \\
- 2) & \stlcprod & 82   & 67        & 75      &  & 61   & 32     & 71        &  & 313    & 149  & (47.6\%)             & 49   & (15.7\%)      \\
- 3) & \F        & 51   & 102       & 46      &  & 29   & 185    & 79        &  & 446    & 75   & (16.8\%)             & 43   & (9.6\%)      \\
- 4) & \fexists  & 71   & 114       & 66      &  & 43   & 266    & 86        &  & 580    & 108  & (18.6\%)             & 80   & (13.8\%)      \\
- 5) & \fprod    & 90   & 150       & 85      &  & 68   & 230    & 136       &  & 674    & 171  & (25.4\%)             & 98   & (14.5\%)      \\
- 6) & \fseqlet  & 99   & 165       & 88      &  & 48   & 249    & 162       &  & 723    & 157  & (21.7\%)             & 90   & (12.4\%)      \\
- 7) & \fsub     & 66   & 117       & 57      &  & 160  & 264    & 150       &  & 757    & 193  & (25.5\%)             & 96   & (12.7\%)      \\
- 8) & \fsubprod & 110  & 155       & 92      &  & 243  & 311    & 222       &  & 1041   & 325  & (31.2\%)             & 151  & (14.5\%)      \\
- 9) & \lomega   & 97   & 88        & 75      &  & 249  & 202    & 141       &  & 777    & 341  & (43.9\%)             & 163  & (21.0\%)      \\
-10) & \fomega   & 120  & 98        & 92      &  & 309  & 204    & 141       &  & 872    & 420  & (48.2\%)             & 171  & (19.6\%)      \\
-\bottomrule
-\end{tabular}
-\vspace{1mm}
-\caption{Size statistics of the meta-theory mechanizations.}
-\vspace{-6mm}
-\label{tbl:casestudy}
-\end{table*}
-
-This section demonstrates the benefits of the \Knot approach with two case
-studies. First, we compare fully manual versus \Knot-based mechanizations of
-type-safety proofs for 10 languages. Second, we compare \Knot's solution of the
-\POPLmark challenge against various existing ones.
-
-%-------------------------------------------------------------------------------
-\subsection{Manual vs. \Needle Mechanizations}\label{ssec:casestudymechanizations}
-
-
-We compare manual against \Knot-based mechanization of type safety for 10
-textbook calculi: 1) the simply typed lambda calculus $\stlc$, 2) \stlc extended
-with products, 3) \SystemF, 4) \SystemF with existentials, 5) \SystemF with
-products, 6) \SystemF with sequential lets, 7) \SystemFsub as in the \POPLmark
-challenge 1A + 2A, 8) \SystemFsub with products, 9) $\stlc$ with type-operators,
-and 10) \SystemF with type-operators.
-
-For each language, we have two \Coq formalizations: one developed without tool
-support and one that uses \Needle's generated code. Table \ref{tbl:casestudy}
-gives a detailed overview of the code sizes (LoC) of different parts of the
-formalizations and the total and relative amount of boilerplate. It also shows
-the savings $\Delta$\Needle due to \Needle's new support for relations.
-
-The \emph{Specification} column comprises the language specifications.  For the
-manual approach, it is split into an \emph{essential} part and a
-\emph{boilerplate} part.  The former comprises the abstract syntax declarations
-(including binding specifications), the evaluation rules, typing contexts and
-typing rules and is also captured (slightly more concisely) in the \Knot
-specification.  The boilerplate part consists of lookups for the variable rules
-and shifting and substitution functions, that are necessary to define
-$\beta$-reduction on terms and, where applicable, on types; all of this
-boilerplate is generated by \Needle and thus not counted towards the \Knot-based
-mechanization.
-
-The \emph{Metatheory} column shows the effort to establish type-safety of the
-languages. The essential lemmas are canonical forms, typing inversion, progress
-and preservation and where applicable this also includes: pattern-matching
-definedness, reflexivity and transitivity of subtyping and the Church-Rosser
-property for type reductions.
-
-There are two classes of binder boilerplate in the metatheory: 1)
-Syntax-related boilerplate includes interaction lemmas between shifting and
-substitition as well as shifting and substitution lemmas for the well-scopedness
-predicates. These lemmas are already generated in earlier
-work~\cite{knotneedle}.
-%%  The size of this class depends on the number of namespaces that are handled by
-%%  the context. In the cases where only single-variable binding is used, we can
-%%  skip weakening and strengthening lemmas related to multi-binders. The
-%%  type-safety proofs for simply typed languages do not need to deal with any
-%%  interaction lemmas or well-scopedness and hence the boilerplate is only about
-%%  20 LoC for environment-related lemmas. In all other cases, this class is about
-%%  230 - 290 LoC.
-2) The semantics-related boilerplate are well-scoping, shifting and substitution
-lemmas for user-defined semantic relations. These lemmas are derived
-by our \Needle extensions, except for some proof obligations. We defined
-\lomega and \fomega using algorithmic type equality and the reflexivity on
-type-variables gives rise to a proof obligation. Similarly, \fsub and \fsubprod
-use algorithmic subtyping and both the type-variable reflexivity and
-type-variable transitivity rule give rise to a proof obligation. Furthermore,
-neither of these two rules meets the restrictions of Section
-\ref{ssec:relationwf} for variable rules. This yields another proof
-obligation.
-
-The case study of \cite{knotneedle} contains a solution to the \POPLmark
-challenge parts 1B and 2B which is to prove type-safety of \SystemFsub with
-records and record subtyping which we did not port. The reason is that our
-symbolic expression language is not rich enough to specify record subtyping in
-the way of \cite{knotneedle} which uses universal quantification over
-record labels and user-defined lookup functions width and depth subtyping of
-records. The weakening and substitution lemmas for subtyping also relies on
-boilerplate properties of the lookup function that are not covered by
-\Needle.
-% We leave addressing the boilerplate of user-defined functions and the
-% addition of type-constructors like dependent function spaces and lists as future
-% work.
-
-\paragraph{Summary}
-Table \ref{tbl:casestudy} clearly shows that the assisted \Knot approach
-provides substantial savings in each of the language formalizations. The
-generation of semantics-related boilerplate saves about 14\% of
-the manual approach and about 31\% of the assisted \Knot approach without
-derivation of semantics-related boilerplate.
-
-%if False
-(let
-   ((manual '(147 313 446 580 723 757 1041 777 872))
-    (esop '(83 198 118 188 269 247 289 476 504 591))
-    (popl '(54 149 75 135 171 153 192 317 331 416))
-    (delta '(29 49 43 53 98 94 97 159 173 175))
-   )
-   (list (savings popl esop) (savings popl manual) (- 1 (savings delta manual))))
-%endif
-
-
-\subsection{Comparison of Approaches}\label{ssec:casestudypoplmark}
-
-Because it is the most widely implemented benchmark for mechanizing metatheory,
-we use parts 1A + 2A of the \POPLmark challenge to compare our work with that of
-others. These parts prove type-safety for \SystemFsub with algorithmic
-subtyping. As they involve only single-variable bindings, they are manageable
-for most existing approaches. Figure \ref{fig:casestudypoplmark} compares 10
-different solutions:
-1) Chargu\'eraud's locally-nameless developments with proof automation~\cite{poplmark:chargueraud},
-2) Vouillon's self-contained de Bruijn solution~\cite{poplmark:vouillon},
-3) our manual version from Section~\ref{ssec:casestudymechanizations},
-4-5) a solution based on the \textsc{GMeta}~\cite{gmeta} datatype-generic library for
-     both de Bruijn and locally-nameless representations,
-6) the Coq code for the locally-nameless representation produced by the \textsc{LNGen} \cite{lngen} code-generator from an Ott specification,
-7) a solution in the \textsc{Twelf} logical framework,
-8) a solution using the \textsc{Autosubst} \cite{autosubst} Coq library for
-  de Bruijn terms,
-9) a \Knot-based solution without generation of semantics-related boilerplate
-  \cite{knotneedle} (Knot),
-10) our \Knot-solution from Section \ref{ssec:casestudymechanizations}
-  (Knot*).
-% \vspace{-1mm}
-% \begin{itemize}
-% \item Chargu\'eraud's \cite{poplmark:chargueraud} developments use the
-%   locally-nameless representation and come with proof automation.
-% \item Vouillon \cite{poplmark:vouillon} presents a self-contained de
-%   Bruijn solution.
-% \item Our manual version from Section
-%   \ref{ssec:casestudymechanizations}.
-% \item \textsc{GMeta} \cite{gmeta} is a datatype-generic library
-%   supporting both de Bruijn indices and the locally-nameless representation.
-% \item \textsc{LNGen} \cite{lngen} is a code-generator that produces Coq
-%   code for the locally-nameless representation from an Ott specification.
-% \item \textsc{Autosubst} \cite{autosubst} is a Coq tactic library for
-%   de Bruijn indices.
-% \item A \Knot-based solution without generation of semantics-related boilerplate
-%   \cite{knotneedle} (Knot).
-% \item Our \Knot-solution from Section \ref{ssec:casestudymechanizations}
-%   (Knot*).
-% \end{itemize}
-
-The figure shows the code size separated into \emph{proof} scripts and other
-\emph{spec}ification lines as generated by \textit{coqwc}, except for the
-\textsc{Twelf} solution were we made the distinction manually. We excluded
-both library code and generated code. The \AutoSubst and \Knot formalizations
-are significantly smaller than the others.  \Knot's biggest savings compared
-to \AutoSubst come from the generic handling of well-scopedness predicates and
-semantic relations which are not supported by \AutoSubst. In
-comparison to the previous \Knot-based solution \cite{knotneedle}, we save
-relatively more LoC in \emph{proofs} than in \emph{specifications}. In
-summary, the \Knot solution is the smallest solutions we are aware of.
-
-\begin{figure*}[t]\centering
-  \begin{tikzpicture}
-    \begin{axis}[
-      width=\linewidth, height=3.8cm,
-      symbolic x coords={ %% Leroy
-        Chargueraud,Vouillon,Manual,GMeta dB,
-        GMeta LN,LNGen,Twelf,AutoSubst,Knot,Knot*
-      },
-      nodes near coords,
-      nodes near coords align={vertical},
-      xtick=data,
-      x tick label style={rotate=25,anchor=east},
-      ybar,
-      bar width=0.43cm,
-      ylabel={Lines of code},
-      ylabel near ticks,
-      enlarge y limits={abs=0.4cm},
-    ]
-    %% (Leroy LN,655)
-    %% (Leroy LN,1199)
-      \addplot coordinates {
-        (Chargueraud,523) (Vouillon,500) (Manual,509) (GMeta dB,297)
-        (GMeta LN,376) (LNGen,330) (Twelf,174) (AutoSubst,210) (Knot,168)
-        (Knot*,117)
-      };
-      \addplot coordinates {
-        (Chargueraud,538) (Vouillon,614) (Manual,259) (GMeta dB,669)
-        (GMeta LN,513) (LNGen,432) (Twelf,402) (AutoSubst,225) (Knot,121)
-        (Knot*,75)
-      };
-      \addplot coordinates {
-      };
-      \legend{Spec,Proof,Time}
-    \end{axis}
-%if False
-    \begin{axis}[
-      width=\linewidth, height=5cm,
-      symbolic x coords={ %% Leroy
-        Chargueraud,Vouillon,Manual,GMeta dB,
-        GMeta LN,LNGen,Twelf,AutoSubst,Knot*
-      },
-      hide x axis,
-      nodes near coords rotate={45},
-      nodes near coords align={vertical},
-      xtick=data,
-      axis y line*=right,
-      %% enlarge y limits={abs=0.4cm}, %% Seems to be problematic.
-      ymin=0,
-      ymax=108,
-      ybar,
-      bar width=0.43cm,
-      ylabel={Checking time},
-      ylabel near ticks,
-    ]
-    %% (Leroy LN,655)
-    %% (Leroy LN,1199)
-      \addplot coordinates {
-      };
-      \addplot coordinates {
-      };
-      \addplot coordinates {
-        (Chargueraud,8.6) (Vouillon,5.3) (Manual,6.4) (GMeta dB,10.4)
-        (GMeta LN,37) (LNGen,97) (Twelf,0.2) (AutoSubst,13.9) (Knot,8.4)
-        (Knot,0)
-      };
-    \end{axis}
-%endif
-  \end{tikzpicture}
-\caption{Sizes (in LoC) of \POPLmark solutions}
-\vspace{-1mm}
-\label{fig:casestudypoplmark}
-\end{figure*}
 
 
 %%% Local Variables:

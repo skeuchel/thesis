@@ -1184,6 +1184,8 @@ develop the scope checking for them.
 %%  Belugas equational theory for (fist-class) substitutions.}
 
 
+
+
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "../Main"

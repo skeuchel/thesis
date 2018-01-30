@@ -394,22 +394,21 @@ the judgement $J$ below the line is the conclusion. Rule without any premises
 are also called \emph{axioms}. The conclusion will always involve the relation
 that is being defined.
 
-The single-step evaluation is defined using five rules. The two axioms
-\textsc{EIfTrue} and \textsc{EIfFalse} show how to reduce an
-\textbf{if}-expression in case the condition is either a \true or a \false
-value. The case of a condition that is not yet fully evaluated is handled by
-rule \textsc{EIf}. If the condition $e_c$ reduces to $e_c'$ in one step then we
-can conclude the one step reduction
+The single-step evaluation is defined using five rules that encode a
+\emph{call-by-name} evaluation strategy. The two axioms \textsc{EIfTrue} and
+\textsc{EIfFalse} show how to reduce an \textbf{if}-expression in case the
+condition is either a \true or a \false value. The case of a condition that is
+not yet fully evaluated is handled by rule \textsc{EIf}. If the condition $e_c$
+reduces to $e_c'$ in one step then we can conclude the one step reduction
 \[ \eval{\ite{e_c}{e_t}{e_e}}{\ite{e_c'}{e_t}{e_e}} \]
 
 The last two rules cover the evaluation of \textlambda-terms. The rule
 \textsc{EAppAbs} handles the case where the left-hand side of an application is
 a \textlambda-term $(\lambda x:\tau.e_1)$. The residual program is the the body
 $e_1$ of the function after substituting $e_2$ for $x$ which we write as $[x
-  \mapsto e_2]e_1$. The argument of the function does not have to be fully
-evaluated, i.e., the rules encode a \stevennote{MENTION
-  EARLIER}{\emph{call-by-name}} evaluation strategy. If the left-hand side is
-not yet a \textlambda-term, we evaluate it first similarly to \textsc{EIf}.
+  \mapsto e_2]e_1$. Due to the call-by-name evaluation, the argument of the
+function does not have to be fully evaluated. If the left-hand side is not yet a
+\textlambda-term, we evaluate it first similarly to \textsc{EIf}.
 
 Note that this definition does not cover all possible cases. In particular the
 case of a \textlambda-term in the condition of an \textbf{if}-expression
@@ -493,17 +492,16 @@ $e_c$ has type boolean and the \textbf{then} and \textbf{else} branches have the
 same type $\tau$. The rule then concludes that the entire \textbf{if}-expression
 also has type $\tau$.
 
-\stevennote{Is including TVar here confusing?}{The three remaining rules deal
-  with $\lambda$-abstractions.} The typing context $\Gamma$ is a list that
-associates term variables with types. In the case of a variable, rule
-\textsc{TVar} looks up the corresponding type in $\Gamma$. Rule \textsc{TAbs}
-checks the body of a $\lambda$-abstraction in the context $(\Gamma,y:\sigma)$
-which is the outside context $\Gamma$ extended with a pair for the
-$\lambda$-bound variable $y$. The type of the $\lambda$-abstraction is the
-function type $(\sigma \to \tau)$ between the argument type $\sigma$ and the
-type of the body $\tau$. Finally, rule \textsc{TApp} requires that the left
-expression of an application has a function type that is compatible with the
-argument.
+The three remaining rules deal with $\lambda$-abstractions. The typing context
+$\Gamma$ is a list that associates term variables with types. In the case of a
+$\lambda$-bound variable, rule \textsc{TVar} looks up the corresponding type in
+$\Gamma$. Rule \textsc{TAbs} checks the body of a $\lambda$-abstraction in the
+context $(\Gamma,y:\sigma)$ which is the outside context $\Gamma$ extended with
+a pair for the $\lambda$-bound variable $y$. The type of the
+$\lambda$-abstraction is the function type $(\sigma \to \tau)$ between the
+argument type $\sigma$ and the type of the body $\tau$. Finally, rule
+\textsc{TApp} requires that the left expression of an application has a function
+type that is compatible with the argument.
 
 
 \paragraph{Example}
@@ -517,8 +515,9 @@ $\bool\to\bool$. Giving the above typing relations, we can repeatedly apply the
 rules to get a typing derivation for this. At each step only one possible rule
 applies. We can arrange the rule applications in a so called \emph{derivation
   tree} that illustrates the whole derivation. Using the abbreviation $\Gamma'
-:= \Gamma, y:\bool$, we have the \stevennote{Try fitting the rule
-  names}{following tree}:
+:= \Gamma, y:\bool$, we have the following tree:
+
+%%\stevennote{Try fitting the rule names}{following tree}:
 
 \[
   \inferrule*
@@ -991,14 +990,13 @@ reuse: by implementing substitution \emph{once} generically and specializing
 this generic implementation to any given concrete language.
 
 While other kinds of \emph{generic functionality} are commonly found in
-programming language meta-theory, e.g. term equality or \stevennote{Cite TAPL
-  and/or some generic rewriting paper}{(first-order) unification}, the generic
-functionality considered in this thesis is substitution. Substitution is
-interesting functionality for reuse because the need for substitutions arises in
-nearly all meta-theory proofs for languages with variable binding. Furthermore,
-many theorems need a large amount of lemmas about substitutions. Discharging
-them automatically, e.g. through reusable generic implementations, can save a
-lot of development effort.
+programming language meta-theory, e.g. term equality or (first-order)
+unification \cite{vannoort2010lightweight}, the generic functionality considered
+in this thesis is substitution. Substitution is interesting functionality for
+reuse because the need for substitutions arises in nearly all meta-theory proofs
+for languages with variable binding. Furthermore, many theorems need a large
+amount of lemmas about substitutions. Discharging them automatically, e.g.
+through reusable generic implementations, can save a lot of development effort.
 
 \section{Overview}
 

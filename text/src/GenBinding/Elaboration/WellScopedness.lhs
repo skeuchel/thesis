@@ -27,15 +27,18 @@
 \section{Well-Scopedness}\label{sec:elab:wellscopedness}
 
 { % FEXISTSPROD SCOPE
-
 \input{src/MacrosFExists}
 
-For user-defined relations with environments we want to generically establish
-that a proof of a judgement implies well-scopedness of the sort terms of the
-judgement. For example for the formalized typing relation
-$\typing{\Gamma}{e}{\tau}$ of \fexistsprod{} from the Overview Section
-\ref{sec:formalization} we want to prove the following two well-scopedness
-lemmas
+In this section, we develop a proof elaboration of well-scopedness lemmas
+for user defined relations. Similar to the previous section, we begin
+by giving a semi-formal overview of the proof steps before developing
+a formal elaboration.
+
+The well-scopedness lemmas state that indices of relations with environments are
+well-scoped in the domain of the environment. For example for the formalized
+typing relation $\typing{\Gamma}{e}{\tau}$ of \fexistsprod{} from the Overview
+Section \ref{sec:formalization} we want to prove the following two
+well-scopedness lemmas
 \[
   \inferrule*[]
      { \wellscoped{}{E} \\
@@ -73,15 +76,13 @@ rule for universal quantification we can conclude that $T$ is well-scoped.
 
 } % FEXISTSPROD SCOPE
 
-In the remainder of this section, we develop a formal elaboration of symbolic
-expressions into proofs of the inductive steps of well-scopedness lemmas. Like
-in the previous section, we first describe the target domain-specific witness
-language and then the elaboration functions.
-
-
+The next two sections develop the formal elaboration of the inductive steps.
+Section \ref{ssec:elab:wellscoped:witnesses} presents the domain-specific
+witness language and Section \ref{ssec:elab:wellscoped:elabfuncs} presents
+the elaboration function from symbolic expressions to witnesses.
 
 %-------------------------------------------------------------------------------
-\subsection{Witnesses of Well-Scoping}
+\subsection{Witnesses of Well-Scoping}\label{ssec:elab:wellscoped:witnesses}
 
 %format ws1
 %format ws2
@@ -262,7 +263,7 @@ for well-scoping, we can establish soundness of the interpretation
 
 %-------------------------------------------------------------------------------
 
-\subsection{Proof Elaboration}
+\subsection{Proof Elaboration}\label{ssec:elab:wellscoped:elabfuncs}
 
 We can split the proof of the induction steps of the lemma into two stages.
 First, we establish well-scopedness of terms represented by sort and global

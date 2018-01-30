@@ -4,71 +4,60 @@
 %include forall.fmt
 
 
-\section{Shifting and Substitution}\label{sec:elab:shifting}
+\section{Shifting and Substitution}\label{sec:elab:shiftsubst}
 
-\begin{itemize}
-\item Finally, we provide generic lemmas for shifting and substitution of relations.
+The last semantic boilerplate lemmas that we consider in this chapter are
+shifting and substitution lemmas of user-defined relations. For formal proofs we
+can apply the methodology of this chapter: elaboration into a sound witness
+language. The witness language in this case also observe term equalities similar
+to Section \ref{sec:elab:interaction}. We do not present the final elaboration
+but only present all the necessary ingredients to develop it. We first discuss
+shifting lemmas in Section \ref{ssec:elab:shifting} and then substitution lemmas
+in Section \ref{ssec:elab:substitution}.
 
-\item As outlined in Section \ref{sec:knotdesign} these operations keep the
-  functorial structure of a derivation tree intact and substitution is
-  implemented by splicing derivations into variable positions. However, in the
-  inductive steps we still need to use interaction lemmas to massage the indices
-  into the expected shape of the corresponding rule. \stevennote{TODO}{Make sure
-    this is properly described in Section \ref{sec:knotdesign}}
+\subsection{Shifting}\label{ssec:elab:shifting}
+\newcommand{\shift}[3]{{\text{shift}_{#1}~{#2}~{#3}}}
 
-\item Hence, we deal with equality of different evaluations of expressions, and
-  our witness language again observes term equalities, albeit more expressive
-  equalities than the witness language for the interaction lemmas.
-\end{itemize}
+As in the previous sections, we first discuss the necessary proof steps
+semi-formally and subsequently sketch the formal proof elaboration for shifting
+lemmas.
 
-\paragraph{Shifting}
-As in the
-previous section, we first present the generic form, then discuss the necessary
-reasoning in the inductive steps and briefly address proof term
-elaboration. Shifting introduces a new binding in the environment of a relation
-and adapts the relation indices by term-level shifting. In its most generic form
-the insertion happens between two parts $u_1$ and $u_2$
-of the environment:
-$$
-\inferrule*[]
-  {(K : \alpha \cto \ov{T}) \in E \\
-   u_1 + u_2 \models_R \ov{u} \\
-   \ov{\domain{u_1} \vdash_T v} \\
-   c := \domain{u_2} \\
-  }
-  {K~u_1~\ov{v} + \sh{\alpha}{0}{u_2} \models_R \ov{\sh{\alpha}{c}{u}}
-  }
-$$
+Shifting introduces a new binding in the environment of a relation and adapts
+the relation indices by term-level shifting. In its most generic form the
+insertion happens between two parts $u_1$ and $u_2$ of the environment. In this
+case, term-level shifting is done using the domain of $u_2$ as cut-off. The
+proof proceeds by induction on the derivation of a relation. For the inductive
+step of each rule, be it a variable rule or a regular rule, we want to apply the
+same rule again. This may require massaging the proof goal with commutation
+lemmas of shifting and substitution, i.e. we have to push the global shifting
+into local weakenings and local substitutions to recreate the symbolic structure
+of the rule.
 
-In this case, term-level shifting is done using the domain of $u_2$ as cutoff.
-The proof proceeds by induction on the derivation of
-$u_1 + u_2 \models_R \ov{u}$. For the inductive step of each of the rules we
-want to apply the same rule again which may require massaging the proof goal
-with commutation lemmas of shifting and substitution. More specifically, for a
-rule with conclusion $R~\ov{\symbolicterm}$ and values $\vartheta$ the goal is
-to show
-$$K~u_1~\ov{v} + \sh{\alpha}{0}{u_2} \models_R \ov{\sh{\alpha}{c}{\evalsym{\epsilon}{\symbolicterm}{\vartheta}}}$$
+More specifically, for a rule with conclusion $R~\ov{\symbolicterm}$ and values
+$\vartheta$ the goal of the induction step is to show
+\[ R~\ov{\shift{\alpha}{c}{\evalsym{\epsilon}{\symbolicterm}{\vartheta}}}.
+\]
 
-To use rule $r$ again, we need to match the same symbolic
-structure $\ov{\symbolicterm}$, i.e. we have to find $\vartheta'$ such that the
-following holds
+To use rule $r$ again, we need to match the same symbolic structure
+$\ov{\symbolicterm}$, i.e. we have to find $\vartheta'$ such that the following
+holds
 \begin{equation}\label{eq:shifteval}
-\ov{sh~c~\evalsym{\epsilon}{\symbolicterm}{\vartheta}} =
+\ov{\shift{\alpha}{c}{\evalsym{\epsilon}{\symbolicterm}{\vartheta}}} =
 \ov{\evalsym{\epsilon}{\symbolicterm}{\vartheta'}}.
 \end{equation}
 
 \noindent This is just
-$\vartheta' = \ov{(r \mapsto sh~c~(\vartheta~r))},\ov{(t \mapsto
-  sh~(c+\evalbs{\bindspec_t}{\vartheta})~(\vartheta~t))}$
+$\vartheta' = \ov{(r \mapsto \shift{\alpha}{c}{(\vartheta~r)})},\ov{(t \mapsto
+  \shift{\alpha}{(c+\evalbs{\bindspec_t}{\vartheta})}{(\vartheta~t)})}$
 \noindent or in other words: shifting commutes with symbolic evaluation.
 
-Similar to Section \ref{sec:wellscopedness} we can give a syntax-directed
-elaboration of symbolic expressions to equality proof terms that witness
-equality (\ref{eq:shifteval}). After using rule $r$ we are still left with it's
-premises as proof goals. In case of a judgement, we need to apply equality
-(\ref{eq:shifteval}) in the opposite direction. The shifting lemma for environment
-lookups has already been generically established in \cite{knotneedle}.
-
+Similar to Section \ref{sec:elab:wellscopedness}, we can give a formal
+syntax-directed elaboration for equation (\ref{eq:shifteval}) from symbolic
+expressions into a domain-specific witness language of term equalities. This is
+an extension of the language of Section \ref{sec:elab:interaction} that
+additionally has primitives for the commutation lemmas. After using rule $r$ we
+are still left with it's premises as proof goals. In case of a judgement, we
+need to apply equality (\ref{eq:shifteval}) in the opposite direction.
 
 %% This has a lot of similarity to equivariance proofs of functions in nominal
 %% representations that commute function evaluation with permutations $\pi$ on

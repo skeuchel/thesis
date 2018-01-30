@@ -158,7 +158,7 @@ generic proofs:
 \begin{enumerate}
 %% \item A (syntax-directed) elaboration into a witness language that we designed
 %%   for the given class of lemmas.
-\item A formal semantics of the witness langauge.
+\item A formal semantics of the witness language.
 \item The correctness of the elaboration, i.e. the produced witness indeed
   encodes a proof of the desired lemma w.r.t. the chosen semantics.
 \item A soundness proof of the semantics of the witness language, e.g. the
@@ -214,23 +214,6 @@ verification of the correctness of the elaboration.
 Finally, Section \ref{sec:elab:impl:generic} discusses the generic library
 implementation \Loom of \Knot in \Coq, and Section \ref{sec:elab:impl:codegen}
 covers the implementation of our code generator \Needle.
-
-
-%% \stevennote{MOVE}{To further reduce the hand-written boilerplate, we have set up
-%%   the \Knot specification language in such a way that it provides all the
-%%   necessary information to generically state and prove a wide range of these
-%%   properties.}
-
-%% \footnote{In fact, we provide more such lemmas than any other framework based on
-%%   first-order representations -- see Section~\ref{sec:related}.}
-
-%% \stevennote{MOVE}{Below we discuss different kinds of ubiquitous lemmas that
-%%   \Needle covers; Appendix~\ref{app:lemmas} provides more detail.}
-
-%% \stevennote{MOVE}{It is quite challenging to tackle these boilerplate lemmas
-%%   generically because their exact statements, and in particular which premises
-%%   are needed, depend highly on the dependencies between sorts and of the
-%%   associated data in environments.}
 
 \input{src/GenBinding/Elaboration/Interaction} \clearpage
 \input{src/GenBinding/Elaboration/WellScopedness}

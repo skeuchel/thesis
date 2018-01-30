@@ -160,12 +160,12 @@ type variable |X| and the term variable |x| into scope.
   pattern, similar to the $\bindp{\cdot}$ function in Figure
   \ref{fig:systemfexists:textbook:freevariables}. The function declaration for
   |bind| in Figure \ref{fig:knot:fexistsprodsyntax} consists of a signature and
-  a body.  The signature specifies that patterns bind variables of namespace
-  |Tmv|, and the body defines |bind| by means of an exhaustive one-level pattern
-  match. Functions can be used in binding specifications. The term constructor
-  |case| for nested pattern matching uses |bind| to specify that the variables
-  bound by the pattern |p| are simultaneously brought into scope in the body
-  |t2|.
+  a body. The signature specifies that patterns bind variables of namespace
+  |Tmv|, and the body defines |bind| by means of an \emph{exhaustive one-level
+    pattern} match. Functions can be used in binding specifications. The term
+  constructor |case| for nested pattern matching uses |bind| to specify that the
+  variables bound by the pattern |p| are simultaneously brought into scope in
+  the body |t2|.
 
   The constructor |ppair| also uses |bind| in a binding specification of the
   right component, even though patterns themselves do not contain terms or term

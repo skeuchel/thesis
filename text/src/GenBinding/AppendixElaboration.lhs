@@ -7,6 +7,9 @@
 
 \subsection{Well-scoping proof terms}
 
+%format ws1
+%format ws2
+
 \begin{figure}[t]
 \begin{center}
 \fbox{\small
@@ -17,7 +20,7 @@
                  {(g:\alpha) \in H}
                  {\wnindex
                     {H}{h_0}
-                    {\textsc{WN}_H~g}
+                    {|hyp g α|}
                     {h_0}
                     {\vartheta}{\vartheta~g}{\alpha}
                  } \\\\
@@ -25,33 +28,38 @@
                  {\,}
                  {\wnindex
                     {H}{h_0}
-                    {\textsc{WN}_0~\alpha~\bindspec}
+                    {|zero α bs|}
                     {S_\alpha(h_0 + \evalbs{bs}{\vartheta})}
                     {\vartheta}{0}{\alpha}
                  } \\\\
-     \inferrule*[right=\textsc{WnWeak}]
+     \inferrule*[right=\textsc{WnWeaken}]
                  {\wnindex{H}{h_0}{wn}{h}{\vartheta}{n}{\alpha}
                  }
                  {\wnindex
                     {H}{h_0}
-                    {\textsc{WN}_W~wn~bs}{h + \evalbs{bs}{\vartheta}}{\vartheta}
+                    {|weaken wn bs|}
+                    {h + \evalbs{bs}{\vartheta}}{\vartheta}
                     {\text{wk}_\alpha~n~\evalbs{bs}{\vartheta}}
                     {\alpha}
                  } \\\\
-     \inferrule*[right=\textsc{WnStr}]
+     \inferrule*[right=\textsc{WnStrengthen}]
                  {\wnindex
                     {H}{h_0}
                     {wn}{h + \evalbs{bs}{\vartheta}}
                     {\vartheta}{\text{wk}_\alpha~n~\evalbs{bs}{\vartheta}}
                     {\alpha}
                  }
-                 {\wnindex{H}{h_0}{\textsc{WN}_S~wn~bs}{h}{\vartheta}{n}{\alpha}
+                 {\wnindex{H}{h_0}
+                   {|strengthen wn bs|}
+                   {h}{\vartheta}{n}{\alpha}
                  } \\\\
      \inferrule*[right=\textsc{WnInvVar}]
                  {K : \alpha \rightarrow S \\\\
                   \wsterm{H}{h_0}{ws}{h}{\vartheta}{K~n}{S}
                  }
-                 {\wnindex{H}{h_0}{\textsc{WN}_I~K~ws}{h}{\vartheta}{n}{\alpha}}
+                 {\wnindex{H}{h_0}
+                   {|varinv K ws|}
+                   {h}{\vartheta}{n}{\alpha}}
      \end{array}
   \]
 
@@ -61,7 +69,7 @@
                  {([\bindspec]\symbolicterm : S) \in H}
                  {\wsterm
                     {H}{h_0}
-                    {\textsc{WS}_H~\bindspec~\symbolicterm~S}
+                    {|hyp bs sym|}
                     {h_0 + \evalbs{\bindspec}{\vartheta}}
                     {\vartheta}{|evalsym bs sym ϑ|}{S}
                  } \\\\
@@ -69,42 +77,42 @@
        {K : \alpha \rightarrow S \\\\
         \wnindex{H}{h_0}{wn}{h}{\vartheta}{n}{\alpha}
        }
-       {\wsterm{H}{h_0}{\textsc{WS}_V~K~wn}{h}{\vartheta}{K~n}{S}} \\\\
+       {\wsterm{H}{h_0}{|var K wn|}{h}{\vartheta}{K~n}{S}} \\\\
 
      \inferrule*[right=\textsc{WsReg}]
        {K : \ov{b : \alpha} \to \ov{[bs] t : T} \to S \\\\
         \vartheta' = \ov{t \mapsto u} \\\\
         \wsterm
            {H}{h_0}
-           {\textsc{WS}_i}
+           {ws_i}
            {h + \evalbs{\bindspec_i}{\vartheta'}}
            {\vartheta}{u_i}{T_i}  \quad (\forall i)
        }
-       {\wsterm{H}{h_0}{\textsc{WS}_K~K~\ov{ws}}{h}{\vartheta}{K~\ov{u}}{S}} \\\\
+       {\wsterm{H}{h_0}{|reg K (overline ws)|}{h}{\vartheta}{K~\ov{u}}{S}} \\\\
 
-     \inferrule*[right=\textsc{WsInvReg}]
+     \inferrule*[right=\textsc{WsRegInv}]
        {K : \ov{b : \alpha} \to \ov{[bs] t : T} \to S \\\\
         \vartheta' = \ov{t \mapsto u} \\\\
         \wsterm{H}{h_0}{ws}{h}{\vartheta}{K~\ov{u}}{S}}
        {\wsterm
            {H}{h_0}
-           {\textsc{WS}_I~K~i~ws}
+           {|reginv K n ws|}
            {h + \evalbs{\bindspec_i}{\vartheta'}}
            {\vartheta}{u_i}{T_i}
        } \\\\
 
-     \inferrule*[right=\textsc{WsWeak}]
+     \inferrule*[right=\textsc{WsWeaken}]
        {\wsterm{H}{h_0}{ws}{h}{\vartheta}{u}{S}}
        {\wsterm
           {H}{h_0}
-          {\textsc{WS}_W~ws~bs}
+          {|weaken ws bs|}
           {h + \evalbs{\bindspec}{\vartheta}}
           {\vartheta}
           {\text{wk}~u~\evalbs{\bindspec}{\vartheta}}
           {S}
        } \\\\
 
-     \inferrule*[right=\textsc{WsStr}]
+     \inferrule*[right=\textsc{WsStrengthen}]
        {\wsterm
           {H}{h_0}
           {ws}
@@ -113,15 +121,15 @@
           {\text{wk}~u~\evalbs{\bindspec}{\vartheta}}
           {S}
        }
-       {\wsterm{H}{h_0}{\textsc{WS}_T~ws~\bindspec}{h}{\vartheta}{u}{S}
+       {\wsterm{H}{h_0}{|strengthen ws bs|}{h}{\vartheta}{u}{S}
        } \\\\
 
      \inferrule*[right=\textsc{WsSubst}]
-       {\wsterm{H}{h_0}{ws1}{h}{\vartheta}{u1}{S1} \\\\
-        \wsterm{H}{h_0}{ws2}{S_\alpha~h}{\vartheta}{u2}{S2}
+       {\wsterm{H}{h_0}{ws_1}{h}{\vartheta}{u1}{S1} \\\\
+        \wsterm{H}{h_0}{ws_2}{S_\alpha~h}{\vartheta}{u2}{S2}
        }
        {\wsterm
-           {H}{h_0}{\textsc{WS}_S~ws1~ws2}{h}{\vartheta}
+           {H}{h_0}{|subst ws1 ws2|}{h}{\vartheta}
            {\text{su}_\alpha~0~u1~u2}{S2}
        } \\\\
      \end{array}

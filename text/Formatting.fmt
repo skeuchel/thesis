@@ -261,7 +261,7 @@
 
 %format (bindspec (bs) (s)) = "[" bs "]" s
 %format dom      = "\dom"
-
+%format domain   = dom
 %% %format (evalsym bs sym th) = "{\evalsym{" bs "}{" sym "}{" th "}}"
 %% %format (evalrbs (rbs) l e th) = "{\evalrbs{" rbs "}{" l "}{" e "}{" th "}}"
 %format LENV = "\LENV"
@@ -287,8 +287,8 @@
 %format eqh1
 %format eqh2
 %format eqh3
-%format evalBindspecShiftα = evalBindspecShift "_\alpha"
-%format evalBindspecShiftβ = evalBindspecShift "_\beta"
+%format evalBindspecShiftα = stable "_{{" shift "}_\alpha}"
+%format evalBindspecShiftβ = stable "_{{" shift "}_\beta}"
 
 %format congshiftα = "{{" cong "}_{{" shift "}_{\alpha}}}"
 %format congshiftβ = "{{" cong "}_{{" shift "}_{\beta}}}"

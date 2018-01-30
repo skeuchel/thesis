@@ -844,19 +844,10 @@ $h \vdash E$.
 
 \subsection{Substitutions}
 
-\newcommand{\shtm}{{\text{shift}_{\text{tm}}}}
-\newcommand{\sutm}{{\text{subst}_{\text{tm}}}}
-\newcommand{\shty}{{\text{shift}_{\text{ty}}}}
-\newcommand{\suty}{{\text{subst}_{\text{ty}}}}
-\newcommand{\SH}{{\text{shift}_{*}}}
-\newcommand{\SU}{{\text{subst}_{*}}}
-
 %format shtm = "\shtm"
 %format sutm = "\sutm"
 %format shty = "\shty"
 %format suty = "\suty"
-%format sh   = "\SH"
-%format su   = "\SU"
 
 The operational semantics and typing relations of \fexistsprod require
 boilerplate definitions for the de Bruijn representation: substitution of type
@@ -941,9 +932,9 @@ context changes
 \]
 
 Only indices for variables in $\Gamma$ need to be adapted. For this purpose the
-shifting functions take a \emph{cutoff} parameter that represents the domain of
-$\Delta$. Only indices ``above'' the cutoff are adapted. We overload the name of
-type variable shifting and hence use the following four shift functions:
+shifting functions take a \emph{cut-off} parameter that represents the domain of
+$\Delta$. Only indices ``above'' the cut-off are adapted. We overload the name
+of type variable shifting and hence use the following four shift functions:
 \[
 \begin{array}{c@@{\hspace{1cm}}c}
   |box (shtm : h → t → t)|  &  |box (shty : h → E → E)| \\
@@ -963,8 +954,8 @@ inserts the successor constructor \emph{at the right place}. This follows the
 inductive structure of |Δ| which facilitates inductive proofs on |Δ|.
 
 The shiftings can be iterated to get weakenings of multiple variables at once.
-We will only use this form of weakening for adding variables at the end of the
-context. We will call this form of weakening \emph{lifting}.
+In the essential meta-theoretic lemmas we will only use this form of weakening
+and will call it \emph{lifting}, i.e. we can define functions
 
 \[ |lift : t → h → t| \quad |lift : T → h → T| \quad |lift : E → h → E| \\
 \]
@@ -1226,7 +1217,7 @@ there are two kinds: syntactic related boilerplate and semantic related
 boilerplate.
 
 
-\paragraph{Syntactic boilerplate}
+\subsubsection{Syntactic Boilerplate}\label{sssec:gen:formalization:syntacticboilerplate}
 
 The principle syntactic operations that we use in the development are
 
@@ -1250,7 +1241,7 @@ interaction lemma. The interaction lemmas are all small but come in large
 numbers.
 
 
-\paragraph{Semantic boilerplate}
+\subsubsection{Semantic Boilerplate}\label{sssec:gen:formalization:semanticboilerplate}
 
 The semantic boilerplate concerns the semantic relations. Only lemmas about
 the typing relation are needed. These are the two well-scoping lemmas we
@@ -1258,7 +1249,7 @@ discussed in Section \ref{sec:gen:overview:formalization:semantics}
 
 \[ \begin{array}{c}
      \inferrule*[]
-     { \wellscoped{0}{E} \\
+     { \wellscoped{}{E} \\
      \typing{E}{t}{T}
      }
      { \wellscopedterm{E}{t}

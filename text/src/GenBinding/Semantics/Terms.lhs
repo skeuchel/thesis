@@ -173,11 +173,9 @@ correct tag. In the interesting case of a function call $(f~t_i)$, the
 evaluation pattern matches on the corresponding subterm $(\vartheta~t_i)$ and
 interprets the right-hand side of the appropriate function clause with respect
 to the new subterms. Note that we have ruled out function definitions for
-variable constructors. Thus, we do not need to handle that case
-here. \stevennote{Check if this is still mentioned in the previous chapter. Or
-  if it was moved to the appendix.}{The evaluation is well-defined since
-  function declarations are required to be exhaustive} and we only evaluate
-functions on well-sorted terms.
+variable constructors. Thus, we do not need to handle that case here. The
+evaluation is well-defined since function declarations are required to be
+exhaustive and we only evaluate functions on well-sorted terms.
 
 %% The $\hvl$s are term counterparts of environments from which the associated
 %% information has been dropped. The function $|domain|$ in Figure \ref{fig:eval}

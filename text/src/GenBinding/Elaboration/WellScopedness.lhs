@@ -24,221 +24,205 @@
 %format  wsV   =   "\text{ws}_V"
 %format  wsW   =   "\text{ws}_W"
 
-\section{Well-scopedness}\label{sec:elab:wellscopedness}
+\section{Well-Scopedness}\label{sec:elab:wellscopedness}
 
-\begin{itemize}
-\item
+{ % FEXISTSPROD SCOPE
+
+\input{src/MacrosFExists}
+
 For user-defined relations with environments we want to generically establish
 that a proof of a judgement implies well-scopedness of the sort terms of the
-judgement. For example for the typing relation $\Gamma \vdash e : \tau$ from
-Section \ref{sec:overview} we want to prove
-$$
+judgement. For example for the formalized typing relation
+$\typing{\Gamma}{e}{\tau}$ of \fexistsprod{} from the Overview Section
+\ref{sec:formalization} we want to prove the following two well-scopedness
+lemmas
+\[
   \inferrule*[]
-    {\Gamma \vdash e : \tau
-    }
-    {\domain{\Gamma} \vdash e \wedge \domain{\Gamma} \vdash \tau
-    }
-$$
-
-\item This boils down to proving that the
-  expressions in the conclusion of a rule are well-scoped assuming that the
-  expressions in the premises are well-scoped. The witness language for this
-  class of lemmas is therefore developed around well-scopedness for expressions.
-\end{itemize}
-
-A proof of well-scopedness follows by induction on the derivation of the premise
-and is accomplished in two steps. First, we establish well-scopedness of the
-sort and global meta-variables of the conclusion, potentially by using inversion
-lemmas on the induction hypotheses. For example for an application rule
-$$
-\inferrule*[]
- {\Gamma \vdash e_1 : \tau_1 \to \tau_2 \\
-  \Gamma \vdash e_2 : \tau_1
- }
- {\Gamma \vdash e_1~e_2 : \tau_2
- }
-$$
-
-we get $(\domain{\Gamma} \vdash e_1)$ and $(\domain{\Gamma} \vdash e_2)$ from
-the induction hypotheses, but we still need to invert the hypothesis
-$(\domain{\Gamma} \vdash \tau_1 \to \tau_2)$ from the first premise to get
-$(\domain{\Gamma} \vdash \tau_2)$.
-
-In some cases, it is impossible to establish well-scopedness from the premises,
-e.g. because a meta-variable is not used in the premises or only
-appears in non-invertible positions. Then we have to add an extra well-formedness
-premises to the judgements.
-
-Second, we use the rules of the well-scopedness relations and derived rules to
-establish well-scopedness of the terms in the conclusion, e.g.
-$(\domain{\Gamma} \vdash e_1~e_2)$ and $(\domain{\Gamma} \vdash \tau_2)$ for the
-application rule. In short, this step amounts to using the fact that
-evaluation of well-scoped symbolic expression in a well-scoped context yields
-well-scoped terms.
-
-This section wants to establish such well-scopedness lemmas for \Knot's
-relational specification generically. These take the form
-$$
+     { \wellscoped{}{E} \\
+     \typing{E}{t}{T}
+     }
+     { \wellscopedterm{E}{t}
+     } \qquad
   \inferrule*[]
-  { 0 \vdash u_E : E \\
-    \judgsimpl{u_E}{R}{\ov{v}} \\
-    (R : E \times \ov{T}) \in \RENV \\
-  }
-  {\ov{\domain{u_E} \vdash v : T}
-  }.
-$$
+     { \wellscoped{}{E} \\
+     \typing{E}{t}{T}
+     }
+     { \kinding{E}{T}
+     }
+\]
 
-The interesting reasoning happens during the inductive steps, which we
-formalize in two stages: First, we elaborate symbolic expressions and one-hole
-contexts to a DSL of proof terms for well-scopedness.  Second, we interpret
-these proof terms as an axiomatic well-scopedness judgement which we prove
-sound with the semantic judgements $(h \vdash_\alpha n)$ and $(h \vdash_S u)$
-from Section \ref{sec:terms}.
+Both lemmas are proved by induction of the typing derivation and the induction
+steps basically boil down to proving that the expressions in the conclusion of a
+rule are well-scoped assuming that the expressions in the premises are
+well-scoped. Consider the typing rule for type application of \fexistsprod{}
 
-This approach has two benefits: The elaboration makes the
-structure of the proof explicit. Also, the proof term DSL is
-independent of an assignment of values to meta-variables (and also independent
-of the de Bruijn representation) which makes it clear that all necessary
-information is given by the symbolic expressions.
+\[ \inferrule* [right=\textsc{TTApp}]
+     {\typing{E}{t}{\forall\bullet.T} \\
+      \kinding{E}{S}
+     }
+     {\typing{E}{(\tapp{e}{S})}{(\suty~0~S~T)}}
+\]
 
-Moreover, because the elaboration function is a key component of \Knot's code
-generator \Needle, this gives us a handle on an important part of \Needle's
-implementation. We have generically established the correctness of the
-elaboration function in \Coq for a simplified (single-variable binding only)
-datatype-generic implementation of \Knot \cite{knotneedle} which roughly
-translates to an indirect correctness proof of \Needle's implementation of the
-elaboration.
+To prove that the type $(\suty~0~S~T)$ of the conclusion is well-scoped we have
+to use the substitution lemma for well-scopedness of types. This still leaves us
+with the obligation to prove that the types represented by the meta-variables
+$S$ and $T$ are well-scoped. The well-scopedness of $S$ is given by the second
+premise. The induction hypothesis for the first premise gives us the
+well-scopedness of $(\forall\bullet.T)$. By inversion of the well-scopedness
+rule for universal quantification we can conclude that $T$ is well-scoped.
+
+} % FEXISTSPROD SCOPE
+
+In the remainder of this section, we develop a formal elaboration of symbolic
+expressions into proofs of the inductive steps of well-scopedness lemmas. Like
+in the previous section, we first describe the target domain-specific witness
+language and then the elaboration functions.
+
 
 
 %-------------------------------------------------------------------------------
-\subsection{Witnesses of Well-scoping}
+\subsection{Witnesses of Well-Scoping}
+
+%format ws1
+%format ws2
 
 \begin{figure}[t]
-\begin{center}
-\fbox{
-  \begin{minipage}{0.95\columnwidth}
-  \vspace{-2mm}
-  \[\begin{array}{@@{}l@@{\hspace{1mm}}c@@{\hspace{1mm}}l}
-      wn  & ::=  & \textsc{WN}_H~g~\alpha \mid \textsc{WN}_0~\alpha~\bindspec \mid \textsc{WN}_W~wn~\bindspec \\
-          & \mid & \textsc{WN}_T~wn~\bindspec \mid \textsc{WN}_I~K~ws \\
-      ws  & ::=  & \textsc{WS}_H~\bindspec~\symbolicterm \mid \textsc{WS}_V~K~wn \mid \textsc{WS}_K K~\ov{ws} \\
-          & \mid & \textsc{WS}_I~K~n~ws \mid \textsc{WS}_W~ws~\bindspec \mid \textsc{WS}_T~ws~\bindspec \\
-          & \mid & \textsc{WS}_S~ws_1~ws_2 \\
-    \end{array}
-  \]
-  \hrule
-  \[\begin{array}{@@{}l@@{\hspace{1mm}}c@@{\hspace{1mm}}lr}
-      H   & ::= & \ov{(g : \alpha)}, \ov{([bs]\symbolicterm : S)} & \text{Hypotheses} \\
-    \end{array}
-  \]
-  \small
-  \framebox{\mbox{$\wnindex{H}{h_0}{wn}{h}{\vartheta}{n}{\alpha}$}} \\
-  \vspace{-7mm}
-  \[ \begin{array}{c}
-     \hspace{3cm}
-     \inferrule*[right=\textsc{WnHyp}]
-                 {(g:\alpha) \in H}
-                 {\wnindex
-                    {H}{h_0}
-                    {\textsc{WN}_H~r}
-                    {h_0}
-                    {\vartheta}{\vartheta~g}{\alpha}
-                 } \\\\
-     \inferrule*[right=\textsc{WnInvVar}]
-                 {K : \alpha \rightarrow S \\\\
-                  \wsterm{H}{h_0}{ws}{h}{\vartheta}{K~n}{S}
-                 }
-                 {\wnindex{H}{h_0}{\textsc{WN}_I~K~ws}{h}{\vartheta}{n}{\alpha}}
-     \end{array}
-  \]
-
-  \framebox{\mbox{$\wsterm{H}{h_0}{ws}{h}{\vartheta}{u}{S}$}} \\
-  \vspace{-7mm}
-  \[ \begin{array}{c}
-     \hspace{3cm}
-     \inferrule*[right=\textsc{WsVar}]
-       {K : \alpha \rightarrow S \\\\
-        \wnindex{H}{h_0}{wn}{h}{\vartheta}{n}{\alpha}
-       }
-       {\wsterm{H}{h_0}{\textsc{WS}_V~K~wn}{h}{\vartheta}{K~n}{S}} \\\\
-
-     \inferrule*[right=\textsc{WsSubst}]
-       {\wsterm{H}{h_0}{ws1}{h}{\vartheta}{u1}{S1} \\\\
-        \wsterm{H}{h_0}{ws2}{S_\alpha~h}{\vartheta}{u2}{S2}
-       }
-       {\wsterm
-           {H}{h_0}{\textsc{WS}_S~ws1~ws2}{h}{\vartheta}
-           {\text{su}_\alpha~0~u1~u2}{S2}
-       } \\\\
-
-    \inferrule*[right=\textsc{WsStr}]
-       {\wsterm
-          {H}{h_0}
-          {ws}
-          {h + \evalbs{\bindspec}{\vartheta}}
-          {\vartheta}
-          {\shstar~u~\evalbs{\bindspec}{\vartheta}}
-          {S}
-       }
-       {\wsterm{H}{h_0}{\textsc{WS}_T~ws~\bindspec}{h}{\vartheta}{u}{S}
-       }
-     \end{array}
-  \]
-  \vspace{-2mm}
-  \end{minipage}
-}
-\end{center}
-\caption{Well-scopedness proof terms}
-\label{fig:wellscopednessproofterms}
+  \centering
+  \fbox{
+    \begin{minipage}{0.96\columnwidth}
+    \vspace{-2mm}
+    \[ \begin{array}{@@{}l@@{\hspace{1mm}}c@@{\hspace{1mm}}l}
+        wn  & ::=  & |hyp g α| \mid |local α bs| \mid |weaken wn bs| \mid |strengthen wn bs| \mid |varinv K ws| \\
+        ws  & ::=  & |hyp bs sym| \mid |var K wn| \mid |reg K (overline ws)| \mid |reginv K n ws| \\
+            & \mid & |weaken ws bs| \mid |strengthen ws bs| \mid |subst ws1 ws2| \\
+        H   & ::=  & \ov{(g : \alpha)}, \ov{([bs]\symbolicterm : S)} \\
+      \end{array}
+    \]
+    \end{minipage}
+  }
+  \caption{Well-Scopedness Witness DSL}
+  \label{fig:elab:wellscopednesswitness:grammar}
 \end{figure}
 
-Figure \ref{fig:wellscopednessproofterms} (top) defines the language of proof
-terms targetted by the elaboration, and Figure
-\ref{fig:wellscopednessproofterms} (bottom) contains selected rules that define
+Figure \ref{fig:elab:wellscopednesswitness:grammar} defines the grammar of the
+witnesses for indices |wn| and for terms of sorts |ws| which are mutually
+recursive. The interpretation witnesses is relative to a fixed rule local
+environment $\LENV = \ov{(r@@\alpha)}, \ov{([\bindspec_b]b : \beta)},
+\ov{[\bindspec_t]t : T}$ and also a fixed value environment $\vartheta = \ov{(r
+  \mapsto n)}, \ov{(t \mapsto u)}$. Furthermore, we use an environment $H$ to
+hold hypotheses, which is populated from both the induction hypotheses of the
+rule and from well-scopedness premises. The witnesses describe the use of a
+hypothesis |hyp|, the well-scopedness of a local reference |local|, the
+application of a constructor rule |var| or |reg|, the inversion of a constructor
+rule |varinv| or |reginv|, use of a weakening lemma |weaken| or of a
+strengthening lemma |strengthen| (the inversion of weakening), or use of a
+substitution lemma |subst|.
+
+Figure \ref{fig:wellscopednessproofterms} contains selected rules that define
 the intended meaning of the proof terms with respect to the de Bruijn
-representation. (See Appendix
-\ref{appendix:elaboration} for the remainder.)
-
-The interpretation is relative to a fixed local environment
-$\LENV = \ov{(r@@\alpha)}, \ov{([\bindspec_b]b : \beta)}, \ov{[\bindspec_t]t :
-  T}$ and also fix a value environment
-$\vartheta = \ov{(r \mapsto n)}, \ov{(t \mapsto u)}$. Furthermore, we use an
-environment $H$ to hold hypotheses, which we get either from the induction or
-from additional well-formedness annotations. An additional parameter is $h_0$
-that represents an outer scope which in our case is the domain of the
-environment term $h_0 = \domain{u_E}$.
-
-The relation $\wnindex{H}{h_0}{wn}{h}{\vartheta}{\alpha}{n}$ denotes that $wn$
+representation. (See Appendix \ref{appendix:elaboration} for the remainder.) The
+relation $\wnindex{H}{h_0}{wn}{h}{\vartheta}{\alpha}{n}$ denotes that $wn$
 witnesses that $n$ is a well-scoped de Bruijn index for namespace $\alpha$ with
 respect to $h$ and $\wsterm{H}{h_0}{ws}{h}{\vartheta}{u}{S}$ denotes that $ws$
 witnesses that $u$ is a well-scoped in the de Bruijn term of sort $S$ with
 respect to $h$. These two relations are mutually-recursive and completely syntax
 directed in $wn$ respectively $ws$.
 
-The rules \textsc{WnHyp} refers to hypotheses in $H$. The hypothesis for a
-global variable $g$ represents the assumption that the de Bruijn index
-$\vartheta~g$ is well-scoped in the outer scope $h_0$. The remaining rules
-axiomatically encode properties of well-scopedness relations. For example, rule
-\textsc{WsVar} corresponds to the variable rule of semantic well-scoping and
-\textsc{WnInvVar} to its inversion, i.e. we can establish the well-scopedness of
-a de Bruijn index from the well-scopedness of a variable constructor. Rule
-\textsc{WsSubst} denotes the substitution lemma for well-scoping and
-\textsc{WsStr} an inversion of the weakening lemma which is possible because
-$\shstar$ on terms is injective.
+Also note, that both relations are parameterized by $H, \vartheta$ and $h_0$, an
+additional parameter that represents the outer scope, i.e. the domain of the
+implicit environment during the proof of the well-scopedness lemma. The binding
+specification in the witness terms always denote the local scope relative to the
+outer scope $h_0$.
 
-The axiomatic rules are backed by concreted lemmas for well-scoping, hence we
-can establish soundness.
+The rule \textsc{WnHyp} refers to hypotheses in $H$. The hypothesis for a global
+variable $g$ represents the assumption that the de Bruijn index $\vartheta~g$ is
+well-scoped in the outer scope $h_0$. The remaining rules axiomatically encode
+properties of well-scopedness relations. For example, rule \textsc{WsVar}
+corresponds to the variable rule of semantic well-scoping and \textsc{WnInvVar}
+to its inversion, i.e. we can establish the well-scopedness of a de Bruijn index
+from the well-scopedness of a variable constructor. Rule \textsc{WsSubst}
+denotes the substitution lemma for well-scoping, and \textsc{WsStrength} denotes
+the strengthening lemma, i.e. an inversion of the weakening lemma.
+
+\begin{figure}[t]
+  \centering
+  \fbox{
+    \begin{minipage}{0.96\columnwidth}
+    \framebox{\mbox{$\wnindex{H}{h_0}{wn}{h}{\vartheta}{n}{\alpha}$}} \\
+    \[ \begin{array}{c}
+       \inferrule*[right=\textsc{WnHyp}]
+                   {(g:\alpha) \in H}
+                   {\wnindex
+                      {H}{h_0}
+                      {|hyp g α|}
+                      {h_0}
+                      {\vartheta}{\vartheta~g}{\alpha}
+                   } \\\\
+       \inferrule*[right=\textsc{WnVarInv}]
+                   {K : \alpha \rightarrow S \\
+                    \wsterm{H}{h_0}{ws}{h}{\vartheta}{K~n}{S}
+                   }
+                   {\wnindex{H}{h_0}{|varinv K ws|}{h}{\vartheta}{n}{\alpha}}
+       \end{array}
+    \]
+
+    \framebox{\mbox{$\wsterm{H}{h_0}{ws}{h}{\vartheta}{u}{S}$}} \\
+    \[ \begin{array}{c}
+       \inferrule*[right=\textsc{WsVar}]
+         {K : \alpha \rightarrow S \\
+          \wnindex{H}{h_0}{wn}{h}{\vartheta}{n}{\alpha}
+         }
+         {\wsterm{H}{h_0}{|var K wn|}{h}{\vartheta}{K~n}{S}} \\\\
+
+       \inferrule*[right=\textsc{WsSubst}]
+         {\wsterm{H}{h_0}{ws_1}{h}{\vartheta}{u_1}{S_1} \\
+          \wsterm{H}{h_0}{ws_2}{S_\alpha~h}{\vartheta}{u_2}{S_2}
+         }
+         {\wsterm
+             {H}{h_0}{|subst ws1 ws2|}{h}{\vartheta}
+             {\text{subst}_\alpha~0~u_1~u_2}{S_2}
+         } \\\\
+
+      \inferrule*[right=\textsc{WsStrengthen}]
+         {\wsterm
+            {H}{h_0}
+            {ws}
+            {h + \evalbs{\bindspec}{\vartheta}}
+            {\vartheta}
+            {|lift|~u~\evalbs{\bindspec}{\vartheta}}
+            {S}
+         }
+         {\wsterm{H}{h_0}{|strengthen ws bs|}{h}{\vartheta}{u}{S}
+         }
+       \end{array}
+    \]
+    \end{minipage}
+  }
+  \caption{Well-scopedness proof terms}
+  \label{fig:wellscopednessproofterms}
+\end{figure}
+
+Since the axiomatic rules of the witness language are backed by concreted lemmas
+for well-scoping, we can establish soundness of the interpretation
 
 \begin{lem}[Soundness]
-  Let $\vartheta = \ov{(r \mapsto n)}, \ov{(t \mapsto u)}$ and
-  $\ov{r'} \subseteq \ov{r}$. If the hypotheses
-  $H = \ov{(r':\alpha)}, \ov{([\bindspec]sym:S)}$ are valid, i.e.
-  $\ov{h_0 \vdash_\alpha \vartheta~r'}$ and \\
-  $\ov{h_0 + \evalbs{\bindspec}{\vartheta} \vdash_S \evalsym{\bindspec}{\symbolicterm}{\vartheta}}$,
-  then
+  Let $\vartheta = \ov{(g \mapsto n)}, \ov{(t \mapsto u)}$ and $\ov{g'}
+  \subseteq \ov{g}$. If the hypotheses $H = \ov{(g':\alpha)},
+  \ov{([\bindspec]sym:S)}$ are valid, i.e. $\ov{h_0 \vdash_\alpha \vartheta~g'}$
+  and \\ $\ov{h_0 + \evalbs{\bindspec}{\vartheta} \vdash_S
+    \evalsym{\bindspec}{\symbolicterm}{\vartheta}}$, then
+
   \begin{enumerate}
-  \item $\forall wn, n', \beta. \wnindex{H}{h_0}{wn}{h}{\vartheta}{n'}{\beta} \Rightarrow  h \vdash_\beta n'$ and
-  \item $\forall ws, u', T'. \wsterm{H}{h_0}{ws}{h}{\vartheta}{u'}{T'} \Rightarrow h \vdash_{T'} u'$.
+  \item
+    \[ \inferrule*[]
+         {\wnindex{H}{h_0}{wn}{h}{\vartheta}{n'}{\beta}}
+         {h \vdash_\beta n'}
+    \]
+  \item
+    \[ \inferrule*[]
+         {\wsterm{H}{h_0}{ws}{h}{\vartheta}{u'}{T'}}
+         {h \vdash_{T'} u'}
+    \]
   \end{enumerate}
 \end{lem}
 
@@ -278,7 +262,23 @@ can establish soundness.
 
 %-------------------------------------------------------------------------------
 
-\subsection{Well-scopedness Elaboration}
+\subsection{Proof Elaboration}
+
+We can split the proof of the induction steps of the lemma into two stages.
+First, we establish well-scopedness of terms represented by sort and global
+meta-variables of the conclusion, potentially by using inversion lemmas on the
+induction hypotheses. Second, we use the rules of the well-scopedness relations
+and derived rules to establish well-scopedness of the terms in the conclusion.
+In short, this step amounts to using the fact that evaluation of well-scoped
+symbolic expression in a well-scoped context yields well-scoped terms.
+
+Similarly, we can also split the elaboration into two corresponding stages. The
+first stage elaborates one-hole contexts \cite{huet1997zipper} that describe
+invertible paths to meta-variable in the premises into witnesses that use
+inversions and hypotheses. We collect the result of the first stage into an
+environment $P ::= \ov{g:wn}, \ov{s:ws}$ that holds the proof terms for the
+meta-variables. The second stage elaborates the expression in the conclusion
+into witness terms by using $P$ for occurring meta-variables.
 
 %if False
 The definition with correct associativity would be
@@ -297,61 +297,57 @@ symwnα (bs, f s)  bα = wnW (symwnα bs x) (f s)
 %format sym2
 
 \begin{figure}[t]
-\begin{center}
-\fbox{
-  \begin{minipage}{0.95\columnwidth}
-  \begin{code}
-    box (symwnα : bs → b → wn)
-    symwnα (bs,x,bs') x  = wnW (wn0 α bs) bs'
+  \centering
+  \fbox{
+    \begin{minipage}{0.95\columnwidth}
+    \begin{code}
+      box (symwnα : bs → b → wn)
+      symwnα (bs,b,bs') b = weaken (local α bs) bs'
 
-    box (symws : P → bs → sym → ws)
-    symws P bs s = ws  where (s:ws) ∈ P
-    symws P bs (K r) = wsV K (wnW wn bs)
-      where (r:wn) ∈ P
-    symws P bs (K b) = wsV K (symwnα bs b)
-      where K : α → S
-    symws P bs (K (overline b') (overline sym)) = wsK K (overline ((symws P bs' sym)))
-      where  K : (bindspec bs_b b : α) → (bindspec bs_t t : T) → S
-             (overline (evalbig (overline (b ↦ b'), overline (t ↦ sym)) bs_t bs'))
-    symws P (bs,bs') (weaken sym bs') =
-      wsW (symws P bs sym) bs'
-    symws P bs (subst b sym1 sym2) =
-      wsS (symws P bs sym1) (symws P (bs,b) sym2)
-    \end{code}
-  \vspace{-5mm}
-  \end{minipage}
-}
-\end{center}
-\caption{Well-scopedness of de Bruijn terms}
-\label{fig:wellscopednesselaboration}
+      box (symws : P → bs → sym → ws)
+      symws P bs s = ws  where (s:ws) ∈ P
+      symws P bs (K g) = var K (weaken wn bs)
+        where (g:wn) ∈ P
+      symws P bs (K b) = var K (symwnα bs b)
+        where K : α → S
+      symws P bs (K (overline b') (overline sym)) = reg K (overline ((symws P bs' sym)))
+        where  K : (bindspec bs_b b : α) → (bindspec bs_t t : T) → S
+               (overline (evalbig (overline (b ↦ b'), overline (t ↦ sym)) bs_t bs'))
+      symws P (bs,bs') (weaken sym bs') =
+        weaken (symws P bs sym) bs'
+      symws P bs (subst b sym1 sym2) =
+        subst (symws P bs sym1) (symws P (bs,b) sym2)
+      \end{code}
+    \end{minipage}
+  }
+  \caption{Well-scopedness of de Bruijn terms}
+  \label{fig:wellscopednesselaboration}
 \end{figure}
 
-For the elaboration we discuss the second step first. Figure
-\ref{fig:wellscopednesselaboration} contains the elaboration function from
-symbolic expressions to our proof term DSL. The argument $P$ is an environment
-that holds proof terms for all sort and global meta-variables, which we get from
-the first step of the proof, and the $\bindspec$ argument is the local scope of
-the symbolic expressions that is elaborated. In case of a sort meta-variable or
-a variable constructor with a global variable we look up the proof term in $P$.
-For the global variable we additionally need to weaken to the local scope first
-via $\textsc{WN}_W~wn~\bindspec$ and wrap it in the variable constructor with
-$\textsc{WS}_V~K$. For a locally bound variable $b$ the helper function
-$\text{symwn}_\alpha~bs~b$ first uses $\textsc{WN}_0~\alpha~\bindspec$ to
-witness the fact that $b$ is well-scoped in $\bindspec,b$ and then weakens with
-the difference $\bindspec'$ to create a proof term for well-scopedness in
-$\bindspec,b,\bindspec'$. |symws| then wraps the result in a variable
-constructor with $\textsc{WS}_V~K$. For a regular constructor $K$ we
-symbolically evaluate the local scopes of the sort fields and proceed
-recursively and wrap the results in a $\textsc{WS}_K~K$. In case of a symbolic
-weakening we need to strip off the tail $bs'$ to get the local scope for the
-recursive position. Finally, for $subst~b~sym_1~sym_2$
-we recurse into $sym_1$ with the same local scope but account for the additional
-variable $b$ when recursing into $sym_2$.
+We only present the formal elaboration of the second stage. Figure
+\ref{fig:wellscopednesselaboration} contains the elaboration function |symws|
+from symbolic expressions to witnesses |ws|. The argument $P$ is the proof term
+environment for sort and global meta-variables, and the $\bindspec$ argument is
+the local scope of the symbolic expressions that is elaborated.
 
-Given proof terms $P$ for the well-scopedness of global respectively sort
-meta-variables the elaboration function $\text{symws}$ constructs a proof term
-for the well-scopedness of any symbolic expression.
+In case of a sort meta-variable or a variable constructor with a global variable
+we look up the proof term in $P$. For the global variable we need to weaken to
+the local scope first and then wrap it in the variable constructor. For a
+locally bound variable $b$ the helper function $\text{symwn}_\alpha$ first uses
+$|local|$ to witness the fact that $b$ is well-scoped in $\bindspec,b$ and then
+weakens with the difference $\bindspec'$ to create a proof term for
+well-scopedness in $\bindspec,b,\bindspec'$\footnote{For simplicity, the
+  presented elaborations in Figure \ref{fig:wellscopednesselaboration} have the
+  wrong associativity when weakening local and global meta-variables into the
+  local scope. \Loom and \Needle contain elaborations that deal with associativity
+  correctly.}.
 
+For a regular constructor $K$ we symbolically evaluate the local scopes of the
+sort fields and proceed recursively and wrap the results in |reg|. In case of a
+symbolic weakening we need to strip off the tail $bs'$ to get the local scope
+for the recursive position. Finally, for $subst~b~sym_1~sym_2$ we recurse into
+$sym_1$ with the same local scope but account for the additional variable $b$
+when recursing into $sym_2$.
 
 %%% Local Variables:
 %%% mode: latex

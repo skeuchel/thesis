@@ -3,14 +3,14 @@
 In this concluding chapter we revisit the research question, summarize the
 results of this thesis and evaluate the contributions in the context of the
 research question. Furthermore, we highlight opportunities for future work and
-speculate how the contributions of this thesis can benefit the programming
+speculate about how the contributions of this thesis can benefit the programming
 language research community at large in the future.
 
 \section{Research Question}
 Widespread formalization and mechanisation of programming language meta-theory
 is hindered by the large development costs. For further adoption, reducing the
-costs is crucial. This leads us back to the research question laid out in the
-beginning of this thesis:
+costs is crucial. This leads us back to the research question laid out at the
+start of this thesis:
 
 \begin{center}
   \begin{minipage}{0.8\columnwidth}\bf
@@ -27,15 +27,15 @@ of these approaches to programming language theory in particular.
 \section{Summary}
 
 This section gives and overview of the thesis and its most important results. We
-discuss the two pats of the thesis in turn.
+discuss the two parts of the thesis in turn.
 
 \subsection{Modularity}
-Part I of this thesis pursues the modularity approach and universal method for
-modularization of functional programs on inductive datatypes and modularization
-of induction proofs for properties of these programs. Specifically this thesis
-contributed new results for modular representation of modular datatypes and on
-reducing feature interaction for effectful semantics. Both contributions have
-been evaluated using case studies. We discuss both contributions and the case
+Part I pursues the modularity approach and universal method for modularization
+of functional programs on inductive datatypes and modularization of induction
+proofs for properties of these programs. Specifically, this thesis has
+contributed new results for the modular representation of datatypes and for
+reducing feature interaction in effectful semantics. Both contributions have
+been evaluated with case studies. We discuss both contributions and the case
 studies below.
 
 %% This universal method is showcased by modularizing type-safety proofs for lambda
@@ -46,9 +46,9 @@ Modularizing proofs is particularly challenging since the proof-assistant
 settings imposes several restrictions for logical consistency. This challenge is
 addressed in work prior to this thesis in the \emph{Meta-Theory \`a la Carte
   (MTC)} \cite{mtc} framework which uses Church encodings to represent inductive
-datatypes and families. This thesis develops and alternative approach using
-datatype-generic representations that improves over MTC in adequacy, convenience
-and compatibility with classical logic.
+datatypes and families. This thesis develops an alternative approach, using
+datatype-generic representations, that improves upon MTC in terms of adequacy,
+convenience and compatibility with classical logic.
 
 \subsubsection{Feature Interaction}
 A concern in modularization is the interaction between two or more features.
@@ -62,28 +62,28 @@ an isolated subset, e.g. two features.
 Problematic feature interactions appear in the semantics of programming
 languages with effectful features. To cut down this particular kind of
 interaction, we developed a denotational semantics based on monad transformers
-and corresponding algebraic laws. This semantics allowed us to to formulate and
-prove a general type-soundness theorem in a modular way that enables the modular
-reuse of language feature proofs and reduce the interaction between effectful
-language features to the interaction between their effects.
+and corresponding algebraic laws. This semantics has allowed us to to formulate
+and prove a general type-soundness theorem in a modular way that enables the
+modular reuse of language feature proofs and reduce the interaction between
+effectful language features to the interaction between their effects.
 
 \subsubsection{Case Studies}
 
-We performed two case studies to evaluate our contributions. The first case
+We have performed two case studies to evaluate our contributions. The first case
 study is a port of the MTC case study to the container based modular
 representation. It consists of continuity and type-safety proofs for seven
 language features and six language compositions. In contrast to MTC, the
-preservation of the universal properties or any other property is not necessary
-for induction which makes the approach conceptually simpler. This is reflected
-in the case study: sigma types and its projections are removed from lemmas and
-proofs, and language features and their (proof) algebras are on average 240 LoC
-(25\%) smaller. The final language compositions are slightly larger by about 6
-LoC (7\%), but are short in comparison to the feature specific code.
+preservation of the universal properties is not necessary for induction which
+makes the approach conceptually simpler. This is reflected in the case study:
+sigma types and its projections are removed from lemmas and proofs, and language
+features and their (proof) algebras are on average 240 LoC (25\%) smaller. The
+final language compositions are slightly larger by about 6 LoC (7\%), but are
+short in comparison to the feature specific code.
 
 The second case study demonstrates the 3MT framework. It consists of five
 reusable language features: pure boolean and arithmetic features and effectful
-features for references, errors and lambda abstractions. The study builds twenty
-eight different combinations of the features. Each language feature has its own
+features for references, errors and lambda abstractions. The study builds 28
+different combinations of the features. Each language feature has its own
 reusable feature theorem and each of the six effect combinations its own effect
 theorem. Effect theorems are only reusable for languages with the specific set
 of effects. Like in the first case study, the feature and effect theorems
@@ -92,21 +92,20 @@ outweigh the final language compositions.
 
 
 \subsection{Genericity}
-Part II examines the genericity approach with a specific use case in mind:
-variable binding boilerplate in mechanisations. A key ingredient of
-reduction-based semantics of programming languages is substitiution.
-Meta-theoretic proofs using these semantics usually involves a large number of
-burdensome boilerplate proofs about substitutions which distracts a human
-semanticist from essential theorems when mechanising her proofs. This thesis
-develops a generic solution to the boilerplate lemmas based on a novel
-specification language \Knot for programming language and a code generator
-\Needle that produces boilerplate code. We summarize and discuss the
-contributions.
+Part II examines the genericity approach for a specific use case: variable
+binding boilerplate in mechanisations. A key ingredient of reduction-based
+semantics of programming languages is substitiution. Meta-theoretic proofs using
+these semantics usually involve a large number of burdensome boilerplate proofs
+about substitutions which distracts a human semanticist from essential theorems
+when mechanising her proofs. This thesis develops a generic solution to the
+boilerplate lemmas based on a novel specification language \Knot for programming
+languages and a code generator \Needle that produces boilerplate code. We
+summarize and discuss the contributions.
 
 \subsubsection{Specification Language}
 \Knot allows the specification of abstract syntax, with explicit specifications
 of binding, and of semantical relations between syntax terms. Relations are
-defined using arbitrary expressions build from a language's abstract syntax.
+defined using arbitrary expressions built from a language's abstract syntax.
 \Knot employs a novel type system that checks that all expressions, including
 substitutions that may appear in them, are always well-scoped.
 
@@ -121,8 +120,8 @@ context parametricity of regular (non-variable) rules.
 \Needle produces specialized definitions for a given \Knot specification in the
 \Coq proof assistant and produces code for boilerplate functions and boilerplate
 lemmas. We employ a principled approach to elaboration of boilerplate code that
-gives us confidence in the correctness of our code generator: we developed and
-formally verified elaborations in the \Coq proof assistant using our
+gives us confidence in the correctness of our code generator: we have developed
+and formally verified elaborations in the \Coq proof assistant using our
 datatype-generic implementation \Loom of \Knot.
 
 \paragraph{Case Study}
@@ -142,15 +141,15 @@ two parts.
 
 \subsection{Modularity}
 
-We achieved modular reuse of structurally recursive functions and structural
-induction proofs. This is a crucial first step towards reducing mechanization
-effort using the modularity methodology. However, the focus was on feasibility.
-Further research is necessary to make the approach more convenient and
-practical. Furthermore we targeted a specific class of languages (simply-typed
-and effectful lambda calculi), specific semantics ((monadic) denotational
-semantics) and specific meta-theoretic properties (type safety). Of course the
-scope can be extended in either of these directions. We discuss the most
-promising ideas for increasing the convenience and scope below.
+We have achieved modular reuse of structurally recursive functions and
+structural induction proofs. This is a crucial first step towards reducing
+mechanization effort using the modularity methodology. However, the focus was on
+feasibility. Further research is necessary to make the approach more convenient
+and practical. Furthermore we targeted a specific class of languages
+(simply-typed and effectful lambda calculi), specific semantics ((monadic)
+denotational semantics) and specific meta-theoretic properties (type safety). Of
+course the scope can be extended in either of these directions. We discuss the
+most promising ideas for increasing the convenience and scope below.
 
 \subsubsection{Convenience}
 
@@ -163,10 +162,10 @@ boilerplate code that should be taken care of automatically.
 Immediate and easy is to provide better specialized proof automation, for
 instance for type class derivations and algebra dispatch proof steps.
 Furthermore, a lot of the repetitive abstractions over super functors and
-algebras can be dealt with available modularity features in proof assistants
-like modular, module functors and canonical substructures.
+algebras can be dealt using with available modularity features in proof
+assistants like modular, module functors and canonical substructures.
 
-Ultimately, the support for modular induction proofs can be added to proof
+Ultimately, the support for modular induction proofs can be built into proof
 assistants to make this method practical on a larger scale. Concepts like
 \emph{proof algebras} presented in this thesis can be turned into first-class
 primitives of the proof-assistant's language. The generic universe
@@ -211,7 +210,7 @@ semantics. Monads are, however, not the only approach to model side-effects and
 it would be interesting to see how modularizable alternative approaches are.
 Since our monadic typing rules with explicit continuations are reminiscent of
 algebraic effects and handlers \cite{eff,handlers,hia}, this is one particularly
-promising alternative to model effects. Furthermore, since algebraic effects
+promising alternative to model effects. Furthermore, since algebraic effect
 handlers have better composability properties than monads, they potentially
 allow further reduction of feature interaction.
 
@@ -232,7 +231,7 @@ Furthermore, we can integrate more variable binding like concepts into \Knot,
 for instance, first-class substitutions. This will also require us to improve
 \Knot scope-checking type system.
 
-The \Needle the code generator can be scaled to include the above extensions.
+The \Needle code generator can be scaled to include the above extensions.
 However, \Needle can also be scaled independently. Currently, the code is geared
 towards type safety proofs, but other meta-theoretic proofs may require
 different boilerplate that could be generated by \Needle. Furthermore, \Knot

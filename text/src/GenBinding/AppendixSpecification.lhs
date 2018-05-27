@@ -23,7 +23,7 @@ class Monad f where
 
 %endif
 
-\chapter{Appendix A}\label{appendix:specification}
+\chapter{Needle \& Knot}\label{appendix:specification}
 
 %format FreeStx = "{" Free  "}_{" Stx "}"
 %format ReturnStx = "{" Return  "}_{" Stx "}"
@@ -34,7 +34,7 @@ class Monad f where
 %format returnstx = "{" return  "}_{" Stx "}"
 %format bindstx = "{" bind  "}_{" Stx "}"
 
-\subsection{Free Monadic Well-Scoped Terms}\label{ssec:appendix:freemonad}
+\section{Free Monadic Well-Scoped Terms}\label{ssec:appendix:freemonad}
 
 The datatype |FreeStx| in Figure \ref{fig:freemonad:freewellscoped} shows the
 generic construction of free monadic well-scoped terms from a base functor.
@@ -83,6 +83,8 @@ morphisms and require an interpretation function |forall d₁ d₂. m d₁ d₂ 
   \label{fig:freemonad:freewellscoped}
 \end{figure}
 
+Simultaneous substitutions, i.e. mapping variables to terms, is generically
+defined in Figure~\ref{fig:freemonad:genericsubst}.
 
 \begin{figure}[t]
   \fbox{
@@ -126,8 +128,10 @@ morphisms and require an interpretation function |forall d₁ d₂. m d₁ d₂ 
     \end{minipage}
   }
   \caption{Free Monad Instantiation}
-  \label{fig:freemonad:set}
+  \label{fig:freemonad:lambda}
 \end{figure}
+
+\clearpage
 
 %%% Local Variables:
 %%% mode: latex

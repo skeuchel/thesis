@@ -8,8 +8,8 @@ reasoning:
 %% first to improve this situation. It is a Coq framework for defining and
 %% reasoning about extensible modular datatypes and extensible modular functions
 %% thereby gaining modular component reuse. MTC builds on Datatypes \`a la Carte
-%% (DTC) \cite{dtc}, a Haskell solution to the expression problem, to achieve
-%% modularity.
+%% (DTC) \cite{swierstra2008dtc}, a Haskell solution to the expression problem,
+%% to achieve modularity.
 
 %% Besides writing modular algebras for expressing semantic functions as folds,
 %% MTC also supports writing generally recursive functions using mixins and

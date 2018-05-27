@@ -185,11 +185,11 @@ thrown which is modeled by a disjunction in the conclusion:
   \label{thm:LSoundE}
 \end{gather*}
 %
-Clearly, the available effects are essential for the formulation of the
-theorem. A larger language which involves both exceptions and state requires yet
-another theorem \ref{thm:LSoundES}~where the impact of both effects cross-cut
-one another\footnote{A similar proliferation of soundness theorems can be found
-  in TAPL~\cite{pierce}.}:
+Clearly, the available effects are essential for the formulation of the theorem.
+A larger language which involves both exceptions and state requires yet another
+theorem \ref{thm:LSoundES}~where the impact of both effects cross-cut one
+another\footnote{A similar proliferation of soundness theorems can be found in
+  TAPL~\cite{tapl}.}:
 %
 \begin{gather*}
   \forall e, t, \Sigma, \sigma.

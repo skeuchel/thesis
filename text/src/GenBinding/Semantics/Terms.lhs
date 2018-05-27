@@ -1,4 +1,4 @@
-E%include lhs2TeX.fmt
+%include lhs2TeX.fmt
 %include polycode.fmt
 %include Formatting.fmt
 %include forall.fmt
@@ -350,7 +350,7 @@ associated data.
 
 
 % \begin{figure}[t]
-% \begin{center}
+% \centering
 % \fbox{
 %   \begin{minipage}{0.98\columnwidth}
 %    \begin{tabular}{@@{}ll}
@@ -386,7 +386,6 @@ associated data.
 %
 %   \end{minipage}
 % }
-% \end{center}
 % \caption{Interpretation of binding specifications and functions}
 % \label{fig:eval}
 % \end{figure}

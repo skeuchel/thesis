@@ -49,9 +49,10 @@ Section~\ref{sec:knot:relations}.
 \section{\Knot by Example}\label{sec:knotbyexample}
 
 In this section we showcase \Knot by porting the semi-formal specification of
-their \fexistsprod calculus from Chapter \ref{ch:gen:background}. Section \ref{sec:knotbyexample:syntax} discusses the \Knot specification
-of the abstract syntax of \fexistsprod and Section
-\ref{sec:knotbyexample:semantics} its typing relation.
+their \fexistsprod calculus from Chapter \ref{ch:gen:background}. Section
+\ref{sec:knotbyexample:syntax} discusses the \Knot specification of the abstract
+syntax of \fexistsprod and Section \ref{sec:knotbyexample:semantics} its typing
+relation.
 
 
 %-------------------------------------------------------------------------------
@@ -437,7 +438,7 @@ inductive relations, in Section \ref{sec:knot:relations}.
 %-------------------------------------------------------------------------------
 \subsection{Well-Formed \Knot~Specifications}\label{sec:wellformedspec}
 \begin{figure}[t]
-\begin{center}
+\centering
 \fbox{
   \small
   \begin{minipage}{0.98\columnwidth}
@@ -522,7 +523,6 @@ inductive relations, in Section \ref{sec:knot:relations}.
   \]
   \end{minipage}
 }
-\end{center}
 \caption{Well-formed specifications}
 \label{fig:wellformedspec}
 \end{figure}
@@ -589,7 +589,7 @@ come back to this issue in the concluding discussion of this chapter in Section
 
 %if False
 \begin{figure}[t]
-\begin{center}
+\centering
 \fbox{
   \begin{minipage}{0.96\columnwidth}
   \framebox{\mbox{$\vdash \envdecl$}} \\
@@ -608,7 +608,6 @@ come back to this issue in the concluding discussion of this chapter in Section
   \]
   \end{minipage}
 }
-\end{center}
 \caption{Well-formed environment specifications}
 \label{fig:wellformedctxspec}
 \end{figure}
@@ -620,7 +619,7 @@ come back to this issue in the concluding discussion of this chapter in Section
 \section{Symbolic Expressions}\label{sec:knot:expressions}
 
 \begin{figure}[t!]
-\begin{center}
+\centering
 \fbox{
   \begin{minipage}{0.98\columnwidth}
     \small
@@ -678,7 +677,6 @@ come back to this issue in the concluding discussion of this chapter in Section
 
   \end{minipage}
 }
-\end{center}
 \caption{Symbolic expressions and their well-formedness}
 \label{fig:symbolicevaluation}
 \end{figure}
@@ -792,7 +790,7 @@ defined in Figure \ref{fig:symbolicevaluation} (top).
 
 
 % \begin{figure}[t]
-% \begin{center}
+% \centering
 % \fbox{
 %   \begin{minipage}{0.95\columnwidth}
 %   \framebox{\mbox{$\wfsym{\bindspec}{\symbolicterm}{S}$}} \\
@@ -839,7 +837,6 @@ defined in Figure \ref{fig:symbolicevaluation} (top).
 %
 %   \end{minipage}
 % }
-% \end{center}
 % \caption{Well-formed symbolic expression}
 % \label{fig:wellformedsymbolicexpressions}
 % \end{figure}
@@ -875,7 +872,7 @@ the substitute $\symbolicterm_1$ have to agree with that of $b$.
 \section{Inductive Relations}\label{sec:knot:relations}
 
 \begin{figure}[t]
-\begin{center}
+\centering
 \fbox{
   \begin{minipage}{0.98\columnwidth}
     \[\begin{array}{@@{}l@@{\hspace{1mm}}c@@{\hspace{1mm}}l@@{\hspace{-6mm}}r}
@@ -894,7 +891,6 @@ the substitute $\symbolicterm_1$ have to agree with that of $b$.
     \]
   \end{minipage}
 }
-\end{center}
 \caption{Syntax for relations}
 \label{fig:grammarrelations}
 \end{figure}
@@ -939,7 +935,7 @@ the corresponding derived rule needs to be proven.
 \subsection{Relation Well-formedness}\label{ssec:relationwf}
 
 \begin{figure}[t]
-  \begin{center}
+\centering
 \small
 \fbox{
   \begin{minipage}{0.99\columnwidth}
@@ -1038,7 +1034,6 @@ the corresponding derived rule needs to be proven.
 
   \end{minipage}
 }
-\end{center}
 \caption{Well-formed relations}
 \label{fig:wellformedrelspec}
 \end{figure}
@@ -1096,15 +1091,56 @@ checked to be identical to the flattening of the prefix $\rulebindspec$.
 
 \section{Discussion}\label{sec:gen:spec:discussion}
 
+Not all programming languages and scoping rules can be specified in \Knot. Some
+restrictions are imposed by deliberate simplifications to reduce the complexity
+while other constructs have not been in the targeted scope of \Knot. We discuss
+several importing restrictions, their relevance and future work to lift these
+restrictions.
+
+
+\paragraph{Multiple input scope}
+Specification of type systems often use multiple environments, for instance, to
+split type variables from term variables, or to have a separate global
+environment with information about datatypes or top-level bindings. To simplify
+recursion and induction \Knot however only allows a single sequentially scoped
+input environment. At the level of terms this means that there is always exactly
+one input domain that defines the variables in scope. As a result, the user is
+forced to always share the environment for all namespaces and has to account for
+all namespaces when reasoning.
+
+For type safety proofs this is rarely an issue, but it may complicate other
+meta-theoretic proofs. For instance, this unnecessarily burdens the proof of
+strong normalization of System~F via logic relations \cite{girard1989proofs}.
+
+There is nothing that fundamentally forbids us to support multiple scopes in the
+future and also allow recursively instead of sequentially scoped global
+environments. The recursion over terms and relations then however depends on the
+dependency structure between multiple scopes, which adds a new dimension of
+complexity into the boilerplate elaboration.
+
+
+\paragraph{Scope delimitation}
+Once names are introduced, they are universally visible in all
+sub-terms\footnote{Disregarding any kind of shadowing in a nominal
+  interpretation}. Some languages do however limit the visibility. For instance,
+imperative languages often allow labels on loops which can be used as the target
+of a break or continue statement. Generally, these labels are only visible
+inside the same function, but for example not in the body of any nested
+functions or lambda expressions. With the support of multiple input scopes, we
+can encode the scope restriction by for example allowing scopes of subterms to
+be closed. Another application would be the distinction between stack allocated
+local variables and heap allocated closure variables that have a similar
+scoping restriction.
+
+
 \paragraph{Recursive Scoping}
 { \input{src/MacrosFExists}
 
-  The first version of the framework, as presented in the first article above,
-  uses a more lenient well-formedness relation for binding specifications than the
-  one presented in Figure \ref{fig:wellformedspec}. This alternative version also
-  allowed for recursive scoping to be specified. Recursive scoping as implemented
-  in the article, uses cyclic binding specifications which
-  Figure~\ref{fig:wellformedspec} rules out. This is a trade-off between
+  The first version of the framework, as presented in \cite{knotneedle}, uses a
+  more lenient well-formedness relation for binding specifications than the one
+  presented in Figure \ref{fig:wellformedspec}. This alternative version allowed
+  for recursive scoping to be specified using cyclic binding specifications
+  which Figure~\ref{fig:wellformedspec} rules out. This is a trade-off between
   expressivity and simplicity.
 
   To illustrate this, consider a hypothetical typing judgement for a mutual
@@ -1174,11 +1210,94 @@ We side-step the issue by sticking to the simple scope checking of Figure
 substitutions and weakenings to appear in positions that are accessed by
 functions. Another consequence is that substitution and weakening are only
 allowed ``at the end of the context''. These restrictions are usually met by
-relations for typing and operational semantics, and thus do not get in the way
-of type-safety proofs. However, in general this too restrictive. In future work
-we would like to extend the scope checking to correctly handle substitutions in
-the middle of the context and also introduce first-class substitutions and
-develop the scope checking for them.
+relations for typing and operational semantics, but useful examples that
+violate this restriction exists.
+
+To see this, consider extending the patterns of \fexistsprod{} with matching on
+existentials. The adapted sort for patterns may look something like this:
+
+\begin{tabular}{@@{}l@@{\hspace{1.5mm}}c@@{\hspace{0.5mm}}l}
+\multicolumn{3}{@@{}l}{|sort Pat|~\cass}                        \\
+& \texttt{||} & |pvar (x:Tmv) (T:Ty)|                                  \\
+& \texttt{||} & |ppair  (p1: Pat) (p2:Pat)|  \\
+& \texttt{||} & |pexist (X:Tyv) (bindspec X p:Pat)|  \\
+\multicolumn{3}{@@{}l}{|fun bind : Pat -> [Tmv]|~\cass}        \\
+& \texttt{||} & |pvar x      -> x|                             \\
+& \texttt{||} & |pprod p1 p2 -> bind p1 , bind p2|             \\
+& \texttt{||} & |pexist X p  -> X , bind p2|                   \\
+\end{tabular}
+
+Note that in comparison to Figure~\ref{fig:knot:fexistsprodsyntax} we have added
+an additional typing annotation in |pvar| and omitted the binding specification
+of |p2| in the |ppair| constructor. The latter is necessary to faithfully encode
+the scoping rules: type-variables of |p1| should not be brought into scope in
+|p2|. However, |bind| still concatenates the recursive results since variables
+from both sub-patterns should be brought into scope in the body of the match. In
+relations defined on top of patterns, we can now force write a symbolic
+expression well-scoped in |bind p2| that needs to be transported to scope |bind
+p1, bind p2| which however needs weakening at depth |bind p2|. The restriction
+comes already into play in the definition of |bind|: the case for |ppair| is
+ill-typed.
+
+In future work we would like to extend the scope checking to correctly handle
+substitutions and weakenings in the middle of the context. Preliminary
+experimentation suggests that this requires an explicit representation of
+bindings that have been commuted with substitutions or weakenings and
+non-trivial equalities that are reminiscent of the equational theory of the
+\textsigma-calculus~\cite{explicitsubstitutions}. We also hope to introduce
+first-class substitutions and develop the scope checking for them.
+
+
+\paragraph{Heterogeneously scoped relations}
+Indices of relations in \Knot are implicitly assumed to be well-scoped in the
+domain of the implicit environment. For some relations involving binders
+however, an index may refer to additional variables bound by another index.
+Consider a pattern matching relation |Match p v t1 t2| that denotes that
+successfully matching pattern |p| against value |v| and applying the resulting
+substitutions to |t1| results in |t2|. In this case, the variables of |p| need
+to be in scope in |t1| which currently is not expressible in \Knot. This is only
+a moderate extension and should be considered an oversight in the design of
+\Knot rather than a fundamental problem. Similarly, the classifiers of a
+variable in an environment are assumed to be homogeneously scoped, which can
+also be extended.
+
+
+\paragraph{Computational functions}
+
+The biggest restrictions of \Knot lie in the expressivity of symbolic
+expressions for relation declarations. \Knot only allows constructor
+applications and symbolic operations. Computational functions can be specified
+in a relational style. In practice, defining recursive functions is more
+convenient and supporting computational function calls in expression is very
+useful. Supporting and scope checking recursive functions and generically
+deriving their boilerplate is within \Knot's grasp, since the complexity is
+similar to that of relations. The major difference is that we need to support
+elimination in addition to introduction forms in expression which come with
+termination concerns.
+
+
+\paragraph{Dependent types}
+
+Constraint on sub-terms are often encoded by using universal quantification,
+implications and functions on sub-terms. Fundamental support for these
+constructions is not a problem as long as any syntactic sorts and relations that
+contain variable cases are only used in positive positions. Unfortunately, this
+is not always the case. For instance, Vouillon's solution to the \POPLmark
+challenge \cite{poplmark:vouillon} defines recursive functions for record label
+lookups and uses these to specify width and depth sub-typing. Specifically, the
+subtyping rule for records universally quantifies over terms and uses lookups
+and identity types in negative positions to encode label subsets.
+
+This encoding of a rule poses a major complication for weakening and
+substitution lemmas. For each of the types used in negative positions, we have
+to prove that we can undo a substitution. In other words, these types need to
+have a substitution lemma which is in fact a natural isomorphism.
+
+In summary, extending \Knot in the future with better support for logical
+primitives is possible but extremely challenging.
+
+
+
 
 %%\stevennote{TODO}{Find and reference
 %%  Belugas equational theory for (fist-class) substitutions.}

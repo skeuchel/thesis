@@ -236,7 +236,7 @@ The 11 textbook calculi we consider are: 1) the simply typed lambda calculus
 $\stlc$, 2) \stlc extended with products, 3) \SystemF, 4) F with products, 5) F
 with existentials, 6) F with existentials and products, 7) F with sequential
 lets, 8) $\text{F}_{<:}$ as in the \POPLmark challenge 1A + 2A of
-Section~\ref{ssec:casestudypoplmark}, 9) $\text{F}_{<:}$ with products, 10)
+Section~\ref{sec:casestudypoplmark}, 9) $\text{F}_{<:}$ with products, 10)
 $\stlc$ with type-operators, and 11) F with type-operators.
 
 For each language, we have two \Coq formalizations: one developed without tool

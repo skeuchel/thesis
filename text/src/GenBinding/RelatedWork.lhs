@@ -72,18 +72,19 @@ property of contexts.
 
 %-------------------------------------------------------------------------------
 \paragraph{Decision Procedures}
-The authors of the \AutoSubst \cite{autosubst} have developed a language with
-symbolic expressions for two sorts: de Bruijn terms and simultaneous de Bruijn
-substitutions with an axiomatic equivalence \cite{debruijndecidability} based on
-the reduction rules of the $\sigma$-calculus \cite{explicitsubstitutions} which
-they show to coincide with the semantic equivalence on de Bruijn terms. They
-have also developed a decision procedure, that automatically decides the
-equivalence of two expressions. As a consequence, frameworks based on
-simultaneous de Bruijn substitutions such as \AutoSubst can, in theory, derive
-all the necessary rewrites for the inductive steps of the substitution lemma
-automatically. In contrast, we derive the rewrites using syntax-directed
-elaboration. However, the decision procedure of \cite{debruijndecidability} is
-applicable in instances other that substitution lemmas.
+The authors of the \AutoSubst library~\cite{autosubst} have developed a language
+with symbolic expressions for two sorts: de Bruijn terms and simultaneous de
+Bruijn substitutions with an axiomatic equivalence \cite{debruijndecidability}
+based on the reduction rules of the $\sigma$-calculus
+\cite{explicitsubstitutions} which they show to coincide with the semantic
+equivalence on de Bruijn terms. They have also developed a decision procedure,
+that automatically decides the equivalence of two expressions. As a consequence,
+frameworks based on simultaneous de Bruijn substitutions such as \AutoSubst can,
+in theory, derive all the necessary rewrites for the inductive steps of the
+substitution lemma automatically. In contrast, we derive the rewrites using
+syntax-directed elaboration. However, the decision procedure of
+\cite{debruijndecidability} is applicable in instances other than substitution
+lemmas.
 
 %-------------------------------------------------------------------------------
 \paragraph{DGP for abstract syntax}
@@ -94,15 +95,16 @@ datatype-generic programming like traversals, pretty-printing, parsing
 etc..
 
 One very interesting idea is to use datatype-generic programming to handle
-variable binding \cite{cheney:synp,unbound}. Variable binding is an ubiquitous
-aspect of programming languages. Moreover, a lot of functionality like variable
-substitutions and free variable calculations is defined for many
+variable binding \cite{cheney:scrapnameplate,unbound}. Variable binding is an
+ubiquitous aspect of programming languages. Moreover, a lot of functionality
+like variable substitutions and free variable calculations is defined for many
 languages. Licata and Harper \cite{licata:ubc} and Keuchel and Jeuring
 \cite{genconv} define universes for datatypes with binding in Agda. Lee et
 al.~\cite{gmeta} develop a framework for first-order representations of variable
-binding in Coq that is based on the universe of regular tree types \cite{ertt}
-and that provides many of the so-called \emph{infrastructure lemmas} required
-when mechanizing programming language meta-theory (cf. Part \ref{part:gen}).
+binding in Coq that is based on the universe of regular tree types
+\cite{regulartreetypes} and that provides many of the so-called
+\emph{infrastructure lemmas} required when mechanizing programming language
+meta-theory (cf. Part \ref{part:gen}).
 
 %-------------------------------------------------------------------------------
 \paragraph{Nominal Representations}

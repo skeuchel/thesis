@@ -3,12 +3,12 @@
 %include polycode.fmt
 %include Formatting.fmt
 
-\chapter{Appendix B}\label{appendix:semantics}
+%% \chapter{Appendix B}\label{appendix:semantics}
 
-\subsection{Term well-scopedness}
+\section{Term well-scopedness}
 
 \begin{figure}[t]
-\begin{center}
+\centering
 \fbox{\small
   \begin{minipage}{0.98\columnwidth}
   \framebox{\mbox{$h \vdash_\alpha n$}} \\
@@ -60,7 +60,6 @@
   %% \]
   \end{minipage}
 }
-\end{center}
 \caption{Well-scopedness of terms}
 \label{fig:wellscopednesspred}
 \end{figure}
@@ -84,75 +83,74 @@ successors for namespace $\alpha$ in $h$ are taken into account.
 %% $u_i$ with the result of evaluating its binding specification |bs_i|.
 
 
-\subsection{Derivation semantics}
-
-\begin{figure}[t]
-\begin{center}
-\fbox{\small
-  \begin{minipage}{0.98\columnwidth}
-
-  \framebox{\mbox{$\judg{u_E?}{R}{\ov{u_t}}{\ov{u_f}}$}} \\
-  \[ \begin{array}{c}
-
-     \inferrule* [right=\textsc{DerVar}]
-       {{\texttt{+} r : \{g \mapsto \ov{t}\} \to R~(K~g)~\ov{t}} \\
-        K : \alpha \to S \\
-        (K' : \alpha \cto \ov{T} : R) \in E \\
-        (n:\ov{v}) \in_{E,\alpha} u_E
-       }
-       {\judg{u_E}{R}{(K~n),\ov{v}}{\epsilon}} \\\\
-
-     \inferrule*[right=\textsc{DerReg}]
-       {\texttt{||} r : \ov{\formula} \to R~\ov{\symbolicterm} ; \ov{f = \rulebindspec} \\
-        \LENV = \ov{(g @@ \alpha)},\ov{([bs]b : \alpha)},\ov{([bs]s : S)}, \ov{([\bindspec]~\jmv:R~\ov{\symbolicterm})} \\
-        \ov{\wfformula{E_{?}}{\formula}} \\
-        \ov{\wfsym{\epsilon}{\symbolicterm}{S}} \\
-        \vartheta = \ov{g \mapsto n},\ov{s \mapsto u_s},\ov{(f,\jmv) \mapsto u_{f\jmv}} \\
-        \ov{\domain{u_E?} \vdash n : \alpha} \\
-        \ov{\domain{u_E?} \vdash u_s : S} \\
-        \ov{\domain{u_E?} \vdash u_{f,\jmv} : E} \\
-        \ov{\models_{\LENV,E,\vartheta} \formula} \\
-       }
-       {\judg{u_E?}{R}{\ov{\evalsym{\epsilon}{\symbolicterm}{\vartheta}}}{\evalbs{\rulebindspec}{E?,\vartheta}}
-       }
-     \end{array}
-  \]
-
-  \framebox{\mbox{$\models_{\LENV,E,\vartheta} \formula$}} \\
-  \[ \begin{array}{c}
-     \end{array}
-  \]
-
-  \framebox{\mbox{$(n:\ov{v}) \in_{E,\alpha} u$}} \\
-  \[ \begin{array}{c}
-     \inferrule* [right=\textsc{InHere}]
-                 {\ov{\vdash v : T} \\
-                  (K : \alpha \cto \ov{T}) \in E
-                 }
-                 {(0 : \ov{\text{sh}_\alpha~0~v)} \in_{E,\alpha} (K~u_E~\ov{v})} \\\\
-     \inferrule* [right=\textsc{InThereHom}]
-                 {(n : \ov{v}) \in_{E,\alpha} u_E \\
-                  (K : \alpha \cto \ov{T}) \in E \\
-                  \ov{\vdash w : T} \\
-                 }
-                 {(S~n : \ov{\text{sh}_\alpha~0~v}) \in_{E,\alpha} {K~u_E~\ov{w}}} \\\\
-     \inferrule* [right=\textsc{InThereHet}]
-                 {(n : \ov{v}) \in_{E,\alpha} u_E \\ \alpha \neq \beta \\
-                  (K : \beta \cto \ov{T}) \in E \\
-                  \ov{\vdash w : T} \\
-                 }
-                 {(n : \ov{\text{sh}_\beta~0~v} \in_{E,\alpha} {K~u_E~\ov{w}}}
-     \end{array}
-  \]
-
-  \end{minipage}
-}
-\end{center}
-\caption{\Knot semantics: relation derivations}
-\label{fig:derivations}
-\end{figure}
-
-Figure \ref{fig:derivations} defines semantics of relations as derivation trees.
+%% \subsection{Derivation semantics}
+%%
+%% \begin{figure}[t]
+%% \centering
+%% \fbox{\small
+%%   \begin{minipage}{0.98\columnwidth}
+%%
+%%   \framebox{\mbox{$\judg{u_E?}{R}{\ov{u_t}}{\ov{u_f}}$}} \\
+%%   \[ \begin{array}{c}
+%%
+%%      \inferrule* [right=\textsc{DerVar}]
+%%        {{\texttt{+} r : \{g \mapsto \ov{t}\} \to R~(K~g)~\ov{t}} \\
+%%         K : \alpha \to S \\
+%%         (K' : \alpha \cto \ov{T} : R) \in E \\
+%%         (n:\ov{v}) \in_{E,\alpha} u_E
+%%        }
+%%        {\judg{u_E}{R}{(K~n),\ov{v}}{\epsilon}} \\\\
+%%
+%%      \inferrule*[right=\textsc{DerReg}]
+%%        {\texttt{||} r : \ov{\formula} \to R~\ov{\symbolicterm} ; \ov{f = \rulebindspec} \\
+%%         \LENV = \ov{(g @@ \alpha)},\ov{([bs]b : \alpha)},\ov{([bs]s : S)}, \ov{([\bindspec]~\jmv:R~\ov{\symbolicterm})} \\
+%%         \ov{\wfformula{E_{?}}{\formula}} \\
+%%         \ov{\wfsym{\epsilon}{\symbolicterm}{S}} \\
+%%         \vartheta = \ov{g \mapsto n},\ov{s \mapsto u_s},\ov{(f,\jmv) \mapsto u_{f\jmv}} \\
+%%         \ov{\domain{u_E?} \vdash n : \alpha} \\
+%%         \ov{\domain{u_E?} \vdash u_s : S} \\
+%%         \ov{\domain{u_E?} \vdash u_{f,\jmv} : E} \\
+%%         \ov{\models_{\LENV,E,\vartheta} \formula} \\
+%%        }
+%%        {\judg{u_E?}{R}{\ov{\evalsym{\epsilon}{\symbolicterm}{\vartheta}}}{\evalbs{\rulebindspec}{E?,\vartheta}}
+%%        }
+%%      \end{array}
+%%   \]
+%%
+%%   \framebox{\mbox{$\models_{\LENV,E,\vartheta} \formula$}} \\
+%%   \[ \begin{array}{c}
+%%      \end{array}
+%%   \]
+%%
+%%   \framebox{\mbox{$(n:\ov{v}) \in_{E,\alpha} u$}} \\
+%%   \[ \begin{array}{c}
+%%      \inferrule* [right=\textsc{InHere}]
+%%                  {\ov{\vdash v : T} \\
+%%                   (K : \alpha \cto \ov{T}) \in E
+%%                  }
+%%                  {(0 : \ov{\text{sh}_\alpha~0~v)} \in_{E,\alpha} (K~u_E~\ov{v})} \\\\
+%%      \inferrule* [right=\textsc{InThereHom}]
+%%                  {(n : \ov{v}) \in_{E,\alpha} u_E \\
+%%                   (K : \alpha \cto \ov{T}) \in E \\
+%%                   \ov{\vdash w : T} \\
+%%                  }
+%%                  {(S~n : \ov{\text{sh}_\alpha~0~v}) \in_{E,\alpha} {K~u_E~\ov{w}}} \\\\
+%%      \inferrule* [right=\textsc{InThereHet}]
+%%                  {(n : \ov{v}) \in_{E,\alpha} u_E \\ \alpha \neq \beta \\
+%%                   (K : \beta \cto \ov{T}) \in E \\
+%%                   \ov{\vdash w : T} \\
+%%                  }
+%%                  {(n : \ov{\text{sh}_\beta~0~v} \in_{E,\alpha} {K~u_E~\ov{w}}}
+%%      \end{array}
+%%   \]
+%%
+%%   \end{minipage}
+%% }
+%% \caption{\Knot semantics: relation derivations}
+%% \label{fig:derivations}
+%% \end{figure}
+%%
+%% Figure \ref{fig:derivations} defines semantics of relations as derivation trees.
 
 %%% Local Variables:
 %%% mode: latex

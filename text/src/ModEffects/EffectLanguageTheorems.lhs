@@ -310,7 +310,7 @@ is similar to \ref{thm:LSoundP} and is easily built from \ref{thm:ESoundE} and
 \paragraph{Typing Rules}
 
 Figure~\ref{fig:WFM+State} lists the two typing rules for stateful computations.
-To understand the formulation of these rules, consider \LSoundS, the
+To understand the formulation of these rules, consider \ref{thm:LSoundS}, the
 statement of soundness for a language with a stateful evaluation function. The
 statement accounts for both the typing environment $\Sigma$ and evaluation
 environment $\sigma$ by imposing the invariant that $\sigma$ is well-formed with
@@ -470,14 +470,21 @@ As we have seen, laws are essential for proofs of \ref{thm:FSound}. The proofs
 so far have involved only up to one effect and the laws regulate the behavior of
 that effect's primitive operations.
 
-Languages often involve more than one effect, however. Hence, the proofs of
-effect theorems must reason about the interaction between multiple effects.
-There is a trade-off between fully instantiating the monad for the language as
-we have done previously, and continuing to reason about a constrained
-polymorphic monad. The former is easy for reasoning, while the latter allows the
-same language proof to be instantiated with different implementations of the
-monad. In the latter case, additional \emph{effect interaction} laws are
-required.
+Languages often involve more than one effect, however. As outline in
+Section~\ref{ssec:mod:effectdependenttheorems} the effect theorem depends on the
+set of available effects, and in the case of multiple effects the theorem is
+different from the theorem for any proper subset of effects. Moreover, the
+proofs of effect theorems must reason about the interaction between multiple
+effects. There is a trade-off between fully instantiating the monad for the
+language as we have done previously, and continuing to reason about a
+constrained polymorphic monad. The former is easy for reasoning, while the
+latter allows the same language proof to be instantiated with different
+implementations of the monad. In the latter case, additional \emph{effect
+  interaction} laws are required.
+
+The following sections discuss compositions of different set of effects, their
+effect theorem statement, and the necessary interaction laws to prove the effect
+theorem.
 
 %\BD{This section needs a discussion of the two candidate rules for how put and
 %catch interact. This reflects the fact that sometimes there aren't single laws

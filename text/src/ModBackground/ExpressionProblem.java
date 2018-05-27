@@ -16,7 +16,7 @@ class Add implements ArithExp {
 }
 class Mul implements ArithExp {
   public ArithExp e1, e2;
-  public int eval() { return e1.eval() + e2.eval(); }
+  public int eval() { return e1.eval() * e2.eval(); }
   public String print() {
     return e1.print().concat("*").concat(e2.print());
   }

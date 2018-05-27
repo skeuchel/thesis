@@ -142,7 +142,7 @@ shows the code with both extensions.
       }
       class Mul implements ArithExp {
         public ArithExp e1, e2;
-        public int eval() { return e1.eval() + e2.eval(); }
+        public int eval() { return e1.eval() * e2.eval(); }
         public String print() {
           return e1.print().concat("*").concat(e2.print());
         }
@@ -178,14 +178,15 @@ without changing or recompiling the existing code, and keeping the code
 type-safe was coined as \emph{the expression problem} by
 \citet{expression-problem}. Solutions to the expression problem exist in
 multiple languages: \citet{expression-problem} presents a solution in Java using
-Generics and the \emph{Datatypes \`a la Carte} (DTC) approach \cite{dtc} is a
-well-known solution in the Haskell programming language. In both of these
-solutions, modularity has to be anticipated and catered for from the beginning
-however. Indeed, we cannot reuse the datatype declaration and interface
-declarations from this section, but have to use ones that account for modular
-extensions. We will call a Haskell datatype that can be modularly extended a
-\emph{modular datatype} and use the term \emph{modular function} for modularly
-extensible functions that are defined on modular datatypes.
+Generics and the \emph{Datatypes \`a la Carte} (DTC) approach
+\cite{swierstra2008dtc} is a well-known solution in the Haskell programming
+language. In both of these solutions, modularity has to be anticipated and
+catered for from the beginning however. Indeed, we cannot reuse the datatype
+declaration and interface declarations from this section, but have to use ones
+that account for modular extensions. We will call a Haskell datatype that can be
+modularly extended a \emph{modular datatype} and use the term \emph{modular
+  function} for modularly extensible functions that are defined on modular
+datatypes.
 
 Our goal to modularly engineer programming language meta-theory adds a third
 dimension to the expression problem: \emph{modular proofs} of statements about

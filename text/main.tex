@@ -30,6 +30,11 @@
 
 \input{src/Titlepage}
 \input{src/Acknowledgements}
+{
+\input{src/GenMacros}
+\input{src/Summary}
+\input{src/Samenvatting}
+}
 
 \cleardoublepage\pdfbookmark[0]{\contentsname}{Contents}
 \tableofcontents
@@ -78,12 +83,13 @@
 \addcontentsline{toc}{part}{Conclusion}
 \input{src/Conclusion}
 
+\appendix
 \part*{Appendices}
 \addcontentsline{toc}{part}{Appendices}
 {
 \input{src/GenMacros}
 \input{src/GenBinding/AppendixSpecification}
-\input{src/GenBinding/AppendixSemantics}
+%% \input{src/GenBinding/AppendixSemantics}
 \input{src/GenBinding/AppendixElaboration}
 }
 

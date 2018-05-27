@@ -17,8 +17,6 @@
 
 > import Data.Kind
 
--- > import Introduction
-
 %endif
 
 
@@ -64,8 +62,8 @@ of signature functors.
 %-------------------------------------------------------------------------------
 \subsection{Generic Universes}\label{mod:pred:universes}
 In a dependently-typed setting it is common to use a universe for generic
-programming~\cite{dgpdt,benke:universes}. A universe consists of two important
-parts:
+programming~\cite{altenkirch:gpwdtp,dgpdt,benke:universes}. A universe consists
+of two important parts:
 
 \begin{enumerate}
 \item A set |Code| of codes that represent types in the universe.
@@ -277,55 +275,54 @@ proof algebra |palg|.
 \subsection{Container Class}\label{mod:pred:containerautomation}
 
 \begin{figure}[t]
-\fbox{
-\begin{minipage}{1\columnwidth}
-
-< class Container (f :: * -> *) where
-<   cont    :: Cont
-<   from    :: f a -> Ext c a
-<   to      :: Ext c a -> f a
-<   fromTo  :: forall x. from (to x) == x
-<   toFrom  :: forall x. to (from x) == x
-
-\end{minipage}
-}
-\caption{Container functor class}
-\label{fig:containerfunctorclass}
+  \fbox{
+    \begin{minipage}{1\columnwidth}
+      \begin{spec}
+      class Container (f :: * -> *) where
+        cont    :: Cont
+        from    :: f a -> Ext c a
+        to      :: Ext c a -> f a
+        fromTo  :: forall x. from (to x) == x
+        toFrom  :: forall x. to (from x) == x
+      \end{spec}
+    \end{minipage}
+  }
+  \caption{Container functor class}
+  \label{fig:containerfunctorclass}
 \end{figure}
 
-Directly working with the container representation is cumbersome for
-the user. As a syntactic convenience we allow the user to use any
-conventional functor of type |* -> *| as long as it is isomorphic
-to a container functor. The type class |Container| in Figure
-\ref{fig:containerfunctorclass} witnesses this isomorphism. The class
-contains the functions |from| and |to| that perform the conversion
-between a conventional functor and a container functor and proofs that
-these conversions are inverses.
+Directly working with the container representation is cumbersome for the user.
+As a syntactic convenience we allow the user to use any conventional functor of
+type |* -> *| as long as it is isomorphic to a container functor. The type class
+|Container| in Figure \ref{fig:containerfunctorclass} witnesses this
+isomorphism. The class contains the functions |from| and |to| that perform the
+conversion between a conventional functor and a container functor and proofs
+that these conversions are inverses.
 
-Via the isomorphisms |from| and |to| we can import all the generic
-functions to concrete functors and give instances for |Functor|,
-|PFunctor| and |SPF|.
+Via the isomorphisms |from| and |to| we can import all the generic functions to
+concrete functors and give instances for |Functor|, |PFunctor|, and |SPF|, which
+are displayed in Figure~\ref{fig:containerinstances}.
 
 \begin{figure}[t]
-\fbox{
-\begin{minipage}{1\columnwidth}
-
-< instance Container f => Functor f where
-<   fmap f    = to . gfmap f . from
-< instance Container f => PFunctor f where
-<   All q     = GAll q . from
-<   all_fmap  = ...
-< instance Container f => SPF f where
-<   Fix       = W S P
-<   inFix     = sup . from
-<   outFix    = to . unSup
-<   fold alg  = gfold (alg . to)
-<   ...
-
-\end{minipage}
-}
-\caption{Container functor class}
-\label{fig:containerfunctorclass}
+  \fbox{
+    \begin{minipage}{1\columnwidth}
+      \begin{spec}
+      instance Container f => Functor f where
+        fmap f    = to . gfmap f . from
+      instance Container f => PFunctor f where
+        All q     = GAll q . from
+        all_fmap  = ...
+      instance Container f => SPF f where
+        Fix       = W S P
+        inFix     = sup . from
+        outFix    = to . unSup
+        fold alg  = gfold (alg . to)
+        ...
+      \end{spec}
+    \end{minipage}
+  }
+  \caption{Container instances}
+  \label{fig:containerinstances}
 \end{figure}
 
 

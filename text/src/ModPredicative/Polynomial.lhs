@@ -64,8 +64,8 @@ equality type class that is shown in Figure \ref{fig:equalityclass}.
 We choose the universe of univariate polynomial functors for the generic
 implementation of equality because it is well-studied, since it usually forms
 the basis of other datatype-generic programming approaches that take a
-\emph{sums-of-products view}~\cite{jansson1997polyp} on datatypes. It can also
-be encoded in a lot of languages. For example the |regular|
+\emph{sums-of-products view}~\cite{jansson:polyp} on datatypes. It can also be
+encoded in a lot of languages. For example the |regular|
 library~\cite{vannoort2010lightweight,multirec} is an implementation in Haskell.
 Furthermore it is relatively easy to write instances for polynomial functors and
 a lot of signature functors that come up in practice are indeed polynomial
@@ -73,14 +73,15 @@ functors.
 
 Polynomial functors are a sub-class of container functors; we use this fact to
 integrate polynomial functors into our approach by writing a universe embedding
-into containers and allow mixing them freely with any container functors.  Such
+into containers and allow mixing them freely with any container functors. Such
 universe embeddings have been studied by \cite{jpm:fcadgp}. However, the
 universe of polynomial functors is not the only possible choice. There are
-universes of functors such as regular tree types \cite{ertt} or finite
-containers~\cite{categoriesofcontainers} \footnote{Also known as dependent
-  polynomial functors \cite{dependentpolynomialfunctors} or shapely functors
-  \cite{lawoftraversals,shapelyfunctors}.} that lie strictly between polynomial
-and container functors and also allow a generic implementation of equality.
+universes of functors such as regular tree types \cite{regulartreetypes} or
+finite containers~\cite{categoriesofcontainers} \footnote{Also known as
+  dependent polynomial functors \cite{dependentpolynomialfunctors} or shapely
+  functors \cite{lawoftraversals,shapelyfunctors}.} that lie strictly between
+polynomial and container functors and also allow a generic implementation of
+equality.
 
 Section \ref{mod:poly:universe} presents the definition of polynomial functors
 and Section \ref{mod:poly:embedding} shows the embedding of polynomial functors

@@ -1,0 +1,104 @@
+\chapter*{Samenvatting}
+\addcontentsline{toc}{chapter}{Samenvatting}
+
+Computerwetenschappers ontwikkelen nieuwe programmeertalen, en verbeteren
+bestaande talen, om ons sneller betere programma's te laten schrijven. Een doel
+is, om talen te ontwikkelen met bruikbare meta-theoretische eigenschappen, zoals
+bijvoorbeeld, veiligheidsgaranties voor alle programma's uitgedrukt in de taal.
+Deze garanties zijn nuttig, een programmeur kan ze bijvoorbeeld gebruiken om de
+correctheid van haar programma's te beoordelen, en een compiler kan ze gebruiken
+voor optimalisaties.
+
+Helaas is het ontwikkelen van talen moeilijk: verschillende taalfuncties hebben
+vaak ingewikkelde interacties in randgevallen welke gemakkelijk te missen zijn,
+en fouten kunnen aannames over meta-theoretische eigenschappen tenietdoen, met
+mogelijk ernstige gevolgen. Daarom begonnen onderzoekers programmeertalen
+formeel te specificeren en hun meta-theorie in bewijsassistenten te verifiëren,
+een proces dat mechanisatie wordt genoemd.
+
+Helaas heeft mechanisatie een steile leercurve en hoge ontwikkelingskosten
+en is daarom niet algemene praktijk. %gangbare praktijk?
+Als mechanisatie wordt gebruikt, dan meestal alleen op een beheersbare deel van
+de taal, met het nadeel dat resultaten niet altijd kunnen overgebracht worden
+naar de volledige taal.
+
+Om het gebruik van mechanisaties uit te breiden en om realistische talen binnen
+handbereik te brengen, is het noodzakelijk om de kosten te verlagen. Dit
+proefschrift onderzoekt hergebruik van code als middel om dit te bereiken,
+bijzonder het principieel hergebruik via modulariteit en genericiteit die we nu
+bespreken.
+
+
+\paragraph{Modulariteit}
+Verschillende programmeertalen hebben vaak gemeenschappelijke functies
+bijvoorbeeld boolean of afhandeling van excepties. Het eerste deel van dit
+proefschrift gaat over het modulair delen van specificatie, implementatie en
+meta-theoretische bewijzen van functies door meerdere talen.
+
+Een struikelblok is dat inductieve definities en bewijzen voor extensies
+gesloten zijn. Dit wordt opgelost door het gebruik van datatype-generieke
+programmeertechnieken om datatypes, semantiek en bewijzen te modulariseren. Een
+case study toont de voordelen van onze aanpak ten opzichte van een bestaande
+oplossing.
+
+Het modulariseren van talen met effecten is uitzonderlijk uitdagend, omdat de
+stelling meestal afhangt van alle effecten van de taal, en functies met effecten
+vaak veel interactie vertonen.
+
+We verbeteren dit situatie door het ontwikkelen van een nieuwe denotationele
+semantiek gebaseerd op monadische interpreter waarmee we het
+typeveiligheidsbewijs op splitsen kunnen: functie-stellingen die goed getypeerde
+monadische denotaties van individuele functies bepalen, en effect-stellingen die
+goed getypeerde denotaties aanpassen naar een vaste verzameling van effecten.
+Het typeveiligheidsbewijs voor een bepaalde taal combineert de stellingen van
+al zijn functies met de stelling van al zijn effecten. Onze case study toont de
+effectiviteit van onze aanpak door het modulariseren van vijf taalfuncties,
+waaronder drie met effecten.
+
+Terwijl onze technieken de tussentijdse doelen van modularisering en hergebruik
+bereiken, hebben complexiteit en boekhouding de totale kosten verhoogd. Verder
+onderzoek en directe integratie in proefassistenten is nodig om de technieken
+praktisch te maken.
+
+
+\paragraph{Genericiteit}
+Bijna elke programmeertaal op hoog niveau maakt gebruik van variabelen in zijn
+syntaxis. De operationele semantiek van dergelijke talen implementeert reductie
+van constructies met variabelen meestal door substituties van variabelen.
+Meta-theoretische bewijzen moeten met eigenschappen van deze substitutie
+redenen. De substitutiefunctie en de bewijzen van zijn eigenschappen kunnen als
+boilerplate geclassificeerd worden, omdat ze een patroon volgen dat alleen
+afhangt van de syntaxis en de scoping regels van de taal. Deze boilerplate kan
+een groot deel van de hele mechanisatie uitmaken, en moet daarom het best
+automatisch beschikbaar zijn. Het tweede deel van dit proefschrift ontwikkelt
+een generieke oplossing voor dit probleem.
+
+We ontwikkelen een nieuwe declaratieve taal \Knot voor de specificatie van
+abstract syntaxis met variabelen, en voor semantische relaties boven op de
+syntaxis. Een type systeem zorgt ervoor dat variabelen in uitdrukkingen in de
+definitie van relaties altijd in hun bereik woorden gebruikt. We geven een
+interpretatie van \Knot-specificaties met behulp van de Bruijn termen die we ook
+geïmplementeerd hebben als een datatype generieke bibliotheek \Loom in \Coq.
+
+Boilerplate lemmas zijn geïmplementeerd door generieke uitwerkingsfuncties naar
+domeinspecifieke getuige-talen. In het bijzonder, zijn wij, voor zover wij
+weten, de eersten die uitwerkingen van verzwakking and substitutie lemmas van
+semantische relaties met een eerste-orde aanpak verschaffen. We bewijzen formeel
+de correctheid van de uitwerkingen en de deugdelijkheid van onze
+domeinspecifieke talen.
+
+Voor praktische mechanisaties hebben we de \Needle-codegenerator ontwikkeld die
+\Knot-specificatie compileert naar \Coq-definities inclusief variabelen
+boilerplate. \Needle's uitwerking functies zijn Haskell-poorten van de
+geverifieerde \Loom-functies die ons vertrouwen in de correctheid van \Needle
+versterkt.
+
+Onze evaluatie toont aanzienlijke besparingen in vergelijking met handmatige
+\Coq mechanisaties van typeveiligheid voor verschillende talen. In het
+bijzonder, onze oplossing van de \POPLmark-challenge (1a + 2a) is veruit de
+kortste in vergelijking met andere oplossingen.
+
+Samenvattend breidt dit proefschrift zich uit over bestaand werk en biedt nieuwe
+inzichten in het codeeherbruik voor mechanisaties van meta-theorie en zet
+daarmee een volgende stap om deze methoden toe te passen op realistische
+programmeertalen.

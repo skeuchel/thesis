@@ -3,18 +3,19 @@
 %include polycode.fmt
 %include Formatting.fmt
 
-\chapter{Appendix C}\label{appendix:elaboration}
+%% \chapter{Appendix C}\label{appendix:elaboration}
 
-\subsection{Well-scoping proof terms}
+\section{Well-scoped Evaluation}\label{appendix:wellscopingwitnesses}
 
 %format ws1
 %format ws2
 
-\begin{figure}[t]
-\begin{center}
+\begin{figure}[t!]
+\centering
 \fbox{\small
   \begin{minipage}{0.98\columnwidth}
   \framebox{\mbox{$\wnindex{H}{h_0}{wn}{h}{\vartheta}{n}{\alpha}$}} \\
+  \vspace{-7mm}
   \[ \begin{array}{c}
      \inferrule*[right=\textsc{WnHyp}]
                  {(g:\alpha) \in H}
@@ -54,7 +55,7 @@
                    {h}{\vartheta}{n}{\alpha}
                  } \\\\
      \inferrule*[right=\textsc{WnInvVar}]
-                 {K : \alpha \rightarrow S \\\\
+                 {K : \alpha \rightarrow S \\
                   \wsterm{H}{h_0}{ws}{h}{\vartheta}{K~n}{S}
                  }
                  {\wnindex{H}{h_0}
@@ -74,13 +75,13 @@
                     {\vartheta}{|evalsym bs sym ϑ|}{S}
                  } \\\\
      \inferrule*[right=\textsc{WsVar}]
-       {K : \alpha \rightarrow S \\\\
+       {K : \alpha \rightarrow S \\
         \wnindex{H}{h_0}{wn}{h}{\vartheta}{n}{\alpha}
        }
        {\wsterm{H}{h_0}{|var K wn|}{h}{\vartheta}{K~n}{S}} \\\\
 
      \inferrule*[right=\textsc{WsReg}]
-       {K : \ov{b : \alpha} \to \ov{[bs] t : T} \to S \\\\
+       {K : \ov{b : \alpha} \to \ov{[bs] t : T} \to S \\
         \vartheta' = \ov{t \mapsto u} \\\\
         \wsterm
            {H}{h_0}
@@ -91,7 +92,7 @@
        {\wsterm{H}{h_0}{|reg K (overline ws)|}{h}{\vartheta}{K~\ov{u}}{S}} \\\\
 
      \inferrule*[right=\textsc{WsRegInv}]
-       {K : \ov{b : \alpha} \to \ov{[bs] t : T} \to S \\\\
+       {K : \ov{b : \alpha} \to \ov{[bs] t : T} \to S \\
         \vartheta' = \ov{t \mapsto u} \\\\
         \wsterm{H}{h_0}{ws}{h}{\vartheta}{K~\ov{u}}{S}}
        {\wsterm
@@ -125,7 +126,7 @@
        } \\\\
 
      \inferrule*[right=\textsc{WsSubst}]
-       {\wsterm{H}{h_0}{ws_1}{h}{\vartheta}{u1}{S1} \\\\
+       {\wsterm{H}{h_0}{ws_1}{h}{\vartheta}{u1}{S1} \\
         \wsterm{H}{h_0}{ws_2}{S_\alpha~h}{\vartheta}{u2}{S2}
        }
        {\wsterm
@@ -136,7 +137,6 @@
   \]
   \end{minipage}
 }
-\end{center}
 \caption{Well-scoping proof term interpretation}
 \label{fig:wellscopingproofterms}
 \end{figure}
@@ -200,7 +200,7 @@ $$
 %% $cosymws$ is correct.
 %%
 %% \begin{figure}[t]
-%% \begin{center}
+%% \centering
 %% \fbox{
 %%   \begin{minipage}{0.95\columnwidth}
 %%   \[\begin{array}{@@{}l@@{\hspace{1mm}}c@@{\hspace{1mm}}l}
@@ -210,7 +210,6 @@ $$
 %%   \]
 %%   \end{minipage}
 %% }
-%% \end{center}
 %% \caption{Grammar of symbolic expression contexts}
 %% \label{fig:grammarsymboliccoterms}
 %% \end{figure}
@@ -219,7 +218,7 @@ $$
 %%
 %%
 %% \begin{figure}[t]
-%% \begin{center}
+%% \centering
 %% \fbox{
 %%   \begin{minipage}{0.95\columnwidth}
 %%     %% box (plug : sym → cosym →ws)
@@ -238,13 +237,12 @@ $$
 %%     \end{code}
 %%   \end{minipage}
 %% }
-%% \end{center}
 %% \caption{Symbolic expression contexts}
 %% \label{fig:elabsymboliccoterm}
 %% \end{figure}
 %%
 %% \begin{figure}[t]
-%% \begin{center}
+%% \centering
 %% \fbox{
 %%   \begin{minipage}{0.95\columnwidth}
 %%   \framebox{\mbox{$\wfsym{\bindspec\to\bindspec}{\symboliccoterm}{T \to S}$}} \\
@@ -289,17 +287,21 @@ $$
 %%
 %%   \end{minipage}
 %% }
-%% \end{center}
 %% \caption{Well-formed symbolic expression contexts}
 %% \label{fig:wellformedsymboliccoterms}
 %% \end{figure}
 
+\clearpage
 
-\subsection{Equality witnesses}
+\section{Relation Shift Elaboration}
 
-Figure \ref{fig:termequalitygrammar} contains the language of equality witnesses
-that we are using and Figure \ref{fig:termequalitysemantics} their
-interpretation.
+The shifting lemma for relations require a proof that the global shifting
+commutes with the local evaluation of expressions. Figure
+\ref{fig:termequalitygrammar} contains the language of equality witnesses that
+we are using, Figure \ref{fig:termequalitysemantics} their interpretation, and
+Figure \ref{fig:shiftcommelablration} shows the elaboration function for the
+shift commutation lemma.
+
 
 %% $(\eqtrefl{\bindspec}{\symbolicterm}{S})$ stands for reflexivity
 %% which means that the two evaluations of $\symbolicterm$ are equal. The witness
@@ -307,7 +309,7 @@ interpretation.
 
 
 \begin{figure}[t]
-\begin{center}
+\centering
 \fbox{\small
   \begin{minipage}{0.98\columnwidth}
   \[\begin{array}{@@{}l@@{\hspace{1mm}}c@@{\hspace{1mm}}l}
@@ -318,13 +320,34 @@ interpretation.
   \]
   \end{minipage}
 }
-\end{center}
 \caption{Grammar of term equality witnesses}
 \label{fig:termequalitygrammar}
 \end{figure}
 
+
 \begin{figure}[t]
-\begin{center}
+\centering
+\fbox{\small
+  \begin{minipage}{0.98\columnwidth}
+    \begin{code}
+    box (shsym : bs → sym → qt)
+    shsym bs s      = qrf bs s
+    shsym bs (K r)  = qrf bs (K r)
+    shsym bs (K b)  = qrf bs (K b)
+    shsym bs (K (overline b) (overline sym)) =
+      qcn K (overline (shsym (bs,bs') sym))
+      where K : (overline (b':alpha)) -> ([bs']t:T) -> S
+    shsym bs (weaken s bs') = qhh bs s bs'
+    shsym bs (subst b sym s) = qhu bs sym s
+    \end{code}
+  \end{minipage}
+}
+\caption{Shift commutation elaboration}
+\label{fig:shiftcommelablration}
+\end{figure}
+
+\begin{figure}[t]
+\centering
 \fbox{\small
   \begin{minipage}{0.98\columnwidth}
   \framebox{\mbox{$\eqterm{h}{c}{\vartheta}{qt}{h}{u}{u}{S}$}} \\
@@ -424,19 +447,17 @@ interpretation.
   \]
   \end{minipage}
 }
-\end{center}
 \caption{Term equality semantics}
 \label{fig:termequalitysemantics}
 \end{figure}
 
 
-\subsection{Shift elaboration}
 
 The relation $\eqterm{h_0}{c}{\vartheta}{qt}{h}{u}{v}{S}$ interprets equality
 witnesses for the purpose of proving commutation of symbolic evaluation with
-shifting. Only proof term formers relevant to this lemma are interpreted. The
-cutoff $c$ and the value environment $\vartheta$ are parameters to this
-relation.
+shifting only. Hence only proof term formers relevant to this lemma are
+interpreted. The cutoff $c$ and the value environment $\vartheta$ are parameters
+to this relation.
 
 
 \begin{lem}[Soundness]
@@ -449,30 +470,6 @@ $$
 $$
 \end{lem}
 
-Figure \ref{fig:shiftcommelablration} shows the elaboration function for the
-shift commutation lemma.
-
-\begin{figure}[t]
-\begin{center}
-\fbox{\small
-  \begin{minipage}{0.98\columnwidth}
-    \begin{code}
-    box (shsym : bs → sym → qt)
-    shsym bs s      = qrf bs s
-    shsym bs (K r)  = qrf bs (K r)
-    shsym bs (K b)  = qrf bs (K b)
-    shsym bs (K (overline b) (overline sym)) =
-      qcn K (overline (shsym (bs,bs') sym))
-      where K : (overline (b':alpha)) -> ([bs']t:T) -> S
-    shsym bs (weaken s bs') = qhh bs s bs'
-    shsym bs (subst b sym s) = qhu bs sym s
-    \end{code}
-  \end{minipage}
-}
-\end{center}
-\caption{Shift commutation elaboration}
-\label{fig:shiftcommelablration}
-\end{figure}
 
 
 

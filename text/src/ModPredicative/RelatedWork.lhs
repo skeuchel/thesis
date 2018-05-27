@@ -27,8 +27,8 @@ generic proofs. The approaches vary in terms of how strictly they follow the
 positivity or termination restrictions imposed by the proof-assistant. Some
 circumvent the type-checker at various points to simplify the development or
 presentation while others put more effort in convincing the type-checker and
-termination checker of the validity~\cite{ertt}. However, in any of the
-proposals there does not seem to be any fundamental problem caused by the
+termination checker of the validity~\cite{regulartreetypes}. However, in any of
+the proposals there does not seem to be any fundamental problem caused by the
 positivity or termination restrictions.
 
 \paragraph{DGP for modular proofs}
@@ -50,14 +50,13 @@ definitions.
 
 Using Coq's type classes both MTC and our approach provide more automation in
 the final composition of datatypes, functions and proofs. Agda features instance
-arguments that can be used to replace type classes in various cases. Schwaab and
-Siek's \cite{schwaab:mtp} developments took place when Agda's implementation did
-not perform recursive resolution, and as a result Agda did not support
-automation of the composition to the extent that is needed for DTC-like
-approaches. However, as of Agda version 2.4.2 instance argument resolution is
-recursive. Hence it should now be possible to augment Schwaab and Siek's
-approach with full automation for composition and also port our approach to
-Agda.
+arguments that can be used to replace type classes in various cases.
+\citet{schwaab:mtp}'s developments took place when Agda's implementation did not
+perform recursive resolution, and as a result Agda did not support automation of
+the composition to the extent that is needed for DTC-like approaches. However,
+as of Agda version 2.4.2 instance argument resolution is recursive. Hence it
+should now be possible to augment Schwaab and Siek's approach with full
+automation for composition and also port our approach to Agda.
 
 A notable difference is that Schwaab and Siek do not define a dependent recursor
 for induction but instead completely rely on non-dependent recursion over
@@ -70,12 +69,11 @@ type-checker because Agda is a fully predicative system.
 \paragraph{Combining different DGP approaches}
 We have shown an embedding of the universe of polynomial functors into the
 universe of containers. Similar inclusions between universes have been
-presentend in the literature \cite{morris:cspf}. Magalh\~aes and L\"oh
-\cite{jpm:fcadgp} have ported several popular DGP approaches from Haskell to
-Agda and performed a formal comparison by proving inclusion relations between
-the approaches including a port of the |regular| Haskell library that is
-equivalent to our polynomial functor universe. However, they did not consider
-containers in their comparison.
+presentend in the literature \cite{morris:cspf}. \citet{jpm:fcadgp} have ported
+several popular DGP approaches from Haskell to Agda and performed a formal
+comparison by proving inclusion relations between the approaches including a
+port of the |regular| Haskell library that is equivalent to our polynomial
+functor universe. However, they did not consider containers in their comparison.
 
 DGP approaches differ in terms of the class of datatypes they capture and the
 set of generic functions that can be implemented for them. Generic functions can

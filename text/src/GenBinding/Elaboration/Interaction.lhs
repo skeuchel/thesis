@@ -75,7 +75,7 @@ and cancels a subsequent substitution:
 %
 where $h := |dom Δ|$.
 
-\begin{lem}\label{lem:elab:shiftcomm}
+\begin{lem}\label{lem:elab:substshiftcancel}
 \[ \forall v, u, h.
      |substα h v (shiftα h u) = u|
 \]

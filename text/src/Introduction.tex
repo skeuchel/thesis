@@ -80,12 +80,18 @@ property at hand. Because calculi are much smaller so are the proofs of their
 meta-theory. The downside is that results for a calculus do not always carry
 over to the full language. Problems in the calculus often reveal problems in the
 full language, but the absence of problems in the calculus does not guarantee
-the same for the full language.  For example, the Java programming language was
-long believed to be type-safe\footnote{Except for some deliberate defects like
-  the co-variance of arrays.}  but the addition of generics made Java's type
-system unsound~\cite{amin2016java}. This fact was not apparent for many years,
-and contradicts the type safety results for several generic Java
-calculi~\cite{igarashi2001featherweight,Cameron2008}.
+the same for the full language. For example, the Java programming language was
+long believed to be type-safe\footnote{With dynamic type checking to ensure
+  safety of deliberate defects like the co-variance of arrays.} but the addition
+of generics made Java's type system unsound~\cite{amin2016java}. This fact was
+not apparent for many years, and contradicts the type safety results for several
+generic Java calculi~\cite{igarashi2001featherweight,Cameron2008}. Luckily
+generics were never integrated into the Java Virtual Machine (JVM) which
+compiles checks that catch this unsoundness at runtime and throw an exception.
+Otherwise this unsoundness could have been used to gain direct access to the raw
+memory representation of objects and be used as a security
+exploit~\cite{javaunsoundindustry}.
+
 % Another problem concerns the type-checking of Java
 % programs. Generics made type-checking an undecidable property of
 % programs~\cite{grigore2017}. Decidability of type-checking does not have an
@@ -96,9 +102,9 @@ calculi~\cite{igarashi2001featherweight,Cameron2008}.
 Secondly, because pen-and-paper proofs are very error-prone and human reviewers
 are not perfect at vetting them, meta-theoretical proofs are often written in
 formal languages that can be automatically checked by software tools known as
-\emph{proof assistants}. This process, known as ``mechanisation'', greatly
+\emph{proof assistants}. This process, known as ``mechanization'', greatly
 increases the confidence in the validity of meta-theory proofs. Unfortunately,
-mechanisation does not address the large effort of proving properties, but
+mechanization does not address the large effort of proving properties, but
 rather aggravates it as every little detail has to be spelled out.
 
 \paragraph{Research Question}
@@ -140,11 +146,11 @@ languages\footnote{We refer the interested reader to introductory textbooks on
 for reuse.
 
 %% %-------------------------------------------------------------------------------
-%% \section{Mechanisation}
+%% \section{Mechanization}
 %% Mechanising formal meta-theory in proof-assistants is crucial, both for the
 %% increased confidence in complex designs and as a basis for technologies such as
 %% proof-carrying code.  Formal reasoning in proof-assistants, also known as
-%% mechanisation, has high development costs.
+%% mechanization, has high development costs.
 %%
 
 %% \begin{itemize}
@@ -355,7 +361,7 @@ correctness of implementations.
              {\eval{(\lambda x:\tau.e_1)~e_2}{[x \mapsto e_2]e_1}
              } \\\\
            \inferrule* [right=\textsc{EApp}]
-             {\eval{e_1}{e_2'}
+             {\eval{e_1}{e_1'}
              }
              {\eval{e_1~e_2}{e_1'~e_2}
              } \\\\
@@ -707,7 +713,7 @@ values.
   Let $\typing{\cdot}{e_1}{\tau}$. If $e_1$ evaluates to a normal form $e_2$
   then $e_2$ is a value of type $\tau$:
   \[ (\evals{e_1}{e_2} \wedge e_2~\text{is normal}) \Rightarrow
-     (e_2~\text{is a value} \wedge \typing{\cdot}{e_1}{\tau}).
+     (e_2~\text{is a value} \wedge \typing{\cdot}{e_2}{\tau}).
    \]
 \end{thm}
 
@@ -752,13 +758,13 @@ as we do not reach a value.
 
 
 %-------------------------------------------------------------------------------
-\section{Mechanisation}
+\section{Mechanization}
 
 Meta-theoretical proofs are long and require the management of many details.
 Consequently, these proofs are prone to error and it is easy for human verifiers
 and reviewers to overlook mistakes. This is aggravated by the fact, that
 properties tend to fail in subtle edge cases. For instance, the unsoundness
-example of \cite{amin2016java} for Java involves the interplay between
+example of \citet{amin2016java} for Java involves the interplay between
 constrained wildcards of generics and null references. Hence, there is a real
 danger that an overlooked detail or a falsely assumed assumption leads to both
 invalid proofs and invalid results.
@@ -782,8 +788,9 @@ increases the confidence in the validity of (meta-theory) proofs.
 % theories generally require the use of a proof assistant.
 
 Among programming language researchers proof assistants are more popular,
-because they provide richer logics. % for which proof search is harder to
-automate. Systems like Abella~\cite{abella}, Agda~\cite{norellthesis},
+because they provide richer logics.
+% for which proof search is harder to automate.
+Systems like Abella~\cite{abella}, Agda~\cite{norellthesis},
 Beluga~\cite{beluga}, Coq~\cite{coq}, Isabelle/HOL~\cite{isabelle} and
 Twelf~\cite{twelf} have been used to check various meta-theoretic proofs. The
 developments of this thesis have been done in the context of the Coq proof
@@ -791,7 +798,7 @@ assistant which offers a competitive degree of automation and is one of the most
 widely used proof assistants for meta-theory.
 
 \paragraph{Benefits}
-To illustrate the benefits of mechanisations, consider the elaborate bug hunting
+To illustrate the benefits of mechanizations, consider the elaborate bug hunting
 study of \citet{yang2011bugs} using their randomized test-case generator
 \textsc{Csmith}.  During their study they found and reported over 325 bugs in 11
 open source and commercial C compilers. One of the compilers is
@@ -830,9 +837,9 @@ following about \textsc{CompCert}:
 %% %% 149       35       16 total
 
 \paragraph{Costs}
-Unfortunately, mechanisation does not address the large effort of proving
+Unfortunately, mechanization does not address the large effort of proving
 properties, but rather aggravates it as every little detail has to be spelled
-out. The size depends largely on the the language and the properties that are
+out. The size depends largely on the language and the properties that are
 proved. Our example language \stlcbool can be specified in about 94
 lines\footnote{Including definitions of capture-avoiding substitutions that we
   omitted for brevity.} of Coq code and type safety including all necessary
@@ -849,13 +856,13 @@ thousands of lines of meta-theory proofs \cite{Leroy2009, Zhao2010}.
 %% formalization in proof-assistants have received much attention in recent years.
 %%
 %% %-------------------------------------------------------------------------------
-%% \section{Mechanisation}
+%% \section{Mechanization}
 %% Mechanising formal meta-theory in proof-assistants is crucial, both for the
 %% increased confidence in complex designs and as a basis for technologies such as
 %% proof-carrying code.  Formal reasoning in proof-assistants, also known as
-%% mechanisation, has high development costs.
+%% mechanization, has high development costs.
 %%
-%% To lighten the burden of programming language mechanisation, many
+%% To lighten the burden of programming language mechanization, many
 %% approaches have been developed that tackle the substantial boilerplate which
 %% arises from variable binders. Unfortunately, the existing approaches are limited
 %% in scope.
@@ -875,8 +882,8 @@ thousands of lines of meta-theory proofs \cite{Leroy2009, Zhao2010}.
 %% in proofs of weakening and substitution lemmas of type systems.
 %%
 %% Our evaluation shows, that Needle \& Knot significantly reduce the size of
-%% language mechanisations (by 40\% in our case study). Moreover, as far as we
-%% know, \Knot enables the most concise mechanisation of the \POPLmark Challenge
+%% language mechanizations (by 40\% in our case study). Moreover, as far as we
+%% know, \Knot enables the most concise mechanization of the \POPLmark Challenge
 %% (1a + 2a) and is two-thirds the size of the next smallest. Finally, \Knot allows
 %% us to mechanise for instance dependently-typed languages, which is notoriously
 %% challenging because of dependent contexts and mutually-recursive sorts with
@@ -885,7 +892,7 @@ thousands of lines of meta-theory proofs \cite{Leroy2009, Zhao2010}.
 %% %-------------------------------------------------------------------------------
 %% \section{Binding}
 %%
-%% To lighten the burden of programming language mechanisation, many approaches
+%% To lighten the burden of programming language mechanization, many approaches
 %% have been developed that tackle the substantial boilerplate which arises from
 %% variable binders. Unfortunately, existing approaches for first-order
 %% representations are limited to the boilerplate that concerns the syntax of
@@ -895,7 +902,7 @@ thousands of lines of meta-theory proofs \cite{Leroy2009, Zhao2010}.
 %%
 %% %% POPL 2014 Submission
 %% %%
-%% %%   A key concern in the mechanisation of programming language metatheory is
+%% %%   A key concern in the mechanization of programming language metatheory is
 %% %%   the representation of terms with variable binding. The properties of
 %% %%   operations manipulating terms are notoriously burdensome to prove and the
 %% %%   amount of work required to scale formalizations to realistic programming
@@ -904,14 +911,14 @@ thousands of lines of meta-theory proofs \cite{Leroy2009, Zhao2010}.
 %% %%   languages.
 %% %%
 %% %%   We present a new solution to generically handle the boilerplate involved in
-%% %%   mechanisations that scales to rich binding forms and advanced rules of
+%% %%   mechanizations that scales to rich binding forms and advanced rules of
 %% %%   scoping. We define a new specification language for abstract syntax with
 %% %%   binding and implement a code generator that produces \Coq code for the
 %% %%   representation of the abstract syntax, syntactic operations and proofs of
 %% %%   their properties.
 %% %%
 %% %%   We illustrate how our approach removes the burden of variable binding
-%% %%   boilerplate in the mechanisation of realistic programming languages on a
+%% %%   boilerplate in the mechanization of realistic programming languages on a
 %% %%   list of example specifications and a solution of the PoplMark challenge
 %% %%   based on the generated code.
 
@@ -923,7 +930,7 @@ Despite the benefits, neither formal specification of programming languages nor
 rigorously mechanised meta-theory proofs are widespread practice. One of the
 main obstacles are the large development costs. This thesis aims to help spur
 further adoption of formal mechanised meta-theory by promoting \emph{reuse} as a
-method to lower the mechanisation effort.
+method to lower the mechanization effort.
 
 Reuse is a common approach in software engineering to reduce development cost
 and increase both quality and reliability. The idea is to identify functionality

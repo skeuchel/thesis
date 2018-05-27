@@ -70,7 +70,7 @@ plus Zero      n = n
 plus (Succ m)  n = Succ (plus m n)
 \end{code}
 
-To prove an simple proposition like the right-neutrality of $Zero$ we can
+To prove a simple proposition like the right-neutrality of $Zero$ we can
 write a function that follows the recursive structure of the $plus$ function:
 \begin{spec}
 plusZero :: forall (m :: Nat). plus m Zero = m

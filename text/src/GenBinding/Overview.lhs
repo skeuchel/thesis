@@ -5,7 +5,7 @@
 %include macros.fmt
 %include exists.fmt
 
-\chapter{Overview}\label{ch:gen:background}
+\chapter{Background}\label{ch:gen:background}
 %% \input{src/GenBackground/Introduction}
 %% \input{src/GenBinding/Introduction}
 %% \clearpage
@@ -16,26 +16,53 @@
 
 %% \section{Overview}\label{sec:overview}
 
-This chapter illustrates the boilerplate that arises when mechanizing
-type-safety proofs, outlines our specific approach and defines necessary
-terminology. Our running example is \fexistsprod{}, i.e. \SystemF with universal
-and existential quantification, and products. In the following, we elaborate on
-the development and point out which definitions and proofs can be considered
-\emph{variable binding boilerplate} and which are \emph{essential}. The kind of
-boilerplate that arises, is coarsely determined by the semantics, the
-meta-theoretic property that is being proved and the approach to proving it. We
-use the syntactic approach of \citet{progresspreservation} to prove type-safety
-via progress and preservation of small-step operational semantics and
-specifically focus on the boilerplate of such proofs.
+\emph{Names} are commonly used in programming languages to refer to defined
+entities such as constants, functions, function parameters, classes, methods,
+record labels, program points, type and data constructors. \emph{Variable
+  binding} is a special case, in which names not only serve as references, but
+also as placeholder that can be \emph{substituted} or instantiated with members
+of some domain. For instance, function parameters might be instantiated to
+values during evaluation, or to arbitrary expressions when the function is being
+inlined during compilation. On the other hand, we do normally not consider a
+Java class name to be substitutable, for example with the definition of the
+class.
+
+\emph{Syntactic operations} like calculating the set of free variables, renaming
+bound variables, or substituting variables can be defined for every language
+with variable binding. Moreover, their implementation is highly repetitive: it
+follows a pattern that only depends on the \emph{scoping rules} of a particular
+language. Furthermore, proof of properties about these operations are equally
+repetitive.
+
+This raises the question of whether we can achieve reuse in the implementation
+of such \emph{boilerplate functions} and \emph{boilerplate lemmas} related to
+variable binding. In this part of the thesis, we investigate a \emph{generic
+  approach} to solving this problem: generically defining the boilerplate and
+instantiating it to a particular language when needed.
+
+This chapter covers background information on formalising languages with
+variable binding and illustrates the boilerplate that arises when mechanising
+meta-theory. Furthermore, it outlines and motivates our specific approach and
+defines necessary terminology. Our running example is \fexistsprod{}, i.e.
+\SystemF with universal and existential quantification, and products. In the
+following sections, we elaborate on the development and point out which
+definitions and proofs can be considered \emph{variable binding boilerplate} and
+which are \emph{essential}. The kind of boilerplate that arises, is coarsely
+determined by the semantics, the meta-theoretic property that is being proved
+and the approach to proving it. We use the syntactic approach of
+\citet{progresspreservation} to prove type safety via progress and preservation
+of small-step operational semantics and specifically focus on the boilerplate of
+such proofs.
 
 For the illustration in this chapter, we proceed in three steps. First, we
 present a textbook-like definition of \fexistsprod{}. This definition is not
-completely formal, and hence cannot be used directly in mechanizations. It is,
+completely formal, and hence cannot be used directly in mechanisations. It is,
 however, formal enough to be accepted in scientific publications. We call it
 \emph{semi-formal}. Using this semi-formal definition we discuss arising
 boilerplate independent of later choices, e.g. syntax representations. Second,
-we formalize the previous semi-formal definition by bringing it into a shape
-that is suitable for mechanization. Third, we discuss the mechanization itself.
+we formalise the previous semi-formal definition by bringing it into a shape
+that is suitable for mechanisation. Third, we discuss the mechanisation itself
+and conclude with an overview of the remainder of this part.
 
 
 
@@ -48,7 +75,7 @@ elaborates on needed variable binding boilerplate. Subsequently, Section
 \ref{sec:gen:semiformal:semantics} presents the typing and evaluation relations
 and illustrates the boilerplate lemmas they determine. Finally, Section
 \ref{sec:gen:semiformal:metatheory} shows where the boilerplate is used in the
-type-safety proof of \fexistsprod{}.
+type safety proof of \fexistsprod{}.
 
 %-------------------------------------------------------------------------------
 \subsection{Syntax}\label{sec:gen:semiformal:syntax}
@@ -171,7 +198,7 @@ Similar relations can be defined for terms, patterns and typing contexts as
 well.
 
 The definition of well-scoping relations follows a standard recipe and usually
-its definition is left out in pen-and-paper specifications. In mechanizations,
+its definition is left out in pen-and-paper specifications. In mechanisations,
 however, such a relation usually needs to be defined (unless it is not used in
 the meta-theory) by the human prover. Therefore, this relation is an example of
 syntax-related boilerplate that we want to derive generically. The structure of
@@ -301,19 +328,22 @@ Figure \ref{fig:systemfexists:textbook:substitution} contains a definition of a
 (capture-avoiding) substitution operator that uses side-conditions to rule out
 the two problematic cases above. However, it rules out certain inputs and
 therefore makes the operations partial. This is widely accepted in semi-formal
-pen-and-paper proofs, but a stumbling block for mechanization.
+pen-and-paper proofs, but a stumbling block for mechanisation.
 
 The partiality can be addressed by taking into account the intuition that the
 names of bound variables do not matter. For example, for our intended semantics
 the terms $\lambda (x:\tau). x$ and $\lambda (y:\tau). y$ are essentially
 equivalent, i.e. we consider terms that are \emph{equal up to consistent
   renaming of bound variables}. We can apply this in the definition of the
-substitution operators to replace bound variables with \emph{fresh} ones,
-i.e. variables that are not used elsewhere.
+substitution operators to replace bound variables with \emph{fresh} ones, i.e.
+variables that are not used elsewhere. In other words, we perform
+\textalpha-conversion during substitution.
 
-In pen-and-paper proofs, the convention is to assume that at any time, all bound
-variables are distinct and implicitly rename them as needed. This is also called
-the \emph{Barendregt variable convention}~\cite{barendregt1984lambda}.
+In pen-and-paper proofs, keeping track of \textalpha-conversions is onerous,
+detrimental to presentation, and utterly boring. Hence it is often assumed, that
+that at any time, all bound variables are distinct from free variables and
+implicitly renamed as needed. This is also called the \emph{Barendregt variable
+  convention}~\cite{barendregt1984lambda}.
 
 % \item Terms that are equal up to consistent renaming form an equivalence relation
 %   which is called $\alpha$-equivalence. Put differently, we really want to
@@ -603,13 +633,13 @@ boilerplate lemma \textsc{SubstTmTm} is used in the pattern variable case.
 
 
 %-------------------------------------------------------------------------------
-\section{Formalization and Mechanization}\label{sec:formalization}
+\section{Formalization and Mechanisation}\label{sec:formalization}
 
 The next step is to rework the textbook-like specification from Section
-\ref{sec:gen:spec} into a formal one, which can be mechanized in a proof
+\ref{sec:gen:spec} into a formal one, which can be mechanised in a proof
 assistant. In the following, we will replace the syntax representation and
-discuss changes to the semantics definitions. Finally, we discuss a mechanization
-itself, and give a breakdown of the different parts of the mechanization to
+discuss changes to the semantics definitions. Finally, we discuss a mechanisation
+itself, and give a breakdown of the different parts of the mechanisation to
 quantify the overall effort and particularly the burden of variable binding
 boilerplate.
 
@@ -640,19 +670,36 @@ boilerplate.
 \end{figure}
 
 \subsection{Syntax Representation}
-The first step in the mechanization is to choose how to concretely represent
-variables. Traditionally, one would represent variables using identifiers, but
-this requires a massive amount of reasoning modulo $\alpha$-equivalence,
-i.e. consistent renaming, which makes it inevitable to choose a different
-representation.
 
-Our goal is not to develop a new approach to variable binding nor to compare
-existing ones, but rather to scale the generic treatment of a single
-approach. For this purpose, we choose de Bruijn representations
+The first step in the mechanisation is to choose how to concretely represent
+variables. Traditionally, one would represent variables using identifiers, but
+as indicated in the previous section, capture-avoidance requires
+\textalpha-conversion and keeping track of conversions is tedious. In the
+semi-formal development we allowed ourselves the luxury of using the Barendregt
+variable convention. However, the Barendregt convention comes with it own
+subtleties that can even result in faulty
+reasoning~\cite{urban2007barendregt,nominallogic}. Hence, it undermines our goal
+for rigorous, gapless, and machine-checked proofs.
+
+Instead, the issue of \textalpha-conversion is handled by moving to a different
+representations. Possible candidates for our formalization are de Bruijn
+index-based~\cite{namelessdummies}, locally nameless~\cite{locallynameless} or
+locally named~\cite{externalinternalsyntax,pollack2012locallynamed}
+representations that \emph{canonically represent \textalpha-equivalent terms}
+and thus eliminate \textalpha-conversion altogether. An alternative is
+\emph{nominal abstract syntax}\cite{nominallogic} that represents terms using
+\textalpha-equivalance classes for which induction and recursion principles can
+be defined. Higher-order abstract syntax (HOAS)~\cite{pfenning1998hoas} is a
+radically different approach that is using binders of the meta-language to
+represent binders of an object language.
+
+Our goal is not to develop a new approach to representing syntax with variable
+binding nor to compare existing ones, but rather to scale the generic treatment
+of a single approach. For this purpose, we choose de Bruijn representations
 \cite{namelessdummies}, motivated by two main reasons. First, reasoning with de
 Bruijn representations is well-understood and, in particular, the representation
 of pattern binding and scoping rules is also well-understood
-\cite{deBruijn,genconv}.  Second, the functions related to variable binding, the
+\cite{deBruijn,genconv}. Second, the functions related to variable binding, the
 statements of properties of these functions and their proofs have highly regular
 structures with respect to the abstract syntax and the scoping rules of the
 language. This helps us in treating boilerplate generically and automating
@@ -703,7 +750,7 @@ variable binders into account and vice versa.
 In the semi-formal specification we have defined a well-scopedness relation
 solely for the purpose to make the scoping rules explicit. Of course, we only
 ever want to consider well-scoped terms which is implicitly assumed in the
-semi-formal development. In a proper formalization and mechanization, however,
+semi-formal development. In a proper formalization and mechanisation, however,
 this introduces obligation to actually prove terms to be well-scoped. For
 instance, we need to prove that that all syntactic operations, like
 substitution, preserve well-scopedness.
@@ -1046,7 +1093,7 @@ $$
 
 %if False
 \begin{figure}[t]
-\begin{center}
+\centering
 \fbox{
   \begin{minipage}{0.95\columnwidth}
   \begin{code}
@@ -1077,7 +1124,6 @@ $$
   \end{code}
   \end{minipage}
 }
-\end{center}
 \caption{Well-scopedness of terms}
 \label{fig:wellscopedness:overview}
 \end{figure}
@@ -1309,7 +1355,7 @@ For the induction, the shifting and substitution lemmas need to be generalized
 to work with under arbitrary suffix $\Delta$ and require extensive use of the
 interaction lemmas.
 
-\subsection{Mechanization}
+\subsection{Mechanisation}
 
 \begin{table}[t]\centering
 \ra{1.3}
@@ -1325,12 +1371,12 @@ interaction lemmas.
 \bottomrule
 \end{tabular}
 \vspace{1mm}
-\caption{Lines of \Coq code for the \fexistsprod~meta-theory mechanization.}
+\caption{Lines of \Coq code for the \fexistsprod~meta-theory mechanisation.}
 \vspace{-4mm}
 \label{fig:fexistscasestudy}
 \end{table}
 
-Table \ref{fig:fexistscasestudy} summarizes the effort required to mechanize
+Table \ref{fig:fexistscasestudy} summarizes the effort required to mechanise
 \fexistsprod in the \Coq proof assistant in terms of the de Bruijn
 representation.  It lists the lines of \Coq code for different parts divided in
 binder-related \emph{boilerplate} and other \emph{useful} code.  The
@@ -1364,7 +1410,7 @@ formalization.
 \section{Our Approach}
 
 As we illustrated in this chapter, the variable binding boilerplate puts a
-dolorous burden on formal mechanized meta-theory of languages.  Fortunately,
+dolorous burden on formal mechanised meta-theory of languages.  Fortunately,
 there is much regularity to the boilerplate: it follows the structure of the
 language's syntax, its scoping rules and the structure of expressions in rules
 of the semantic relations. This fact has already been exploited by many earlier

@@ -28,8 +28,8 @@ Firstly, both modular programming and datatype-generic programming have
 been indepedently well-studied.
 \begin{itemize}
 \item
-  Modular programming and the expression problem have been studied
-  extensively. The Datatypes \`a la Carte~\cite{dtc} approach is an existing
+  Modular programming and the expression problem have been studied extensively.
+  The Datatypes \`a la Carte~\cite{swierstra2008dtc} approach is an existing
   solution in a purely functional programming setting. Metatheory \`a la
   Carte~\cite{mtc} extends DTC to modular proving. We reuse most of the
   definitions from MTC, in particular automation of compositions. The main
@@ -40,10 +40,10 @@ been indepedently well-studied.
 
 \item
   Datatype-generic programming (DGP) or polytypic programming
-  \cite{jansson1997polyp} is an established field in functional programming
-  which has also seen extensive use in dependently-type
-  theory~\cite{benke:ugpp}. The universe of containers is a well-studied
-  subject, including generic functionality like generic induction for
+  \cite{jansson:polyp} is an established field in functional programming which
+  has also seen extensive use in dependently-type theory~\cite{benke:universes}.
+  The universe of containers is a well-studied subject, including generic
+  functionality like generic induction for
   containers~\cite{categoriesofcontainers}. The container-based representation
   comes with generic fixed-points, folds and induction principles that meet the
   requirements of proof-assistants.

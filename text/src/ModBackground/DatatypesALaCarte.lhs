@@ -23,12 +23,13 @@
 
 \section{Datatypes \`a la Carte}\label{sec:mod:datatypesalacarte}
 
-%The  (DTC) approach \cite{dtc} is a solution of
+%The  (DTC) approach \cite{swierstra2008dtc} is a solution of
 %the expression problem in the Haskell programming language.
 
-This section reviews the core ideas behind \emph{Datatypes \`a la Carte} (DTC) \cite{dtc},
-a well-known Haskell solution to the expression problem, and presents the
-infrastructure for writing modular functions over modular datatypes.
+This section reviews the core ideas behind \emph{Datatypes \`a la Carte} (DTC)
+\cite{swierstra2008dtc}, a well-known Haskell solution to the expression
+problem, and presents the infrastructure for writing modular functions over
+modular datatypes.
 
 %% In the next section we discuss our adapted approach that works in the restricted
 %% Coq setting.
@@ -102,15 +103,17 @@ is isomorphic to the monolithic datatype |Exp| from Figure
   \begin{minipage}{0.98\columnwidth}
     \begin{spec}
       class f :<: g where
-        inj      :: f a -> g a
-        prj      :: g a -> Maybe (f a)
-        inj_prj  :: forall a (ga :: g a) (fa :: f a).  prj ga = Just fa -> ga = inj fa
-        prj_inj  :: forall a (fa :: f a).              prj (inj fa) = Just fa
+        inj      ::  f a -> g a
+        prj      ::  g a -> Maybe (f a)
+        inj_prj  ::  forall a (ga :: g a) (fa :: f a).
+                       prj ga = Just fa -> ga = inj fa
+        prj_inj  ::  forall a (fa :: f a).
+                       prj (inj fa) = Just fa
 
       inject :: (f :<: g) => f (FixDTC g) -> FixDTC g
-      inject x = FixDTC (inj x)
+      inject x = InDTC (inj x)
       project :: (f :<: g) => FixDTC g -> Maybe (f (FixDTC g))
-      project x = prj (unFix x)
+      project x = prj (outDTC x)
     \end{spec}
 
     \hrule \vspace{2mm}
@@ -119,9 +122,9 @@ is isomorphic to the monolithic datatype |Exp| from Figure
       instance (f :<: f) where
         inj = id
       instance (f :<: g) => (f :<: (g :+:h)) where
-        inj = Inl
+        inj = Inl . inj
       instance (f :<: h) => (f :<: (g :+:h)) where
-        inj = Inr
+        inj = Inr . inj
     \end{spec}
   \end{minipage}
 }
@@ -159,12 +162,13 @@ To facilitate writing expressions and make reuse possible we use the sub-functor
 member function |inj| injects the sub-functor |f| into the super-functor |g|. In
 our case we need injections of functors into coproducts which are automated
 using type class machinery.\footnote{Coq's type-class mechanism performs
-backtracking. These instances do not properly work in Haskell. See \cite{dtc}
-for a partial solution.} The |prj| member function is a partial inverse of
-|inj|. With it we can test if a specific sub-functor was used to build the top
-layer of a value. This operation fails if another sub-functor was used. The type
-class also includes the laws |inj_prj| and |prj_inj| that witness the partial
-inversion.\footnote{Using a hypothetical dependently-typed Haskell syntax.}
+  backtracking. These instances do not properly work in Haskell. See
+  \cite{swierstra2008dtc} for a partial solution.} The |prj| member function is
+a partial inverse of |inj|. With it we can test if a specific sub-functor was
+used to build the top layer of a value. This operation fails if another
+sub-functor was used. The type class also includes the laws |inj_prj| and
+|prj_inj| that witness the partial inversion.\footnote{Using a hypothetical
+  dependently-typed Haskell syntax.}
 
 The |inject| function is a variation of |inj| that additionally applies the
 constructor of the fixed-point type |FixDTC|. Using the sub-functor relation we

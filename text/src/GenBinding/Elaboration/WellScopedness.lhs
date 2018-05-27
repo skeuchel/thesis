@@ -121,13 +121,13 @@ substitution lemma |subst|.
 
 Figure \ref{fig:wellscopednessproofterms} contains selected rules that define
 the intended meaning of the proof terms with respect to the de Bruijn
-representation. (See Appendix \ref{appendix:elaboration} for the remainder.) The
-relation $\wnindex{H}{h_0}{wn}{h}{\vartheta}{\alpha}{n}$ denotes that $wn$
-witnesses that $n$ is a well-scoped de Bruijn index for namespace $\alpha$ with
-respect to $h$ and $\wsterm{H}{h_0}{ws}{h}{\vartheta}{u}{S}$ denotes that $ws$
-witnesses that $u$ is a well-scoped in the de Bruijn term of sort $S$ with
-respect to $h$. These two relations are mutually-recursive and completely syntax
-directed in $wn$ respectively $ws$.
+representation. (See Appendix \ref{appendix:wellscopingwitnesses} for the
+remainder.) The relation $\wnindex{H}{h_0}{wn}{h}{\vartheta}{\alpha}{n}$ denotes
+that $wn$ witnesses that $n$ is a well-scoped de Bruijn index for namespace
+$\alpha$ with respect to $h$ and $\wsterm{H}{h_0}{ws}{h}{\vartheta}{u}{S}$
+denotes that $ws$ witnesses that $u$ is a well-scoped in the de Bruijn term of
+sort $S$ with respect to $h$. These two relations are mutually-recursive and
+completely syntax directed in $wn$ respectively $ws$.
 
 Also note, that both relations are parameterized by $H, \vartheta$ and $h_0$, an
 additional parameter that represents the outer scope, i.e. the domain of the

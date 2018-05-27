@@ -86,13 +86,13 @@ the Church numeral for any concretely given natural number:
   ...
 \end{spec}
 
-In other words, the $n$-th Church numeral corresponds to
-the fold over natural numbers instantiated for the number $n$. In fact, typing the above combinators in Haskell
-yields the familiar type |c_n :: forall a. (a -> a) -> a -> a|. B\"ohm and
-Berarducci \cite{bohm85automatic} proved that such an encoding is not limited to
-simple datatypes like the naturals, but that all strictly-positive (and
-parameterized) datatypes can be encoded in System~F in this fashion and proved
-that the encoding is an isomorphism.
+In other words, the $n$-th Church numeral corresponds to the fold over natural
+numbers instantiated for the number $n$. In fact, typing the above combinators
+in Haskell yields the familiar type |c_n :: forall a. (a -> a) -> a -> a|.
+\citet{bohm85automatic} proved that such an encoding is not limited to simple
+datatypes like the naturals, but that all strictly-positive (and parameterized)
+datatypes can be encoded in System~F in this fashion and proved that the
+encoding is an isomorphism.
 
 Specializing the type of DTC's generic fold operator from Section
 \ref{sec:mod:datatypesalacarte}

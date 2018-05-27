@@ -110,8 +110,9 @@ in the symbolic expressions used to define the rules of the relations. For
 example, none of the elaborations for boilerplate lemmas make use of
 representations of derivations. The lemmas need to induct over derivations but
 we leave this aspect to the concrete implementation. Therefore, we only
-introduce declaration heads as notation for use in subsequent sections, but
-refer to the technical Appendix \ref{appendix:semantics} for details.
+introduce declaration heads as notation for use in subsequent sections.
+
+%% but refer to the technical Appendix \ref{appendix:semantics} for details.
 
 % The next ingredient of the semantics is an interpretation of lookup formulas
 % $\{ g \cto \ov{S} \}$ of rules with implicit environment type $E$ as containment

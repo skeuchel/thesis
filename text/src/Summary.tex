@@ -1,0 +1,93 @@
+\chapter*{Summary}
+\addcontentsline{toc}{chapter}{Summary}
+
+Computer scientists develop new programming languages and improve existing ones
+to let us write better programs faster. One goal is to develop languages with
+useful meta-theoretical properties, like, for example, safety guarantees for all
+programs expressed in the language. These guarantees are useful when reasoning
+about programs: a programmer can use them when assessing correctness of her
+program, and a compiler can use them for optimizations.
+
+Sadly, developing languages is difficult: different language features often
+display complicated interactions in edge cases, which are easily overlooked, and
+can thus invalidate assumptions about meta-theoretical properties with
+potentially disastrous implications. Therefore researchers began to formally
+specify programming languages and verify their meta-theory in proof assistants,
+a process which is also known as mechanization. Unfortunately, mechanization of
+meta-theory is not common practice because of its steep learning curve and large
+development effort. As a result, if done at all, mechanizations often only cover
+a manageable subset of the language with the downside that results do not always
+carry over to the full language.
+
+To increase the adoption of mechanization and to further scale it to realistic
+programming languages, it is imperative to reduce the costs. This thesis
+investigates code reuse as a means to achieve this, specifically principled
+reuse via modularity and genericity which we discuss in turn.
+
+\paragraph{Modularity}
+Different programming languages often have features in common, for instance
+boolean or exception handling. The first part of this thesis deals with reuse by
+modularly sharing specification, implementation and meta-theoretic proofs of
+features by multiple languages.
+
+A stumbling block is that inductive definitions and proofs are closed to
+extension. This is solved by using datatype-generic programming techniques to
+modularize datatypes, semantics functions and inductive proofs. A case study
+shows the advantages of our approach over an existing solution.
+
+Modularizing proofs about languages with side effects is exceptionally
+challenging, since the theorem usually depend on all the effects the language
+uses and side effectful features display a lot of interaction. We improve this
+situation by developing a new denotational semantics based on monadic
+interpreters that allows us to factor the type safety theorem into seperate
+parts: a feature theorem that captures the well-typing of monadic denotations of
+an individual feature, and an effect theorem that adapts the well-typing of
+denotations to a fixed superset of effects. The type safety proof for a
+particular language combines the theorems for all its features with the theorem
+of all its effects. Our case study shows the effictiveness of our approach by
+modularizing five language features, including three with effects.
+
+While our techniques achieve the intermediate goals of modularization and reuse,
+the complexity and bookkeeping involved inflate the overall development effort.
+Further research and direct integration into proof assistants is needed to make
+the techniques practical.
+
+
+\paragraph{Genericity}
+Nearly every high-level programming language uses variable binding in its
+syntax. The operational semantics of such languages often implements reduction
+of constructs, that involve binding, by means of variable substitution.
+Meta-theoretic proofs need to deal with properties of this substitution. The
+substitution function and the proofs of its properties can be considered
+boilerplate, since they follow a pattern that only depends on the syntax and the
+scoping rules of the language. This boilerplate can represent a large part of
+the whole mechanization and should therefore best be taken care of
+automatically. The second part of this thesis develops a generic solution to
+this problem.
+
+
+We develop a new declarative language \Knot for the specification of abstract
+syntax with variable binding, and for semantic relation on top of the syntax. A
+type system ensures that expressions in the definition of relations are always
+well-scoped. We give an interpretation of \Knot specifications using de Bruijn
+terms which we also implemented as a datatype generic library \Loom in \Coq.
+Boilerplate lemmas are implemented by generic elaboration functions into
+domain-specific witness languages. In particular, to the best of our knowledge,
+we are the first to provide elaborations for shifting and substitution lemmas of
+semantic relations using a first-order approach. We formally proof the
+correctness of the elaborations and the soundness of the witness languages.
+
+For practical mechanizations, we developed the \Needle code generator that
+compiles a \Knot language specification into \Coq definition for that language
+including variable binding boilerplate. \Needle's core proof elaboration
+functions are Haskell ports of the verified \Loom functions which boosts our
+confidence in the correctness of \Needle.
+
+Our evaluation shows substantial savings in comparison to fully manual \Coq
+mechanizations of type safety for various calculi. In particular, our solution
+to the \POPLmark challenge (1a + 2a) is by far the shortest compared to other
+approaches.
+
+In conclusion, this thesis extends upon existing work and provides novel
+insights into code reusability for mechanization of meta-theory and thereby
+takes another step to scaling these methods to realistic programming languages.

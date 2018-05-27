@@ -311,7 +311,7 @@ expression arguments of substitution need to be evaluated in their respective
 local scopes.
 
 % \begin{figure}[t]
-% \begin{center}
+% \centering
 %   \fbox{
 %   \hspace{-2mm}
 %   \begin{minipage}{0.98\columnwidth}
@@ -346,7 +346,6 @@ local scopes.
 %     \end{tabular}
 %   \end{minipage}
 % }
-% \end{center}
 % \caption{Interpretation of symbolic expressions}
 % \label{fig:evalsymbolicterm}
 % \end{figure}

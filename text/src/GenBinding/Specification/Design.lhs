@@ -271,11 +271,10 @@ or more concisely a \emph{local variable}, and $x$ a \emph{global} or \emph{free
   variable}.
 
 The distinction between local and global variables goes back to at least
-Frege~\cite{begriffsschrift} and representations such as locally nameless and
-locally named have internalized this distinction. These concepts do not commit
-us to a particular representation of variable binding, such as a locally
-nameless representation. Rather, these notions arise naturally in
-meta-languages.
+\citet{begriffsschrift} and representations such as locally nameless and locally
+named have internalized this distinction. These concepts do not commit us to a
+particular representation of variable binding, such as a locally nameless
+representation. Rather, these notions arise naturally in meta-languages.
 
 Frege characterizes global variables as variables that can possibly stand for
 anything while local variables stand for something very specific. Indeed, the
@@ -326,16 +325,16 @@ each regular rule consists of applying the same rule again modulo commutation of
 substitutions. Independent of the language at hand, this is automatically
 possible for any context parametric rule.
 
-To understand this, not that in the proof, the substitution is in fact a
-substitution of a global variable. Hence, it represents a context change. Since
-context parametric rules do not make assumptions about the context, they are
-naturally compatible with any changes to the context as long as the change can
-be properly reflected in the indices. For this we needed the commutation of two
-type substitutions. However, this will always be a substitution of a global
-variable which comes from the lemma we are proving, and a local variable from
-the definition of the relation. Intuitively, such a commutation is always
-possible.
-
+To understand this, note that the substitution lemma encodes a context change
+that states the preservation of typing when substituting a global variable.
+Context parametric rules do not make assumptions about the context, hence they
+are compatible with any changes to the context as long as the change can be
+properly reflected in the indices. This raises the question whether this is
+always possible, even if the rule uses syntactic operations, like for example
+the type application rule of \fexistsprod{} which uses a type substitution and
+hence requires the commutation of two substitutions. However, this will always
+be a substitution of a global variable, i.e. our context change, and a local
+variable substitution. Intuitively, such a commutation is always possible.
 
 %%% Local Variables:
 %%% mode: latex

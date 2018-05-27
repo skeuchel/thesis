@@ -16,11 +16,12 @@
 \section{Mendler Folds}\label{sec:mod:mendler}
 
 MTC encodes data types and folds with a variant of Church encodings based on
-Mendler folds~\cite{uustalu00mendler}. The benefit of this encoding is that we
-have more control over the evaluation: 1) it allows us to explicitly define the
-evaluation order of recursive positions instead of relying on the evaluation
-order of the meta-language and 2) model general-recursive evaluation via bounded
-fixed-points.
+Mendler
+folds~\cite{mendler1987recursivetypes,mendler1991inductivetypes,uustalu00mendler}.
+The benefit of this encoding is that we have more control over the evaluation:
+1) it allows us to explicitly define the evaluation order of recursive positions
+instead of relying on the evaluation order of the meta-language and 2) model
+general-recursive evaluation via bounded fixed-points.
 
 
 %-------------------------------------------------------------------------------
@@ -50,11 +51,11 @@ fixed-points.
 
 In comparison to ordinary Church encodings, the Mendler Church encodings (|MFix
 f|) differ in their use of Mendler algebras (|MAlgebra f a|) instead of ordinary
-|F|-algebras as shown in Figure \ref{fig:mod:mendlerchurchencoding}. Mendler
+|F|-algebras as shown in Figure~\ref{fig:mod:mendlerchurchencoding}. Mendler
 algebras take an additional function argument of type (|r -> a|) for their
 recursive calls. To enforce structurally recursive calls, arguments which appear
-at recursive positions have a polymorphic type |r|.  Using this polymorphic type
-prevents case analysis, or any type of inspection, on those arguments.  Mendler
+at recursive positions have a polymorphic type |r|. Using this polymorphic type
+prevents case analysis, or any type of inspection, on those arguments. Mendler
 folds (|mfold fa alg|) are defined by directly applying a Church encoded value
 |fa| to a Mendler algebra |alg|. All these definitions are non-recursive and can
 thus be expressed in Coq.
@@ -137,7 +138,7 @@ do not type-check.
 %%
 %% %\input{src/ModBackground/Figures/SalCa_TypeClasses}
 %%
-%% MTC adapts the \emph{Data Types \`a la Carte} (DTC)~\cite{dtc} approach for
+%% MTC adapts the \emph{Data Types \`a la Carte} (DTC)~\cite{swierstra2008dtc} approach for
 %% composing |F|-algebras to Mendler algebras. MTC defines a number of type classes
 %% with laws in order to support proofs.  These classes and laws are summarized in
 %% the table in Figure~\ref{fig:SalCa_Typeclasses}.  The second column notes

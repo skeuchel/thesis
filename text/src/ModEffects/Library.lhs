@@ -91,13 +91,18 @@ ways in order to support modular reasoning using algebraic laws:
 
 Figure~\ref{fig:mod:monadclasses} summarizes the library's key classes,
 definitions and laws. The type class |Monad| describes the basic interface of
-monads.  The type |m a| denotes computations of type |m| which produce values of
-type |a| when executed.  The function | return | lifts a value of type |a| into
-a (pure) computation that simply produces the value. The \emph{bind} function |
->>= | composes a computation |m a| producing values of type |a|, with a function
-that accepts a value of type |a| and returns a computation of type |m b|. The
-function |>>| defines a special case of bind that discards the intermediate
-value:
+monads.\footnote{In contrast to pending changes to Haskell's standard library,
+  we do not require |Applicative| but merely |Functor| as a superclass of
+  |Monad| (cf.
+  \url{https://wiki.haskell.org/Functor-Applicative-Monad_Proposal}. We do
+  however exclude the |fail| method (cf.
+  \url{https://wiki.haskell.org/MonadFail_Proposal}).} The type |m a| denotes
+computations of type |m| which produce values of type |a| when executed. The
+function | return | lifts a value of type |a| into a (pure) computation that
+simply produces the value. The \emph{bind} function | >>= | composes a
+computation |m a| producing values of type |a|, with a function that accepts a
+value of type |a| and returns a computation of type |m b|. The function |>>|
+defines a special case of bind that discards the intermediate value:
 
 < (>>) :: Monad m => m a -> m b -> m b
 < ma >> mb = ma >>= \_ -> mb
